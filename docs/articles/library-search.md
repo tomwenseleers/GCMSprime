@@ -154,32 +154,38 @@ as.data.frame(matches)
 
 A reproducible comparison used 250 held-out MoNA GC/MS records with
 different nominal spectral shapes from matching reference records,
-searched against 19,485 other records. Identity was assessed by full
-InChIKey or CAS. The query records were excluded from the reference
-catalogue. RI filtering was disabled to measure spectral discrimination
-directly.
+searched against 19,411 other records. Identity was assessed by full
+InChIKey or CAS. Query records and near-duplicate same-identity
+reference shapes (normalized L1 difference at most 0.05) were excluded
+from the reference catalogue. RI filtering was disabled to measure
+spectral discrimination directly.
 
 | Method | Correct first match | Correct within top five | Eight-core time |
 |:---|---:|---:|---:|
-| Stein–Scott | **61.6%** | 72.4% | 0.48 s |
-| Cosine | 55.6% | 66.4% | 0.39 s |
-| Hellinger | 58.8% | **75.2%** | 0.41 s |
-| Jensen–Shannon | 60.0% | 74.4% | 1.06 s |
-| Multinomial deviance | 33.6% | 40.0% | 1.02 s |
+| Stein–Scott | **51.2%** | 64.8% | 0.39 s |
+| Cosine | 44.8% | 58.8% | 0.42 s |
+| Hellinger | 50.0% | **69.2%** | 0.45 s |
+| Jensen–Shannon | 50.8% | 67.6% | 1.30 s |
+| Multinomial deviance | 8.4% | 14.8% | 1.05 s |
 
-Stein–Scott is the default because it gave the best first-match
-performance in this comparison. Hellinger is a useful complementary
-ranking. The count-sensitive statistic favoured some references with
-small arbitrary totals and performed less well. A separate 200-spectrum
-multinomial sampling check, using column-labelled GCMS-ID references and
-a ±30 RI filter, recovered 99.5–100% of first matches at 100 counts and
-100% at 1,000 and 10,000 counts. That check measures sampling noise
-around a fixed reference shape; the independent-record comparison also
-reflects variation between stored spectra.
+Stein–Scott is the default because it gave the highest observed
+first-match accuracy in this comparison. Hellinger is a useful
+complementary ranking. The count-sensitive statistic favoured some
+references with small arbitrary totals and performed less well. A
+separate 200-spectrum multinomial sampling check, using column-labelled
+GCMS-ID references and a ±30 RI filter, recovered 99.5–100% of first
+matches at 100 counts and 100% at 1,000 and 10,000 counts. That check
+measures sampling noise around a fixed reference shape; the
+independent-record comparison also reflects variation between stored
+spectra.
 
-The benchmark script is in `benchmarks/library_search.R`. Timings
-include preparing and searching the imported library, on an HP ZBook
-Fury G8 with an Intel i9-11950H and eight physical cores. SQLite queries
-filter the RI table first and load eligible spectral blobs in bounded
-batches. Native OpenMP workers process queries independently; rankings
-are identical with one or eight threads.
+The [benchmark
+script](https://github.com/tomwenseleers/GCMSprime/blob/master/benchmarks/library_search.R)
+and [aggregate
+results](https://github.com/tomwenseleers/GCMSprime/tree/master/benchmarks/results)
+are included in the repository. Timings include preparing and searching
+the imported library, on an HP ZBook Fury G8 with an Intel i9-11950H and
+eight physical cores. SQLite queries filter the RI table first and load
+eligible spectral blobs in bounded batches. Native OpenMP workers
+process queries independently; rankings are identical with one or eight
+threads.

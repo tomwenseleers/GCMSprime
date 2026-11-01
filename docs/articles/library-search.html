@@ -220,10 +220,11 @@ Stein–Scott option implements the published weighted dot product.</p>
 </h2>
 <p>A reproducible comparison used 250 held-out MoNA GC/MS records with
 different nominal spectral shapes from matching reference records,
-searched against 19,485 other records. Identity was assessed by full
-InChIKey or CAS. The query records were excluded from the reference
-catalogue. RI filtering was disabled to measure spectral discrimination
-directly.</p>
+searched against 19,411 other records. Identity was assessed by full
+InChIKey or CAS. Query records and near-duplicate same-identity
+reference shapes (normalized L1 difference at most 0.05) were excluded
+from the reference catalogue. RI filtering was disabled to measure
+spectral discrimination directly.</p>
 <table class="table">
 <colgroup>
 <col width="25%">
@@ -240,51 +241,54 @@ directly.</p>
 <tbody>
 <tr class="odd">
 <td align="left">Stein–Scott</td>
-<td align="right"><strong>61.6%</strong></td>
-<td align="right">72.4%</td>
-<td align="right">0.48 s</td>
+<td align="right"><strong>51.2%</strong></td>
+<td align="right">64.8%</td>
+<td align="right">0.39 s</td>
 </tr>
 <tr class="even">
 <td align="left">Cosine</td>
-<td align="right">55.6%</td>
-<td align="right">66.4%</td>
-<td align="right">0.39 s</td>
+<td align="right">44.8%</td>
+<td align="right">58.8%</td>
+<td align="right">0.42 s</td>
 </tr>
 <tr class="odd">
 <td align="left">Hellinger</td>
-<td align="right">58.8%</td>
-<td align="right"><strong>75.2%</strong></td>
-<td align="right">0.41 s</td>
+<td align="right">50.0%</td>
+<td align="right"><strong>69.2%</strong></td>
+<td align="right">0.45 s</td>
 </tr>
 <tr class="even">
 <td align="left">Jensen–Shannon</td>
-<td align="right">60.0%</td>
-<td align="right">74.4%</td>
-<td align="right">1.06 s</td>
+<td align="right">50.8%</td>
+<td align="right">67.6%</td>
+<td align="right">1.30 s</td>
 </tr>
 <tr class="odd">
 <td align="left">Multinomial deviance</td>
-<td align="right">33.6%</td>
-<td align="right">40.0%</td>
-<td align="right">1.02 s</td>
+<td align="right">8.4%</td>
+<td align="right">14.8%</td>
+<td align="right">1.05 s</td>
 </tr>
 </tbody>
 </table>
-<p>Stein–Scott is the default because it gave the best first-match
-performance in this comparison. Hellinger is a useful complementary
-ranking. The count-sensitive statistic favoured some references with
-small arbitrary totals and performed less well. A separate 200-spectrum
-multinomial sampling check, using column-labelled GCMS-ID references and
-a ±30 RI filter, recovered 99.5–100% of first matches at 100 counts and
-100% at 1,000 and 10,000 counts. That check measures sampling noise
-around a fixed reference shape; the independent-record comparison also
-reflects variation between stored spectra.</p>
-<p>The benchmark script is in <code>benchmarks/library_search.R</code>.
-Timings include preparing and searching the imported library, on an HP
-ZBook Fury G8 with an Intel i9-11950H and eight physical cores. SQLite
-queries filter the RI table first and load eligible spectral blobs in
-bounded batches. Native OpenMP workers process queries independently;
-rankings are identical with one or eight threads.</p>
+<p>Stein–Scott is the default because it gave the highest observed
+first-match accuracy in this comparison. Hellinger is a useful
+complementary ranking. The count-sensitive statistic favoured some
+references with small arbitrary totals and performed less well. A
+separate 200-spectrum multinomial sampling check, using column-labelled
+GCMS-ID references and a ±30 RI filter, recovered 99.5–100% of first
+matches at 100 counts and 100% at 1,000 and 10,000 counts. That check
+measures sampling noise around a fixed reference shape; the
+independent-record comparison also reflects variation between stored
+spectra.</p>
+<p>The <a href="https://github.com/tomwenseleers/GCMSprime/blob/master/benchmarks/library_search.R" class="external-link">benchmark
+script</a> and <a href="https://github.com/tomwenseleers/GCMSprime/tree/master/benchmarks/results" class="external-link">aggregate
+results</a> are included in the repository. Timings include preparing
+and searching the imported library, on an HP ZBook Fury G8 with an Intel
+i9-11950H and eight physical cores. SQLite queries filter the RI table
+first and load eligible spectral blobs in bounded batches. Native OpenMP
+workers process queries independently; rankings are identical with one
+or eight threads.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

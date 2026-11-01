@@ -12,17 +12,19 @@ key<-ifelse(!is.na(lib$metadata$inchikey)&nzchar(lib$metadata$inchikey),lib$meta
             ifelse(!is.na(lib$metadata$cas)&nzchar(lib$metadata$cas),paste0('CAS:',lib$metadata$cas),NA))
 groups<-split(seq_len(lib$n),key);groups<-groups[lengths(groups)>1]
 set.seed(20261101);groups<-groups[sample(length(groups))]
-query_id<-integer()
+query_id<-integer();excluded<-integer()
 for(g in groups) {
   total<-Matrix::colSums(a[,g,drop=FALSE]);g<-g[total>0]
   if(length(g)<2) next
   x<-as.matrix(a[,g,drop=FALSE]);pp<-sweep(x,2,colSums(x),'/')
   if(sum(pp[,1]>0)<8||max(colSums(abs(pp-pp[,1])))<.05) next
+  excluded<-c(excluded,g[colSums(abs(pp-pp[,1]))<=.05])
   query_id<-c(query_id,g[1]);if(length(query_id)==250) break
 }
 q<-t(as.matrix(a[,query_id,drop=FALSE]));colnames(q)<-mass
 truth<-key[query_id]
-lib$matrix[,query_id]<-0 # remove every query record from the reference catalogue
+excluded<-unique(excluded)
+lib$matrix[,excluded]<-0 # exclude query records and near-duplicate same-identity shapes
 all<-library_search(q,lib,method='all',ri_tolerance=Inf,n_matches=5,ncores=8)
 saveRDS(all,file.path(out,'replicate_matches.rds'))
 tab<-do.call(rbind,lapply(all$settings$method,function(m) {
@@ -36,5 +38,5 @@ timing<-do.call(rbind,lapply(c(1,8),function(threads) do.call(rbind,lapply(all$s
 }))))
 write.csv(tab,file.path(out,'replicate_accuracy.csv'),row.names=FALSE)
 write.csv(timing,file.path(out,'replicate_timing.csv'),row.names=FALSE)
-cat('Independent records with different shapes:',nrow(q),'; reference catalogue:',lib$n-length(query_id),'\n')
+cat('Independent records with different shapes:',nrow(q),'; reference catalogue:',lib$n-length(excluded),'\n')
 print(tab);print(timing)

@@ -1,0 +1,6 @@
+"method","queries","top1","top5"
+"stein_scott",250,0.512,0.648
+"cosine",250,0.448,0.588
+"hellinger",250,0.5,0.692
+"jensen_shannon",250,0.508,0.676
+"multinomial",250,0.084,0.148
