@@ -17,3 +17,7 @@ L0glm::EBIC
 #' @importFrom L0glm MBIC
 #' @export
 L0glm::MBIC
+
+#' @useDynLib GCMSprime, .registration=TRUE
+#' @importFrom Rcpp evalCpp
+NULL

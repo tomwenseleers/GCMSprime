@@ -4,7 +4,7 @@
 takes a chromatogram from an ANDI-MS `.cdf` file to resolved compound
 profiles, integrated areas and a NIST-compatible `.msp` spectral
 library. Its
-[`splogconNMF()`](https://rdrr.io/pkg/L0nmf/man/splogconNMF.html)
+[`splogconNMF()`](https://tomwenseleers.github.io/L0nmf/reference/splogconNMF.html)
 backend combines sparse selection with local nonnegative factorization:
 narrow peaks and broad asymmetric peaks can each be represented by a
 single log-concave profile. A smooth background is fitted jointly, while
@@ -68,9 +68,9 @@ coef(fit2, normalize = "l1")       # unit-area spectra in all 518 channels
 
 These short windows use a supplied Gaussian PSF as the initial profile
 dictionary. `maxiter=0L` keeps this PSF fixed;
-[`splogconNMF()`](https://rdrr.io/pkg/L0nmf/man/splogconNMF.html) then
-refines the individual compound profiles. For a full chromatogram, the
-default `nwindows=10L` with positive `maxiter` estimates a smoothly
+[`splogconNMF()`](https://tomwenseleers.github.io/L0nmf/reference/splogconNMF.html)
+then refines the individual compound profiles. For a full chromatogram,
+the default `nwindows=10L` with positive `maxiter` estimates a smoothly
 varying PSF. An alkane standard can supply its initial calibration
 through `alkanes_file="alkanes.cdf"`. The hydrocarbon window uses a
 constant background; the longer beer window uses the automatically
@@ -78,7 +78,7 @@ chosen low-df cubic spline.
 
 ### Estimate the PSF automatically
 
-[`estimate_psf()`](https://rdrr.io/pkg/L0nmf/man/estimate_psf.html)
+[`estimate_psf()`](https://tomwenseleers.github.io/L0nmf/reference/estimate_psf.html)
 provides one interface for standard calibration and blind sample
 estimation. Both bundled matrices include a full alkane TIC in
 `attr(Y, "alkanes_TIC")`; its numeric names give retention times in
@@ -101,7 +101,7 @@ blind <- estimate_psf(GCMS_data2, standard = NULL, method = "blind",
 `precluster=FALSE` uses all ion channels, `1L` uses their total, and
 `32L` uses at most 32 size-adjusted groups. The same identity-link noise
 models are available as in
-[`splogconNMF()`](https://rdrr.io/pkg/L0nmf/man/splogconNMF.html),
+[`splogconNMF()`](https://tomwenseleers.github.io/L0nmf/reference/splogconNMF.html),
 including negative binomial and Gamma models. The [PSF help
 page](https://tomwenseleers.github.io/L0nmf/reference/estimate_psf.html)
 describes likelihood fitting, noise scaling and aggregation.
@@ -231,7 +231,8 @@ file.
 
 ## Fit a supplied PSF design directly
 
-Use [`splogconNMF()`](https://rdrr.io/pkg/L0nmf/man/splogconNMF.html)
+Use
+[`splogconNMF()`](https://tomwenseleers.github.io/L0nmf/reference/splogconNMF.html)
 when a suitable PSF design and background basis are already available.
 This also gives direct control over the background for a short
 chromatographic window:
@@ -268,8 +269,8 @@ H\_{\cdot r}\leq0.
 Each column of H is one compound’s elution profile and each row of S is
 its spectrum. The low-df basis B models background; O is a known offset
 when supplied to
-[`splogconNMF()`](https://rdrr.io/pkg/L0nmf/man/splogconNMF.html). The
-criterion is
+[`splogconNMF()`](https://tomwenseleers.github.io/L0nmf/reference/splogconNMF.html).
+The criterion is
 
 J=-2\sum\_{ij}w\_{ij}\ell(y\_{ij};\mu\_{ij},\nu) +m\kappa\lambda\_{IC}K,
 

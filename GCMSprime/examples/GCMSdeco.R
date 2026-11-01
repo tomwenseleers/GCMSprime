@@ -1,3 +1,4 @@
+library(L0nmf)
 \dontrun{
 library(L0glm)
 data(GCMS_data1)

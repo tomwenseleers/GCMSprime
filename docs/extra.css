@@ -89,3 +89,5 @@ footer { border-top:1px solid #dce8ec; margin-top:4rem; padding-top:1.7rem; font
 @media(prefers-reduced-motion:reduce) { * {scroll-behavior:auto !important;transition:none !important;} }
 
 .package-banner{background:linear-gradient(120deg,#081629,#103d51);color:#f5fbff;padding:2.5rem;border-radius:1rem;margin:0 0 2rem}.package-banner h1{color:#f5fbff!important;margin-top:0}.package-banner p{color:#c6f4fa}.package-banner a{color:#76eee3}
+
+.navbar{background-color:#081629!important}.navbar .navbar-brand,.navbar .nav-link{color:#d7edf3!important}.navbar .nav-link:hover{color:#76eee3!important}pre a,pre a:visited{color:#8fe8df!important}

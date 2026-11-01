@@ -35,6 +35,19 @@ The [GC/MS tutorial](articles/gcms-deconvolution.html) includes two experimental
 
 The underlying [factorization and PSF methods](https://tomwenseleers.github.io/L0nmf/) are available independently in L0nmf.
 
+## Spectral libraries
+
+Import MSP libraries into sparse memory or SQLite storage, preserving raw peaks, chemical identifiers, synonyms and retention-index provenance:
+
+```r
+lib <- read_msp("library.msp", backend="sqlite", db_file="library.sqlite")
+spectra(lib, which=1:1000, nominal=TRUE, normalize="l2")
+library_metadata(lib, which=1:10)
+retention_indices(lib, which=1:1000, phase="DB5")
+```
+
+[Library formats and storage](articles/spectral-libraries.html) covers OpenChrom MSP exports, MoNA/Golm MSP and GCMS-ID CSV predictions.
+
 ## Citation and acknowledgements
 
 An article describing these methods is in preparation. Please cite the package and the methodological sources linked in the help pages when using this work. OpenAI Codex/GPT-6 Astra and 6.1 Sol assisted code optimization, refactoring and documentation; the authors developed the key ideas and take responsibility for the work.

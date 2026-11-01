@@ -274,6 +274,7 @@ information criteria and all plot types, alongside the algorithm.
 }
 
 \examples{
+library(L0nmf)
 \dontrun{
 library(L0glm)
 data(GCMS_data1)

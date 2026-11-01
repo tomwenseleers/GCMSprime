@@ -2,3 +2,4 @@
 
 * ANDI-MS CDF import and export, PSF calibration and sparse chromatographic deconvolution.
 * MSP spectra, Excel area tables and signal, residual, profile and spectral reports.
+* Native streaming MSP and GCMS-ID CSV import, compact dgCMatrix or SQLite storage, chemical metadata and retention-index provenance.

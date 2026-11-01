@@ -20,7 +20,7 @@
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
-    <nav class="navbar navbar-expand-lg fixed-top bg-light" data-bs-theme="light" aria-label="Site navigation"><div class="container">
+    <nav class="navbar navbar-expand-lg fixed-top bg-dark" data-bs-theme="dark" aria-label="Site navigation"><div class="container">
 
     <a class="navbar-brand me-2" href="index.html">GCMSprime</a>
 
@@ -34,13 +34,15 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
 <li class="nav-item"><a class="nav-link" href="articles/gcms-deconvolution.html">Get started</a></li>
-<li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="articles/gcms-deconvolution.html">GC/MS deconvolution</a></li>
+    <li><a class="dropdown-item" href="articles/spectral-libraries.html">Spectral libraries: import and storage</a></li>
   </ul>
 </li>
+<li class="nav-item"><a class="external-link nav-link" href="https://tomwenseleers.github.io/L0nmf/articles/log-concave-nmf.html">Algorithm &amp; theory</a></li>
+<li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
 <li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
       </ul>
 <ul class="navbar-nav">
@@ -97,6 +99,17 @@ GC/MS deconvolution, full mass spectra and reproducible chromatographic reports.
 <img src="reference/figures/gcms-data2-traces.png" alt="Beer volatile profiles"><div class="figcaption">Beer volatile profiles</div>
 </div>
 <p>The underlying <a href="https://tomwenseleers.github.io/L0nmf/" class="external-link">factorization and PSF methods</a> are available independently in L0nmf.</p>
+</div>
+<div class="section level2">
+<h2 id="spectral-libraries">Spectral libraries<a class="anchor" aria-label="anchor" href="#spectral-libraries"></a>
+</h2>
+<p>Import MSP libraries into sparse memory or SQLite storage, preserving raw peaks, chemical identifiers, synonyms and retention-index provenance:</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">lib</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/read_msp.html">read_msp</a></span><span class="op">(</span><span class="st">"library.msp"</span>, backend<span class="op">=</span><span class="st">"sqlite"</span>, db_file<span class="op">=</span><span class="st">"library.sqlite"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/spectra.html">spectra</a></span><span class="op">(</span><span class="va">lib</span>, which<span class="op">=</span><span class="fl">1</span><span class="op">:</span><span class="fl">1000</span>, nominal<span class="op">=</span><span class="cn">TRUE</span>, normalize<span class="op">=</span><span class="st">"l2"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/library_metadata.html">library_metadata</a></span><span class="op">(</span><span class="va">lib</span>, which<span class="op">=</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/retention_indices.html">retention_indices</a></span><span class="op">(</span><span class="va">lib</span>, which<span class="op">=</span><span class="fl">1</span><span class="op">:</span><span class="fl">1000</span>, phase<span class="op">=</span><span class="st">"DB5"</span><span class="op">)</span></span></code></pre></div>
+<p><a href="articles/spectral-libraries.html">Library formats and storage</a> covers OpenChrom MSP exports, MoNA/Golm MSP and GCMS-ID CSV predictions.</p>
 </div>
 <div class="section level2">
 <h2 id="citation-and-acknowledgements">Citation and acknowledgements<a class="anchor" aria-label="anchor" href="#citation-and-acknowledgements"></a>

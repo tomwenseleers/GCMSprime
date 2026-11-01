@@ -2,3 +2,6 @@
 ^\.Rproj\.user$
 ^_pkgdown\.yml$
 ^pkgdown$
+^vignettes/articles$
+^examples$
+^src/.*[.](o|so|dll|rds)$

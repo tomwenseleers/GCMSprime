@@ -11,11 +11,18 @@ S3method(logLik,GCMSdeco)
 S3method(nobs,GCMSdeco)
 S3method(plot,GCMSdeco)
 S3method(print,GCMSdeco)
+S3method(print,GCMSlibrary)
 S3method(residuals,GCMSdeco)
 export(EBIC)
 export(GCMSdeco)
 export(GIC)
 export(MBIC)
+export(library_metadata)
+export(open_library)
+export(read_gcms_id)
+export(read_msp)
+export(retention_indices)
+export(spectra)
 export(write_GCMS_cdf)
 import(L0glm)
 import(L0nmf)
@@ -36,6 +43,7 @@ importFrom(Matrix,
   sparseMatrix,
   tail
 )
+importFrom(Rcpp,evalCpp)
 importFrom(stats,
   AIC,
   BIC,
@@ -45,3 +53,4 @@ importFrom(utils,
   data,
   flush.console
 )
+useDynLib(GCMSprime, .registration=TRUE)

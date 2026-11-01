@@ -7,3 +7,8 @@
 
   Separate overlapping compounds into log-concave elution profiles and
   full mass spectra.
+
+- [Spectral libraries: import and
+  storage](https://tomwenseleers.github.io/GCMSprime/articles/spectral-libraries.md):
+
+  Stream MSP libraries into sparse matrices or indexed SQLite storage.

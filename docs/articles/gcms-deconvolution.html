@@ -20,7 +20,7 @@
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
-    <nav class="navbar navbar-expand-lg fixed-top bg-light" data-bs-theme="light" aria-label="Site navigation"><div class="container">
+    <nav class="navbar navbar-expand-lg fixed-top bg-dark" data-bs-theme="dark" aria-label="Site navigation"><div class="container">
 
     <a class="navbar-brand me-2" href="../index.html">GCMSprime</a>
 
@@ -34,13 +34,15 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
 <li class="active nav-item"><a class="nav-link" href="../articles/gcms-deconvolution.html">Get started</a></li>
-<li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/gcms-deconvolution.html">GC/MS deconvolution</a></li>
+    <li><a class="dropdown-item" href="../articles/spectral-libraries.html">Spectral libraries: import and storage</a></li>
   </ul>
 </li>
+<li class="nav-item"><a class="external-link nav-link" href="https://tomwenseleers.github.io/L0nmf/articles/log-concave-nmf.html">Algorithm &amp; theory</a></li>
+<li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul>
 <ul class="navbar-nav">
@@ -73,7 +75,7 @@
 <p><code><a href="../reference/GCMSdeco.html">GCMSdeco()</a></code> takes a chromatogram from an ANDI-MS
 <code>.cdf</code> file to resolved compound profiles, integrated areas
 and a NIST-compatible <code>.msp</code> spectral library. Its
-<code><a href="https://rdrr.io/pkg/L0nmf/man/splogconNMF.html" class="external-link">splogconNMF()</a></code> backend combines sparse selection with local
+<code><a href="https://tomwenseleers.github.io/L0nmf/reference/splogconNMF.html" class="external-link">splogconNMF()</a></code> backend combines sparse selection with local
 nonnegative factorization: narrow peaks and broad asymmetric peaks can
 each be represented by a single log-concave profile. A smooth background
 is fitted jointly, while every original mass channel is retained in the
@@ -125,7 +127,7 @@ exported from R or a chromatogram exported by instrument software:</p>
 <span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">fit2</span>, normalize <span class="op">=</span> <span class="st">"l1"</span><span class="op">)</span>       <span class="co"># unit-area spectra in all 518 channels</span></span></code></pre></div>
 <p>These short windows use a supplied Gaussian PSF as the initial
 profile dictionary. <code>maxiter=0L</code> keeps this PSF fixed;
-<code><a href="https://rdrr.io/pkg/L0nmf/man/splogconNMF.html" class="external-link">splogconNMF()</a></code> then refines the individual compound
+<code><a href="https://tomwenseleers.github.io/L0nmf/reference/splogconNMF.html" class="external-link">splogconNMF()</a></code> then refines the individual compound
 profiles. For a full chromatogram, the default <code>nwindows=10L</code>
 with positive <code>maxiter</code> estimates a smoothly varying PSF. An
 alkane standard can supply its initial calibration through
@@ -135,26 +137,26 @@ chosen low-df cubic spline.</p>
 <div class="section level3">
 <h3 id="estimate-the-psf-automatically">Estimate the PSF automatically<a class="anchor" aria-label="anchor" href="#estimate-the-psf-automatically"></a>
 </h3>
-<p><code><a href="https://rdrr.io/pkg/L0nmf/man/estimate_psf.html" class="external-link">estimate_psf()</a></code> provides one interface for standard
+<p><code><a href="https://tomwenseleers.github.io/L0nmf/reference/estimate_psf.html" class="external-link">estimate_psf()</a></code> provides one interface for standard
 calibration and blind sample estimation. Both bundled matrices include a
 full alkane TIC in <code>attr(Y, "alkanes_TIC")</code>; its numeric
 names give retention times in minutes. The estimator uses this
 calibration automatically, resamples to the sample scan interval and
 refines the PSF on the sample:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">psf</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/L0nmf/man/estimate_psf.html" class="external-link">estimate_psf</a></span><span class="op">(</span><span class="va">GCMS_data2</span>, nwindows <span class="op">=</span> <span class="fl">3L</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">psf</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://tomwenseleers.github.io/L0nmf/reference/estimate_psf.html" class="external-link">estimate_psf</a></span><span class="op">(</span><span class="va">GCMS_data2</span>, nwindows <span class="op">=</span> <span class="fl">3L</span><span class="op">)</span></span>
 <span><span class="va">X</span> <span class="op">&lt;-</span> <span class="va">psf</span><span class="op">$</span><span class="va">X</span>                         <span class="co"># sparse scan-by-scan PSF design</span></span>
 <span><span class="va">psf</span><span class="op">$</span><span class="va">width_scans</span></span>
 <span></span>
 <span><span class="co"># A constant PSF, calibration alone, or blind fitting without a standard:</span></span>
-<span><span class="va">constant</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/L0nmf/man/estimate_psf.html" class="external-link">estimate_psf</a></span><span class="op">(</span><span class="va">GCMS_data2</span>, nwindows <span class="op">=</span> <span class="fl">1L</span><span class="op">)</span></span>
-<span><span class="va">standard</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/L0nmf/man/estimate_psf.html" class="external-link">estimate_psf</a></span><span class="op">(</span><span class="va">GCMS_data2</span>, method <span class="op">=</span> <span class="st">"standard"</span>, nwindows <span class="op">=</span> <span class="fl">3L</span><span class="op">)</span></span>
-<span><span class="va">blind</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/L0nmf/man/estimate_psf.html" class="external-link">estimate_psf</a></span><span class="op">(</span><span class="va">GCMS_data2</span>, standard <span class="op">=</span> <span class="cn">NULL</span>, method <span class="op">=</span> <span class="st">"blind"</span>,</span>
+<span><span class="va">constant</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://tomwenseleers.github.io/L0nmf/reference/estimate_psf.html" class="external-link">estimate_psf</a></span><span class="op">(</span><span class="va">GCMS_data2</span>, nwindows <span class="op">=</span> <span class="fl">1L</span><span class="op">)</span></span>
+<span><span class="va">standard</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://tomwenseleers.github.io/L0nmf/reference/estimate_psf.html" class="external-link">estimate_psf</a></span><span class="op">(</span><span class="va">GCMS_data2</span>, method <span class="op">=</span> <span class="st">"standard"</span>, nwindows <span class="op">=</span> <span class="fl">3L</span><span class="op">)</span></span>
+<span><span class="va">blind</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://tomwenseleers.github.io/L0nmf/reference/estimate_psf.html" class="external-link">estimate_psf</a></span><span class="op">(</span><span class="va">GCMS_data2</span>, standard <span class="op">=</span> <span class="cn">NULL</span>, method <span class="op">=</span> <span class="st">"blind"</span>,</span>
 <span>  nwindows <span class="op">=</span> <span class="fl">3L</span>, precluster <span class="op">=</span> <span class="fl">32L</span><span class="op">)</span></span></code></pre></div>
 <p><code>precluster=FALSE</code> uses all ion channels, <code>1L</code>
 uses their total, and <code>32L</code> uses at most 32 size-adjusted
 groups. The same identity-link noise models are available as in
-<code><a href="https://rdrr.io/pkg/L0nmf/man/splogconNMF.html" class="external-link">splogconNMF()</a></code>, including negative binomial and Gamma
+<code><a href="https://tomwenseleers.github.io/L0nmf/reference/splogconNMF.html" class="external-link">splogconNMF()</a></code>, including negative binomial and Gamma
 models. The <a href="https://tomwenseleers.github.io/L0nmf/reference/estimate_psf.html" class="external-link">PSF
 help page</a> describes likelihood fitting, noise scaling and
 aggregation.</p>
@@ -298,14 +300,14 @@ scans from that file.</p>
 <div class="section level2">
 <h2 id="fit-a-supplied-psf-design-directly">Fit a supplied PSF design directly<a class="anchor" aria-label="anchor" href="#fit-a-supplied-psf-design-directly"></a>
 </h2>
-<p>Use <code><a href="https://rdrr.io/pkg/L0nmf/man/splogconNMF.html" class="external-link">splogconNMF()</a></code> when a suitable PSF design and
+<p>Use <code><a href="https://tomwenseleers.github.io/L0nmf/reference/splogconNMF.html" class="external-link">splogconNMF()</a></code> when a suitable PSF design and
 background basis are already available. This also gives direct control
 over the background for a short chromatographic window:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">Y</span> <span class="op">&lt;-</span> <span class="va">GCMS_data1</span></span>
 <span><span class="va">X</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://tomwenseleers.github.io/L0glm/reference/convmatrix.html" class="external-link">convmatrix</a></span><span class="op">(</span><span class="fu"><a href="https://tomwenseleers.github.io/L0glm/reference/convkernel.html" class="external-link">convkernel</a></span><span class="op">(</span><span class="st">"gaussian"</span>, <span class="fl">65L</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>sigma <span class="op">=</span> <span class="fl">8</span><span class="op">)</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">Y</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">B</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">Y</span><span class="op">)</span>, <span class="fl">1L</span><span class="op">)</span>          <span class="co"># constant background in this short window</span></span>
-<span><span class="va">nmf</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/L0nmf/man/splogconNMF.html" class="external-link">splogconNMF</a></span><span class="op">(</span><span class="va">X</span>, <span class="va">Y</span>, background <span class="op">=</span> <span class="va">B</span>,</span>
+<span><span class="va">nmf</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://tomwenseleers.github.io/L0nmf/reference/splogconNMF.html" class="external-link">splogconNMF</a></span><span class="op">(</span><span class="va">X</span>, <span class="va">Y</span>, background <span class="op">=</span> <span class="va">B</span>,</span>
 <span>  family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">quasipoisson</a></span><span class="op">(</span><span class="st">"identity"</span><span class="op">)</span>, precluster <span class="op">=</span> <span class="fl">16L</span>,</span>
 <span>  correlation <span class="op">=</span> <span class="st">"none"</span>, ncores <span class="op">=</span> <span class="fl">8L</span><span class="op">)</span></span>
 <span><span class="va">nmf</span><span class="op">$</span><span class="va">rank</span></span>
@@ -333,7 +335,7 @@ the mean is</p>
 elution profile and each row of <span class="math inline">S</span> is
 its spectrum. The low-df basis <span class="math inline">B</span> models
 background; <span class="math inline">O</span> is a known offset when
-supplied to <code><a href="https://rdrr.io/pkg/L0nmf/man/splogconNMF.html" class="external-link">splogconNMF()</a></code>. The criterion is</p>
+supplied to <code><a href="https://tomwenseleers.github.io/L0nmf/reference/splogconNMF.html" class="external-link">splogconNMF()</a></code>. The criterion is</p>
 <p><span class="math display">
 J=-2\sum_{ij}w_{ij}\ell(y_{ij};\mu_{ij},\nu)
    +m\kappa\lambda_{IC}K,

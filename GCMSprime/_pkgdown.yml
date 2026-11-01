@@ -3,6 +3,7 @@ title: GCMSprime
 destination: ../docs
 template:
   bootstrap: 5
+  theme: github-dark
   math-rendering: katex
   bslib:
     bg: "#fcfdfd"
@@ -14,13 +15,18 @@ template:
     border-radius: 0.6rem
     navbar-bg: "#081629"
 navbar:
+  bg: dark
+  type: dark
   structure:
-    left: [intro, reference, articles, news]
+    left: [intro, articles, algorithm, reference, news]
     right: [search, github]
   components:
     intro:
       text: Get started
       href: articles/gcms-deconvolution.html
+    algorithm:
+      text: Algorithm & theory
+      href: https://tomwenseleers.github.io/L0nmf/articles/log-concave-nmf.html
     github:
       icon: fab fa-github
       href: https://github.com/tomwenseleers/GCMSprime

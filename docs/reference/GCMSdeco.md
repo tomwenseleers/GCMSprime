@@ -2,7 +2,7 @@
 
 Read an ANDI-MS netCDF chromatogram, estimate a smoothly time-varying
 point spread function, recover log-concave compounds with
-[`L0nmf::splogconNMF()`](https://rdrr.io/pkg/L0nmf/man/splogconNMF.html),
+[`L0nmf::splogconNMF()`](https://tomwenseleers.github.io/L0nmf/reference/splogconNMF.html),
 and write a NIST-compatible MSP spectral library. All original mass
 channels are retained in the final spectra.
 
@@ -110,7 +110,7 @@ print(x, ...)
 - family:
 
   Identity-link noise model accepted by
-  [`L0nmf::splogconNMF()`](https://rdrr.io/pkg/L0nmf/man/splogconNMF.html).
+  [`L0nmf::splogconNMF()`](https://tomwenseleers.github.io/L0nmf/reference/splogconNMF.html).
   The default `quasipoisson("identity")` estimates one pooled dispersion
   across channels, suitable for overdispersed instrumental intensities.
 
@@ -129,7 +129,7 @@ print(x, ...)
 
   Optional ANDI-MS alkane-standard chromatogram. Isolated peaks
   calibrate the initial PSF through
-  [`L0nmf::estimate_psf()`](https://rdrr.io/pkg/L0nmf/man/estimate_psf.html),
+  [`L0nmf::estimate_psf()`](https://tomwenseleers.github.io/L0nmf/reference/estimate_psf.html),
   with automatic support, sample refinement and resampling to the sample
   scan interval.
 
@@ -213,7 +213,7 @@ print(x, ...)
 
   Named PSF settings. Entries `method`, `standard`, `precluster`,
   `weights` and `offset` are passed directly to
-  [`L0nmf::estimate_psf()`](https://rdrr.io/pkg/L0nmf/man/estimate_psf.html).
+  [`L0nmf::estimate_psf()`](https://tomwenseleers.github.io/L0nmf/reference/estimate_psf.html).
   Other entries form its `control` list, for example
   `list(kernel_est=psf, maxiter=0L)` keeps a supplied PSF fixed and
   `list(L=61L, maxiter=8L, tol=1e-3)` estimates a PSF on the sample.
@@ -295,7 +295,7 @@ are reconstructed from the factors; the observed matrix is released
 after fitting.
 
 **PSF and background.**
-[`L0nmf::estimate_psf()`](https://rdrr.io/pkg/L0nmf/man/estimate_psf.html)
+[`L0nmf::estimate_psf()`](https://tomwenseleers.github.io/L0nmf/reference/estimate_psf.html)
 estimates constant or smoothly time-varying PSFs from the sample,
 optionally starting from an alkane standard. Original channels, outcome
 groups and the total-ion signal are supported. Interpolated columns are
@@ -306,7 +306,7 @@ n/(200w)\rceil\]\\.\$\$ Background coefficients are nonnegative and
 unpenalized. This keeps the baseline much smoother than an individual
 elution peak. The calibrated median PSF width also sets the guard for
 the final broad-profile fusion pass in
-[`L0nmf::splogconNMF()`](https://rdrr.io/pkg/L0nmf/man/splogconNMF.html).
+[`L0nmf::splogconNMF()`](https://tomwenseleers.github.io/L0nmf/reference/splogconNMF.html).
 Set `control=list(profile_fusion=FALSE)` to disable that pass.
 
 **Shared noise model.** Noise parameters are estimated once from the
@@ -315,7 +315,7 @@ PSF weights include the information adjustment \\1/\kappa\\, where
 \\\kappa=1+2\widehat\rho_1\\. Aggregation adjusts the variance
 parameters according to the selected family; NB2 and ordinary Gamma use
 moment matching. See
-[`L0nmf::estimate_psf()`](https://rdrr.io/pkg/L0nmf/man/estimate_psf.html)
+[`L0nmf::estimate_psf()`](https://tomwenseleers.github.io/L0nmf/reference/estimate_psf.html)
 for the distributional details. The returned `psf_working_weight`
 summarises the average Poisson-scale precision for comparing noise
 scales; the actual PSF likelihood uses the specified family.
@@ -323,23 +323,24 @@ scales; the actual PSF likelihood uses the specified family.
 `precluster=32L` performs selection and fusion in at most 32
 size-adjusted outcome groups, followed by refinement on every original
 channel. See
-[`L0nmf::splogconNMF()`](https://rdrr.io/pkg/L0nmf/man/splogconNMF.html)
+[`L0nmf::splogconNMF()`](https://tomwenseleers.github.io/L0nmf/reference/splogconNMF.html)
 for the selection criterion and shape constraints. The spreadsheet and
 returned coefficient rows use increasing apex retention time. Rank
 selection, hard log concavity, censored Gamma intensities and
 compound-count information criteria follow
-[`L0nmf::splogconNMF()`](https://rdrr.io/pkg/L0nmf/man/splogconNMF.html).
+[`L0nmf::splogconNMF()`](https://tomwenseleers.github.io/L0nmf/reference/splogconNMF.html).
 
 ## Experimental GC/MS examples
 
 The [GC/MS deconvolution
 tutorial](https://tomwenseleers.github.io/GCMSprime/articles/gcms-deconvolution.md)
 converts the bundled
-[GCMS_data1](https://rdrr.io/pkg/L0nmf/man/GCMS_data1.html) and
-[GCMS_data2](https://rdrr.io/pkg/L0nmf/man/GCMS_data2.html) matrices to
-CDF, fits the full-channel models and exports their spectra. It includes
-timings, information criteria and all plot types, alongside the
-algorithm. **GCMS_data1: overlapping cuticular hydrocarbons.**
+[GCMS_data1](https://tomwenseleers.github.io/L0nmf/reference/GCMS_data1.html)
+and
+[GCMS_data2](https://tomwenseleers.github.io/L0nmf/reference/GCMS_data2.html)
+matrices to CDF, fits the full-channel models and exports their spectra.
+It includes timings, information criteria and all plot types, alongside
+the algorithm. **GCMS_data1: overlapping cuticular hydrocarbons.**
 ![Background-corrected observed mass traces and fitted
 compounds.](figures/gcms-data1-traces.png)![Observed, corrected, fitted
 and Pearson-residual
@@ -361,13 +362,14 @@ NIST MS Search user manual, section on NIST text format:
 
 [`write_GCMS_cdf()`](https://tomwenseleers.github.io/GCMSprime/reference/write_GCMS_cdf.md),
 [`plot.GCMSdeco()`](https://tomwenseleers.github.io/GCMSprime/reference/plot.GCMSdeco.md),
-[`L0nmf::splogconNMF()`](https://rdrr.io/pkg/L0nmf/man/splogconNMF.html),
-[`L0nmf::estimate_psf()`](https://rdrr.io/pkg/L0nmf/man/estimate_psf.html),
-[`L0glm_blind_deco()`](https://rdrr.io/pkg/L0nmf/man/L0glm_blind_deco.html)
+[`L0nmf::splogconNMF()`](https://tomwenseleers.github.io/L0nmf/reference/splogconNMF.html),
+[`L0nmf::estimate_psf()`](https://tomwenseleers.github.io/L0nmf/reference/estimate_psf.html),
+[`L0glm_blind_deco()`](https://tomwenseleers.github.io/L0nmf/reference/L0glm_blind_deco.html)
 
 ## Examples
 
 ``` r
+library(L0nmf)
 if (FALSE) { # \dontrun{
 library(L0glm)
 data(GCMS_data1)

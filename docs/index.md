@@ -59,6 +59,24 @@ The underlying [factorization and PSF
 methods](https://tomwenseleers.github.io/L0nmf/) are available
 independently in L0nmf.
 
+## Spectral libraries
+
+Import MSP libraries into sparse memory or SQLite storage, preserving
+raw peaks, chemical identifiers, synonyms and retention-index
+provenance:
+
+``` r
+
+lib <- read_msp("library.msp", backend="sqlite", db_file="library.sqlite")
+spectra(lib, which=1:1000, nominal=TRUE, normalize="l2")
+library_metadata(lib, which=1:10)
+retention_indices(lib, which=1:1000, phase="DB5")
+```
+
+[Library formats and
+storage](https://tomwenseleers.github.io/GCMSprime/articles/spectral-libraries.md)
+covers OpenChrom MSP exports, MoNA/Golm MSP and GCMS-ID CSV predictions.
+
 ## Citation and acknowledgements
 
 An article describing these methods is in preparation. Please cite the
