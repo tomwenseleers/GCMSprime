@@ -7,8 +7,7 @@ Authors@R: c(
     person("Tom", "Wenseleers", role = c("aut", "cre"),
            email = "tom.wenseleers@kuleuven.be"),
     person("Christophe", "Vanderaa", role = "aut",
-           email = "christophe.vanderaa@kuleuven.be"),
-    person("Niamh", "Callinan Keenan", role = "ctb"))
+           email = "christophe.vanderaa@kuleuven.be"))
 Description: Chromatogram deconvolution, compound spectra, integrated areas and reproducible reports, built on sparse log-concave matrix factorization. Spectral library tools preserve chemical metadata and retention-index provenance.
 License: GPL (>= 2)
 Encoding: UTF-8

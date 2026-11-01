@@ -6,8 +6,6 @@
 
 - **Christophe Vanderaa**. Author.
 
-- **Niamh Callinan Keenan**. Contributor.
-
 ## Citation
 
 Source:

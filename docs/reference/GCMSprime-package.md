@@ -24,7 +24,3 @@ Authors:
 - Tom Wenseleers <tom.wenseleers@kuleuven.be>
 
 - Christophe Vanderaa <christophe.vanderaa@kuleuven.be>
-
-Other contributors:
-
-- Niamh Callinan Keenan \[contributor\]

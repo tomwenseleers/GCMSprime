@@ -6,6 +6,8 @@
 \alias{GCMSprime-package}
 \title{Sparse GC/MS Deconvolution and Spectral Libraries}
 \description{
+\if{html}{\figure{logo.png}{options: style='float: right' alt='logo' width='120'}}
+
 Chromatogram deconvolution, compound spectra, integrated areas and reproducible reports, built on sparse log-concave matrix factorization. Spectral library tools preserve chemical metadata and retention-index provenance.
 }
 \seealso{
@@ -24,11 +26,6 @@ Authors:
 \itemize{
   \item Tom Wenseleers \email{tom.wenseleers@kuleuven.be}
   \item Christophe Vanderaa \email{christophe.vanderaa@kuleuven.be}
-}
-
-Other contributors:
-\itemize{
-  \item Niamh Callinan Keenan [contributor]
 }
 
 }
