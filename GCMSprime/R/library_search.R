@@ -195,12 +195,15 @@ library_search <- function(x,library,calibration=NULL,ri=NULL,phase=c("DB5","DB1
   indices<-search_ri(library,con,phase,unknown_phase,range)
   ids<-if(is.finite(ri_tolerance)) sort(unique(indices$id)) else seq_len(library$n)
   if(is.finite(ri_tolerance)&&!length(valid)) ids<-integer()
-  hits<-list();by_id<-split(indices$value,indices$id)
+  hits<-list();grouped<-split(indices$value,indices$id)
+  # Resolve library IDs once; repeated named-list lookup is quadratic in catalogue size.
+  position<-match(as.character(ids),names(grouped))
+  by_id<-lapply(position,function(k) if(is.na(k)) numeric() else as.numeric(grouped[[k]]))
   for(at in seq.int(1L,max(1L,length(ids)),by=as.integer(batch_size))) {
     batch<-ids[seq.int(at,min(length(ids),at+batch_size-1L))]
     if(!length(ids)) break
     prepared<-search_matrix(library,con,batch,query$mass)
-    ris<-lapply(as.character(batch),function(id) {a<-by_id[[id]];if(is.null(a)) numeric() else as.numeric(a)})
+    ris<-by_id[seq.int(at,min(length(ids),at+batch_size-1L))]
     out<-library_search_cpp(t(query$S),prepared$matrix,query$mass,ris,query$queries$query_RI,
       ri_tolerance,as.integer(n_matches),match(method,search_methods),as.integer(ncores),
       weights,prepared$count_known,match(reference_count,c("auto","query","library"))-1L)

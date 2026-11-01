@@ -162,3 +162,18 @@ test_that("explicit benchmark phase assignments are visible in reports", {
     expect_equal(run$value[run$field=="unlabelled reference RI phase"],"explicitly assumed DB5")
   }
 })
+
+test_that("indexed RI batches preserve duplicate values, gaps and unindexed spectra", {
+  a<-search_fixture()
+  a$lib$indices<-rbind(a$lib$indices,data.frame(a$lib$indices[1,,drop=FALSE]))
+  a$lib$indices$value[nrow(a$lib$indices)]<-1004
+  for(tolerance in c(Inf,30)) {
+    full<-library_search(a$q,a$lib,ri=c(1003,1020),ri_tolerance=tolerance,
+      method="all",n_matches=4,ncores=1)
+    batched<-library_search(a$q,a$lib,ri=c(1003,1020),ri_tolerance=tolerance,
+      method="all",n_matches=4,ncores=2,batch_size=1)
+    expect_equal(full$matches,batched$matches)
+    hit<-full$matches[full$matches$library_id==1&full$matches$query==1,]
+    expect_equal(unique(hit$library_RI),1004)
+  }
+})
