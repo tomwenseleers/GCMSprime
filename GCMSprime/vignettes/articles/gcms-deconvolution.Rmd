@@ -11,7 +11,7 @@ nonnegative factorization: narrow peaks and broad asymmetric peaks can each
 be represented by a single log-concave profile. A smooth background is fitted
 jointly, while every original mass channel is retained in the final spectra.
 
-The [single and multichannel deconvolution tutorial](deconvolution.html)
+The [single and multichannel deconvolution tutorial](https://tomwenseleers.github.io/L0glm/articles/deconvolution.html)
 introduces selection with a fixed peak shape. Here the peak shapes are refined
 as part of the factorization, which is particularly useful for overloaded
 or shark-fin-shaped peaks.
@@ -112,7 +112,7 @@ PSFs in `fit1` and `fit2` above. Automatic calibration is available through
 the calls in this section.
 
 <!-- BEGIN gcms-results -->
-These results were obtained with the calls above on the [benchmark workstation](performance.html#reproduce-and-extend), using eight OpenMP workers and one BLAS thread. Timings are medians of two complete runs, including CDF reading, PSF initialization, factorization and MSP export.
+These results were obtained with the calls above on the [benchmark workstation](https://tomwenseleers.github.io/L0glm/articles/performance.html#reproduce-and-extend), using eight OpenMP workers and one BLAS thread. Timings are medians of two complete runs, including CDF reading, PSF initialization, factorization and MSP export.
 
 | Dataset | Scans | Mass channels | Compounds | Time (s) | GIC | Adjusted weighted R² |
 |:--|--:|--:|--:|--:|--:|--:|
@@ -261,7 +261,7 @@ rank selection and shape constraints. For standard fixed-parameter
 exponential-family models its likelihood loss is a weighted Bregman
 divergence, giving the connection to
 [Bregman NMF](https://doi.org/10.3390/s23167229).
-The [derivation and noise-specific divergences](log-concave-nmf.html#deviance-matrix-factorization-and-bregman-nmf)
+The [derivation and noise-specific divergences](https://tomwenseleers.github.io/L0nmf/articles/log-concave-nmf.html#deviance-matrix-factorization-and-bregman-nmf)
 are given in the mathematical article.
 
 Sparse deconvolution with shifted peak shapes follows the idea of
@@ -278,7 +278,7 @@ Log-concave profile modelling is inspired by
 The combination of grouped selection, pooled noise calibration, local
 original-scale likelihood updates, hard log-concavity and compound-count
 fusion is developed for L0glm. The
-[sparse log-concave NMF article](log-concave-nmf.html#local-quadratic-updates)
+[sparse log-concave NMF article](https://tomwenseleers.github.io/L0nmf/articles/log-concave-nmf.html#local-quadratic-updates)
 derives its score, working information, constrained profile updates and
 likelihood acceptance rules.
 

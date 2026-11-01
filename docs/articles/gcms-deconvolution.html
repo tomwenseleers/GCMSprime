@@ -80,10 +80,11 @@ nonnegative factorization: narrow peaks and broad asymmetric peaks can
 each be represented by a single log-concave profile. A smooth background
 is fitted jointly, while every original mass channel is retained in the
 final spectra.</p>
-<p>The <a href="deconvolution.html">single and multichannel
-deconvolution tutorial</a> introduces selection with a fixed peak shape.
-Here the peak shapes are refined as part of the factorization, which is
-particularly useful for overloaded or shark-fin-shaped peaks.</p>
+<p>The <a href="https://tomwenseleers.github.io/L0glm/articles/deconvolution.html" class="external-link">single
+and multichannel deconvolution tutorial</a> introduces selection with a
+fixed peak shape. Here the peak shapes are refined as part of the
+factorization, which is particularly useful for overloaded or
+shark-fin-shaped peaks.</p>
 <div class="section level2">
 <h2 id="two-experimental-chromatograms">Two experimental chromatograms<a class="anchor" aria-label="anchor" href="#two-experimental-chromatograms"></a>
 </h2>
@@ -174,10 +175,10 @@ explicit Gaussian PSFs in <code>fit1</code> and <code>fit2</code> above.
 Automatic calibration is available through the calls in this
 section.</p>
 <!-- BEGIN gcms-results -->
-<p>These results were obtained with the calls above on the <a href="performance.html#reproduce-and-extend">benchmark workstation</a>,
-using eight OpenMP workers and one BLAS thread. Timings are medians of
-two complete runs, including CDF reading, PSF initialization,
-factorization and MSP export.</p>
+<p>These results were obtained with the calls above on the <a href="https://tomwenseleers.github.io/L0glm/articles/performance.html#reproduce-and-extend" class="external-link">benchmark
+workstation</a>, using eight OpenMP workers and one BLAS thread. Timings
+are medians of two complete runs, including CDF reading, PSF
+initialization, factorization and MSP export.</p>
 <table style="width:100%;" class="table">
 <colgroup>
 <col width="14%">
@@ -387,7 +388,7 @@ factorization</a>, with an identity link and a smooth background. Its
 loss gives the connection to <a href="https://doi.org/10.1214/23-EJS2174" class="external-link">deviance matrix
 factorization</a>, with rank selection and shape constraints. For
 standard fixed-parameter exponential-family models its likelihood loss
-is a weighted Bregman divergence, giving the connection to <a href="https://doi.org/10.3390/s23167229" class="external-link">Bregman NMF</a>. The <a href="log-concave-nmf.html#deviance-matrix-factorization-and-bregman-nmf">derivation
+is a weighted Bregman divergence, giving the connection to <a href="https://doi.org/10.3390/s23167229" class="external-link">Bregman NMF</a>. The <a href="https://tomwenseleers.github.io/L0nmf/articles/log-concave-nmf.html#deviance-matrix-factorization-and-bregman-nmf" class="external-link">derivation
 and noise-specific divergences</a> are given in the mathematical
 article.</p>
 <p>Sparse deconvolution with shifted peak shapes follows the idea of <a href="https://doi.org/10.1016/j.aca.2011.05.030" class="external-link">de Rooi &amp; Eilers
@@ -397,9 +398,9 @@ Poisson likelihood connects to KL-divergence NMF as studied by <a href="https://
 &amp; Seung (2000)</a>. Log-concave profile modelling is inspired by <a href="https://doi.org/10.1002/cem.935" class="external-link">Eilers (2005)</a>.</p>
 <p>The combination of grouped selection, pooled noise calibration, local
 original-scale likelihood updates, hard log-concavity and compound-count
-fusion is developed for L0glm. The <a href="log-concave-nmf.html#local-quadratic-updates">sparse log-concave
-NMF article</a> derives its score, working information, constrained
-profile updates and likelihood acceptance rules.</p>
+fusion is developed for L0glm. The <a href="https://tomwenseleers.github.io/L0nmf/articles/log-concave-nmf.html#local-quadratic-updates" class="external-link">sparse
+log-concave NMF article</a> derives its score, working information,
+constrained profile updates and likelihood acceptance rules.</p>
 <p>The experimental data are described in <a href="https://doi.org/10.1126/science.1244899" class="external-link">Van Oystaeyen et
 al. (2014)</a> and <a href="https://doi.org/10.1038/s41467-024-46346-0" class="external-link">Schreurs et
 al. (2024)</a>.</p>

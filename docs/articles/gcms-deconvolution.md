@@ -11,7 +11,7 @@ single log-concave profile. A smooth background is fitted jointly, while
 every original mass channel is retained in the final spectra.
 
 The [single and multichannel deconvolution
-tutorial](https://tomwenseleers.github.io/GCMSprime/articles/deconvolution.md)
+tutorial](https://tomwenseleers.github.io/L0glm/articles/deconvolution.html)
 introduces selection with a fixed peak shape. Here the peak shapes are
 refined as part of the factorization, which is particularly useful for
 overloaded or shark-fin-shaped peaks.
@@ -124,7 +124,7 @@ explicit Gaussian PSFs in `fit1` and `fit2` above. Automatic calibration
 is available through the calls in this section.
 
 These results were obtained with the calls above on the [benchmark
-workstation](https://tomwenseleers.github.io/GCMSprime/articles/performance.html#reproduce-and-extend),
+workstation](https://tomwenseleers.github.io/L0glm/articles/performance.html#reproduce-and-extend),
 using eight OpenMP workers and one BLAS thread. Timings are medians of
 two complete runs, including CDF reading, PSF initialization,
 factorization and MSP export.
@@ -322,7 +322,7 @@ exponential-family models its likelihood loss is a weighted Bregman
 divergence, giving the connection to [Bregman
 NMF](https://doi.org/10.3390/s23167229). The [derivation and
 noise-specific
-divergences](https://tomwenseleers.github.io/GCMSprime/articles/log-concave-nmf.html#deviance-matrix-factorization-and-bregman-nmf)
+divergences](https://tomwenseleers.github.io/L0nmf/articles/log-concave-nmf.html#deviance-matrix-factorization-and-bregman-nmf)
 are given in the mathematical article.
 
 Sparse deconvolution with shifted peak shapes follows the idea of [de
@@ -339,7 +339,7 @@ Log-concave profile modelling is inspired by [Eilers
 The combination of grouped selection, pooled noise calibration, local
 original-scale likelihood updates, hard log-concavity and compound-count
 fusion is developed for L0glm. The [sparse log-concave NMF
-article](https://tomwenseleers.github.io/GCMSprime/articles/log-concave-nmf.html#local-quadratic-updates)
+article](https://tomwenseleers.github.io/L0nmf/articles/log-concave-nmf.html#local-quadratic-updates)
 derives its score, working information, constrained profile updates and
 likelihood acceptance rules.
 
