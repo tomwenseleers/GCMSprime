@@ -11,8 +11,8 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // library_search_cpp
-DataFrame library_search_cpp(NumericMatrix query, S4 library, NumericVector mass, List indices, NumericVector query_ri, double tolerance, int top, IntegerVector methods, int threads);
-RcppExport SEXP _GCMSprime_library_search_cpp(SEXP querySEXP, SEXP librarySEXP, SEXP massSEXP, SEXP indicesSEXP, SEXP query_riSEXP, SEXP toleranceSEXP, SEXP topSEXP, SEXP methodsSEXP, SEXP threadsSEXP) {
+DataFrame library_search_cpp(NumericMatrix query, S4 library, NumericVector mass, List indices, NumericVector query_ri, double tolerance, int top, IntegerVector methods, int threads, NumericVector ion_weights, LogicalVector count_known, int reference_mode);
+RcppExport SEXP _GCMSprime_library_search_cpp(SEXP querySEXP, SEXP librarySEXP, SEXP massSEXP, SEXP indicesSEXP, SEXP query_riSEXP, SEXP toleranceSEXP, SEXP topSEXP, SEXP methodsSEXP, SEXP threadsSEXP, SEXP ion_weightsSEXP, SEXP count_knownSEXP, SEXP reference_modeSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -25,7 +25,23 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type top(topSEXP);
     Rcpp::traits::input_parameter< IntegerVector >::type methods(methodsSEXP);
     Rcpp::traits::input_parameter< int >::type threads(threadsSEXP);
-    rcpp_result_gen = Rcpp::wrap(library_search_cpp(query, library, mass, indices, query_ri, tolerance, top, methods, threads));
+    Rcpp::traits::input_parameter< NumericVector >::type ion_weights(ion_weightsSEXP);
+    Rcpp::traits::input_parameter< LogicalVector >::type count_known(count_knownSEXP);
+    Rcpp::traits::input_parameter< int >::type reference_mode(reference_modeSEXP);
+    rcpp_result_gen = Rcpp::wrap(library_search_cpp(query, library, mass, indices, query_ri, tolerance, top, methods, threads, ion_weights, count_known, reference_mode));
+    return rcpp_result_gen;
+END_RCPP
+}
+// ion_frequency_cpp
+List ion_frequency_cpp(S4 library, double relative, int threads);
+RcppExport SEXP _GCMSprime_ion_frequency_cpp(SEXP librarySEXP, SEXP relativeSEXP, SEXP threadsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< S4 >::type library(librarySEXP);
+    Rcpp::traits::input_parameter< double >::type relative(relativeSEXP);
+    Rcpp::traits::input_parameter< int >::type threads(threadsSEXP);
+    rcpp_result_gen = Rcpp::wrap(ion_frequency_cpp(library, relative, threads));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -65,7 +81,8 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_GCMSprime_library_search_cpp", (DL_FUNC) &_GCMSprime_library_search_cpp, 9},
+    {"_GCMSprime_library_search_cpp", (DL_FUNC) &_GCMSprime_library_search_cpp, 12},
+    {"_GCMSprime_ion_frequency_cpp", (DL_FUNC) &_GCMSprime_ion_frequency_cpp, 3},
     {"_GCMSprime_msp_open_cpp", (DL_FUNC) &_GCMSprime_msp_open_cpp, 1},
     {"_GCMSprime_msp_read_cpp", (DL_FUNC) &_GCMSprime_msp_read_cpp, 3},
     {"_GCMSprime_msp_close_cpp", (DL_FUNC) &_GCMSprime_msp_close_cpp, 1},

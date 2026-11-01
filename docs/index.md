@@ -91,6 +91,12 @@ identified <- identify_compounds(fit, lib, calibration=cal,
   msp_file="sample_identified.msp", xlsx_file="sample_identified.xlsx")
 ```
 
+For metric spectral distances, use `method="angular"` or
+`"stein_scott_angular"`. Reusable ion-rarity weights come from
+`library_ion_weights(lib)` and are passed through `ion_weights=`.
+Multinomial matching balances unknown reference counts to the sample
+total automatically.
+
 [RI calibration and library
 search](https://tomwenseleers.github.io/GCMSprime/articles/library-search.html)
 compares five similarity measures and explains the peak-onset timing

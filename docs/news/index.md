@@ -11,3 +11,5 @@
 - Diagnostic-ion alkane identification, smooth onset-based RI
   calibration, fast native RI-filtered spectral library search, and
   annotated Excel/MSP exports.
+- Reusable ion-rarity weights, weighted angular distances, and
+  sample-balanced multinomial matching for relative-intensity libraries.

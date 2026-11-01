@@ -1,4 +1,4 @@
-search_methods <- c("stein_scott","cosine","hellinger","jensen_shannon","multinomial")
+search_methods <- c("stein_scott","cosine","hellinger","jensen_shannon","multinomial","angular","stein_scott_angular")
 
 search_queries <- function(x,calibration,ri,pseudocount,extrapolate,require_ri=TRUE) {
   fit<-inherits(x,"GCMSdeco")
@@ -68,11 +68,12 @@ search_matrix <- function(library,con,ids,mass) {
     j<-rep.int(seq_along(ids),lengths(mz));x<-unlist(intensity,use.names=FALSE)
     valid<-!is.na(i);ii<-i[valid];jj<-j[valid];xx<-x[valid]
   }
+  known<-if(length(count)) is.finite(count)&count>0 else rep(FALSE,length(ids))
   if(length(count)) {
     scale<-ifelse(is.finite(count)&count>0&raw_total>0,count/pmax(raw_total,.Machine$double.xmin),1)
     xx<-xx*scale[jj];raw_total<-raw_total*scale
   }
-  list(matrix=Matrix::sparseMatrix(i=ii,j=jj,x=xx,dims=c(length(mass),length(ids))),raw_total=raw_total)
+  list(matrix=Matrix::sparseMatrix(i=ii,j=jj,x=xx,dims=c(length(mass),length(ids))),raw_total=raw_total,count_known=known)
 }
 
 #' Identify deconvoluted spectra using retention indices and spectral libraries
@@ -91,7 +92,7 @@ search_matrix <- function(library,con,ids,mass) {
 #'   an unconstrained spectral comparison, also allowing references without RI.
 #' @param n_matches Maximum number of matches per spectrum and scoring method.
 #' @param method One or more of stein_scott, cosine, hellinger, jensen_shannon,
-#'   multinomial, or all. The default is the Stein--Scott weighted dot product.
+#'   multinomial, angular, stein_scott_angular, or all. The default is the Stein--Scott weighted dot product.
 #' @param pseudocount Optional total for each query (or one common total), useful
 #'   when passing L1-normalized spectra. GCMSdeco already retains fitted ion totals.
 #' @param extrapolate Allow linear RI extrapolation beyond the calibrated anchors.
@@ -99,6 +100,14 @@ search_matrix <- function(library,con,ids,mass) {
 #'   RI records whose phase is unknown. NULL excludes these from constrained searches.
 #' @param ncores Native search threads; NULL uses the physical core count.
 #' @param batch_size Maximum library spectra loaded per batch; bounds SQLite memory.
+#' @param reference_count Reference count convention for multinomial deviance:
+#'   auto uses an explicitly supplied reference total when available and otherwise
+#'   matches the reference total to the query. query always balances to the query;
+#'   library uses the stored library scale. Original library totals are retained.
+#' @param ion_weights Optional finite nonnegative ion weights. A named vector is
+#'   matched by nominal mass; unspecified masses retain weight one. An unnamed
+#'   vector has one value or one per acquired bin. NULL gives uniform weights.
+#'   library_ion_weights() estimates reusable inverse-frequency weights.
 #' @return A GCMSmatches list with matches (ranked long table), queries (including
 #'   unassigned spectra), calibration, search settings and elapsed seconds.
 #'   as.data.frame() extracts the match table. Matches are tentative annotations.
@@ -109,23 +118,38 @@ search_matrix <- function(library,con,ids,mass) {
 #'   The same onset-plus-half-narrow-width coordinate is used for standards and
 #'   fitted profiles. Unknown library column classes require an explicit assignment.
 #'
-#'   Let a and b be the acquired-bin intensities, N=sum(a), M=sum(b),
-#'   p=a/N and q=b/M. stein_scott is the squared cosine between
-#'   a^0.6 * mass^3 and b^0.6 * mass^3; cosine uses unweighted intensities.
-#'   hellinger uses sqrt(1-sum(sqrt(p*q))). jensen_shannon uses
-#'   sqrt((KL(p,r)+KL(q,r))/(2*log(2))) with r=(p+q)/2.
-#'   multinomial returns the symmetric two-sample deviance
-#'   2*(N*KL(p,u)+M*KL(q,u)), u=(a+b)/(N+M), retaining both totals.
-#'   Zero contributions use 0*log(0)=0. These distances are finite with disjoint support.
+#'   Let a and b be acquired-bin intensities, N=sum(a), p=a/N and q=b/sum(b).
+#'   The effective reference total M follows reference_count. Raw library totals
+#'   remain in library_total; reference_total and reference_count identify the
+#'   effective count and its source. In auto mode an explicit Pseudocount/Ion_total
+#'   tag supplies the known reference total, adjusted for acquisition coverage.
 #'
-#'   Scores run from 0 to 1000, with 1000 denoting identical spectral shape:
-#'   squared cosine, Bhattacharyya coefficient, 1-normalized-JS, and 1/(1+deviance),
-#'   respectively. Compare scores within a method. The returned distance is the
-#'   quantity minimized in ranking. Relative library intensities are pseudocounts;
-#'   their arbitrary scale affects multinomial deviance. An explicit library
-#'   Pseudocount/Ion_total tag supplies the original total when available. Hellinger and equal-weight
-#'   Jensen--Shannon compare shapes independently of that scale. query_total,
-#'   library_total and library_mass_coverage make the count and acquisition conventions explicit.
+#'   Cosine and Stein--Scott use weighted inner products sum(w*x*y), with x=a,
+#'   y=b or the transforms x=a^0.6*mass^3, y=b^0.6*mass^3, respectively.
+#'   Their distance is 1-C^2. angular and stein_scott_angular return acos(C) in
+#'   radians using the corresponding transform. Positive weights give a metric
+#'   on unit-normalized transformed spectra; zero weights omit ions. Angular
+#'   distances satisfy the triangle inequality and rank identically to their
+#'   cosine counterparts. A nonzero weighted norm is required.
+#'
+#'   Let W=max(w). Weighted Hellinger distance is
+#'   sqrt(sum(w*(sqrt(p)-sqrt(q))^2)/(2*W)). With r=(p+q)/2, weighted JS is
+#'   J_w=1/2*sum(w*(p*log(p/r)+q*log(q/r))); jensen_shannon returns
+#'   sqrt(J_w/(W*log(2))). Multinomial deviance is
+#'   D_w=2*sum(w*(N*p*log(p/u)+M*q*log(q/u))), u=(N*p+M*q)/(N+M).
+#'   With M=N this simplifies to D_w=4*N*J_w, retaining the query count scale
+#'   and ranking identically to weighted Jensen--Shannon. At a fixed N this is
+#'   symmetric in the two spectral shapes. Each ion contributes a nonnegative
+#'   Jensen gap; nonconstant weights define a composite divergence. Uniform
+#'   weights with known N,M recover the ordinary multinomial likelihood ratio.
+#'   Zero contributions use 0*log(0)=0. Disjoint support gives finite distances.
+#'
+#'   Scores run from 0 to 1000: 1000*C^2 for cosine, 1000*(1-distance^2)
+#'   for Hellinger/JS, 1000*(1-2*angle/pi) for angular distances, and
+#'   1000/(1+deviance) for multinomial. Compare scores within a method and weight
+#'   convention. Weights change spectral importance while query_total and
+#'   library_total retain the original count conventions. The default uses no
+#'   rarity weighting. Build library_ion_weights() once and reuse the vector.
 #'
 #'   References are restricted to mass bins actually acquired for the query.
 #'   Spectra are streamed from SQLite in bounded batches. Native OpenMP workers
@@ -146,8 +170,9 @@ search_matrix <- function(library,con,ids,mass) {
 #' @export
 library_search <- function(x,library,calibration=NULL,ri=NULL,phase=c("DB5","DB1","DBWAX"),
                            ri_tolerance=30,n_matches=5L,method="stein_scott",pseudocount=NULL,
-                           extrapolate=FALSE,unknown_phase=NULL,ncores=NULL,batch_size=4096L) {
-  begun<-proc.time()[['elapsed']];phase<-match.arg(phase)
+                           extrapolate=FALSE,unknown_phase=NULL,ncores=NULL,batch_size=4096L,
+                           reference_count=c("auto","query","library"),ion_weights=NULL) {
+  begun<-proc.time()[['elapsed']];phase<-match.arg(phase);reference_count<-match.arg(reference_count)
   if(!inherits(library,"GCMSlibrary")) stop("Supply a GCMSlibrary.")
   if(identical(method,"all")) method<-search_methods
   if(!is.character(method)||!length(method)||any(!method%in%search_methods)) stop("Unknown spectral scoring method.")
@@ -156,10 +181,10 @@ library_search <- function(x,library,calibration=NULL,ri=NULL,phase=c("DB5","DB1
   if(!integer_option(n_matches)||!integer_option(batch_size)) stop("Use positive integer n_matches and batch_size.")
   if(!is.numeric(ri_tolerance)||length(ri_tolerance)!=1L||is.na(ri_tolerance)||ri_tolerance<0) stop("ri_tolerance must be nonnegative.")
   if(!is.null(unknown_phase)&&!identical(unknown_phase,phase)) stop("unknown_phase must be NULL or the chosen phase.")
-  if(is.null(ncores)) ncores<-parallel::detectCores(logical=FALSE)
-  if(is.na(ncores)) ncores<-1L
-  if(!integer_option(ncores)) stop("ncores must be a positive integer.")
+  ncores<-GCMS_threads(ncores)
   query<-search_queries(x,calibration,ri,pseudocount,extrapolate,is.finite(ri_tolerance))
+  weights<-search_weights(ion_weights,query$mass)
+  query$queries$weighted_ion_total<-as.numeric(query$S%*%weights)
   if(nrow(query$queries)&&is.finite(ri_tolerance)&&all(is.na(query$queries$query_RI)))
     warning("No query RI is available; constrained matches remain unassigned.",call.=FALSE)
   con<-if(library$backend=="sqlite") library_connect(library) else NULL
@@ -176,17 +201,19 @@ library_search <- function(x,library,calibration=NULL,ri=NULL,phase=c("DB5","DB1
     prepared<-search_matrix(library,con,batch,query$mass)
     ris<-lapply(as.character(batch),function(id) {a<-by_id[[id]];if(is.null(a)) numeric() else as.numeric(a)})
     out<-library_search_cpp(t(query$S),prepared$matrix,query$mass,ris,query$queries$query_RI,
-      ri_tolerance,as.integer(n_matches),match(method,search_methods),as.integer(ncores))
+      ri_tolerance,as.integer(n_matches),match(method,search_methods),as.integer(ncores),
+      weights,prepared$count_known,match(reference_count,c("auto","query","library"))-1L)
     if(nrow(out)) {
+      out$reference_count<-if(reference_count=="auto") ifelse(prepared$count_known[out$library_id],"known","query") else reference_count
       out$library_mass_coverage<-out$library_total/prepared$raw_total[out$library_id]
       out$library_id<-batch[out$library_id];hits[[length(hits)+1L]]<-out
     }
   }
   hits<-if(length(hits)) do.call(rbind,hits) else data.frame(query=integer(),library_id=integer(),
-    method=integer(),distance=numeric(),library_RI=numeric(),library_total=numeric(),library_mass_coverage=numeric())
+    method=integer(),distance=numeric(),library_RI=numeric(),library_total=numeric(),library_mass_coverage=numeric(),reference_total=numeric(),reference_count=character())
   if(nrow(hits)) {
     hits$query_RI<-query$queries$query_RI[hits$query];hits$delta_RI<-hits$library_RI-hits$query_RI
-    hits<-hits[order(hits$query,hits$method,hits$distance,abs(hits$delta_RI),hits$library_id,na.last=TRUE),,drop=FALSE]
+    hits<-hits[order(hits$query,hits$method,hits$ordering,abs(hits$delta_RI),hits$library_id,na.last=TRUE),,drop=FALSE]
     hits$rank<-ave(hits$query,paste(hits$query,hits$method),FUN=seq_along)
     hits<-hits[hits$rank<=n_matches,,drop=FALSE]
     kept<-unique(hits$library_id)
@@ -202,15 +229,19 @@ library_search <- function(x,library,calibration=NULL,ri=NULL,phase=c("DB5","DB1
     hits$query_total<-query$queries$query_total[hits$query]
     hits$compound<-query$queries$compound[hits$query]
     hits$score<-1000*ifelse(hits$method%in%c(1L,2L),1-hits$distance,
-      ifelse(hits$method==3L,1-hits$distance^2,ifelse(hits$method==4L,1-hits$distance^2,1/(1+hits$distance))))
+      ifelse(hits$method==3L,1-hits$distance^2,ifelse(hits$method==4L,1-hits$distance^2,
+        ifelse(hits$method%in%c(6L,7L),1-2*hits$distance/pi,1/(1+hits$distance)))))
     hits$method<-search_methods[hits$method];rownames(hits)<-NULL
   } else hits$method<-character()
+  hits$ordering<-NULL
   query$queries$status<-ifelse(query$queries$query_total<=0,"empty_spectrum",
+    ifelse(query$queries$weighted_ion_total<=0,"empty_weighted_spectrum",
     ifelse(is.finite(ri_tolerance)&is.na(query$queries$query_RI),"uncalibrated",
-      ifelse(query$queries$query%in%hits$query,"matched","no_eligible_reference")))
+      ifelse(query$queries$query%in%hits$query,"matched","no_eligible_reference"))))
   structure(list(matches=hits,queries=query$queries,calibration=query$calibration,
     settings=list(phase=phase,ri_tolerance=ri_tolerance,method=method,unknown_phase=unknown_phase,
-      ncores=ncores,n_matches=n_matches,mass=query$mass),
+      ncores=ncores,n_matches=n_matches,mass=query$mass,
+      reference_count=reference_count,ion_weights=stats::setNames(weights,query$mass)),
     seconds=proc.time()[['elapsed']]-begun),class="GCMSmatches")
 }
 

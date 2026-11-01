@@ -1,15 +1,7 @@
-search_fixture <- function(backend="memory") {
-  f<-tempfile(fileext=".msp")
-  writeLines(c("Name: A","CAS: 1","RI_DB5: 1000","RI_DB1: 900","RI_DB5: 1010","Num Peaks: 3",
-    "43 100;57 50;71 20;","Name: B","RI_DB5: 1020","Num Peaks: 2","57 70;91 50;",
-    "Name: C","RI: 1000","Num Peaks: 1","43 10;","Name: D","RI_DBWAX: 1000","Num Peaks: 1","43 10;"),f)
-  lib<-read_msp(f,backend=backend,db_file=if(backend=="sqlite") tempfile(fileext=".sqlite") else NULL)
-  list(lib=lib,q=matrix(c(20,10,4,0,2,15,0,10),2,byrow=TRUE,dimnames=list(NULL,c(43,57,71,91))))
-}
 test_that("native spectral distances match direct calculations and preserve totals", {
-  a<-search_fixture();z<-library_search(a$q,a$lib,ri=c(1002,1018),n_matches=2,method="all",ncores=1)
+  a<-search_fixture();z<-library_search(a$q,a$lib,ri=c(1002,1018),n_matches=2,method="all",ncores=1,reference_count="library")
   expect_equal(z$queries$query_total,c(34,27))
-  expect_equal(nrow(z$matches),20L)
+  expect_equal(nrow(z$matches),28L)
   b<-as.matrix(spectra(a$lib))[,1];b<-b[match(colnames(a$q),rownames(spectra(a$lib)))];b[is.na(b)]<-0
   x<-a$q[1,];p<-x/sum(x);q<-b/sum(b);m<-as.numeric(colnames(a$q))
   kl<-function(x,y) sum(x[x>0]*log(x[x>0]/y[x>0]))
@@ -17,16 +9,18 @@ test_that("native spectral distances match direct calculations and preserve tota
   truth<-c(1-sum(w(x)*w(b))^2/sum(w(x)^2)/sum(w(b)^2),
     1-sum(x*b)^2/sum(x^2)/sum(b^2),sqrt(1-sum(sqrt(p*q))),
     sqrt((kl(p,(p+q)/2)+kl(q,(p+q)/2))/(2*log(2))),
-    2*(sum(x)*kl(p,(x+b)/sum(x+b))+sum(b)*kl(q,(x+b)/sum(x+b))))
+    2*(sum(x)*kl(p,(x+b)/sum(x+b))+sum(b)*kl(q,(x+b)/sum(x+b))),
+    acos(min(1,sum(x*b)/sqrt(sum(x^2)*sum(b^2)))),
+    acos(min(1,sum(w(x)*w(b))/sqrt(sum(w(x)^2)*sum(w(b)^2)))))
   one<-z$matches[z$matches$query==1&z$matches$library_id==1,]
   expect_equal(one$distance,truth,tolerance=1e-7)
-  expect_equal(one$library_RI,rep(1000,5))
-  expect_equal(one$query_total,rep(34,5))
-  expect_equal(one$library_total,rep(170,5))
-  expect_equal(one$library_mass_coverage,rep(1,5))
-  z2<-library_search(a$q,a$lib,ri=c(1002,1018),method="all",n_matches=2,ncores=8,batch_size=1)
+  expect_equal(one$library_RI,rep(1000,7))
+  expect_equal(one$query_total,rep(34,7))
+  expect_equal(one$library_total,rep(170,7))
+  expect_equal(one$library_mass_coverage,rep(1,7))
+  z2<-library_search(a$q,a$lib,ri=c(1002,1018),method="all",n_matches=2,ncores=8,batch_size=1,reference_count="library")
   expect_equal(z$matches,z2$matches)
-  z3<-library_search(a$q/rowSums(a$q),a$lib,ri=c(1002,1018),method="all",n_matches=2,pseudocount=c(34,27))
+  z3<-library_search(a$q/rowSums(a$q),a$lib,ri=c(1002,1018),method="all",n_matches=2,pseudocount=c(34,27),reference_count="library")
   expect_equal(z$matches,z3$matches,tolerance=1e-7)
   expect_equal(as.data.frame(z),z$matches)
 })
@@ -63,15 +57,15 @@ test_that("SQLite batching agrees with memory search", {
 })
 test_that("count deviance is symmetric and shape metrics ignore intensity scales", {
   a<-search_fixture();x<-a$q[2,,drop=FALSE]
-  z<-library_search(x,a$lib,ri_tolerance=Inf,method="all",n_matches=4)
-  zz<-library_search(x*100,a$lib,ri_tolerance=Inf,method="all",n_matches=4)
+  z<-library_search(x,a$lib,ri_tolerance=Inf,method="all",n_matches=4,reference_count="library")
+  zz<-library_search(x*100,a$lib,ri_tolerance=Inf,method="all",n_matches=4,reference_count="library")
   k<-z$matches$method!="multinomial"
   expect_equal(z$matches$distance[k],zz$matches$distance[k],tolerance=1e-7)
   expect_false(isTRUE(all.equal(z$matches$distance[!k],zz$matches$distance[!k])))
   f<-tempfile(fileext=".msp")
   writeLines(c("Name: query","Num Peaks: 3","43 2;57 15;91 10;"),f)
   reverse<-library_search(matrix(c(100,50,20,0),1,dimnames=list(NULL,c(43,57,71,91))),
-    read_msp(f),ri_tolerance=Inf,method="multinomial")
+    read_msp(f),ri_tolerance=Inf,method="multinomial",reference_count="library")
   expect_equal(reverse$matches$distance,z$matches$distance[z$matches$method=="multinomial"&z$matches$library_id==1],tolerance=1e-7)
 })
 
@@ -97,7 +91,7 @@ test_that("fit annotation preserves factors, orders compounds and exports all ma
   expect_match(paste(readLines(out,warn=FALSE),collapse="\n"),"Pseudocount: 120")
   if(!is.null(excel)) {
     expect_true(all(c("Compounds","Run","Matches")%in%openxlsx::getSheetNames(excel)))
-    expect_equal(nrow(openxlsx::read.xlsx(excel,sheet="Matches")),20L)
+    expect_equal(nrow(openxlsx::read.xlsx(excel,sheet="Matches")),28L)
   }
   cal<-calibrate_ri(anchors=data.frame(carbon=7:12,retention_time=0:5,narrow_width=.3))
   z<-library_search(x,a$lib,calibration=cal,ri_tolerance=Inf)

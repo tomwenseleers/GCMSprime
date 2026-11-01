@@ -3,4 +3,6 @@
 "cosine",250,0.448,0.588
 "hellinger",250,0.5,0.692
 "jensen_shannon",250,0.508,0.676
-"multinomial",250,0.084,0.148
+"multinomial",250,0.508,0.676
+"angular",250,0.448,0.588
+"stein_scott_angular",250,0.512,0.648

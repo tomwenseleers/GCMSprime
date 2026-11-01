@@ -21,6 +21,8 @@
   : Deconvolve a GC/MS chromatogram and export its compound spectra
 - [`identify_compounds()`](https://tomwenseleers.github.io/GCMSprime/reference/identify_compounds.md)
   : Annotate recovered GC/MS compounds and export library matches
+- [`library_ion_weights()`](https://tomwenseleers.github.io/GCMSprime/reference/library_ion_weights.md)
+  : Estimate ion-rarity weights from a spectral library
 - [`library_metadata()`](https://tomwenseleers.github.io/GCMSprime/reference/library_metadata.md)
   : Inspect spectral-library metadata
 - [`library_search()`](https://tomwenseleers.github.io/GCMSprime/reference/library_search.md)

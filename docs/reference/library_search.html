@@ -63,7 +63,9 @@ column-specific retention-index filtering. Fitted ion totals are preserved.</p>
 <span>  extrapolate <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  unknown_phase <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  ncores <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  batch_size <span class="op">=</span> <span class="fl">4096L</span></span>
+<span>  batch_size <span class="op">=</span> <span class="fl">4096L</span>,</span>
+<span>  reference_count <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"auto"</span>, <span class="st">"query"</span>, <span class="st">"library"</span><span class="op">)</span>,</span>
+<span>  ion_weights <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'GCMSmatches'</span></span>
@@ -110,7 +112,7 @@ an unconstrained spectral comparison, also allowing references without RI.</p></
 
 <dt id="arg-method">method<a class="anchor" aria-label="anchor" href="#arg-method"></a></dt>
 <dd><p>One or more of stein_scott, cosine, hellinger, jensen_shannon,
-multinomial, or all. The default is the Stein–Scott weighted dot product.</p></dd>
+multinomial, angular, stein_scott_angular, or all. The default is the Stein–Scott weighted dot product.</p></dd>
 
 
 <dt id="arg-pseudocount">pseudocount<a class="anchor" aria-label="anchor" href="#arg-pseudocount"></a></dt>
@@ -135,6 +137,20 @@ RI records whose phase is unknown. NULL excludes these from constrained searches
 <dd><p>Maximum library spectra loaded per batch; bounds SQLite memory.</p></dd>
 
 
+<dt id="arg-reference-count">reference_count<a class="anchor" aria-label="anchor" href="#arg-reference-count"></a></dt>
+<dd><p>Reference count convention for multinomial deviance:
+auto uses an explicitly supplied reference total when available and otherwise
+matches the reference total to the query. query always balances to the query;
+library uses the stored library scale. Original library totals are retained.</p></dd>
+
+
+<dt id="arg-ion-weights">ion_weights<a class="anchor" aria-label="anchor" href="#arg-ion-weights"></a></dt>
+<dd><p>Optional finite nonnegative ion weights. A named vector is
+matched by nominal mass; unspecified masses retain weight one. An unnamed
+vector has one value or one per acquired bin. NULL gives uniform weights.
+library_ion_weights() estimates reusable inverse-frequency weights.</p></dd>
+
+
 <dt id="arg-row-names-optional">row.names, optional<a class="anchor" aria-label="anchor" href="#arg-row-names-optional"></a></dt>
 <dd><p>Additional data-frame arguments.</p></dd>
 
@@ -157,22 +173,35 @@ RI records whose phase is unknown. NULL excludes these from constrained searches
   A compound with fewer eligible references returns fewer than n_matches.
   The same onset-plus-half-narrow-width coordinate is used for standards and
   fitted profiles. Unknown library column classes require an explicit assignment.</p>
-<p>Let a and b be the acquired-bin intensities, N=sum(a), M=sum(b),
-  p=a/N and q=b/M. stein_scott is the squared cosine between
-  a^0.6 * mass^3 and b^0.6 * mass^3; cosine uses unweighted intensities.
-  hellinger uses sqrt(1-sum(sqrt(p*q))). jensen_shannon uses
-  sqrt((KL(p,r)+KL(q,r))/(2*log(2))) with r=(p+q)/2.
-  multinomial returns the symmetric two-sample deviance
-  2*(N*KL(p,u)+M*KL(q,u)), u=(a+b)/(N+M), retaining both totals.
-  Zero contributions use 0*log(0)=0. These distances are finite with disjoint support.</p>
-<p>Scores run from 0 to 1000, with 1000 denoting identical spectral shape:
-  squared cosine, Bhattacharyya coefficient, 1-normalized-JS, and 1/(1+deviance),
-  respectively. Compare scores within a method. The returned distance is the
-  quantity minimized in ranking. Relative library intensities are pseudocounts;
-  their arbitrary scale affects multinomial deviance. An explicit library
-  Pseudocount/Ion_total tag supplies the original total when available. Hellinger and equal-weight
-  Jensen–Shannon compare shapes independently of that scale. query_total,
-  library_total and library_mass_coverage make the count and acquisition conventions explicit.</p>
+<p>Let a and b be acquired-bin intensities, N=sum(a), p=a/N and q=b/sum(b).
+  The effective reference total M follows reference_count. Raw library totals
+  remain in library_total; reference_total and reference_count identify the
+  effective count and its source. In auto mode an explicit Pseudocount/Ion_total
+  tag supplies the known reference total, adjusted for acquisition coverage.</p>
+<p>Cosine and Stein–Scott use weighted inner products sum(w*x*y), with x=a,
+  y=b or the transforms x=a^0.6*mass^3, y=b^0.6*mass^3, respectively.
+  Their distance is 1-C^2. angular and stein_scott_angular return acos(C) in
+  radians using the corresponding transform. Positive weights give a metric
+  on unit-normalized transformed spectra; zero weights omit ions. Angular
+  distances satisfy the triangle inequality and rank identically to their
+  cosine counterparts. A nonzero weighted norm is required.</p>
+<p>Let W=max(w). Weighted Hellinger distance is
+  sqrt(sum(w*(sqrt(p)-sqrt(q))^2)/(2*W)). With r=(p+q)/2, weighted JS is
+  J_w=1/2*sum(w*(p*log(p/r)+q*log(q/r))); jensen_shannon returns
+  sqrt(J_w/(W*log(2))). Multinomial deviance is
+  D_w=2*sum(w*(N*p*log(p/u)+M*q*log(q/u))), u=(N*p+M*q)/(N+M).
+  With M=N this simplifies to D_w=4*N*J_w, retaining the query count scale
+  and ranking identically to weighted Jensen–Shannon. At a fixed N this is
+  symmetric in the two spectral shapes. Each ion contributes a nonnegative
+  Jensen gap; nonconstant weights define a composite divergence. Uniform
+  weights with known N,M recover the ordinary multinomial likelihood ratio.
+  Zero contributions use 0*log(0)=0. Disjoint support gives finite distances.</p>
+<p>Scores run from 0 to 1000: 1000*C^2 for cosine, 1000*(1-distance^2)
+  for Hellinger/JS, 1000*(1-2*angle/pi) for angular distances, and
+  1000/(1+deviance) for multinomial. Compare scores within a method and weight
+  convention. Weights change spectral importance while query_total and
+  library_total retain the original count conventions. The default uses no
+  rarity weighting. Build library_ion_weights() once and reuse the vector.</p>
 <p>References are restricted to mass bins actually acquired for the query.
   Spectra are streamed from SQLite in bounded batches. Native OpenMP workers
   compare queries independently with deterministic ranking and no nested fitting.</p>

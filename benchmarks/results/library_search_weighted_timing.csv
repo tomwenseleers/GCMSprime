@@ -1,0 +1,8 @@
+"method","queries","seconds"
+"stein_scott",500,0.52
+"cosine",500,0.449999999999999
+"angular",500,0.440000000000001
+"stein_scott_angular",500,0.58
+"multinomial",500,2.15
+"jensen_shannon",500,2.14
+"hellinger",500,0.57
