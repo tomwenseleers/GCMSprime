@@ -34,7 +34,8 @@ library_search(
 \item{library}{A GCMSlibrary returned by read_msp(), read_gcms_id() or open_library().}
 
 \item{calibration}{RIcalibration from calibrate_ri(). For GCMSdeco fits, the
-stored alkane standard is used automatically when available.}
+stored alkane standard and calibrated PSF widths are used automatically
+when available.}
 
 \item{ri}{Optional RI vector, one value per query; overrides profile-based timing.}
 

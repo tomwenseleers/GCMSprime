@@ -143,3 +143,22 @@ test_that("explicit reference totals survive relative-intensity MSP export", {
     expect_equal(z$matches$distance,0,tolerance=1e-7)
   }
 })
+
+test_that("explicit benchmark phase assignments are visible in reports", {
+  a<-search_fixture();a$lib$indices$phase_class<-"unknown"
+  time<-seq(0,2,length.out=101);H<-matrix(exp(-.5*((time-1)/.1)^2),ncol=1)
+  H<-H/sum(H);model<-list(H=H,S=matrix(c(100,50,20,0),1),
+    spec=list(name="poisson",dispersion=1,theta=1))
+  x<-structure(list(model=model,time=time,mass=c(43,57,71,91),seconds=c(total=1),
+    compounds=GCMSprime:::GCMS_compounds(model,time,"phase test"),cdf_file="test.cdf"),class="GCMSdeco")
+  msp<-tempfile(fileext=".msp")
+  excel<-if(requireNamespace("openxlsx",quietly=TRUE)) tempfile(fileext=".xlsx") else NULL
+  z<-identify_compounds(x,a$lib,ri=1000,unknown_phase="DB5",msp_file=msp,xlsx_file=excel)
+  expect_true(z$compounds$match_ri_assumed)
+  expect_equal(z$compounds$match_ri_phase,"unknown")
+  expect_match(paste(readLines(msp,warn=FALSE),collapse="\n"),"reference RI column assumed DB5")
+  if(!is.null(excel)) {
+    run<-openxlsx::read.xlsx(excel,sheet="Run")
+    expect_equal(run$value[run$field=="unlabelled reference RI phase"],"explicitly assumed DB5")
+  }
+})

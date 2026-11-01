@@ -15,6 +15,8 @@
 #'   preserved. Library names are tentative annotations. MSP files include the
 #'   RI, column class, original fitted ion total and best-match description.
 #'   Excel includes every returned match and the accepted alkane calibration anchors.
+#'   Explicit assignments of unlabelled reference RI phases are recorded in the
+#'   compound table, match table, Run sheet and MSP annotation.
 #'   Supply output paths to export companion files from a saved fit.
 #' @seealso [calibrate_ri()], [library_search()], [GCMSdeco()]
 #' @examples
@@ -37,7 +39,7 @@ identify_compounds <- function(x,library,...,msp_file=NULL,xlsx_file=NULL) {
   hits<-found$matches
   best<-hits[hits$method==found$settings$method[1L]&hits$rank==1,,drop=FALSE]
   at<-match(c$compound,best$compound)
-  for(field in c('name','cas','library_id','score','delta_RI','method','source','origin','ri_origin')) {
+  for(field in c('name','cas','library_id','score','delta_RI','method','source','origin','ri_origin','ri_phase','ri_assumed')) {
     value<-best[[field]]
     c[[paste0('match_',field)]]<-if(is.null(value)) rep(NA,nrow(c)) else value[at]
   }
@@ -49,7 +51,7 @@ identify_compounds <- function(x,library,...,msp_file=NULL,xlsx_file=NULL) {
   }
   if(!is.null(xlsx_file)) {
     GCMS_write_xlsx(x$model,x$time,x$mass,c,xlsx_file,x$cdf_file,x$alkanes_file,x$seconds,
-      matches=found$matches,calibration=found$calibration)
+      matches=found$matches,calibration=found$calibration,search_settings=found$settings)
     x$xlsx_file<-normalizePath(xlsx_file,winslash='/')
   }
   x$seconds['total']<-x$seconds['total']+proc.time()[['elapsed']]-begun

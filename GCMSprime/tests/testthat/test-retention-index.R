@@ -31,3 +31,29 @@ test_that("manual anchors, missing times and extrapolation behave consistently",
   expect_error(calibrate_ri(control=list(typo=0)),"Unknown")
   expect_error(calibrate_ri(matrix(0,10,5)),"numeric mass")
 })
+
+test_that("calibrated PSF supplies the width at the selected relative height", {
+  offset<-seq(-.2,.2,length.out=1001);g<-exp(-.5*(offset/.02)^2)
+  psf<-list(psf_kernels=matrix(g,nrow=1),psf_offsets=offset)
+  a<-data.frame(carbon=7:11,retention_time=1:5)
+  z<-calibrate_ri(anchors=a,psf=psf)
+  expected<-2*.02*sqrt(2*log(100))
+  # Linear crossing interpolation is accurate to less than 1e-5 minutes.
+  expect_lt(max(abs(GCMSprime:::ri_predict_width(z,c(0,2,7))-expected)),1e-5)
+  expect_identical(z$width_source,"calibrated_psf")
+  psf$psf_kernels<-rbind(g,g);psf$peak_timepoints<-c(1,5)
+  z<-calibrate_ri(anchors=a,psf=psf)
+  expect_lt(abs(GCMSprime:::ri_predict_width(z,3)-expected),1e-5)
+  psf$psf_offsets<-1:3
+  expect_error(calibrate_ri(anchors=a,psf=psf),"psf_kernels")
+})
+
+test_that("time-varying PSF widths retain their local scale", {
+  t<-c(1,3,5,7);offset<-seq(-.5,.5,length.out=2001)
+  sigma<-.015*exp(.1*t)
+  psf<-list(psf_kernels=t(vapply(sigma,function(s) exp(-.5*(offset/s)^2),numeric(length(offset)))),
+    psf_offsets=offset,psf_timepoints=t)
+  z<-calibrate_ri(anchors=data.frame(carbon=7:11,retention_time=1:5),psf=psf)
+  expect_lt(max(abs(GCMSprime:::ri_predict_width(z,t)-2*sigma*sqrt(2*log(100)))),1e-5)
+  expect_gt(GCMSprime:::ri_predict_width(z,6),GCMSprime:::ri_predict_width(z,2))
+})

@@ -26,7 +26,7 @@ search_queries <- function(x,calibration,ri,pseudocount,extrapolate,require_ri=T
     if(!is.numeric(ri)||length(ri)!=nrow(S)||any(!is.na(ri)&!is.finite(ri))) stop("ri must contain one RI per query spectrum.")
     q$query_RI<-ri
   } else if(fit) {
-    if(is.null(calibration)&&!is.null(x$alkanes_file)) calibration<-calibrate_ri(x$alkanes_file)
+    if(is.null(calibration)&&!is.null(x$alkanes_file)) calibration<-calibrate_ri(x$alkanes_file,psf=x$psf_standard)
     if(!require_ri&&(!inherits(calibration,"RIcalibration")||is.null(calibration$width_curve)))
       return(list(S=S,mass=mass,queries=q,calibration=calibration))
     if(!inherits(calibration,"RIcalibration")) stop("Supply an RI calibration, alkane file in the fitted object, or explicit ri values.")
@@ -84,7 +84,8 @@ search_matrix <- function(library,con,ids,mass) {
 #' @param x A GCMSdeco fit, or a compound-by-mass matrix with numeric mass names.
 #' @param library A GCMSlibrary returned by read_msp(), read_gcms_id() or open_library().
 #' @param calibration RIcalibration from calibrate_ri(). For GCMSdeco fits, the
-#'   stored alkane standard is used automatically when available.
+#'   stored alkane standard and calibrated PSF widths are used automatically
+#'   when available.
 #' @param ri Optional RI vector, one value per query; overrides profile-based timing.
 #' @param phase RI column class: DB1 (nonpolar), DB5 (semi-standard nonpolar),
 #'   or DBWAX (polar).

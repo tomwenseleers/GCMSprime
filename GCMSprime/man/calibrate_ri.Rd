@@ -12,7 +12,8 @@ calibrate_ri(
   carbon = 7:40,
   anchors = NULL,
   spar = NULL,
-  control = list()
+  control = list(),
+  psf = NULL
 )
 
 \method{predict}{RIcalibration}(object, newdata, extrapolate = FALSE, ...)
@@ -34,6 +35,12 @@ column supplies local small-peak durations for timing sample profiles.}
 \item{spar}{Smoothing-spline smoothing parameter; NULL selects it by GCV.}
 
 \item{control}{Named calibration controls, described below.}
+
+\item{psf}{Optional calibrated PSF from L0nmf::estimate_psf(), or a list with
+psf_kernels (one kernel per row), psf_offsets in minutes and psf_timepoints
+(or peak_timepoints) in minutes. Its local width at the chosen height fraction
+supplies the small-peak duration. A single kernel gives a constant duration.
+NULL estimates a narrow-width envelope from the detected standard peaks.}
 
 \item{object}{A fitted RIcalibration.}
 
@@ -64,8 +71,8 @@ For an alkane with c carbon atoms the nominal molecular ion is
   maxima and inconsistent assignments. Solvent-range C6 is excluded by default.
 
   Peak onset and duration use a relative-height fraction of 0.01 by default.
-  A local lower envelope of standard peak durations estimates the duration
-  of a small peak. Both standards and sample profiles use
+  A supplied calibrated PSF gives its local small-peak duration; otherwise
+  a local lower envelope of standard peak durations estimates that duration. Both standards and sample profiles use
   t_star = onset + narrow_width/2. A smoothing spline maps t_star to 100c;
   a monotone cubic interpolation through its fitted anchor values prevents
   local reversals. Extrapolation is disabled by default in predict().

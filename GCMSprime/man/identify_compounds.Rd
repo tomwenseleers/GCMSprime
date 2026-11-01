@@ -32,6 +32,8 @@ The original compound names, factorization and fitted ion totals are
   preserved. Library names are tentative annotations. MSP files include the
   RI, column class, original fitted ion total and best-match description.
   Excel includes every returned match and the accepted alkane calibration anchors.
+  Explicit assignments of unlabelled reference RI phases are recorded in the
+  compound table, match table, Run sheet and MSP annotation.
   Supply output paths to export companion files from a saved fit.
 }
 \examples{

@@ -5,7 +5,7 @@ GCMS_xlsx_path <- function(path) {
   invisible(path)
 }
 
-GCMS_write_xlsx <- function(model,time,mass,compounds,path,cdf_file,alkanes_file,seconds,matches=NULL,calibration=NULL) {
+GCMS_write_xlsx <- function(model,time,mass,compounds,path,cdf_file,alkanes_file,seconds,matches=NULL,calibration=NULL,search_settings=NULL) {
   GCMS_xlsx_path(path)
   wb<-openxlsx::createWorkbook(creator="GCMSprime")
   header<-openxlsx::createStyle(fgFill="#102d4d",fontColour="#FFFFFF",textDecoration="bold",
@@ -28,6 +28,15 @@ GCMS_write_xlsx <- function(model,time,mass,compounds,path,cdf_file,alkanes_file
       "minutes","intensity-scans","intensity-minutes","m/z (intensity), decreasing intensity; base peak 9999; rounded-zero fragments omitted. MSP and R retain all positive ions.",
       if("total"%in%names(seconds)) seconds[["total"]] else sum(seconds)),
     stringsAsFactors=FALSE)
+  if(!is.null(search_settings)) metadata<-rbind(metadata,data.frame(
+    field=c("RI phase class","RI tolerance","unlabelled reference RI phase","spectral methods",
+      "reference count convention","RI timing convention","small-peak width source"),
+    value=c(search_settings$phase,search_settings$ri_tolerance,
+      if(is.null(search_settings$unknown_phase)) "excluded from constrained search" else
+        paste("explicitly assumed",search_settings$unknown_phase),
+      paste(search_settings$method,collapse=", "),search_settings$reference_count,
+      if(is.null(calibration)) "explicit query RI" else calibration$timing,
+      if(is.null(calibration$width_source)) "not supplied" else calibration$width_source)))
   tables<-list(Compounds=compounds,Run=metadata)
   if(!is.null(matches)) tables$Matches<-matches
   if(inherits(calibration,"RIcalibration")) tables$RI_calibration<-calibration$anchors

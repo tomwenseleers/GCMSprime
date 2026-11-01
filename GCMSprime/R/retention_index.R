@@ -54,6 +54,25 @@ ri_width_curve <- function(time,width,quantile) {
   list(time=x,width=exp(stats::predict(fit,x)$y),spline=fit)
 }
 
+ri_psf_width_curve <- function(psf,fraction) {
+  if(is.null(psf)) return(NULL)
+  kernels<-psf$psf_kernels;offset<-psf$psf_offsets
+  time<-if(is.null(psf$psf_timepoints)) psf$peak_timepoints else psf$psf_timepoints
+  if(is.numeric(kernels)&&is.null(dim(kernels))) kernels<-matrix(kernels,nrow=1L)
+  if(!is.matrix(kernels)||!is.numeric(kernels)||!nrow(kernels)||ncol(kernels)!=length(offset)||
+      length(offset)<3L||any(!is.finite(kernels)|kernels<0)||any(rowSums(kernels)<=0)||
+      any(!is.finite(offset))||any(diff(offset)<=0))
+    stop("psf requires nonnegative psf_kernels and increasing relative-time psf_offsets.")
+  if(is.null(time)&&nrow(kernels)==1L) time<-0
+  if(length(time)!=nrow(kernels)||any(!is.finite(time))||anyDuplicated(time))
+    stop("Supply one distinct PSF anchor time per kernel.")
+  o<-order(time);time<-as.numeric(time[o]);kernels<-kernels[o,,drop=FALSE]
+  width<-apply(kernels,1L,function(g) ri_crossings(offset,g,which.max(g),fraction)[['width']])
+  if(any(!is.finite(width)|width<=0)) stop("PSF widths must be positive.")
+  fit<-if(length(time)>=4L) stats::smooth.spline(time,log(width),spar=.6) else NULL
+  list(time=time,width=as.numeric(width),spline=fit)
+}
+
 ri_predict_width <- function(object,time) {
   curve<-object$width_curve
   if(length(curve$time)==1L) return(rep(curve$width,length(time)))
@@ -77,6 +96,11 @@ ri_predict_width <- function(object,time) {
 #'   column supplies local small-peak durations for timing sample profiles.
 #' @param spar Smoothing-spline smoothing parameter; NULL selects it by GCV.
 #' @param control Named calibration controls, described below.
+#' @param psf Optional calibrated PSF from L0nmf::estimate_psf(), or a list with
+#'   psf_kernels (one kernel per row), psf_offsets in minutes and psf_timepoints
+#'   (or peak_timepoints) in minutes. Its local width at the chosen height fraction
+#'   supplies the small-peak duration. A single kernel gives a constant duration.
+#'   NULL estimates a narrow-width envelope from the detected standard peaks.
 #' @return An RIcalibration object with accepted anchors, all candidate diagnostics,
 #'   fitted spline, local narrow-peak widths and timing convention.
 #' @details For an alkane with c carbon atoms the nominal molecular ion is
@@ -87,8 +111,8 @@ ri_predict_width <- function(object,time) {
 #'   maxima and inconsistent assignments. Solvent-range C6 is excluded by default.
 #'
 #'   Peak onset and duration use a relative-height fraction of 0.01 by default.
-#'   A local lower envelope of standard peak durations estimates the duration
-#'   of a small peak. Both standards and sample profiles use
+#'   A supplied calibrated PSF gives its local small-peak duration; otherwise
+#'   a local lower envelope of standard peak durations estimates that duration. Both standards and sample profiles use
 #'   t_star = onset + narrow_width/2. A smoothing spline maps t_star to 100c;
 #'   a monotone cubic interpolation through its fitted anchor values prevents
 #'   local reversals. Extrapolation is disabled by default in predict().
@@ -108,11 +132,11 @@ ri_predict_width <- function(object,time) {
 #' cal
 #' @export
 calibrate_ri <- function(standard=NULL,time=NULL,carbon=7:40,anchors=NULL,
-                         spar=NULL,control=list()) {
+                         spar=NULL,control=list(),psf=NULL) {
   begun<-proc.time()[["elapsed"]];control<-ri_control(control)
   if(!is.numeric(carbon)||anyNA(carbon)||any(carbon<3|carbon!=floor(carbon))||anyDuplicated(carbon))
     stop("carbon must contain distinct integer carbon numbers.",call.=FALSE)
-  candidates<-data.frame();width_curve<-NULL;source<-if(is.character(standard)) standard else NULL
+  candidates<-data.frame();width_curve<-ri_psf_width_curve(psf,control$fraction);source<-if(is.character(standard)) standard else NULL
   if(is.null(anchors)) {
     raw<-ri_input(standard,time);Y<-raw$Y;time<-raw$time;mass<-raw$mass
     dt<-median(diff(time));carbon<-sort(carbon[14*carbon+2<=max(mass)&14*carbon+2>=min(mass)])
@@ -164,7 +188,7 @@ calibrate_ri <- function(standard=NULL,time=NULL,carbon=7:40,anchors=NULL,
     candidates$accepted<-seq_len(nrow(candidates))%in%chosen
     anchors<-candidates[chosen,,drop=FALSE]
     if(nrow(anchors)<4L) stop("Fewer than four coherent alkane assignments; inspect diagnostics or supply anchors.")
-    width_curve<-ri_width_curve(anchors$apex,anchors$width,control$width_quantile)
+    if(is.null(width_curve)) width_curve<-ri_width_curve(anchors$apex,anchors$width,control$width_quantile)
     temp<-list(width_curve=width_curve)
     anchors$narrow_width<-ri_predict_width(temp,anchors$start)
     anchors$retention_time<-anchors$start+anchors$narrow_width/2
@@ -172,7 +196,7 @@ calibrate_ri <- function(standard=NULL,time=NULL,carbon=7:40,anchors=NULL,
     if(!is.data.frame(anchors)||!all(c('carbon','retention_time')%in%names(anchors)))
       stop("anchors requires carbon and retention_time columns.")
     anchors<-anchors[order(anchors$retention_time),,drop=FALSE]
-    if('narrow_width'%in%names(anchors)) {
+    if('narrow_width'%in%names(anchors)&&is.null(psf)) {
       if(any(!is.finite(anchors$narrow_width)|anchors$narrow_width<=0))
         stop("Explicit narrow_width values must be positive.")
       width_curve<-ri_width_curve(anchors$retention_time,anchors$narrow_width,control$width_quantile)
@@ -187,6 +211,7 @@ calibrate_ri <- function(standard=NULL,time=NULL,carbon=7:40,anchors=NULL,
   anchors$RI<-100*anchors$carbon;anchors$fitted_RI<-fitted;anchors$residual<-anchors$RI-fitted
   structure(list(anchors=anchors,candidates=candidates,spline=spline,width_curve=width_curve,
     fraction=control$fraction,source=source,control=control,
+    width_source=if(!is.null(psf)) 'calibrated_psf' else if(nrow(candidates)) 'standard_peak_envelope' else 'provided',
     timing=if(is.null(width_curve)) 'provided' else 'onset_plus_half_narrow_width',
     seconds=proc.time()[['elapsed']]-begun),class='RIcalibration')
 }

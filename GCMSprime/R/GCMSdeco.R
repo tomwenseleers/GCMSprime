@@ -85,9 +85,11 @@ GCMS_write_msp <- function(model,time,mass,msp_file,compounds=NULL) {
     if('retention_index'%in%names(compounds)&&is.finite(compounds$retention_index[index]))
       annotation<-c(annotation,sprintf("RI_%s: %.6f",compounds$ri_phase[index],compounds$retention_index[index]))
     if('match_name'%in%names(compounds)&&!is.na(compounds$match_name[index]))
-      annotation<-c(annotation,sprintf("Synon: Tentative library match: %s; %s score %.4f; delta RI %.4f",
+      annotation<-c(annotation,sprintf("Synon: Tentative library match: %s; %s score %.4f; delta RI %.4f%s",
         gsub("[\r\n]"," ",compounds$match_name[index]),compounds$match_method[index],
-        compounds$match_score[index],compounds$match_delta_RI[index]))
+        compounds$match_score[index],compounds$match_delta_RI[index],
+        if('match_ri_assumed'%in%names(compounds)&&isTRUE(compounds$match_ri_assumed[index]))
+          paste0("; reference RI column assumed ",compounds$ri_phase[index]) else ""))
     c(paste0("Name: ",names[index]),annotation,sprintf("Pseudocount: %.15g",sum(s)),
       sprintf("Comments: Sample %s; retention time %.7g min; integrated ion intensity %.9g; splogconNMF",
         compounds$sample[index],compounds$retention_time[index],sum(s)),
@@ -333,7 +335,8 @@ GCMSdeco <- function(cdf_file,msp_file,family=quasipoisson("identity"),lambda="g
   if(!is.null(xlsx_file)) timed("write_xlsx",GCMS_write_xlsx(model,raw$time,raw$mass,
     object$compounds,xlsx_file,cdf_file,alkanes_file,seconds,
     matches=if(is.null(object$identification)) NULL else object$identification$matches,
-    calibration=if(is.null(object$identification)) NULL else object$identification$calibration))
+    calibration=if(is.null(object$identification)) NULL else object$identification$calibration,
+    search_settings=if(is.null(object$identification)) NULL else object$identification$settings))
   object$msp_file<-normalizePath(msp_file,winslash="/")
   object$xlsx_file<-if(is.null(xlsx_file)) NULL else normalizePath(xlsx_file,winslash="/")
   seconds["total"]<-proc.time()[["elapsed"]]-begun;object$seconds<-seconds
