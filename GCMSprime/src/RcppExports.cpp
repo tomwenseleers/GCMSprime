@@ -10,6 +10,25 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
+// library_search_cpp
+DataFrame library_search_cpp(NumericMatrix query, S4 library, NumericVector mass, List indices, NumericVector query_ri, double tolerance, int top, IntegerVector methods, int threads);
+RcppExport SEXP _GCMSprime_library_search_cpp(SEXP querySEXP, SEXP librarySEXP, SEXP massSEXP, SEXP indicesSEXP, SEXP query_riSEXP, SEXP toleranceSEXP, SEXP topSEXP, SEXP methodsSEXP, SEXP threadsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type query(querySEXP);
+    Rcpp::traits::input_parameter< S4 >::type library(librarySEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type mass(massSEXP);
+    Rcpp::traits::input_parameter< List >::type indices(indicesSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type query_ri(query_riSEXP);
+    Rcpp::traits::input_parameter< double >::type tolerance(toleranceSEXP);
+    Rcpp::traits::input_parameter< int >::type top(topSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type methods(methodsSEXP);
+    Rcpp::traits::input_parameter< int >::type threads(threadsSEXP);
+    rcpp_result_gen = Rcpp::wrap(library_search_cpp(query, library, mass, indices, query_ri, tolerance, top, methods, threads));
+    return rcpp_result_gen;
+END_RCPP
+}
 // msp_open_cpp
 SEXP msp_open_cpp(std::string path);
 RcppExport SEXP _GCMSprime_msp_open_cpp(SEXP pathSEXP) {
@@ -46,6 +65,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_GCMSprime_library_search_cpp", (DL_FUNC) &_GCMSprime_library_search_cpp, 9},
     {"_GCMSprime_msp_open_cpp", (DL_FUNC) &_GCMSprime_msp_open_cpp, 1},
     {"_GCMSprime_msp_read_cpp", (DL_FUNC) &_GCMSprime_msp_read_cpp, 3},
     {"_GCMSprime_msp_close_cpp", (DL_FUNC) &_GCMSprime_msp_close_cpp, 1},

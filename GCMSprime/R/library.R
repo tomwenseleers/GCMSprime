@@ -141,7 +141,10 @@ read_msp <- function(file,backend=c("auto","memory","sqlite"),db_file=NULL,
     library_require()
     DBI::dbExecute(con,"CREATE UNIQUE INDEX spectrum_id ON spectra(id)")
     for(field in c("name","cas","inchikey","source_id")) DBI::dbExecute(con,paste0("CREATE INDEX spectrum_",field," ON spectra(",field,")"))
-    if(DBI::dbExistsTable(con,"retention_indices")) DBI::dbExecute(con,"CREATE INDEX retention_id ON retention_indices(id)")
+    if(DBI::dbExistsTable(con,"retention_indices")) {
+      DBI::dbExecute(con,"CREATE INDEX retention_id ON retention_indices(id)")
+      DBI::dbExecute(con,"CREATE INDEX retention_phase_value ON retention_indices(phase_class,value,id)")
+    }
     # Close before renaming on Windows; the on.exit handler is then replaced.
     DBI::dbDisconnect(con);on.exit({msp_close_cpp(handle);if(file.exists(temporary)) unlink(temporary)},add=FALSE)
     if(!file.rename(temporary,db_file)) stop("Cannot finalize library database.")

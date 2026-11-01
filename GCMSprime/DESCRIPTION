@@ -13,7 +13,7 @@ Description: Chromatogram deconvolution, compound spectra, integrated areas and 
 License: GPL (>= 2)
 Encoding: UTF-8
 Depends: R (>= 4.1.0)
-Imports: Rcpp, L0nmf (>= 0.1.0), L0glm (>= 0.2.0), Matrix, methods, stats, graphics, grDevices, utils
+Imports: Rcpp, parallel, L0nmf (>= 0.1.0), L0glm (>= 0.2.0), Matrix, methods, stats, graphics, grDevices, utils
 Suggests: testthat (>= 3.0.0), knitr, rmarkdown, pkgdown, mgcv, ncdf4, openxlsx, DBI, RSQLite, jsonlite
 URL: https://tomwenseleers.github.io/GCMSprime/, https://github.com/tomwenseleers/GCMSprime
 BugReports: https://github.com/tomwenseleers/GCMSprime/issues
@@ -22,4 +22,4 @@ VignetteBuilder: knitr
 Config/roxygen2/version: 8.1.1
 Remotes: tomwenseleers/L0glm/L0glm, tomwenseleers/L0nmf/L0nmf
 LinkingTo: Rcpp
-SystemRequirements: C++17
+SystemRequirements: C++17, OpenMP (optional)
