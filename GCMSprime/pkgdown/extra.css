@@ -87,8 +87,6 @@ footer { border-top:1px solid #dce8ec; margin-top:4rem; padding-top:1.7rem; font
 .l0-hero h1 { color:#fff !important; }
 .l0-hero h1 span { color:#70e5e7 !important; }
 .l0-hero .l0-lead { font-size:.95rem; }
-.navbar-brand { display:inline-flex; align-items:center; gap:.4rem; }
-.navbar-brand::before { content:""; width:28px; height:33px; background:url("logo-dark.svg") center/contain no-repeat; }
 @media(max-width:480px) {
   .l0-hero .l0-eyebrow { min-height:3.2rem; max-width:calc(100% - 75px); display:flex; align-items:center; }
   .l0-hero h1 { max-width:100%; font-size:2rem; }

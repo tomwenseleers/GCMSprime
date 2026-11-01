@@ -26,7 +26,7 @@ install.packages("remotes")
 remotes::install_github("tomwenseleers/GCMSprime/GCMSprime")
 ```
 
-## One chromatogram, complete output
+## Fully automatic deconvolution
 
 ```r
 library(GCMSprime)
