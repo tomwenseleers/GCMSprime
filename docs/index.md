@@ -122,10 +122,24 @@ search](https://tomwenseleers.github.io/GCMSprime/articles/library-search.html)
 compares five similarity measures and explains the peak-onset timing
 convention, retained ion totals and scalable SQLite search.
 
-## Citation and acknowledgements
+## Citation
 
-An article describing these methods is in preparation. Please cite the
-package and the methodological sources linked in the help pages when
-using this work. OpenAI Codex/GPT-6 Astra and 6.1 Sol assisted code
-optimization, refactoring and documentation; the authors developed the
-key ideas and take responsibility for the work.
+An article describing the methods implemented in GCMSprime is in
+preparation. If you use the package before the article is formally
+published, we would appreciate a citation to the package:
+
+Wenseleers T, Vanderaa C (2026). *GCMSprime: Sparse GC/MS Deconvolution
+and Spectral Libraries*. R package version 0.1.0,
+<https://tomwenseleers.github.io/GCMSprime/>.
+
+The [Authors and Citation
+page](https://tomwenseleers.github.io/GCMSprime/authors.html#citation)
+also provides the citation in BibTeX format. Please also cite the
+methodological sources linked in the help pages where relevant.
+
+## Acknowledgements
+
+OpenAI Codex, using GPT-6 Astra and GPT-6.1 Sol, was used to optimize
+and refactor code and help draft the documentation. The key ideas and
+methodological decisions are the authors’ own, and the authors take full
+responsibility for the work presented here.

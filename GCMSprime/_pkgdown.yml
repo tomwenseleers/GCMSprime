@@ -53,7 +53,7 @@ home:
   strip_header: false
   title: "State-of-the-art GC/MS deconvolution, quantification and library search."
   sidebar:
-    structure: [links, authors, license]
+    structure: [links, citation, authors, license]
 authors:
   sidebar:
     roles: [aut, cre, ctb]
