@@ -1,0 +1,23 @@
+Package: GCMSprime
+Type: Package
+Title: Sparse GC/MS Deconvolution and Spectral Libraries
+Version: 0.1.0
+Authors@R: c(person("Tom", "Wenseleers", role = c("aut", "cre"),
+    	     email = "tom.wenseleers@kuleuven.be"),
+    	     person("Laura", "Lanzas", role = c("aut"),
+  	       email = "lauralanzasiolsina@gmail.com"),
+  	       person("Christophe", "Vanderaa", role = c("aut"),
+           email = "christophe.vanderaa@kuleuven.be"),
+           person("Niamh", "Callinan Keenan", role = "ctb"))
+Description: Chromatogram deconvolution, compound spectra, integrated areas and reproducible reports, built on sparse log-concave matrix factorization. Spectral library tools preserve chemical metadata and retention-index provenance.
+License: GPL (>= 2)
+Encoding: UTF-8
+Depends: R (>= 4.1.0)
+Imports: L0nmf (>= 0.1.0), L0glm (>= 0.2.0), Matrix, methods, stats, graphics, grDevices, utils
+Suggests: testthat (>= 3.0.0), knitr, rmarkdown, pkgdown, mgcv, ncdf4, openxlsx, DBI, RSQLite, jsonlite
+URL: https://tomwenseleers.github.io/GCMSprime/, https://github.com/tomwenseleers/GCMSprime
+BugReports: https://github.com/tomwenseleers/GCMSprime/issues
+Config/testthat/edition: 3
+VignetteBuilder: knitr
+Config/roxygen2/version: 8.1.1
+Remotes: tomwenseleers/L0glm/L0glm, tomwenseleers/L0nmf/L0nmf

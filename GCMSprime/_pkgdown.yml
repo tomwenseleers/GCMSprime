@@ -1,0 +1,33 @@
+url: https://tomwenseleers.github.io/GCMSprime/
+title: GCMSprime
+destination: ../docs
+template:
+  bootstrap: 5
+  math-rendering: katex
+  bslib:
+    bg: "#fcfdfd"
+    fg: "#203047"
+    primary: "#087e83"
+    base_font: "system-ui"
+    heading_font: "system-ui"
+    code_font: "system-ui"
+    border-radius: 0.6rem
+    navbar-bg: "#081629"
+navbar:
+  structure:
+    left: [intro, reference, articles, news]
+    right: [search, github]
+  components:
+    intro:
+      text: Get started
+      href: articles/gcms-deconvolution.html
+    github:
+      icon: fab fa-github
+      href: https://github.com/tomwenseleers/GCMSprime
+home:
+  title: "GC/MS deconvolution, full mass spectra and reproducible chromatographic reports."
+  sidebar:
+    structure: [links, authors, license]
+authors:
+  sidebar:
+    roles: [aut, cre, ctb]

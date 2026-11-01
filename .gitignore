@@ -1,0 +1,9 @@
+codex_sandbox/
+.Rproj.user/
+.Rhistory
+.RData
+*.o
+*.dll
+*.so
+*.tar.gz
+*.Rcheck/

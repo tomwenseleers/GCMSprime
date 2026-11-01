@@ -1,0 +1,19 @@
+#' Sparse GC/MS Deconvolution and Spectral Libraries
+#'
+#' @keywords internal
+#' @import L0glm
+#' @import L0nmf
+#' @importFrom Matrix sparseMatrix Diagonal colSums rowSums head tail
+#' @import stats graphics grDevices methods
+#' @importFrom utils data flush.console
+"_PACKAGE"
+
+#' @importFrom L0glm GIC
+#' @export
+L0glm::GIC
+#' @importFrom L0glm EBIC
+#' @export
+L0glm::EBIC
+#' @importFrom L0glm MBIC
+#' @export
+L0glm::MBIC
