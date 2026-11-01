@@ -13,7 +13,7 @@
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/tomwenseleers/GCMSprime/blob/HEAD/DESCRIPTION)
+[`DESCRIPTION`](https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSprime/DESCRIPTION)
 
 Wenseleers T, Lanzas L, Vanderaa C (2026). *GCMSprime: Sparse GC/MS
 Deconvolution and Spectral Libraries*. R package version 0.1.0,

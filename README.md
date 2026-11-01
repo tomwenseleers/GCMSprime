@@ -27,7 +27,7 @@ The workflow calibrates a time-varying PSF, models a smooth baseline, resolves o
 
 ## Experimental examples
 
-The [GC/MS tutorial](articles/gcms-deconvolution.html) includes two experimental chromatogram windows, complete fitted signals, spectra, timings and exports.
+The [GC/MS tutorial](https://tomwenseleers.github.io/GCMSprime/articles/gcms-deconvolution.html) includes two experimental chromatogram windows, complete fitted signals, spectra, timings and exports.
 
 ![Co-eluting hydrocarbon profiles](https://tomwenseleers.github.io/GCMSprime/reference/figures/gcms-data1-traces.png)
 
@@ -46,7 +46,7 @@ library_metadata(lib, which=1:10)
 retention_indices(lib, which=1:1000, phase="DB5")
 ```
 
-[Library formats and storage](articles/spectral-libraries.html) covers OpenChrom MSP exports, MoNA/Golm MSP and GCMS-ID CSV predictions.
+[Library formats and storage](https://tomwenseleers.github.io/GCMSprime/articles/spectral-libraries.html) covers OpenChrom MSP exports, MoNA/Golm MSP and GCMS-ID CSV predictions.
 
 ## Citation and acknowledgements
 

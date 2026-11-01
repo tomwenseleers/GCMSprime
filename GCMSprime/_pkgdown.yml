@@ -1,5 +1,11 @@
 url: https://tomwenseleers.github.io/GCMSprime/
 title: GCMSprime
+repo:
+  url:
+    home: https://github.com/tomwenseleers/GCMSprime/
+    source: https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSprime/
+    issue: https://github.com/tomwenseleers/GCMSprime/issues
+    user: https://github.com/
 destination: ../docs
 template:
   bootstrap: 5
