@@ -23,7 +23,6 @@ Useful links:
 Authors:
 \itemize{
   \item Tom Wenseleers \email{tom.wenseleers@kuleuven.be}
-  \item Laura Lanzas \email{lauralanzasiolsina@gmail.com}
   \item Christophe Vanderaa \email{christophe.vanderaa@kuleuven.be}
 }
 

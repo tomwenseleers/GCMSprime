@@ -1,9 +1,29 @@
 # GCMSprime
 
-# Resolve peaks. Recover compounds.
+GC/MS DECONVOLUTION · QUANTIFICATION · IDENTIFICATION
 
-GC/MS deconvolution, full mass spectra and reproducible chromatographic
-reports.
+More compounds.\
+Cleaner spectra.
+================
+
+State-of-the-art GC/MS deconvolution, quantification and library search.
+
+[Get started
+↗](https://tomwenseleers.github.io/GCMSprime/articles/gcms-deconvolution.md)[Search
+spectral
+libraries](https://tomwenseleers.github.io/GCMSprime/articles/library-search.md)
+
+R · Full mass spectra · CDF input · MSP & Excel output
+
+![GCMSprime hex logo showing resolved chromatographic peaks and their
+mass spectra](logo-dark.svg)
+
+[**Deconvolve**Resolve overlapping compounds and recover their
+spectra](https://tomwenseleers.github.io/GCMSprime/articles/gcms-deconvolution.md)
+[**Quantify**Integrated areas, fitted profiles and complete
+reports](https://tomwenseleers.github.io/GCMSprime/reference/GCMSdeco.md)
+[**Identify**Fast spectral matching with column-specific retention
+indices](https://tomwenseleers.github.io/GCMSprime/articles/library-search.md)
 
 GCMSprime is part of a focused three-package toolkit:
 [L0glm](https://tomwenseleers.github.io/L0glm/) supplies fast sparse GLM

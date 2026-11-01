@@ -34,14 +34,6 @@ math[display="block"] { max-width:100%; overflow-x:auto; padding:.4rem 0; }
 .table thead th { color:#19374a; border-bottom:2px solid #21a6a6; background:#edf7f7; }
 .table td,.table th { padding:.65rem .75rem; }
 .table tbody tr:hover { background:#f0f9f9; }
-.template-home #application-sparse-deconvolution ~ table col:nth-child(1) { width:23%; }
-.template-home #application-sparse-deconvolution ~ table col:nth-child(2) { width:14%; }
-.template-home #application-sparse-deconvolution ~ table col:nth-child(3) { width:12%; }
-.template-home #application-sparse-deconvolution ~ table col:nth-child(4) { width:13%; }
-.template-home #application-sparse-deconvolution ~ table col:nth-child(5),
-.template-home #application-sparse-deconvolution ~ table col:nth-child(6) { width:9%; }
-.template-home #application-sparse-deconvolution ~ table col:nth-child(7),
-.template-home #application-sparse-deconvolution ~ table col:nth-child(8) { width:10%; }
 img { max-width:100%; height:auto; }
 .caption,figcaption { font-size:.88rem; color:var(--l0-muted); }
 .l0-hero { display:flex; align-items:center; gap:1.5rem; position:relative; overflow:hidden; margin:.5rem 0 1.5rem; padding:2.6rem 2.5rem; border-radius:22px; background:radial-gradient(ellipse at 95% 10%,#103d55 0%,transparent 60%),linear-gradient(130deg,#07182b,#101c37); color:#f7fdff; }
@@ -88,6 +80,17 @@ footer { border-top:1px solid #dce8ec; margin-top:4rem; padding-top:1.7rem; font
 @media(max-width:480px) { .l0-hero {display:block;}.l0-hero-logo {position:absolute;width:72px;right:1rem;top:1rem;opacity:.85;}.l0-hero .l0-eyebrow {max-width:75%;font-size:.54rem;}.l0-hero h1 {font-size:2.3rem;max-width:85%;}.l0-stat-grid {grid-template-columns:1fr;}.l0-stat-grid a {display:flex;gap:1rem;align-items:center;}.l0-stat-grid strong {flex:0 0 35%;}.l0-stat-grid span {margin:0;} }
 @media(prefers-reduced-motion:reduce) { * {scroll-behavior:auto !important;transition:none !important;} }
 
-.package-banner{background:linear-gradient(120deg,#081629,#103d51);color:#f5fbff;padding:2.5rem;border-radius:1rem;margin:0 0 2rem}.package-banner h1{color:#f5fbff!important;margin-top:0}.package-banner p{color:#c6f4fa}.package-banner a{color:#76eee3}
 
 .navbar{background-color:#081629!important}.navbar .navbar-brand,.navbar .nav-link{color:#d7edf3!important}.navbar .nav-link:hover{color:#76eee3!important}pre a,pre a:visited{color:#8fe8df!important}
+
+/* Shared toolkit branding; explicit headline colors also work in Edge. */
+.l0-hero h1 { color:#fff !important; }
+.l0-hero h1 span { color:#70e5e7 !important; }
+.l0-hero .l0-lead { font-size:.95rem; }
+.navbar-brand { display:inline-flex; align-items:center; gap:.4rem; }
+.navbar-brand::before { content:""; width:28px; height:33px; background:url("logo-dark.svg") center/contain no-repeat; }
+@media(max-width:480px) {
+  .l0-hero .l0-eyebrow { min-height:3.2rem; max-width:calc(100% - 75px); display:flex; align-items:center; }
+  .l0-hero h1 { max-width:100%; font-size:2rem; }
+  .l0-hero-logo { width:66px; opacity:1; }
+}

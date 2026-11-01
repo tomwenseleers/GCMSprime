@@ -5,16 +5,23 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>GC/MS deconvolution, full mass spectra and reproducible chromatographic reports. • GCMSprime</title>
+<title>State-of-the-art GC/MS deconvolution, quantification and library search. • GCMSprime</title>
+<!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="favicon-96x96.png">
+<link rel="icon" type="”image/svg+xml”" href="favicon.svg">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="icon" sizes="any" href="favicon.ico">
+<link rel="manifest" href="site.webmanifest">
 <!-- katex math --><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" integrity="sha384-nB0miv6/jRmo5UMMR1wu3Gz6NLsoTkbqJghGIsx//Rlm+ZU03BU6SQNC66uf4l5+" crossorigin="anonymous">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" integrity="sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFqjFALcbeS9Ggm/Yr2r3Dy4lfFg" crossorigin="anonymous"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" integrity="sha384-43gviWU0YVjaDtb/GhzOouOXtZMP/7XUzwPTstBeZFe/+rCMvRwr4yROQP43s0Xk" crossorigin="anonymous" onload="renderMathInElement(document.body);"></script><script src="katex-auto.js"></script><script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><link href="extra.css" rel="stylesheet">
-<meta property="og:title" content="GC/MS deconvolution, full mass spectra and reproducible chromatographic reports.">
+<meta property="og:title" content="State-of-the-art GC/MS deconvolution, quantification and library search.">
 <meta name="description" content="Chromatogram deconvolution, compound spectra, integrated areas and reproducible reports, built on sparse log-concave matrix factorization. Spectral library tools preserve chemical metadata and retention-index provenance.">
 <meta property="og:description" content="Chromatogram deconvolution, compound spectra, integrated areas and reproducible reports, built on sparse log-concave matrix factorization. Spectral library tools preserve chemical metadata and retention-index provenance.">
+<meta property="og:image" content="https://tomwenseleers.github.io/GCMSprime/reference/figures/logo.png">
+<meta property="og:image:alt" content="GCMSprime hex logo showing resolved chromatographic peaks and their mass spectra">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -35,11 +42,11 @@
       <ul class="navbar-nav me-auto">
 <li class="nav-item"><a class="nav-link" href="articles/gcms-deconvolution.html">Get started</a></li>
 <li class="nav-item dropdown">
-  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-tutorials" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Tutorials</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-tutorials">
 <li><a class="dropdown-item" href="articles/gcms-deconvolution.html">GC/MS deconvolution</a></li>
-    <li><a class="dropdown-item" href="articles/library-search.html">Identify compounds with spectra and retention indices</a></li>
-    <li><a class="dropdown-item" href="articles/spectral-libraries.html">Spectral libraries: import and storage</a></li>
+    <li><a class="dropdown-item" href="articles/spectral-libraries.html">Spectral libraries and storage</a></li>
+    <li><a class="dropdown-item" href="articles/library-search.html">Retention indices and library search</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="external-link nav-link" href="https://tomwenseleers.github.io/L0nmf/articles/log-concave-nmf.html">Algorithm &amp; theory</a></li>
@@ -60,13 +67,28 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="section level1">
 
-<div class="package-banner">
-<h1>
-Resolve peaks. Recover compounds.
-</h1>
-<p>
-GC/MS deconvolution, full mass spectra and reproducible chromatographic reports.
+<div class="l0-hero">
+<div class="l0-hero-copy">
+<p class="l0-eyebrow">
+GC/MS DECONVOLUTION · QUANTIFICATION · IDENTIFICATION
 </p>
+<h1>
+More compounds.<br><span>Cleaner spectra.</span>
+</h1>
+<p class="l0-lead">
+State-of-the-art GC/MS deconvolution, quantification and library search.
+</p>
+<div class="l0-actions">
+<a class="btn btn-primary" href="articles/gcms-deconvolution.html">Get started <span aria-hidden="true">↗</span></a><a class="btn btn-outline-light" href="articles/library-search.html">Search spectral libraries</a>
+</div>
+<p class="l0-hero-note">
+R · Full mass spectra · CDF input · MSP &amp; Excel output
+</p>
+</div>
+<p><img class="l0-hero-logo" src="logo-dark.svg" alt="GCMSprime hex logo showing resolved chromatographic peaks and their mass spectra" width="240" height="280"></p>
+</div>
+<div class="l0-stat-grid">
+<p><a href="articles/gcms-deconvolution.html"><strong>Deconvolve</strong><span>Resolve overlapping compounds and recover their spectra</span></a> <a href="reference/GCMSdeco.html"><strong>Quantify</strong><span>Integrated areas, fitted profiles and complete reports</span></a> <a href="articles/library-search.html"><strong>Identify</strong><span>Fast spectral matching with column-specific retention indices</span></a></p>
 </div>
 <p>GCMSprime is part of a focused three-package toolkit: <a href="https://tomwenseleers.github.io/L0glm/" class="external-link">L0glm</a> supplies fast sparse GLM selection, <a href="https://tomwenseleers.github.io/L0nmf/" class="external-link">L0nmf</a> supplies sparse factorization and PSF estimation, and <a href="https://tomwenseleers.github.io/GCMSprime/">GCMSprime</a> turns those methods into a chromatographic workflow.</p>
 <div class="section level2">
@@ -143,7 +165,6 @@ GC/MS deconvolution, full mass spectra and reproducible chromatographic reports.
 <h2 data-toc-skip>Developers</h2>
 <ul class="list-unstyled">
 <li>Tom Wenseleers <br><small class="roles"> Author, maintainer </small>   </li>
-<li>Laura Lanzas <br><small class="roles"> Author </small>   </li>
 <li>Christophe Vanderaa <br><small class="roles"> Author </small>   </li>
 <li>Niamh Callinan Keenan <br><small class="roles"> Contributor </small>   </li>
 </ul>
@@ -161,7 +182,7 @@ GC/MS deconvolution, full mass spectra and reproducible chromatographic reports.
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Tom Wenseleers, Laura Lanzas, Christophe Vanderaa.</p>
+  <p>Developed by Tom Wenseleers, Christophe Vanderaa.</p>
 </div>
 
 <div class="pkgdown-footer-right">

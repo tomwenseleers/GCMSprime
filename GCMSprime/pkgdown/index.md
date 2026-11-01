@@ -1,6 +1,21 @@
 # GCMSprime
 
-<div class="package-banner"><h1>Resolve peaks. Recover compounds.</h1><p>GC/MS deconvolution, full mass spectra and reproducible chromatographic reports.</p></div>
+<div class="l0-hero">
+<div class="l0-hero-copy">
+<p class="l0-eyebrow">GC/MS DECONVOLUTION · QUANTIFICATION · IDENTIFICATION</p>
+<h1>More compounds.<br><span>Cleaner spectra.</span></h1>
+<p class="l0-lead">State-of-the-art GC/MS deconvolution, quantification and library search.</p>
+<div class="l0-actions"><a class="btn btn-primary" href="articles/gcms-deconvolution.html">Get started <span aria-hidden="true">↗</span></a><a class="btn btn-outline-light" href="articles/library-search.html">Search spectral libraries</a></div>
+<p class="l0-hero-note">R · Full mass spectra · CDF input · MSP &amp; Excel output</p>
+</div>
+<img class="l0-hero-logo" src="logo-dark.svg" alt="GCMSprime hex logo showing resolved chromatographic peaks and their mass spectra" width="240" height="280">
+</div>
+
+<div class="l0-stat-grid">
+<a href="articles/gcms-deconvolution.html"><strong>Deconvolve</strong><span>Resolve overlapping compounds and recover their spectra</span></a>
+<a href="reference/GCMSdeco.html"><strong>Quantify</strong><span>Integrated areas, fitted profiles and complete reports</span></a>
+<a href="articles/library-search.html"><strong>Identify</strong><span>Fast spectral matching with column-specific retention indices</span></a>
+</div>
 
 GCMSprime is part of a focused three-package toolkit: [L0glm](https://tomwenseleers.github.io/L0glm/) supplies fast sparse GLM selection, [L0nmf](https://tomwenseleers.github.io/L0nmf/) supplies sparse factorization and PSF estimation, and [GCMSprime](https://tomwenseleers.github.io/GCMSprime/) turns those methods into a chromatographic workflow.
 

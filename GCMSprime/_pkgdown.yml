@@ -11,6 +11,10 @@ template:
   bootstrap: 5
   theme: github-dark
   math-rendering: katex
+  opengraph:
+    image:
+      src: man/figures/logo.png
+      alt: "GCMSprime hex logo showing resolved chromatographic peaks and their mass spectra"
   bslib:
     bg: "#fcfdfd"
     fg: "#203047"
@@ -24,9 +28,18 @@ navbar:
   bg: dark
   type: dark
   structure:
-    left: [intro, articles, algorithm, reference, news]
+    left: [intro, tutorials, algorithm, reference, news]
     right: [search, github]
   components:
+    tutorials:
+      text: Tutorials
+      menu:
+        - text: GC/MS deconvolution
+          href: articles/gcms-deconvolution.html
+        - text: Spectral libraries and storage
+          href: articles/spectral-libraries.html
+        - text: Retention indices and library search
+          href: articles/library-search.html
     intro:
       text: Get started
       href: articles/gcms-deconvolution.html
@@ -37,7 +50,8 @@ navbar:
       icon: fab fa-github
       href: https://github.com/tomwenseleers/GCMSprime
 home:
-  title: "GC/MS deconvolution, full mass spectra and reproducible chromatographic reports."
+  strip_header: false
+  title: "State-of-the-art GC/MS deconvolution, quantification and library search."
   sidebar:
     structure: [links, authors, license]
 authors:

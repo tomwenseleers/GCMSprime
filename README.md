@@ -1,5 +1,15 @@
 # GCMSprime: state-of-the-art GC/MS deconvolution, quantification and library search in R
 
+<a href="https://tomwenseleers.github.io/GCMSprime/">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="GCMSprime/man/figures/logo-dark.svg">
+  <source media="(prefers-color-scheme: light)" srcset="GCMSprime/man/figures/logo-light.svg">
+  <img src="GCMSprime/man/figures/logo.png" align="right" width="140" height="163" alt="GCMSprime hex logo showing resolved chromatographic peaks and their mass spectra">
+</picture>
+</a>
+
+[Get started](https://tomwenseleers.github.io/GCMSprime/articles/gcms-deconvolution.html) · [Documentation](https://tomwenseleers.github.io/GCMSprime/reference/index.html) · [Algorithm & theory](https://tomwenseleers.github.io/L0nmf/articles/log-concave-nmf.html)
+
 GCMSprime is a new state-of-the-art GC/MS deconvolution pipeline to separate and integrate overlapping chromatographic peaks. It enables unparalleled peak integration accuracy, and has retention index constrained library search using either public or commercial libraries built-in. It is extremely easy to use, and produces detailed sample reports in minutes in a fully automatic way, without any required user intervention or parameter settings. The deconvolution method that it uses is mathematically principled and builds on two other packages. First, [L0glm](https://tomwenseleers.github.io/L0glm/) for ultrafast joint feature selection across mass channels (approximating best subset of group selection). Second, [L0nmf](https://tomwenseleers.github.io/L0nmf/) to deconvolve spectra based on an estimated time-varying peak shape function (PSF), followed by sparse log-concave nonnegative matrix factorization with automatic best rank detection, subject to log-concave peak shape constraints and taking into account overdispersed multivariate Poisson noise. In this way, the package can simultaneously estimate the true number of compounds that are present, their elution profiles, and the deconvolved spectra, even based on data from single samples. It succeeds in accurately estimating elution profiles and peak areas, even for challenging cases where peaks are highly overloaded or have awkward shark-fin shapes, as is commonly the case for acids. To our knowledge, it is the first package that can achieve this. Following deconvolution, spectra can then be searched against public (MoNA, GCMS-ID) or commercial libraries (after Openchrom export to .MSP), using a retention index constrained seach, or be exported to NIST MS Search compatible MSP format. Using this workflow, analysts can save weeks of manual work.
 
 ## Installation
