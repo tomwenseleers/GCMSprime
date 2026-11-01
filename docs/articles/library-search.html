@@ -83,7 +83,7 @@ libraries.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tomwenseleers.github.io/GCMSprime/">GCMSprime</a></span><span class="op">)</span></span>
 <span><span class="va">lib</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_msp.html">read_msp</a></span><span class="op">(</span><span class="st">"library.msp"</span>, backend<span class="op">=</span><span class="st">"sqlite"</span>, db_file<span class="op">=</span><span class="st">"library.sqlite"</span><span class="op">)</span></span>
-<span><span class="va">cal</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/calibrate_ri.html">calibrate_ri</a></span><span class="op">(</span><span class="st">"alkanes.cdf"</span>, carbon<span class="op">=</span><span class="fl">7</span><span class="op">:</span><span class="fl">23</span><span class="op">)</span></span>
+<span><span class="va">cal</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/calibrate_ri.html">calibrate_ri</a></span><span class="op">(</span><span class="st">"alkanes.cdf"</span>, carbon<span class="op">=</span><span class="fl">7</span><span class="op">:</span><span class="fl">23</span>, psf<span class="op">=</span><span class="va">fit</span><span class="op">$</span><span class="va">psf_standard</span><span class="op">)</span></span>
 <span><span class="va">weights</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/library_ion_weights.html">library_ion_weights</a></span><span class="op">(</span><span class="va">lib</span><span class="op">)</span>  <span class="co"># compute once and reuse</span></span>
 <span></span>
 <span><span class="va">identified</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/identify_compounds.html">identify_compounds</a></span><span class="op">(</span><span class="va">fit</span>, <span class="va">lib</span>, calibration<span class="op">=</span><span class="va">cal</span>,</span>
@@ -122,10 +122,13 @@ decisions are retained for inspection.</p>
 t^\star=t_{\mathrm{onset}}+\frac{w_{\mathrm{small}}(t_{\mathrm{onset}})}2.
 </span></p>
 <p>Onset is the leading crossing at 1% of the background-corrected peak
-height. A smooth local lower envelope of the standard peak widths
-estimates the duration of a small peak. This reduces the influence of
-overloaded or tailing peaks on the retention coordinate. Both standard
-peaks and recovered sample profiles use this timing convention. The
+height. The local calibrated narrow-peak PSF supplies the full width at
+the same 1% height. Pass it through <code>psf=fit$psf_standard</code>; a
+time-varying PSF gives a smoothly varying local duration. If no PSF is
+supplied, a smooth lower envelope of the standard peak widths estimates
+the small-peak duration. This reduces the influence of overloaded or
+tailing peaks on the retention coordinate. Both standard peaks and
+recovered sample profiles use this timing convention. The
 relative-height fraction is configurable through
 <code>control=list(fraction=.01)</code>.</p>
 <p>A smoothing spline maps <span class="math inline">t^\star_c</span> to
@@ -144,6 +147,9 @@ default. Verified anchors can be supplied directly, including a
 Kratz (1963)</a>. <a href="https://webbook.nist.gov/chemistry/gc-ri/" class="external-link">NIST describes the
 standard RI conventions</a>. Use a ladder acquired with the sample’s
 column and chromatographic programme.</p>
+<p>The Excel Run sheet records the width source and timing convention.
+<code><a href="../reference/GCMSdeco.html">GCMSdeco()</a></code> reuses its stored standard PSF automatically
+when identification is requested.</p>
 </div>
 <div class="section level2">
 <h2 id="column-specific-retention-constraints">Column-specific retention constraints<a class="anchor" aria-label="anchor" href="#column-specific-retention-constraints"></a>
@@ -165,6 +171,15 @@ their column class, pass, for example, <code>unknown_phase="DB5"</code>
 explicitly. <code>ri_tolerance=Inf</code> requests spectral-only
 searching. It is useful for evaluating spectral scores separately from
 RI filtering.</p>
+<p>NIST/OpenChrom comment summaries such as
+<code>SemiStdNP=1000 StdNP=990 StdPolar=1300</code> retain their DB5,
+DB1 and DBWAX column classes during import. Slash-delimited uncertainty
+summaries remain available in the raw RI value. For an explicitly
+justified benchmark assignment, <code>unknown_phase="DB5"</code> also
+admits unlabelled RI values. These matches carry
+<code>ri_assumed=TRUE</code>, and the Excel and MSP reports state the
+assignment. References with missing RIs remain excluded from a
+constrained search.</p>
 </div>
 <div class="section level2">
 <h2 id="spectral-comparisons-and-angular-distance">Spectral comparisons and angular distance<a class="anchor" aria-label="anchor" href="#spectral-comparisons-and-angular-distance"></a>

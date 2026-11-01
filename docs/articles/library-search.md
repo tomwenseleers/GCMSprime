@@ -12,7 +12,7 @@ workflow supports sparse in-memory libraries and large SQLite libraries.
 
 library(GCMSprime)
 lib <- read_msp("library.msp", backend="sqlite", db_file="library.sqlite")
-cal <- calibrate_ri("alkanes.cdf", carbon=7:23)
+cal <- calibrate_ri("alkanes.cdf", carbon=7:23, psf=fit$psf_standard)
 weights <- library_ion_weights(lib)  # compute once and reuse
 
 identified <- identify_compounds(fit, lib, calibration=cal,
@@ -58,10 +58,13 @@ The retention coordinate follows
 t^\star=t\_{\mathrm{onset}}+\frac{w\_{\mathrm{small}}(t\_{\mathrm{onset}})}2.
 
 Onset is the leading crossing at 1% of the background-corrected peak
-height. A smooth local lower envelope of the standard peak widths
-estimates the duration of a small peak. This reduces the influence of
-overloaded or tailing peaks on the retention coordinate. Both standard
-peaks and recovered sample profiles use this timing convention. The
+height. The local calibrated narrow-peak PSF supplies the full width at
+the same 1% height. Pass it through `psf=fit$psf_standard`; a
+time-varying PSF gives a smoothly varying local duration. If no PSF is
+supplied, a smooth lower envelope of the standard peak widths estimates
+the small-peak duration. This reduces the influence of overloaded or
+tailing peaks on the retention coordinate. Both standard peaks and
+recovered sample profiles use this timing convention. The
 relative-height fraction is configurable through
 `control=list(fraction=.01)`.
 
@@ -86,6 +89,11 @@ den Dool & Kratz (1963)](https://doi.org/10.1016/S0021-9673(01)80947-X).
 conventions](https://webbook.nist.gov/chemistry/gc-ri/). Use a ladder
 acquired with the sample’s column and chromatographic programme.
 
+The Excel Run sheet records the width source and timing convention.
+[`GCMSdeco()`](https://tomwenseleers.github.io/GCMSprime/reference/GCMSdeco.md)
+reuses its stored standard PSF automatically when identification is
+requested.
+
 ## Column-specific retention constraints
 
 `phase="DB1"`, `"DB5"` and `"DBWAX"` select nonpolar, semi-standard
@@ -104,6 +112,15 @@ remain unassigned to a phase. If the library’s documentation establishes
 their column class, pass, for example, `unknown_phase="DB5"` explicitly.
 `ri_tolerance=Inf` requests spectral-only searching. It is useful for
 evaluating spectral scores separately from RI filtering.
+
+NIST/OpenChrom comment summaries such as
+`SemiStdNP=1000 StdNP=990 StdPolar=1300` retain their DB5, DB1 and DBWAX
+column classes during import. Slash-delimited uncertainty summaries
+remain available in the raw RI value. For an explicitly justified
+benchmark assignment, `unknown_phase="DB5"` also admits unlabelled RI
+values. These matches carry `ri_assumed=TRUE`, and the Excel and MSP
+reports state the assignment. References with missing RIs remain
+excluded from a constrained search.
 
 ## Spectral comparisons and angular distance
 

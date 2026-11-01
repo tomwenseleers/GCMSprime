@@ -14,7 +14,8 @@ calibrate_ri(
   carbon = 7:40,
   anchors = NULL,
   spar = NULL,
-  control = list()
+  control = list(),
+  psf = NULL
 )
 
 # S3 method for class 'RIcalibration'
@@ -54,6 +55,15 @@ print(x, ...)
 
   Named calibration controls, described below.
 
+- psf:
+
+  Optional calibrated PSF from L0nmf::estimate_psf(), or a list with
+  psf_kernels (one kernel per row), psf_offsets in minutes and
+  psf_timepoints (or peak_timepoints) in minutes. Its local width at the
+  chosen height fraction supplies the small-peak duration. A single
+  kernel gives a constant duration. NULL estimates a narrow-width
+  envelope from the detected standard peaks.
+
 - object:
 
   A fitted RIcalibration.
@@ -92,11 +102,12 @@ maxima and inconsistent assignments. Solvent-range C6 is excluded by
 default.
 
 Peak onset and duration use a relative-height fraction of 0.01 by
-default. A local lower envelope of standard peak durations estimates the
-duration of a small peak. Both standards and sample profiles use t_star
-= onset + narrow_width/2. A smoothing spline maps t_star to 100c; a
-monotone cubic interpolation through its fitted anchor values prevents
-local reversals. Extrapolation is disabled by default in predict().
+default. A supplied calibrated PSF gives its local small-peak duration;
+otherwise a local lower envelope of standard peak durations estimates
+that duration. Both standards and sample profiles use t_star = onset +
+narrow_width/2. A smoothing spline maps t_star to 100c; a monotone cubic
+interpolation through its fitted anchor values prevents local reversals.
+Extrapolation is disabled by default in predict().
 
 control accepts fraction, baseline_window (minutes), min_separation
 (minutes), min_relative, min_molecular_fraction, min_molecular_ratio,

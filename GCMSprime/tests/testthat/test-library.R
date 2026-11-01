@@ -75,3 +75,24 @@ test_that("MoNA quoted comments populate searchable chemical metadata", {
   expect_equal(z$inchi,"InChI=1S/C2H6O");expect_equal(z$license,"CC BY-SA")
   expect_equal(library_metadata(x,raw=TRUE)[[1]]$value[2],text)
 })
+
+test_that("OpenChrom NIST comment indices retain their known column classes", {
+  f<-tempfile(fileext=".msp");on.exit(unlink(f))
+  comment<-"SemiStdNP=1000/12/3 StdNP=990 StdPolar=1300/20/5 ; NIST MS# 1"
+  writeLines(c("Name: test",paste0("COMMENTS: ",comment),"RI: 0","Num Peaks: 1","43 100;"),f)
+  a<-read_msp(f);ri<-retention_indices(a)
+  expect_equal(ri$value,c(1000,990,1300))
+  expect_equal(ri$phase_class,c("DB5","DB1","DBWAX"))
+  expect_equal(ri$raw,c("1000/12/3","990","1300/20/5"))
+  expect_equal(library_metadata(a,raw=TRUE)[[1]]$value[2],comment)
+  skip_if_not_installed("RSQLite")
+  db<-tempfile(fileext=".sqlite");on.exit(unlink(db),add=TRUE)
+  b<-read_msp(f,backend="sqlite",db_file=db)
+  expect_equal(retention_indices(b),ri,ignore_attr=TRUE)
+})
+
+test_that("quoted NIST comment RIs are imported once", {
+  f<-tempfile(fileext=".msp");on.exit(unlink(f))
+  writeLines(c("Name: test",'Comments: "SemiStdNP=1000" "StdNP=990"',"Num Peaks: 1","43 100;"),f)
+  expect_equal(retention_indices(read_msp(f))$value,c(1000,990))
+})

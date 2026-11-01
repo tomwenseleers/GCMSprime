@@ -46,7 +46,8 @@ print(x, ...)
 - calibration:
 
   RIcalibration from calibrate_ri(). For GCMSdeco fits, the stored
-  alkane standard is used automatically when available.
+  alkane standard and calibrated PSF widths are used automatically when
+  available.
 
 - ri:
 

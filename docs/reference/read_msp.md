@@ -100,11 +100,13 @@ reopened with open_library(). Existing databases are never overwritten.
 No live connection is serialized.
 
 Retention indices retain their raw field, phase class and provenance.
-DB1, DB5 and DBWAX denote nonpolar, semi-standard nonpolar and polar
-classes; a separate column/stationary-phase field also supplies the RI
-phase class. An unspecified column remains unknown. Zero RI placeholders
-are omitted from the index table. Supplied SMILES are preserved without
-chemical canonicalization.
+NIST/OpenChrom comment summaries SemiStdNP, StdNP and StdPolar map to
+DB5, DB1 and DBWAX; slash-delimited uncertainty fields remain in the raw
+value. DB1, DB5 and DBWAX denote nonpolar, semi-standard nonpolar and
+polar classes; a separate column/stationary-phase field also supplies
+the RI phase class. An unspecified column remains unknown. Zero RI
+placeholders are omitted from the index table. Supplied SMILES are
+preserved without chemical canonicalization.
 
 ## Examples
 

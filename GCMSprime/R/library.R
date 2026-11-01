@@ -28,6 +28,14 @@ library_record <- function(x,id,source,encoding,origin) {
     at<-regexpr("=",pairs,fixed=TRUE)
     tags<-c(tags,substring(pairs,1L,at-1L));values<-c(values,substring(pairs,at+1L))
   }
+  # OpenChrom preserves NIST's column-specific RI summary in comments.
+  ri_pairs<-unlist(lapply(comments,function(value) regmatches(value,
+    gregexpr('(?i)\\b(?:SemiStdNP|StdNP|StdPolar)\\s*=\\s*[0-9][^[:space:];"]*',value,perl=TRUE))[[1]]),use.names=FALSE)
+  if(length(ri_pairs)) {
+    at<-regexpr("=",ri_pairs,fixed=TRUE)
+    tags<-c(tags,trimws(substring(ri_pairs,1L,at-1L)))
+    values<-c(values,trimws(substring(ri_pairs,at+1L)))
+  }
   keys<-toupper(gsub("[^[:alnum:]]","",tags))
   field<-function(names) {i<-which(keys%in%names);if(length(i)) values[i[1]] else NA_character_}
   metadata<-data.frame(id=as.integer(id),name=field("NAME"),formula=field("FORMULA"),
@@ -37,21 +45,22 @@ library_record <- function(x,id,source,encoding,origin) {
     origin=origin,source_line=x$line,npeaks=length(x$mass),stringsAsFactors=FALSE)
   count<-suppressWarnings(as.numeric(field(c("PSEUDOCOUNT","IONTOTAL","TOTALIONCOUNT"))))
   metadata$pseudocount<-if(length(count)==1L&&is.finite(count)&&count>0) count else NA_real_
-  ri<-which(keys%in%c("RI","RETENTIONINDEX","KOVATSRI","KOVATSINDEX","RIUNKNOWN")|
+  ri<-which(keys%in%c("RI","RETENTIONINDEX","KOVATSRI","KOVATSINDEX","RIUNKNOWN","SEMISTDNP","STDNP","STDPOLAR")|
     grepl("^(RETENTIONINDEX|KOVATS|RI(DB|STANDARD|SEMI))",keys))
+  ri<-ri[!duplicated(paste(keys[ri],trimws(values[ri]),sep="\r"))]
   indices<-lapply(ri,function(i) {
     number<-suppressWarnings(as.numeric(sub("^.*?([0-9]+(?:\\.[0-9]+)?).*$","\\1",values[i],perl=TRUE)))
     if(!is.finite(number)||number<=0) return(NULL)
     column<-field(c("COLUMN","COLUMNNAME","COLUMNPHASE","STATIONARYPHASE","GCCOLUMN"))
     label<-paste(tags[i],values[i]);compact<-toupper(gsub("[^[:alnum:]]","",label))
-    phase<-if(grepl("DBWAX|STANDARDPOLAR|PEG|CARBOWAX",compact)) "DBWAX" else
-      if(grepl("DB5|SEMISTANDARDNONPOLAR|5MS",compact)) "DB5" else
-      if(grepl("DB1|STANDARDNONPOLAR",compact)) "DB1" else "unknown"
+    phase<-if(grepl("DBWAX|STANDARDPOLAR|STDPOLAR|PEG|CARBOWAX",compact)) "DBWAX" else
+      if(grepl("DB5|SEMISTANDARDNONPOLAR|SEMISTDNP|5MS",compact)) "DB5" else
+      if(grepl("DB1|STANDARDNONPOLAR|STDNP",compact)) "DB1" else "unknown"
     if(phase=="unknown"&&!is.na(column)) {
       compact<-toupper(gsub("[^[:alnum:]]","",column))
-      phase<-if(grepl("DBWAX|STANDARDPOLAR|PEG|CARBOWAX",compact)) "DBWAX" else
-        if(grepl("DB5|SEMISTANDARDNONPOLAR|5MS",compact)) "DB5" else
-        if(grepl("DB1|STANDARDNONPOLAR",compact)) "DB1" else "unknown"
+      phase<-if(grepl("DBWAX|STANDARDPOLAR|STDPOLAR|PEG|CARBOWAX",compact)) "DBWAX" else
+        if(grepl("DB5|SEMISTANDARDNONPOLAR|SEMISTDNP|5MS",compact)) "DB5" else
+        if(grepl("DB1|STANDARDNONPOLAR|STDNP",compact)) "DB1" else "unknown"
     }
     data.frame(id=as.integer(id),value=number,phase_class=phase,
       column=if(is.na(column)) tags[i] else paste(tags[i],column,sep="; "),
@@ -95,6 +104,8 @@ library_record <- function(x,id,source,encoding,origin) {
 #'   Existing databases are never overwritten. No live connection is serialized.
 #'
 #'   Retention indices retain their raw field, phase class and provenance.
+#'   NIST/OpenChrom comment summaries SemiStdNP, StdNP and StdPolar map to
+#'   DB5, DB1 and DBWAX; slash-delimited uncertainty fields remain in the raw value.
 #'   DB1, DB5 and DBWAX denote nonpolar, semi-standard nonpolar and polar classes;
 #'   a separate column/stationary-phase field also supplies the RI phase class.
 #'   An unspecified column remains unknown. Zero RI placeholders are omitted from
