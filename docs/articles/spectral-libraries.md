@@ -71,3 +71,10 @@ are assembled for subsequent analysis.
 Library matching and compound identification can build on this storage
 layer. The import functions expose both raw peaks and normalized sparse
 blocks for those analyses.
+
+## Search recovered spectra
+
+Use [RI calibration and spectral
+search](https://tomwenseleers.github.io/GCMSprime/articles/library-search.md)
+to identify recovered compounds with column-specific RI constraints,
+Stein–Scott similarity and symmetric multinomial distances.

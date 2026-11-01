@@ -1,0 +1,113 @@
+---
+title: "Identify compounds with spectra and retention indices"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Identify compounds with spectra and retention indices}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+GCMSprime searches recovered spectra directly, preserving the fitted ion totals and using retention indices (RIs) to exclude incompatible candidates. A compiled sparse search compares hundreds of spectra against thousands of references in a fraction of a second. The same workflow supports sparse in-memory libraries and large SQLite libraries.
+
+## One call after deconvolution
+
+```{r, eval=FALSE}
+library(GCMSprime)
+lib <- read_msp("library.msp", backend="sqlite", db_file="library.sqlite")
+cal <- calibrate_ri("alkanes.cdf", carbon=7:23)
+
+identified <- identify_compounds(fit, lib, calibration=cal,
+  phase="DB5", ri_tolerance=30, n_matches=5,
+  method=c("stein_scott", "hellinger"),
+  msp_file="sample_identified.msp", xlsx_file="sample_identified.xlsx")
+
+identified$compounds
+identified$identification$matches
+```
+
+The first method supplies the best-match columns in the compound table. Every returned match, its spectral score, RI difference, reference provenance and ion totals are included in the Excel Matches sheet. MSP output retains unique peak names, the RI, fitted pseudocount and tentative library annotation. Profiles, spectra and the model objective stay unchanged.
+
+Identification can also run during the CDF workflow:
+
+```{r, eval=FALSE}
+fit <- GCMSdeco("sample.cdf", "sample.msp", xlsx_file="sample.xlsx",
+  alkanes_file="alkanes.cdf", precluster=32L, library=lib,
+  search=list(phase="DB5", ri_tolerance=30, n_matches=5,
+              method="stein_scott"))
+```
+
+## Alkane identification and RI calibration
+
+The standard is identified using the alkyl-fragment series at m/z 43, 57, 71, 85, 99 and 113, together with the molecular ion at \(M=14c+2\) for an n-alkane with \(c\) carbons. The molecular-ion signal is corrected for the carbon-13 isotope contribution of the neighbouring alkyl ion. Minimum molecular-ion evidence and fragment-series abundance screen candidates; a maximum-weight increasing carbon-number sequence resolves duplicate maxima and inconsistent assignments. Supply the known carbon range when available. All candidates and their acceptance decisions are retained for inspection.
+
+The retention coordinate follows
+
+\[
+t^\star=t_{\mathrm{onset}}+\frac{w_{\mathrm{small}}(t_{\mathrm{onset}})}2.
+\]
+
+Onset is the leading crossing at 1% of the background-corrected peak height. A smooth local lower envelope of the standard peak widths estimates the duration of a small peak. This reduces the influence of overloaded or tailing peaks on the retention coordinate. Both standard peaks and recovered sample profiles use this timing convention. The relative-height fraction is configurable through `control=list(fraction=.01)`.
+
+A smoothing spline maps \(t^\star_c\) to \(100c\); monotone interpolation through its fitted anchor values preserves the chromatographic ordering. Smoothing is selected by GCV unless `spar` is supplied. Predictions outside the accepted standard range remain unassigned by default. Verified anchors can be supplied directly, including a `narrow_width` column when timing fitted profiles.
+
+```{r, eval=FALSE}
+cal$anchors[, c("carbon", "apex", "start", "narrow_width",
+                 "retention_time", "RI", "residual")]
+cal$candidates
+predict(cal, c(10, 20, 30))
+```
+
+This smooth calibration extends the alkane-index construction of [van den Dool & Kratz (1963)](https://doi.org/10.1016/S0021-9673(01)80947-X). [NIST describes the standard RI conventions](https://webbook.nist.gov/chemistry/gc-ri/). Use a ladder acquired with the sample's column and chromatographic programme.
+
+## Column-specific retention constraints
+
+`phase="DB1"`, `"DB5"` and `"DBWAX"` select nonpolar, semi-standard nonpolar and polar RI classes. Only references satisfying
+
+\[
+|I_{\mathrm{sample}}-I_{\mathrm{reference}}|\leq\texttt{ri\_tolerance}
+\]
+
+are scored. The closest RI measurement is used when a reference has several measurements on the selected phase class. Predicted RI records retain their provenance in the match table. Uncalibrated queries and spectra without eligible references remain visible in the query diagnostics.
+
+MSP exports sometimes contain RI values without a column class. These remain unassigned to a phase. If the library's documentation establishes their column class, pass, for example, `unknown_phase="DB5"` explicitly. `ri_tolerance=Inf` requests spectral-only searching. It is useful for evaluating spectral scores separately from RI filtering.
+
+## Spectral comparisons
+
+For acquired-bin ion vectors \(a,b\), let \(N=\sum a_j\), \(M=\sum b_j\), \(p=a/N\) and \(q=b/M\). Library peaks outside the query's acquired mass bins are excluded. All acquired bins, including those with zero query intensity, contribute to normalization.
+
+* **Stein–Scott** uses the squared cosine after transforming each ion to \(I^{0.6}(m/z)^3\), following [Stein & Scott (1994)](https://doi.org/10.1016/1044-0305(94)87009-8) and the comparison by [Kim et al. (2012)](https://doi.org/10.1093/bioinformatics/bts083).
+* **Cosine** uses the squared cosine of the unweighted intensities.
+* **Hellinger** uses \(H(p,q)=\sqrt{1-\sum_j\sqrt{p_jq_j}}\), a symmetric distance between multinomial probability vectors.
+* **Jensen–Shannon** uses \(\sqrt{\{D_{KL}(p\|r)+D_{KL}(q\|r)\}/(2\log2)}\), with \(r=(p+q)/2\).
+* **Multinomial deviance** uses the symmetric two-sample likelihood-ratio statistic
+
+\[
+D=2\left[N D_{KL}(p\|u)+M D_{KL}(q\|u)\right],\qquad
+u=\frac{a+b}{N+M}.
+\]
+
+The multinomial statistic retains the actual query and reference pseudocounts. Its response to library intensity scaling is useful when totals have comparable meaning; MSP relative intensities often have an arbitrary scale. Hellinger and equal-weight Jensen–Shannon compare spectral shape independently of that scale. `query_total`, `library_total` and `library_mass_coverage` record these conventions explicitly. For an L1-normalized matrix, supply its original totals through `pseudocount=`. A `GCMSdeco` fit supplies them automatically. Explicit `Pseudocount` or `Ion_total` tags in an MSP reference also preserve its original total through relative-intensity export and re-import.
+
+Scores are reported on a 0–1000 scale, with larger values better; distances are also returned. Compare scores within the same method. The Stein–Scott option implements the published weighted dot product.
+
+```{r, eval=FALSE}
+matches <- library_search(fit, lib, calibration=cal, phase="DB5",
+  ri_tolerance=30, method="all", n_matches=5, ncores=8)
+as.data.frame(matches)
+```
+
+## Which measure works best?
+
+A reproducible comparison used 250 held-out MoNA GC/MS records with different nominal spectral shapes from matching reference records, searched against 19,485 other records. Identity was assessed by full InChIKey or CAS. The query records were excluded from the reference catalogue. RI filtering was disabled to measure spectral discrimination directly.
+
+| Method | Correct first match | Correct within top five | Eight-core time |
+|:--|--:|--:|--:|
+| Stein–Scott | **61.6%** | 72.4% | 0.48 s |
+| Cosine | 55.6% | 66.4% | 0.39 s |
+| Hellinger | 58.8% | **75.2%** | 0.41 s |
+| Jensen–Shannon | 60.0% | 74.4% | 1.06 s |
+| Multinomial deviance | 33.6% | 40.0% | 1.02 s |
+
+Stein–Scott is the default because it gave the best first-match performance in this comparison. Hellinger is a useful complementary ranking. The count-sensitive statistic favoured some references with small arbitrary totals and performed less well. A separate 200-spectrum multinomial sampling check, using column-labelled GCMS-ID references and a ±30 RI filter, recovered 99.5–100% of first matches at 100 counts and 100% at 1,000 and 10,000 counts. That check measures sampling noise around a fixed reference shape; the independent-record comparison also reflects variation between stored spectra.
+
+The benchmark script is in `benchmarks/library_search.R`. Timings include preparing and searching the imported library, on an HP ZBook Fury G8 with an Intel i9-11950H and eight physical cores. SQLite queries filter the RI table first and load eligible spectral blobs in bounded batches. Native OpenMP workers process queries independently; rankings are identical with one or eight threads.

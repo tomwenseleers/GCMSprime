@@ -21,6 +21,7 @@ OpenChrom Agilent and Shimadzu exports and MoNA/Golm MSP fields are accepted."><
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/gcms-deconvolution.html">GC/MS deconvolution</a></li>
+    <li><a class="dropdown-item" href="../articles/library-search.html">Identify compounds with spectra and retention indices</a></li>
     <li><a class="dropdown-item" href="../articles/spectral-libraries.html">Spectral libraries: import and storage</a></li>
   </ul></li>
 <li class="nav-item"><a class="external-link nav-link" href="https://tomwenseleers.github.io/L0nmf/articles/log-concave-nmf.html">Algorithm &amp; theory</a></li>
@@ -131,6 +132,8 @@ uses a new file beside the MSP when this is omitted.</p></dd>
   fields remain available through library_metadata(raw=TRUE). Raw masses and
   intensities are retained as double precision arrays. Sparse matrix extraction
   sums duplicate masses; nominal binning and normalization are explicit options.
+  Explicit Pseudocount/Ion_total tags retain a supplied full-spectrum total;
+  library_search uses it for count-sensitive comparisons without changing raw peaks.
   In-memory libraries store a dgCMatrix plus compact metadata. Exceptional
   unsorted, duplicate or zero-intensity peak records retain exact raw arrays.</p>
 <p>SQLite stores one pair of little-endian float64 blobs per spectrum, indexed
@@ -139,7 +142,8 @@ uses a new file beside the MSP when this is omitted.</p></dd>
   Existing databases are never overwritten. No live connection is serialized.</p>
 <p>Retention indices retain their raw field, phase class and provenance.
   DB1, DB5 and DBWAX denote nonpolar, semi-standard nonpolar and polar classes;
-  an unspecified column remains unknown. Zero RI placeholders are omitted from
+  a separate column/stationary-phase field also supplies the RI phase class.
+  An unspecified column remains unknown. Zero RI placeholders are omitted from
   the index table. Supplied SMILES are preserved without chemical canonicalization.</p>
     </div>
 

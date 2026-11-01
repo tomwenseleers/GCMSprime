@@ -37,3 +37,7 @@ SQLite stores indexed metadata, a separate retention-index table and one pair of
 A nominal-mass `dgCMatrix` requires approximately \(12q+4(N+1)\) bytes for \(q\) nonzero peaks across \(N\) spectra, excluding metadata. For one million spectra with 80 nonzero peaks each this is about 964 MB; a dense matrix with 1,200 mass rows would require about 9.6 GB. SQLite allows raw high-resolution peaks and metadata to remain on disk while matrix blocks are assembled for subsequent analysis.
 
 Library matching and compound identification can build on this storage layer. The import functions expose both raw peaks and normalized sparse blocks for those analyses.
+
+## Search recovered spectra
+
+Use [RI calibration and spectral search](library-search.html) to identify recovered compounds with column-specific RI constraints, Stein–Scott similarity and symmetric multinomial distances.

@@ -61,6 +61,8 @@ MSP tags are case-insensitive. Repeated tags, synonyms and unknown
   fields remain available through library_metadata(raw=TRUE). Raw masses and
   intensities are retained as double precision arrays. Sparse matrix extraction
   sums duplicate masses; nominal binning and normalization are explicit options.
+  Explicit Pseudocount/Ion_total tags retain a supplied full-spectrum total;
+  library_search uses it for count-sensitive comparisons without changing raw peaks.
   In-memory libraries store a dgCMatrix plus compact metadata. Exceptional
   unsorted, duplicate or zero-intensity peak records retain exact raw arrays.
 
@@ -71,7 +73,8 @@ MSP tags are case-insensitive. Repeated tags, synonyms and unknown
 
   Retention indices retain their raw field, phase class and provenance.
   DB1, DB5 and DBWAX denote nonpolar, semi-standard nonpolar and polar classes;
-  an unspecified column remains unknown. Zero RI placeholders are omitted from
+  a separate column/stationary-phase field also supplies the RI phase class.
+  An unspecified column remains unknown. Zero RI placeholders are omitted from
   the index table. Supplied SMILES are preserved without chemical canonicalization.
 }
 \examples{

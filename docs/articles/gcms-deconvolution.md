@@ -346,3 +346,10 @@ likelihood acceptance rules.
 The experimental data are described in [Van Oystaeyen et
 al. (2014)](https://doi.org/10.1126/science.1244899) and [Schreurs et
 al. (2024)](https://doi.org/10.1038/s41467-024-46346-0).
+
+## Identify the recovered compounds
+
+[Alkane calibration and library
+search](https://tomwenseleers.github.io/GCMSprime/articles/library-search.md)
+add retention indices, ranked spectral matches and annotations to the
+Excel and MSP reports without refitting the chromatogram.

@@ -1,0 +1,121 @@
+# Calibrate retention indices from an n-alkane standard
+
+Identify a homologous alkane series using diagnostic ions and fit a
+smooth, monotone retention-time calibration. The retention coordinate
+uses peak onset plus half a local narrow-peak duration, reducing the
+influence of tailing.
+
+## Usage
+
+``` r
+calibrate_ri(
+  standard = NULL,
+  time = NULL,
+  carbon = 7:40,
+  anchors = NULL,
+  spar = NULL,
+  control = list()
+)
+
+# S3 method for class 'RIcalibration'
+predict(object, newdata, extrapolate = FALSE, ...)
+
+# S3 method for class 'RIcalibration'
+print(x, ...)
+```
+
+## Arguments
+
+- standard:
+
+  ANDI-MS CDF path, scan-by-mass matrix, or list with Y and time.
+
+- time:
+
+  Increasing scan times in minutes for matrix input.
+
+- carbon:
+
+  Permitted carbon numbers, default 7:40. The molecular ion must lie
+  within the acquired mass range. Supply the known standard range when
+  available.
+
+- anchors:
+
+  Optional data frame with carbon and retention_time columns, supplying
+  verified calibration coordinates directly. An optional narrow_width
+  column supplies local small-peak durations for timing sample profiles.
+
+- spar:
+
+  Smoothing-spline smoothing parameter; NULL selects it by GCV.
+
+- control:
+
+  Named calibration controls, described below.
+
+- object:
+
+  A fitted RIcalibration.
+
+- newdata:
+
+  Retention coordinates in minutes.
+
+- extrapolate:
+
+  Use linear continuation outside the calibration range. FALSE returns
+  NA outside the range.
+
+- ...:
+
+  Additional method arguments.
+
+- x:
+
+  An RIcalibration object.
+
+## Value
+
+An RIcalibration object with accepted anchors, all candidate
+diagnostics, fitted spline, local narrow-peak widths and timing
+convention.
+
+## Details
+
+For an alkane with c carbon atoms the nominal molecular ion is 14c+2.
+Its excess above the carbon-13 isotope contribution of the adjacent
+alkyl ion is used with the 43, 57, 71, 85, 99 and 113 fragment series.
+Candidate anchors must have a coherent saturated-hydrocarbon spectrum. A
+maximum-weight increasing carbon-number sequence removes duplicate
+maxima and inconsistent assignments. Solvent-range C6 is excluded by
+default.
+
+Peak onset and duration use a relative-height fraction of 0.01 by
+default. A local lower envelope of standard peak durations estimates the
+duration of a small peak. Both standards and sample profiles use t_star
+= onset + narrow_width/2. A smoothing spline maps t_star to 100c; a
+monotone cubic interpolation through its fitted anchor values prevents
+local reversals. Extrapolation is disabled by default in predict().
+
+control accepts fraction, baseline_window (minutes), min_separation
+(minutes), min_relative, min_molecular_fraction, min_molecular_ratio,
+min_alkane_fraction and width_quantile. The returned anchor table
+includes the molecular-ion evidence and calibration residuals for
+inspection. Explicit anchors bypass automatic assignment and use their
+supplied timing.
+
+## References
+
+van den Dool, H. and Kratz, P. D. (1963), J. Chromatogr. 11, 463–471,
+doi:10.1016/S0021-9673(01)80947-X.
+\<https://webbook.nist.gov/chemistry/gc-ri/\>
+
+## Examples
+
+``` r
+a <- data.frame(carbon=8:15, retention_time=c(3,4,5.2,6.7,8.5,10.6,13,15.7))
+cal <- calibrate_ri(anchors=a)
+predict(cal, c(5,10))
+cal
+```

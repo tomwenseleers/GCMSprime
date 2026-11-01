@@ -1,17 +1,18 @@
 search_methods <- c("stein_scott","cosine","hellinger","jensen_shannon","multinomial")
 
-search_queries <- function(x,calibration,ri,pseudocount,extrapolate) {
+search_queries <- function(x,calibration,ri,pseudocount,extrapolate,require_ri=TRUE) {
   fit<-inherits(x,"GCMSdeco")
   S<-if(fit) as.matrix(x$model$S[x$compounds$compound,,drop=FALSE]) else as.matrix(x)
   mass<-if(fit) x$mass else suppressWarnings(as.numeric(colnames(S)))
   if(!is.numeric(S)||!ncol(S)||any(!is.finite(S)|S<0)||length(mass)!=ncol(S)||
       any(!is.finite(mass)|mass<=0)) stop("Use a nonnegative compound-by-mass matrix with numeric mass names.")
   # Nominal bins match ANDI-MS import; retain all acquired bins, including zeros.
-  mass<-round(mass)
+  mass<-round(mass);colnames(S)<-as.character(mass)
   if(anyDuplicated(mass)) S<-t(rowsum(t(S),mass,reorder=TRUE))
   mass<-sort(unique(mass));S<-S[,order(as.numeric(colnames(S))),drop=FALSE]
   colnames(S)<-as.character(mass)
   total<-rowSums(S)
+  if(any(!is.finite(total))) stop("Spectrum totals must be finite.")
   if(!is.null(pseudocount)) {
     if(!is.numeric(pseudocount)||!length(pseudocount)%in%c(1L,nrow(S))||
         any(!is.finite(pseudocount)|pseudocount<=0)||any(total<=0)) stop("pseudocount must be positive for every nonempty spectrum.")
@@ -26,6 +27,8 @@ search_queries <- function(x,calibration,ri,pseudocount,extrapolate) {
     q$query_RI<-ri
   } else if(fit) {
     if(is.null(calibration)&&!is.null(x$alkanes_file)) calibration<-calibrate_ri(x$alkanes_file)
+    if(!require_ri&&(!inherits(calibration,"RIcalibration")||is.null(calibration$width_curve)))
+      return(list(S=S,mass=mass,queries=q,calibration=calibration))
     if(!inherits(calibration,"RIcalibration")) stop("Supply an RI calibration, alkane file in the fitted object, or explicit ri values.")
     if(is.null(calibration$width_curve)) stop("Calibration requires narrow_width values for timing profiles; alternatively supply query ri.")
     q$peak_onset<-vapply(seq_len(ncol(x$model$H)),function(j)
@@ -53,15 +56,21 @@ search_ri <- function(library,con,phase,unknown_phase,range) {
 search_matrix <- function(library,con,ids,mass) {
   if(is.null(con)) {
     a<-library$matrix[,ids,drop=FALSE];raw_total<-as.numeric(Matrix::colSums(a))
+    count<-library$metadata$pseudocount[match(ids,library$metadata$id)]
     i<-match(round(library$mass),mass);j<-rep.int(seq_along(ids),diff(a@p))
     valid<-!is.na(i[a@i+1L]);ii<-i[a@i[valid]+1L];jj<-j[valid];xx<-a@x[valid]
   } else {
-    a<-DBI::dbGetQuery(con,paste0("SELECT id,mass,intensity FROM spectra WHERE id IN (",paste(ids,collapse=","),") ORDER BY id"))
-    a<-a[match(ids,a$id),,drop=FALSE]
+    fields<-if("pseudocount"%in%DBI::dbListFields(con,"spectra")) ",pseudocount" else ""
+    a<-DBI::dbGetQuery(con,paste0("SELECT id,mass,intensity",fields," FROM spectra WHERE id IN (",paste(ids,collapse=","),") ORDER BY id"))
+    a<-a[match(ids,a$id),,drop=FALSE];count<-a$pseudocount
     mz<-lapply(a$mass,library_decode);intensity<-lapply(a$intensity,library_decode)
     raw_total<-vapply(intensity,sum,0.);i<-match(round(unlist(mz,use.names=FALSE)),mass)
     j<-rep.int(seq_along(ids),lengths(mz));x<-unlist(intensity,use.names=FALSE)
     valid<-!is.na(i);ii<-i[valid];jj<-j[valid];xx<-x[valid]
+  }
+  if(length(count)) {
+    scale<-ifelse(is.finite(count)&count>0&raw_total>0,count/pmax(raw_total,.Machine$double.xmin),1)
+    xx<-xx*scale[jj];raw_total<-raw_total*scale
   }
   list(matrix=Matrix::sparseMatrix(i=ii,j=jj,x=xx,dims=c(length(mass),length(ids))),raw_total=raw_total)
 }
@@ -113,7 +122,8 @@ search_matrix <- function(library,con,ids,mass) {
 #'   squared cosine, Bhattacharyya coefficient, 1-normalized-JS, and 1/(1+deviance),
 #'   respectively. Compare scores within a method. The returned distance is the
 #'   quantity minimized in ranking. Relative library intensities are pseudocounts;
-#'   their arbitrary scale affects multinomial deviance. Hellinger and equal-weight
+#'   their arbitrary scale affects multinomial deviance. An explicit library
+#'   Pseudocount/Ion_total tag supplies the original total when available. Hellinger and equal-weight
 #'   Jensen--Shannon compare shapes independently of that scale. query_total,
 #'   library_total and library_mass_coverage make the count and acquisition conventions explicit.
 #'
@@ -142,14 +152,14 @@ library_search <- function(x,library,calibration=NULL,ri=NULL,phase=c("DB5","DB1
   if(identical(method,"all")) method<-search_methods
   if(!is.character(method)||!length(method)||any(!method%in%search_methods)) stop("Unknown spectral scoring method.")
   method<-unique(method)
-  integer_option<-function(z) is.numeric(z)&&length(z)==1L&&is.finite(z)&&z>=1&&z==floor(z)
+  integer_option<-function(z) is.numeric(z)&&length(z)==1L&&is.finite(z)&&z>=1&&z<=.Machine$integer.max&&z==floor(z)
   if(!integer_option(n_matches)||!integer_option(batch_size)) stop("Use positive integer n_matches and batch_size.")
   if(!is.numeric(ri_tolerance)||length(ri_tolerance)!=1L||is.na(ri_tolerance)||ri_tolerance<0) stop("ri_tolerance must be nonnegative.")
   if(!is.null(unknown_phase)&&!identical(unknown_phase,phase)) stop("unknown_phase must be NULL or the chosen phase.")
   if(is.null(ncores)) ncores<-parallel::detectCores(logical=FALSE)
   if(is.na(ncores)) ncores<-1L
   if(!integer_option(ncores)) stop("ncores must be a positive integer.")
-  query<-search_queries(x,calibration,ri,pseudocount,extrapolate)
+  query<-search_queries(x,calibration,ri,pseudocount,extrapolate,is.finite(ri_tolerance))
   if(nrow(query$queries)&&is.finite(ri_tolerance)&&all(is.na(query$queries$query_RI)))
     warning("No query RI is available; constrained matches remain unassigned.",call.=FALSE)
   con<-if(library$backend=="sqlite") library_connect(library) else NULL
@@ -186,6 +196,7 @@ library_search <- function(x,library,calibration=NULL,ri=NULL,phase=c("DB5","DB1
     for(nm in intersect(c("name","cas","inchikey","source","source_id","origin"),names(meta))) hits[[nm]]<-meta[[nm]][a]
     nearest<-match(paste(hits$library_id,hits$library_RI),paste(indices$id,indices$value))
     hits$ri_phase<-indices$phase_class[nearest]
+    hits$ri_assumed<-!is.na(hits$ri_phase)&hits$ri_phase=="unknown"&!is.null(unknown_phase)
     hits$ri_origin<-if('origin'%in%names(indices)) indices$origin[nearest] else NA_character_
     hits$ri_source<-if('source'%in%names(indices)) indices$source[nearest] else NA_character_
     hits$query_total<-query$queries$query_total[hits$query]
@@ -196,7 +207,7 @@ library_search <- function(x,library,calibration=NULL,ri=NULL,phase=c("DB5","DB1
   } else hits$method<-character()
   query$queries$status<-ifelse(query$queries$query_total<=0,"empty_spectrum",
     ifelse(is.finite(ri_tolerance)&is.na(query$queries$query_RI),"uncalibrated",
-      ifelse(query$queries$query%in%hits$query,"matched","no_RI_eligible_reference")))
+      ifelse(query$queries$query%in%hits$query,"matched","no_eligible_reference")))
   structure(list(matches=hits,queries=query$queries,calibration=query$calibration,
     settings=list(phase=phase,ri_tolerance=ri_tolerance,method=method,unknown_phase=unknown_phase,
       ncores=ncores,n_matches=n_matches,mass=query$mass),

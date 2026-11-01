@@ -8,6 +8,9 @@
   Separate overlapping compounds into log-concave elution profiles and
   full mass spectra.
 
+- [Identify compounds with spectra and retention
+  indices](https://tomwenseleers.github.io/GCMSprime/articles/library-search.md):
+
 - [Spectral libraries: import and
   storage](https://tomwenseleers.github.io/GCMSprime/articles/spectral-libraries.md):
 

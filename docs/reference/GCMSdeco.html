@@ -25,6 +25,7 @@ are retained in the final spectra."></head><body>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/gcms-deconvolution.html">GC/MS deconvolution</a></li>
+    <li><a class="dropdown-item" href="../articles/library-search.html">Identify compounds with spectra and retention indices</a></li>
     <li><a class="dropdown-item" href="../articles/spectral-libraries.html">Spectral libraries: import and storage</a></li>
   </ul></li>
 <li class="nav-item"><a class="external-link nav-link" href="https://tomwenseleers.github.io/L0nmf/articles/log-concave-nmf.html">Algorithm &amp; theory</a></li>
@@ -83,7 +84,9 @@ are retained in the final spectra.</p>
 <span>  psf_control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  xlsx_file <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  sample_name <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  sample_name <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  library <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  search <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'GCMSdeco'</span></span>
@@ -279,6 +282,17 @@ the optional <span class="pkg">openxlsx</span> package. <code>NULL</code> omits 
 <dt id="arg-sample-name">sample_name<a class="anchor" aria-label="anchor" href="#arg-sample-name"></a></dt>
 <dd><p>Sample identifier, defaulting to the CDF filename without
 its extension. Included in the compound table, MSP entries and workbook.</p></dd>
+
+
+<dt id="arg-library">library<a class="anchor" aria-label="anchor" href="#arg-library"></a></dt>
+<dd><p>Optional GCMSlibrary for retention-index-constrained identification.</p></dd>
+
+
+<dt id="arg-search">search<a class="anchor" aria-label="anchor" href="#arg-search"></a></dt>
+<dd><p>Named options for library_search(), such as phase="DB5",
+ri_tolerance=30, n_matches=5 and method="stein_scott". The alkane file supplies
+RI calibration automatically; a precomputed calibration can be supplied here.
+Identification is stored in the returned object and included in MSP/Excel exports.</p></dd>
 
 
 <dt id="arg-normalize">normalize<a class="anchor" aria-label="anchor" href="#arg-normalize"></a></dt>

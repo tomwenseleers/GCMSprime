@@ -2,6 +2,10 @@
 
 ## All functions
 
+- [`calibrate_ri()`](https://tomwenseleers.github.io/GCMSprime/reference/calibrate_ri.md)
+  [`predict(`*`<RIcalibration>`*`)`](https://tomwenseleers.github.io/GCMSprime/reference/calibrate_ri.md)
+  [`print(`*`<RIcalibration>`*`)`](https://tomwenseleers.github.io/GCMSprime/reference/calibrate_ri.md)
+  : Calibrate retention indices from an n-alkane standard
 - [`residuals(`*`<GCMSdeco>`*`)`](https://tomwenseleers.github.io/GCMSprime/reference/GCMSdeco.md)
   [`GCMSdeco()`](https://tomwenseleers.github.io/GCMSprime/reference/GCMSdeco.md)
   [`coef(`*`<GCMSdeco>`*`)`](https://tomwenseleers.github.io/GCMSprime/reference/GCMSdeco.md)
@@ -15,8 +19,15 @@
   [`MBIC(`*`<GCMSdeco>`*`)`](https://tomwenseleers.github.io/GCMSprime/reference/GCMSdeco.md)
   [`print(`*`<GCMSdeco>`*`)`](https://tomwenseleers.github.io/GCMSprime/reference/GCMSdeco.md)
   : Deconvolve a GC/MS chromatogram and export its compound spectra
+- [`identify_compounds()`](https://tomwenseleers.github.io/GCMSprime/reference/identify_compounds.md)
+  : Annotate recovered GC/MS compounds and export library matches
 - [`library_metadata()`](https://tomwenseleers.github.io/GCMSprime/reference/library_metadata.md)
   : Inspect spectral-library metadata
+- [`library_search()`](https://tomwenseleers.github.io/GCMSprime/reference/library_search.md)
+  [`as.data.frame(`*`<GCMSmatches>`*`)`](https://tomwenseleers.github.io/GCMSprime/reference/library_search.md)
+  [`print(`*`<GCMSmatches>`*`)`](https://tomwenseleers.github.io/GCMSprime/reference/library_search.md)
+  : Identify deconvoluted spectra using retention indices and spectral
+  libraries
 - [`plot(`*`<GCMSdeco>`*`)`](https://tomwenseleers.github.io/GCMSprime/reference/plot.GCMSdeco.md)
   : Plot GC/MS signals, compound profiles and recovered spectra
 - [`read_gcms_id()`](https://tomwenseleers.github.io/GCMSprime/reference/read_gcms_id.md)

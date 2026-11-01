@@ -74,3 +74,78 @@ test_that("count deviance is symmetric and shape metrics ignore intensity scales
     read_msp(f),ri_tolerance=Inf,method="multinomial")
   expect_equal(reverse$matches$distance,z$matches$distance[z$matches$method=="multinomial"&z$matches$library_id==1],tolerance=1e-7)
 })
+
+test_that("fit annotation preserves factors, orders compounds and exports all matches", {
+  a<-search_fixture();time<-seq(0,5,length.out=501)
+  H<-cbind(exp(-.5*((time-3)/.05)^2),exp(-.5*((time-1)/.05)^2))
+  H<-sweep(H,2,colSums(H),'/')
+  S<-rbind(c(100,50,20,0),c(0,70,0,50))
+  model<-list(H=H,S=S,spec=list(name="poisson",dispersion=1,theta=1))
+  x<-structure(list(model=model,time=time,mass=c(43,57,71,91),seconds=c(total=1),
+    compounds=GCMSprime:::GCMS_compounds(model,time,"test"),cdf_file="test.cdf",sample_name="test"),class="GCMSdeco")
+  expect_equal(x$compounds$compound,c(2L,1L))
+  unconstrained<-library_search(x,a$lib,ri_tolerance=Inf)
+  expect_true(nrow(unconstrained$matches)>0)
+  out<-tempfile(fileext=".msp")
+  excel<-if(requireNamespace("openxlsx",quietly=TRUE)) tempfile(fileext=".xlsx") else NULL
+  z<-identify_compounds(x,a$lib,ri=c(1020,1000),n_matches=2,method="all",msp_file=out,xlsx_file=excel)
+  expect_identical(z$model,x$model)
+  expect_equal(z$compounds$match_library_id,c(2L,1L))
+  expect_equal(z$compounds$match_score,c(1000,1000),tolerance=1e-6)
+  expect_equal(z$compounds$retention_index,c(1020,1000))
+  expect_match(paste(readLines(out,warn=FALSE),collapse="\n"),"RI_DB5: 1020")
+  expect_match(paste(readLines(out,warn=FALSE),collapse="\n"),"Pseudocount: 120")
+  if(!is.null(excel)) {
+    expect_true(all(c("Compounds","Run","Matches")%in%openxlsx::getSheetNames(excel)))
+    expect_equal(nrow(openxlsx::read.xlsx(excel,sheet="Matches")),20L)
+  }
+  cal<-calibrate_ri(anchors=data.frame(carbon=7:12,retention_time=0:5,narrow_width=.3))
+  z<-library_search(x,a$lib,calibration=cal,ri_tolerance=Inf)
+  expected<-vapply(c(2,1),function(j) GCMSprime:::ri_crossings(time,H[,j],which.max(H[,j]),.01)[['start']],0.)+.15
+  expect_equal(z$queries$retention_coordinate,unname(expected))
+  expect_equal(z$queries$query_RI,as.numeric(predict(cal,expected)))
+})
+
+test_that("combined deconvolution and identification works without changing the fit", {
+  skip_if_not_installed("ncdf4")
+  n<-80;kernel<-convkernel("gaussian",11L,list(sigma=1.2));X<-convmatrix(kernel,n)
+  Y<-as.matrix(X[,c(20,60)]%*%rbind(c(700,300,50,0),c(0,500,100,400)))+3
+  Y<-round(Y);colnames(Y)<-40:43;rownames(Y)<-seq_len(n)/60
+  file<-tempfile(fileext=".cdf");write_GCMS_cdf(Y,file,time=seq_len(n)/60,mass=40:43)
+  a<-search_fixture();out<-tempfile(fileext=".msp")
+  cal<-calibrate_ri(anchors=data.frame(carbon=7:10,retention_time=c(0,.5,1,1.5),narrow_width=.1))
+  common<-list(cdf_file=file,msp_file=out,family=poisson("identity"),nwindows=1L,baseline_df=4L,
+    precluster=2L,ncores=1L,psf_control=list(kernel_est=kernel,maxiter=1L),
+    control=list(broad_repeats=0L,full_sweeps=0L,final_polishes=0L))
+  plain<-do.call(GCMSdeco,common)
+  z<-do.call(GCMSdeco,c(common,list(library=a$lib,search=list(calibration=cal,ri_tolerance=300))))
+  expect_s3_class(z$identification,"GCMSmatches")
+  expect_identical(plain$model$H,z$model$H);expect_identical(plain$model$S,z$model$S)
+  expect_equal(GIC(plain),GIC(z))
+  expect_true("retention_index"%in%names(z$compounds))
+  expect_error(GCMSdeco(file,out,search=list(phase="DB5")),"Supply library")
+})
+
+test_that("separate column metadata supplies the RI phase", {
+  f<-tempfile(fileext=".msp")
+  writeLines(c("Name: A","Column: DB-5ms","Retention_index: 1100","RI_DB1: 1090",
+    "Num Peaks: 1","43 100;"),f)
+  r<-retention_indices(read_msp(f))
+  expect_equal(r$phase_class,c("DB5","DB1"))
+})
+
+test_that("explicit reference totals survive relative-intensity MSP export", {
+  for(backend in c("memory","sqlite")) {
+    if(backend=="sqlite"&&!requireNamespace("RSQLite",quietly=TRUE)) next
+    f<-tempfile(fileext=".msp")
+    writeLines(c("Name: count spectrum","Pseudocount: 5000","Num Peaks: 2","43 999;57 999;"),f)
+    lib<-read_msp(f,backend=backend,db_file=if(backend=="sqlite") tempfile(fileext=".sqlite") else NULL)
+    expect_equal(library_metadata(lib)$pseudocount,5000)
+    expect_equal(sum(spectra(lib)),1998) # source arrays remain exact
+    z<-library_search(matrix(c(250,250),1,dimnames=list(NULL,c(43,57))),lib,
+      ri_tolerance=Inf,method="multinomial")
+    expect_equal(z$matches$query_total,500)
+    expect_equal(z$matches$library_total,5000)
+    expect_equal(z$matches$distance,0,tolerance=1e-7)
+  }
+})

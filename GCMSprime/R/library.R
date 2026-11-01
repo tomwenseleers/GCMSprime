@@ -35,16 +35,26 @@ library_record <- function(x,id,source,encoding,origin) {
     inchikey=field(c("INCHIKEY","STDINCHIKEY")),smiles=field(c("SMILES","CANONICALSMILES")),
     license=field("LICENSE"),source=source,source_id=field(c("DB","ID","REFID","DBNUMBER","ACCESSION","SOURCEID")),
     origin=origin,source_line=x$line,npeaks=length(x$mass),stringsAsFactors=FALSE)
+  count<-suppressWarnings(as.numeric(field(c("PSEUDOCOUNT","IONTOTAL","TOTALIONCOUNT"))))
+  metadata$pseudocount<-if(length(count)==1L&&is.finite(count)&&count>0) count else NA_real_
   ri<-which(keys%in%c("RI","RETENTIONINDEX","KOVATSRI","KOVATSINDEX","RIUNKNOWN")|
     grepl("^(RETENTIONINDEX|KOVATS|RI(DB|STANDARD|SEMI))",keys))
   indices<-lapply(ri,function(i) {
     number<-suppressWarnings(as.numeric(sub("^.*?([0-9]+(?:\\.[0-9]+)?).*$","\\1",values[i],perl=TRUE)))
     if(!is.finite(number)||number<=0) return(NULL)
+    column<-field(c("COLUMN","COLUMNNAME","COLUMNPHASE","STATIONARYPHASE","GCCOLUMN"))
     label<-paste(tags[i],values[i]);compact<-toupper(gsub("[^[:alnum:]]","",label))
     phase<-if(grepl("DBWAX|STANDARDPOLAR|PEG|CARBOWAX",compact)) "DBWAX" else
       if(grepl("DB5|SEMISTANDARDNONPOLAR|5MS",compact)) "DB5" else
       if(grepl("DB1|STANDARDNONPOLAR",compact)) "DB1" else "unknown"
-    data.frame(id=as.integer(id),value=number,phase_class=phase,column=tags[i],
+    if(phase=="unknown"&&!is.na(column)) {
+      compact<-toupper(gsub("[^[:alnum:]]","",column))
+      phase<-if(grepl("DBWAX|STANDARDPOLAR|PEG|CARBOWAX",compact)) "DBWAX" else
+        if(grepl("DB5|SEMISTANDARDNONPOLAR|5MS",compact)) "DB5" else
+        if(grepl("DB1|STANDARDNONPOLAR",compact)) "DB1" else "unknown"
+    }
+    data.frame(id=as.integer(id),value=number,phase_class=phase,
+      column=if(is.na(column)) tags[i] else paste(tags[i],column,sep="; "),
       convention=if(grepl("KOVATS",compact)) "Kovats" else "unknown",
       origin=if(grepl("PREDICT",compact)||origin=="predicted") "predicted" else "unknown",
       source=source,raw=values[i],stringsAsFactors=FALSE)
@@ -74,6 +84,8 @@ library_record <- function(x,id,source,encoding,origin) {
 #'   fields remain available through library_metadata(raw=TRUE). Raw masses and
 #'   intensities are retained as double precision arrays. Sparse matrix extraction
 #'   sums duplicate masses; nominal binning and normalization are explicit options.
+#'   Explicit Pseudocount/Ion_total tags retain a supplied full-spectrum total;
+#'   library_search uses it for count-sensitive comparisons without changing raw peaks.
 #'   In-memory libraries store a dgCMatrix plus compact metadata. Exceptional
 #'   unsorted, duplicate or zero-intensity peak records retain exact raw arrays.
 #'
@@ -84,7 +96,8 @@ library_record <- function(x,id,source,encoding,origin) {
 #'
 #'   Retention indices retain their raw field, phase class and provenance.
 #'   DB1, DB5 and DBWAX denote nonpolar, semi-standard nonpolar and polar classes;
-#'   an unspecified column remains unknown. Zero RI placeholders are omitted from
+#'   a separate column/stationary-phase field also supplies the RI phase class.
+#'   An unspecified column remains unknown. Zero RI placeholders are omitted from
 #'   the index table. Supplied SMILES are preserved without chemical canonicalization.
 #' @examples
 #' f <- tempfile(fileext=".msp")
@@ -198,7 +211,8 @@ library_fetch <- function(x,which,peaks=FALSE) {
   }))
   if(!length(ids)) return(list())
   con<-library_connect(x);on.exit(DBI::dbDisconnect(con))
-  columns<-if(peaks) "*" else "id,name,formula,cas,inchi,inchikey,smiles,license,source,source_id,origin,source_line,npeaks,fields"
+  columns<-if(peaks) "*" else paste(DBI::dbQuoteIdentifier(con,
+    setdiff(DBI::dbListFields(con,"spectra"),c("mass","intensity"))),collapse=",")
   z<-DBI::dbGetQuery(con,paste0("SELECT ",columns," FROM spectra WHERE id IN (",paste(unique(ids),collapse=","),")"))
   z<-z[match(ids,z$id),,drop=FALSE]
   lapply(seq_along(ids),function(i) list(metadata=z[i,setdiff(names(z),c("mass","intensity","fields")),drop=FALSE],

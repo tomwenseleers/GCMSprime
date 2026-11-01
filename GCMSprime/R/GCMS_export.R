@@ -5,9 +5,9 @@ GCMS_xlsx_path <- function(path) {
   invisible(path)
 }
 
-GCMS_write_xlsx <- function(model,time,mass,compounds,path,cdf_file,alkanes_file,seconds) {
+GCMS_write_xlsx <- function(model,time,mass,compounds,path,cdf_file,alkanes_file,seconds,matches=NULL,calibration=NULL) {
   GCMS_xlsx_path(path)
-  wb<-openxlsx::createWorkbook(creator="L0glm")
+  wb<-openxlsx::createWorkbook(creator="GCMSprime")
   header<-openxlsx::createStyle(fgFill="#102d4d",fontColour="#FFFFFF",textDecoration="bold",
     fontSize=11,wrapText=TRUE,valign="center")
   compounds$Spectrum<-vapply(compounds$compound,function(k) {
@@ -29,6 +29,8 @@ GCMS_write_xlsx <- function(model,time,mass,compounds,path,cdf_file,alkanes_file
       if("total"%in%names(seconds)) seconds[["total"]] else sum(seconds)),
     stringsAsFactors=FALSE)
   tables<-list(Compounds=compounds,Run=metadata)
+  if(!is.null(matches)) tables$Matches<-matches
+  if(inherits(calibration,"RIcalibration")) tables$RI_calibration<-calibration$anchors
   for(name in names(tables)) {
     openxlsx::addWorksheet(wb,name,gridLines=FALSE)
     openxlsx::writeData(wb,name,tables[[name]],headerStyle=header,withFilter=name!="Run")

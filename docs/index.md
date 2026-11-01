@@ -77,6 +77,25 @@ retention_indices(lib, which=1:1000, phase="DB5")
 storage](https://tomwenseleers.github.io/GCMSprime/articles/spectral-libraries.md)
 covers OpenChrom MSP exports, MoNA/Golm MSP and GCMS-ID CSV predictions.
 
+## Identify recovered compounds
+
+Calibrate retention indices from a diagnostic-ion alkane ladder and
+combine column-specific RI constraints with fast spectral matching:
+
+``` r
+
+cal <- calibrate_ri("alkanes.cdf", carbon=7:23)
+identified <- identify_compounds(fit, lib, calibration=cal,
+  phase="DB5", ri_tolerance=30, n_matches=5,
+  method=c("stein_scott", "hellinger"),
+  msp_file="sample_identified.msp", xlsx_file="sample_identified.xlsx")
+```
+
+[RI calibration and library
+search](https://tomwenseleers.github.io/GCMSprime/articles/library-search.html)
+compares five similarity measures and explains the peak-onset timing
+convention, retained ion totals and scalable SQLite search.
+
 ## Citation and acknowledgements
 
 An article describing these methods is in preparation. Please cite the

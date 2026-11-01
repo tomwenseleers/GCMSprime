@@ -93,7 +93,8 @@ RI filtering precedes spectral scoring. Only the chosen phase class
   squared cosine, Bhattacharyya coefficient, 1-normalized-JS, and 1/(1+deviance),
   respectively. Compare scores within a method. The returned distance is the
   quantity minimized in ranking. Relative library intensities are pseudocounts;
-  their arbitrary scale affects multinomial deviance. Hellinger and equal-weight
+  their arbitrary scale affects multinomial deviance. An explicit library
+  Pseudocount/Ion_total tag supplies the original total when available. Hellinger and equal-weight
   Jensen--Shannon compare shapes independently of that scale. query_total,
   library_total and library_mass_coverage make the count and acquisition conventions explicit.
 

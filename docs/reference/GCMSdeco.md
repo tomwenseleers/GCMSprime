@@ -37,7 +37,9 @@ GCMSdeco(
   psf_control = list(),
   verbose = FALSE,
   xlsx_file = NULL,
-  sample_name = NULL
+  sample_name = NULL,
+  library = NULL,
+  search = list()
 )
 
 # S3 method for class 'GCMSdeco'
@@ -241,6 +243,18 @@ print(x, ...)
 
   Sample identifier, defaulting to the CDF filename without its
   extension. Included in the compound table, MSP entries and workbook.
+
+- library:
+
+  Optional GCMSlibrary for retention-index-constrained identification.
+
+- search:
+
+  Named options for library_search(), such as phase="DB5",
+  ri_tolerance=30, n_matches=5 and method="stein_scott". The alkane file
+  supplies RI calibration automatically; a precomputed calibration can
+  be supplied here. Identification is stored in the returned object and
+  included in MSP/Excel exports.
 
 - normalize:
 

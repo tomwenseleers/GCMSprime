@@ -38,6 +38,7 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="articles/gcms-deconvolution.html">GC/MS deconvolution</a></li>
+    <li><a class="dropdown-item" href="articles/library-search.html">Identify compounds with spectra and retention indices</a></li>
     <li><a class="dropdown-item" href="articles/spectral-libraries.html">Spectral libraries: import and storage</a></li>
   </ul>
 </li>
@@ -110,6 +111,18 @@ GC/MS deconvolution, full mass spectra and reproducible chromatographic reports.
 <span><span class="fu"><a href="reference/library_metadata.html">library_metadata</a></span><span class="op">(</span><span class="va">lib</span>, which<span class="op">=</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">)</span></span>
 <span><span class="fu"><a href="reference/retention_indices.html">retention_indices</a></span><span class="op">(</span><span class="va">lib</span>, which<span class="op">=</span><span class="fl">1</span><span class="op">:</span><span class="fl">1000</span>, phase<span class="op">=</span><span class="st">"DB5"</span><span class="op">)</span></span></code></pre></div>
 <p><a href="articles/spectral-libraries.html">Library formats and storage</a> covers OpenChrom MSP exports, MoNA/Golm MSP and GCMS-ID CSV predictions.</p>
+</div>
+<div class="section level2">
+<h2 id="identify-recovered-compounds">Identify recovered compounds<a class="anchor" aria-label="anchor" href="#identify-recovered-compounds"></a>
+</h2>
+<p>Calibrate retention indices from a diagnostic-ion alkane ladder and combine column-specific RI constraints with fast spectral matching:</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">cal</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/calibrate_ri.html">calibrate_ri</a></span><span class="op">(</span><span class="st">"alkanes.cdf"</span>, carbon<span class="op">=</span><span class="fl">7</span><span class="op">:</span><span class="fl">23</span><span class="op">)</span></span>
+<span><span class="va">identified</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/identify_compounds.html">identify_compounds</a></span><span class="op">(</span><span class="va">fit</span>, <span class="va">lib</span>, calibration<span class="op">=</span><span class="va">cal</span>,</span>
+<span>  phase<span class="op">=</span><span class="st">"DB5"</span>, ri_tolerance<span class="op">=</span><span class="fl">30</span>, n_matches<span class="op">=</span><span class="fl">5</span>,</span>
+<span>  method<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"stein_scott"</span>, <span class="st">"hellinger"</span><span class="op">)</span>,</span>
+<span>  msp_file<span class="op">=</span><span class="st">"sample_identified.msp"</span>, xlsx_file<span class="op">=</span><span class="st">"sample_identified.xlsx"</span><span class="op">)</span></span></code></pre></div>
+<p><a href="https://tomwenseleers.github.io/GCMSprime/articles/library-search.html">RI calibration and library search</a> compares five similarity measures and explains the peak-onset timing convention, retained ion totals and scalable SQLite search.</p>
 </div>
 <div class="section level2">
 <h2 id="citation-and-acknowledgements">Citation and acknowledgements<a class="anchor" aria-label="anchor" href="#citation-and-acknowledgements"></a>

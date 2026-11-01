@@ -81,7 +81,14 @@ GCMS_write_msp <- function(model,time,mass,msp_file,compounds=NULL) {
     k<-order[index];s<-model$S[k,];keep<-which(s>0)
     if(!length(keep)) stop("Cannot export an empty compound spectrum.",call.=FALSE)
     abundance<-999*s[keep]/max(s[keep])
-    c(paste0("Name: ",names[index]),
+    annotation<-character()
+    if('retention_index'%in%names(compounds)&&is.finite(compounds$retention_index[index]))
+      annotation<-c(annotation,sprintf("RI_%s: %.6f",compounds$ri_phase[index],compounds$retention_index[index]))
+    if('match_name'%in%names(compounds)&&!is.na(compounds$match_name[index]))
+      annotation<-c(annotation,sprintf("Synon: Tentative library match: %s; %s score %.4f; delta RI %.4f",
+        gsub("[\r\n]"," ",compounds$match_name[index]),compounds$match_method[index],
+        compounds$match_score[index],compounds$match_delta_RI[index]))
+    c(paste0("Name: ",names[index]),annotation,sprintf("Pseudocount: %.15g",sum(s)),
       sprintf("Comments: Sample %s; retention time %.7g min; integrated ion intensity %.9g; splogconNMF",
         compounds$sample[index],compounds$retention_time[index],sum(s)),
       sprintf("Num Peaks: %d",length(keep)),sprintf("%d %.8g;",mass[keep],abundance),"")
@@ -216,6 +223,12 @@ GCMS_write_msp <- function(model,time,mass,msp_file,compounds=NULL) {
 #' \figure{gcms-data2-profiles-spectra.png}{Representative compound profiles and mass spectra.}
 #' }
 #'
+#' @param library Optional GCMSlibrary for retention-index-constrained identification.
+#' @param search Named options for library_search(), such as phase="DB5",
+#'   ri_tolerance=30, n_matches=5 and method="stein_scott". The alkane file supplies
+#'   RI calibration automatically; a precomputed calibration can be supplied here.
+#'   Identification is stored in the returned object and included in MSP/Excel exports.
+#'
 #' @return An object of class \code{GCMSdeco} containing \code{model} (the full
 #'   factorization), a \code{compounds} table with names, retention times,
 #'   original-file apex scan indices, integrated intensities and ion counts,
@@ -236,8 +249,12 @@ GCMSdeco <- function(cdf_file,msp_file,family=quasipoisson("identity"),lambda="g
                      baseline_df=NULL,precluster=32L,dispersion=NULL,theta=NULL,
                      correlation=c("auto","none","lag1"),
                      ncores=NULL,control=list(),psf_control=list(),verbose=FALSE,
-                     xlsx_file=NULL,sample_name=NULL) {
+                     xlsx_file=NULL,sample_name=NULL,library=NULL,search=list()) {
   begun<-proc.time()[["elapsed"]];seconds<-numeric()
+  if(!is.list(search)||length(search)&&(is.null(names(search))||any(!nzchar(names(search)))||
+      anyDuplicated(names(search))||any(names(search)%in%c("x","library","msp_file","xlsx_file"))))
+    stop("Use named library-search options in search.")
+  if(is.null(library)&&length(search)) stop("Supply library when specifying search options.")
   ncores<-GCMS_threads(ncores)
   if(length(nwindows)!=1L||!is.finite(nwindows)||nwindows<1L||nwindows!=floor(nwindows)) stop("Use a positive integer nwindows.")
   if(is.null(sample_name)) sample_name<-tools::file_path_sans_ext(basename(sub("[?#].*$","",cdf_file)))
@@ -300,20 +317,27 @@ GCMSdeco <- function(cdf_file,msp_file,family=quasipoisson("identity"),lambda="g
   model$nuisance_df<-as.integer(spec$dispersion_estimated)+as.integer(spec$theta_estimated)
   model$ic_df<-ncol(Y)*model$rank+model$nuisance_df
   compounds<-GCMS_compounds(model,raw$time,sample_name)
-  compounds<-timed("write_msp",GCMS_write_msp(model,raw$time,raw$mass,msp_file,compounds))
   compounds$apex_scan<-raw$scans[compounds$apex_scan]
-  if(!is.null(xlsx_file)) timed("write_xlsx",GCMS_write_xlsx(model,raw$time,raw$mass,
-    compounds,xlsx_file,cdf_file,alkanes_file,seconds))
   model$y<-model$mu<-NULL
   if(!is.null(model$aggregation$model)) model$aggregation$model$mu<-NULL
-  seconds["total"]<-proc.time()[["elapsed"]]-begun
-  structure(list(model=model,compounds=compounds,psf=blind,background_df=baseline_df,
+  object<-structure(list(model=model,compounds=compounds,psf=blind,background_df=baseline_df,
     psf_standard=calibration,psf_width_scans=width,time=raw$time,mass=raw$mass,
     scans=raw$scans,psf_working_weight=working_weight,
     cdf_file=if(grepl("^https?://",cdf_file)) cdf_file else normalizePath(cdf_file,winslash="/"),
-    sample_name=sample_name,msp_file=normalizePath(msp_file,winslash="/"),
-    xlsx_file=if(is.null(xlsx_file)) NULL else normalizePath(xlsx_file,winslash="/"),
-    seconds=seconds),class="GCMSdeco")
+    alkanes_file=if(is.null(alkanes_file)) NULL else normalizePath(alkanes_file,winslash="/",mustWork=FALSE),
+    sample_name=sample_name,msp_file=msp_file,xlsx_file=xlsx_file,
+    seconds=c(seconds,total=proc.time()[["elapsed"]]-begun)),class="GCMSdeco")
+  if(!is.null(library)) object<-timed("library_search",do.call(identify_compounds,
+    c(list(x=object,library=library),search)))
+  object$compounds<-timed("write_msp",GCMS_write_msp(model,raw$time,raw$mass,msp_file,object$compounds))
+  if(!is.null(xlsx_file)) timed("write_xlsx",GCMS_write_xlsx(model,raw$time,raw$mass,
+    object$compounds,xlsx_file,cdf_file,alkanes_file,seconds,
+    matches=if(is.null(object$identification)) NULL else object$identification$matches,
+    calibration=if(is.null(object$identification)) NULL else object$identification$calibration))
+  object$msp_file<-normalizePath(msp_file,winslash="/")
+  object$xlsx_file<-if(is.null(xlsx_file)) NULL else normalizePath(xlsx_file,winslash="/")
+  seconds["total"]<-proc.time()[["elapsed"]]-begun;object$seconds<-seconds
+  object
 }
 
 #' @rdname GCMSdeco
