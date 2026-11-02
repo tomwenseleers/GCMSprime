@@ -7,6 +7,11 @@
 \alias{plot.GCMSbatch}
 \alias{logLik.GCMSbatch}
 \alias{GIC.GCMSbatch}
+\alias{AIC.GCMSbatch}
+\alias{BIC.GCMSbatch}
+\alias{EBIC.GCMSbatch}
+\alias{MBIC.GCMSbatch}
+\alias{nobs.GCMSbatch}
 \alias{print.GCMSbatch}
 \title{Multisample GC/MS deconvolution, alignment and shared spectral recovery}
 \usage{
@@ -20,7 +25,17 @@
 
 \method{GIC}{GCMSbatch}(object, ...)
 
-\method{print}{GCMSbatch}(x, ...)
+\method{AIC}{GCMSbatch}(object, ..., k = 2)
+
+\method{BIC}{GCMSbatch}(object, ...)
+
+\method{EBIC}{GCMSbatch}(object, ...)
+
+\method{MBIC}{GCMSbatch}(object, ...)
+
+\method{nobs}{GCMSbatch}(object, ...)
+
+print.GCMSbatch(x, ...)
 }
 \arguments{
 \item{sample}{One sample index or identifier. \code{NULL} in \code{coef()} returns the
@@ -31,6 +46,8 @@ common spectral library. \code{NULL} in \code{plot()} plots the coupled area tab
 \item{normalize}{Spectrum normalization: unnormalized or unit L1.}
 
 \item{x, object}{A multisample result returned by \code{\link[=GCMSdeco]{GCMSdeco()}}.}
+
+\item{k}{Information-criterion multiplier.}
 }
 \value{
 A \code{GCMSbatch} object with \code{samples}, optional \code{coupled} fit, sample

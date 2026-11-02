@@ -17,7 +17,7 @@ GCMS_plot_observed <- function(x,rows,cols) {
 
 GCMS_plot_offset <- function(x,rows,cols) {
   O<-x$model$offset
-  if(length(O)==1L) O else O[rows,cols,drop=FALSE]
+  if(length(O)==1L) O else if(is.null(dim(O)))O[rows]else O[rows,cols,drop=FALSE]
 }
 
 GCMS_raster_grid <- function(z,time,mass) {
@@ -187,7 +187,7 @@ plot.GCMSdeco <- function(x,type=c("lines","heatmap","spectra","profiles"),file=
     Y<-as.matrix(Q%*%Y)
     background<-as.matrix((Q%*%B[rows,,drop=FALSE])%*%A[,cols,drop=FALSE])
     O<-GCMS_plot_offset(x,rows,cols)
-    background<-background+if(length(O)==1L) O else as.matrix(Q%*%O)
+    background<-background+if(length(O)==1L) O else if(is.null(dim(O)))as.numeric(Q%*%O)else as.matrix(Q%*%O)
     mu<-as.matrix((Q%*%H[rows,,drop=FALSE])%*%S[,cols,drop=FALSE])+background
     graphics::par(mfrow=c(4L,1L),mar=c(3,4,2.2,2),mgp=c(1.8,.6,0))
     titles<-c("Observed chromatogram","Observed minus modeled background","Fitted chromatogram","Mean Pearson residual")

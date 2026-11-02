@@ -40,4 +40,10 @@ test_that("coupled directory workflows export original-channel sample and consen
   z<-readRDS(f$paths[1L]);expect_null(z$model$y);expect_null(z$model$mu)
   expect_equal(unname(fitted(z)),unname(fitted(f$coupled,sample=1L)),tolerance=1e-12)
   expect_equal(ncol(coef(f)),m)
+  again<-GCMSdeco(d,output_dir=out,ncores=1L,nwindows=1L,dispersion=1,correlation="none",
+    psf_control=list(kernel_est=kern,maxiter=1L),
+    control=list(profile_cycles=0L,original_cleanup=FALSE),
+    batch=list(resume=TRUE,coupling=list(cycles=1L,initial_cycles=1L,rounds=1L)))
+  expect_true(all(again$samples$cache_hit))
+  expect_equal(f$areas,again$areas)
 })

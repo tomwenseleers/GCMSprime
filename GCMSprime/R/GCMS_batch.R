@@ -122,6 +122,11 @@ GCMSdeco_directory <- function(cdf_file,msp_file=NULL,family,lambda,nwindows,
     correlation,ncores,control,psf_control,verbose,xlsx_file,sample_name,library,search,
     output_dir,coupled,batch) {
   begun<-proc.time()[["elapsed"]]
+  if(!requireNamespace("ncdf4",quietly=TRUE)||!requireNamespace("openxlsx",quietly=TRUE))
+    stop("Install ncdf4 and openxlsx for directory input and batch exports.")
+  if(!is.null(msp_file)&&(!is.character(msp_file)||length(msp_file)!=1L||is.na(msp_file)||
+      !grepl("[.]msp$",msp_file,ignore.case=TRUE)))stop("msp_file must end in .msp.")
+  if(!is.null(xlsx_file))GCMS_xlsx_path(xlsx_file)
   defaults<-list(method="cosine",align=TRUE,coupling=list(),sample_order=NULL,
     exposure=NULL,resume=FALSE,plots=FALSE)
   if(!is.list(batch)||length(batch)&&(is.null(names(batch))||anyDuplicated(names(batch))||
@@ -134,20 +139,20 @@ GCMSdeco_directory <- function(cdf_file,msp_file=NULL,family,lambda,nwindows,
   dir.create(output_dir,recursive=TRUE,showWarnings=FALSE);output_dir<-normalizePath(output_dir,winslash="/")
   dir.create(file.path(output_dir,"samples"),showWarnings=FALSE)
   descriptors<-vector("list",nrow(manifest));paths<-character(nrow(manifest));mass_axes<-vector("list",length(paths))
+  cache_hit<-logical(length(paths))
   initial_time<-system.time(for(s in seq_along(paths)) {
     id<-manifest$sample_id[s];d<-file.path(output_dir,"samples",id);dir.create(d,showWarnings=FALSE)
     cache<-file.path(d,"initial.rds");file<-manifest$cdf_file[s]
-    info<-file.info(file);standard<-manifest$alkanes_file[s];if(is.na(standard))standard<-NULL
+    standard<-manifest$alkanes_file[s];if(is.na(standard))standard<-NULL
     args<-list(cdf_file=file,msp_file=file.path(d,"initial.msp"),family=family,lambda=lambda,
       nwindows=nwindows,alkanes_file=standard,time_range=time_range,calibration_range=calibration_range,
       baseline_df=baseline_df,precluster=precluster,dispersion=dispersion,theta=theta,
       correlation=correlation,ncores=ncores,control=control,psf_control=psf_control,verbose=verbose,
       sample_name=id)
-    signature<-list(size=info$size,mtime=info$mtime,args=args,
-      standard=if(is.null(standard))NULL else file.info(standard)[,c("size","mtime")],
-      package=as.character(utils::packageVersion("GCMSprime")))
+    signature<-GCMS_batch_signature(file,standard,args)
     saved<-if(isTRUE(batch$resume)&&file.exists(cache))readRDS(cache)else NULL
-    fit<-if(!is.null(saved)&&identical(saved$signature,signature))saved$fit else do.call(GCMSdeco,args)
+    cache_hit[s]<-!is.null(saved)&&identical(saved$signature,signature)
+    fit<-if(cache_hit[s])saved$fit else do.call(GCMSdeco,args)
     saveRDS(list(signature=signature,fit=fit),cache)
     paths[s]<-file.path(d,"fit.rds");saveRDS(fit,paths[s])
     raw<-GCMS_read_cdf(file,time_range);yfile<-file.path(d,"observed.rds");saveRDS(raw$Y,yfile,compress=FALSE)
@@ -157,6 +162,7 @@ GCMSdeco_directory <- function(cdf_file,msp_file=NULL,family,lambda,nwindows,
       if(length(scan_meta[[key]])>=max(fit$scans))scan_meta[[key]]<-scan_meta[[key]][fit$scans]
     exposure<-if(is.null(batch$exposure))1 else if(is.function(batch$exposure))batch$exposure(scan_meta,fit$time)else
       if(is.list(batch$exposure))batch$exposure[[s]]else batch$exposure
+    if(!is.null(batch$exposure)&&is.null(exposure))stop("The requested exposure is missing for sample ",id,".")
     small<-fit$psf_width_scans*sqrt(log(100)/log(2))*median(diff(fit$time))
     descriptors[[s]]<-list(y=yfile,time=fit$time,fit=initfile,exposure=exposure,
       sample_id=id,group=manifest$group[s],small_width=small)
@@ -174,7 +180,8 @@ GCMSdeco_directory <- function(cdf_file,msp_file=NULL,family,lambda,nwindows,
         S<-matrix(0,nrow(f$S),length(axis));S[,ix]<-f$S;f$S<-S
         A<-matrix(0,nrow(f$alpha),length(axis));A[,ix]<-f$alpha;f$alpha<-A
         saveRDS(f,x$fit,compress=FALSE)
-        x$weights<-matrix(rep(as.numeric(axis%in%mass),each=n),n,length(axis))
+        x$weights<-file.path(dirname(x$y),"channel_weights.rds")
+        saveRDS(matrix(rep(as.numeric(axis%in%mass),each=n),n,length(axis)),x$weights,compress=FALSE)
       }
       descriptors[[s]]<-x
     }
@@ -206,9 +213,11 @@ GCMSdeco_directory <- function(cdf_file,msp_file=NULL,family,lambda,nwindows,
     }
     saveRDS(fit,paths[s])
     # Observations now live in the coupled store; plotting reloads the CDF.
-    unlink(c(descriptors[[s]]$y,descriptors[[s]]$fit))
+    unlink(c(descriptors[[s]]$y,descriptors[[s]]$fit,
+      if(is.character(descriptors[[s]]$weights))descriptors[[s]]$weights else NULL))
   }
   manifest$fit_file<-paths
+  manifest$cache_hit<-cache_hit
   manifest$compounds<-vapply(paths,function(p)readRDS(p)$model$rank,0L)
   manifest$GIC<-vapply(paths,function(p)GIC(readRDS(p)),0)
   areas<-if(is.null(common))NULL else common$areas
@@ -221,6 +230,19 @@ GCMSdeco_directory <- function(cdf_file,msp_file=NULL,family,lambda,nwindows,
     GCMS_batch_consensus(object,msp_file,xlsx_file)
   }
   saveRDS(object,file.path(output_dir,"experiment.rds"));object
+}
+
+GCMS_batch_signature <- function(file,standard,args) {
+  f<-args$family;if(is.function(f))f<-f(link="identity")
+  # Family closures have distinct R environments on each construction.
+  # Compare their model settings rather than environment identity.
+  if(is.list(f))args$family<-list(family=f$family,link=f$link,scalar=f$scalar,
+    theta=if(is.function(f$getTheta))f$getTheta(TRUE)else NULL,n.theta=f$n.theta)
+  info<-file.info(file)
+  list(size=info$size,mtime=as.numeric(info$mtime),args=args,
+    standard=if(is.null(standard))NULL else list(size=file.info(standard)$size,
+      mtime=as.numeric(file.info(standard)$mtime)),
+    package=as.character(utils::packageVersion("GCMSprime")))
 }
 
 GCMS_batch_consensus <- function(object,msp_file=NULL,xlsx_file=NULL) {
@@ -286,6 +308,28 @@ logLik.GCMSbatch <- function(object,...) {
 GIC.GCMSbatch <- function(object,...) {
   if(is.null(object$coupled))stop("Select a sample for independent fits.")
   GIC(object$coupled,...)
+}
+#' @rdname GCMSbatch
+#' @param k Information-criterion multiplier.
+#' @export
+AIC.GCMSbatch <- function(object,...,k=2) {
+  if(is.null(object$coupled))stop("Select a sample for independent fits.")
+  AIC(object$coupled,...,k=k)
+}
+#' @rdname GCMSbatch
+#' @export
+BIC.GCMSbatch <- function(object,...)BIC(object$coupled,...)
+#' @rdname GCMSbatch
+#' @export
+EBIC.GCMSbatch <- function(object,...)EBIC(object$coupled,...)
+#' @rdname GCMSbatch
+#' @export
+MBIC.GCMSbatch <- function(object,...)MBIC(object$coupled,...)
+#' @rdname GCMSbatch
+#' @export
+nobs.GCMSbatch <- function(object,...) {
+  if(!is.null(object$coupled))return(nobs(object$coupled,...))
+  sum(vapply(object$paths,function(p)nobs(readRDS(p)),0L))
 }
 #' @rdname GCMSbatch
 #' @export
