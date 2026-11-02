@@ -1,4 +1,4 @@
-# GCMSprime: Scalable and Automated GC–MS Deconvolution, Quantification, and Spectral Library Search in R
+# GCMSprime: Scalable and Automated GC–MS Deconvolution, Quantification and Spectral Library Search in R
 
 <a href="https://tomwenseleers.github.io/GCMSprime/">
 <picture>
