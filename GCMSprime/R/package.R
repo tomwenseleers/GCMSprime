@@ -1,4 +1,4 @@
-#' Sparse GC/MS Deconvolution and Spectral Libraries
+#' Scalable and Automated GC–MS Deconvolution, Quantification, and Spectral Library Search in R
 #'
 #' @keywords internal
 #' @import L0glm

@@ -51,7 +51,7 @@ navbar:
       href: https://github.com/tomwenseleers/GCMSprime
 home:
   strip_header: false
-  title: "State-of-the-art GC/MS deconvolution, quantification and library search."
+  title: "GCMSprime: Scalable and Automated GC–MS Deconvolution, Quantification, and Spectral Library Search in R"
   sidebar:
     structure: [links, citation, authors, license]
 authors:

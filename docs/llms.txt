@@ -150,9 +150,9 @@ An article describing the methods implemented in GCMSprime is in
 preparation. If you use the package before the article is formally
 published, we would appreciate a citation to the package:
 
-Wenseleers T, Vanderaa C (2026). *GCMSprime: Sparse GC/MS Deconvolution
-and Spectral Libraries*. R package version 0.1.0,
-<https://tomwenseleers.github.io/GCMSprime/>.
+Wenseleers T, Vanderaa C (2026). *GCMSprime: Scalable and Automated
+GC–MS Deconvolution, Quantification, and Spectral Library Search in R*.
+R package version 0.1.0, <https://tomwenseleers.github.io/GCMSprime/>.
 
 The [Authors and Citation
 page](https://tomwenseleers.github.io/GCMSprime/authors.html#citation)

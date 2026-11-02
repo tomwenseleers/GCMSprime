@@ -1,4 +1,4 @@
-# GCMSprime: state-of-the-art GC/MS deconvolution, quantification and library search in R
+# GCMSprime: Scalable and Automated GC–MS Deconvolution, Quantification, and Spectral Library Search in R
 
 <a href="https://tomwenseleers.github.io/GCMSprime/">
 <picture>
@@ -81,7 +81,7 @@ If you use the package before the article is formally published, we would
 appreciate a citation to the package:
 
 Wenseleers T, Vanderaa C (2026).
-*GCMSprime: Sparse GC/MS Deconvolution and Spectral Libraries*.
+*GCMSprime: Scalable and Automated GC–MS Deconvolution, Quantification, and Spectral Library Search in R*.
 R package version 0.1.0,
 <https://tomwenseleers.github.io/GCMSprime/>.
 

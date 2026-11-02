@@ -1,6 +1,6 @@
 Package: GCMSprime
 Type: Package
-Title: Sparse GC/MS Deconvolution and Spectral Libraries
+Title: Scalable and Automated GC–MS Deconvolution, Quantification, and Spectral Library Search in R
 Version: 0.1.0
 Date: 2026-11-01
 Authors@R: c(

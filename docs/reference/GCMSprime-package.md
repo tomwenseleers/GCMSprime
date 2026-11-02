@@ -1,4 +1,4 @@
-# Sparse GC/MS Deconvolution and Spectral Libraries
+# Scalable and Automated GC–MS Deconvolution, Quantification, and Spectral Library Search in R
 
 Chromatogram deconvolution, compound spectra, integrated areas and
 reproducible reports, built on sparse log-concave matrix factorization.

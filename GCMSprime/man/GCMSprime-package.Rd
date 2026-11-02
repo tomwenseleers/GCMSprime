@@ -4,7 +4,7 @@
 \name{GCMSprime-package}
 \alias{GCMSprime}
 \alias{GCMSprime-package}
-\title{Sparse GC/MS Deconvolution and Spectral Libraries}
+\title{Scalable and Automated GC–MS Deconvolution, Quantification, and Spectral Library Search in R}
 \description{
 \if{html}{\figure{logo.png}{options: style='float: right' alt='logo' width='120'}}
 
