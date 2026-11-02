@@ -157,7 +157,9 @@ a guarded whole-profile refit can also update the shared background.
 Neighbouring modes stay within one quarter of their initial FWHM, and
 the merge is retained only when the original-channel criterion decreases.
 \code{profile_fusion} enables a final conservative fusion pass on all original
-channels, followed by one local likelihood-based profile/spectrum refit.}
+channels, followed by one local likelihood-based profile/spectrum refit.
+\code{original_cleanup=TRUE} enables a final original-channel deletion, local
+fusion and residual-discovery pass. Set it to \code{FALSE} to skip that pass.}
 
 \item{psf_control}{Named PSF settings. Entries \code{method}, \code{standard},
 \code{precluster}, \code{weights} and \code{offset} are passed directly to \code{\link[L0nmf:estimate_psf]{L0nmf::estimate_psf()}}.
@@ -258,7 +260,10 @@ See \code{\link[L0nmf:estimate_psf]{L0nmf::estimate_psf()}} for the distribution
 comparing noise scales; the actual PSF likelihood uses the specified family.
 
 \code{precluster=32L} performs selection and fusion in at most 32 size-adjusted
-outcome groups, followed by refinement on every original channel. See
+outcome groups, followed by refinement on every original channel. The final
+original-channel cleanup checks deletions, local fusions and missed residual
+peaks using the complete compound-count criterion. Its diagnostics are in
+\code{model$cleanup}; \code{control=list(original_cleanup=FALSE)} skips it. See
 \code{\link[L0nmf:splogconNMF]{L0nmf::splogconNMF()}} for the selection criterion and shape constraints. The
 spreadsheet and returned coefficient rows use increasing apex retention time. Rank selection,
 hard log concavity, censored Gamma intensities and compound-count information

@@ -123,16 +123,16 @@ used in the plotted comparison, so the table and figures below use the
 explicit Gaussian PSFs in `fit1` and `fit2` above. Automatic calibration
 is available through the calls in this section.
 
-These results were obtained with the calls above on the [benchmark
+These results use the calls above on the [benchmark
 workstation](https://tomwenseleers.github.io/L0glm/articles/performance.html#reproduce-and-extend),
-using eight OpenMP workers and one BLAS thread. Timings are medians of
-two complete runs, including CDF reading, PSF initialization,
-factorization and MSP export.
+with eight OpenMP workers and one BLAS thread. Each timing measures one
+complete run, including CDF reading, PSF initialization, factorization,
+original-channel completion and MSP export.
 
 | Dataset | Scans | Mass channels | Compounds | Time (s) | GIC | Adjusted weighted R² |
 |:---|---:|---:|---:|---:|---:|---:|
-| `GCMS_data1` | 119 | 671 | 6 | 4.77 | 219,686 | 0.98980 |
-| `GCMS_data2` | 1,764 | 518 | 37 | 92.21 | 1,289,044 | 0.99418 |
+| `GCMS_data1` | 119 | 671 | 6 | 11.82 | 219,686 | 0.98980 |
+| `GCMS_data2` | 1,764 | 518 | 42 | 100.71 | 1,250,069 | 0.99487 |
 
 Weighted R² uses weights `1/pmax(fitted_mean, 0.1)` and a separate
 weighted mean for each ion channel. Its adjustment is conditional on the
@@ -185,9 +185,10 @@ Elution profiles and mass spectra for GCMS_data2
 
 The profile/spectrum preview includes the broadest component and five
 other large components, in temporal order. The PDF contains every
-recovered component. The broad acid peak is represented by one extended
-log-concave profile (compound 20 in this fit), while the smaller
-neighbouring peaks remain distinct.
+recovered component. The broad acid contribution and neighbouring
+components are shown on the original ion channels. The final residual
+pass can retain additional small components when their likelihood gain
+exceeds the compound penalty.
 
 Download
 [traces](https://tomwenseleers.github.io/GCMSprime/gcms/gcms-data2-traces.pdf),
@@ -301,9 +302,13 @@ comparisons; `correlation="none"` sets \kappa=1.
     within one quarter of their starting FWHM; the complete
     original-channel criterion must decrease for the fusion to be
     retained.
-6.  Apply the conservative broad-profile fusion pass, refine the
-    affected neighbourhoods, and return profiles and spectra in temporal
-    order.
+6.  Apply the conservative broad-profile fusion pass. On every original
+    ion channel, check conditional deletions, nearly
+    proportional-profile fusions and additional PSF candidates from
+    residual evidence. Refit only the affected scan windows and accept
+    moves that decrease the full compound-count criterion. Return
+    profiles and spectra in temporal order. `fit$model$cleanup` records
+    the original-channel changes.
 
 The same original-channel compound penalty is used in the reduced-space
 search. Native Rcpp/OpenMP kernels share the sparse profile design and

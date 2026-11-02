@@ -209,7 +209,9 @@ print(x, ...)
   quarter of their initial FWHM, and the merge is retained only when the
   original-channel criterion decreases. `profile_fusion` enables a final
   conservative fusion pass on all original channels, followed by one
-  local likelihood-based profile/spectrum refit.
+  local likelihood-based profile/spectrum refit. `original_cleanup=TRUE`
+  enables a final original-channel deletion, local fusion and
+  residual-discovery pass. Set it to `FALSE` to skip that pass.
 
 - psf_control:
 
@@ -336,7 +338,10 @@ scales; the actual PSF likelihood uses the specified family.
 
 `precluster=32L` performs selection and fusion in at most 32
 size-adjusted outcome groups, followed by refinement on every original
-channel. See
+channel. The final original-channel cleanup checks deletions, local
+fusions and missed residual peaks using the complete compound-count
+criterion. Its diagnostics are in `model$cleanup`;
+`control=list(original_cleanup=FALSE)` skips it. See
 [`L0nmf::splogconNMF()`](https://tomwenseleers.github.io/L0nmf/reference/splogconNMF.html)
 for the selection criterion and shape constraints. The spreadsheet and
 returned coefficient rows use increasing apex retention time. Rank

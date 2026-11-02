@@ -112,12 +112,12 @@ PSFs in `fit1` and `fit2` above. Automatic calibration is available through
 the calls in this section.
 
 <!-- BEGIN gcms-results -->
-These results were obtained with the calls above on the [benchmark workstation](https://tomwenseleers.github.io/L0glm/articles/performance.html#reproduce-and-extend), using eight OpenMP workers and one BLAS thread. Timings are medians of two complete runs, including CDF reading, PSF initialization, factorization and MSP export.
+These results use the calls above on the [benchmark workstation](https://tomwenseleers.github.io/L0glm/articles/performance.html#reproduce-and-extend), with eight OpenMP workers and one BLAS thread. Each timing measures one complete run, including CDF reading, PSF initialization, factorization, original-channel completion and MSP export.
 
 | Dataset | Scans | Mass channels | Compounds | Time (s) | GIC | Adjusted weighted R² |
 |:--|--:|--:|--:|--:|--:|--:|
-| `GCMS_data1` | 119 | 671 | 6 | 4.77 | 219,686 | 0.98980 |
-| `GCMS_data2` | 1,764 | 518 | 37 | 92.21 | 1,289,044 | 0.99418 |
+| `GCMS_data1` | 119 | 671 | 6 | 11.82 | 219,686 | 0.98980 |
+| `GCMS_data2` | 1,764 | 518 | 42 | 100.71 | 1,250,069 | 0.99487 |
 
 Weighted R² uses weights `1/pmax(fitted_mean, 0.1)` and a separate weighted mean for each ion channel. Its adjustment is conditional on the fitted profiles, using the positive spectral coefficients and background coefficients as the parameter count.
 
@@ -141,7 +141,7 @@ Download [traces](../gcms/gcms-data1-traces.pdf), [heatmaps](../gcms/gcms-data1-
 
 ![Elution profiles and mass spectra for GCMS_data2](../reference/figures/gcms-data2-profiles-spectra.png)
 
-The profile/spectrum preview includes the broadest component and five other large components, in temporal order. The PDF contains every recovered component. The broad acid peak is represented by one extended log-concave profile (compound 20 in this fit), while the smaller neighbouring peaks remain distinct.
+The profile/spectrum preview includes the broadest component and five other large components, in temporal order. The PDF contains every recovered component. The broad acid contribution and neighbouring components are shown on the original ion channels. The final residual pass can retain additional small components when their likelihood gain exceeds the compound penalty.
 
 Download [traces](../gcms/gcms-data2-traces.pdf), [heatmaps](../gcms/gcms-data2-heatmaps.pdf), [all profiles and spectra](../gcms/gcms-data2-profiles-spectra.pdf), or the [MSP library](../gcms/gcms-data2.msp).
 <!-- END gcms-results -->
@@ -242,8 +242,12 @@ scaled by the common dispersion. The optional temporal working adjustment
    guarded whole-profile refit with a shared background update. Neighbouring
    modes remain within one quarter of their starting FWHM; the complete
    original-channel criterion must decrease for the fusion to be retained.
-6. Apply the conservative broad-profile fusion pass, refine the affected
-   neighbourhoods, and return profiles and spectra in temporal order.
+6. Apply the conservative broad-profile fusion pass. On every original ion
+   channel, check conditional deletions, nearly proportional-profile fusions
+   and additional PSF candidates from residual evidence. Refit only the affected
+   scan windows and accept moves that decrease the full compound-count
+   criterion. Return profiles and spectra in temporal order. `fit$model$cleanup`
+   records the original-channel changes.
 
 The same original-channel compound penalty is used in the reduced-space
 search. Native Rcpp/OpenMP kernels share the sparse profile design and update

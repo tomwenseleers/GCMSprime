@@ -203,7 +203,10 @@ GCMS_write_msp <- function(model,time,mass,msp_file,compounds=NULL) {
 #' comparing noise scales; the actual PSF likelihood uses the specified family.
 #'
 #' \code{precluster=32L} performs selection and fusion in at most 32 size-adjusted
-#' outcome groups, followed by refinement on every original channel. See
+#' outcome groups, followed by refinement on every original channel. The final
+#' original-channel cleanup checks deletions, local fusions and missed residual
+#' peaks using the complete compound-count criterion. Its diagnostics are in
+#' `model$cleanup`; `control=list(original_cleanup=FALSE)` skips it. See
 #' [L0nmf::splogconNMF()] for the selection criterion and shape constraints. The
 #' spreadsheet and returned coefficient rows use increasing apex retention time. Rank selection,
 #' hard log concavity, censored Gamma intensities and compound-count information

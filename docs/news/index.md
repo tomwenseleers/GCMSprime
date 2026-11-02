@@ -2,6 +2,9 @@
 
 ## GCMSprime 0.1.0
 
+- Original-channel completion checks conditional deletions, local
+  profile/spectral fusions and missed residual peaks, with
+  complete-likelihood safeguards and native local updates.
 - ANDI-MS CDF import and export, PSF calibration and sparse
   chromatographic deconvolution.
 - MSP spectra, Excel area tables and signal, residual, profile and

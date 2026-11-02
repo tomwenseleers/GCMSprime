@@ -40,6 +40,8 @@ plot(fit, type="profiles", file="sample_profiles_spectra.pdf")
 
 The workflow calibrates a time-varying PSF, models a smooth baseline, resolves overlapping compounds and refines their spectra on every original mass channel. Results are ordered by apex retention time. MSP files are readable by NIST MS Search; Excel reports contain integrated areas and compact spectra.
 
+The final original-channel pass checks component deletions, local fusions and missed residual peaks, accepting each change only when the complete likelihood-and-compound criterion improves.
+
 ## Experimental examples
 
 The [GC/MS tutorial](articles/gcms-deconvolution.html) includes two experimental chromatogram windows, complete fitted signals, spectra, timings and exports.

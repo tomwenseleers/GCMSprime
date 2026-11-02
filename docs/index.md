@@ -81,6 +81,10 @@ original mass channel. Results are ordered by apex retention time. MSP
 files are readable by NIST MS Search; Excel reports contain integrated
 areas and compact spectra.
 
+The final original-channel pass checks component deletions, local
+fusions and missed residual peaks, accepting each change only when the
+complete likelihood-and-compound criterion improves.
+
 ## Experimental examples
 
 The [GC/MS
