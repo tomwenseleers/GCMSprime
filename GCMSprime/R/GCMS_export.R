@@ -5,16 +5,20 @@ GCMS_xlsx_path <- function(path) {
   invisible(path)
 }
 
+GCMS_spectrum_text <- function(S,mass) {
+  vapply(seq_len(nrow(S)),function(k) {
+    s<-S[k,];intensity<-if(max(s)>0)as.integer(round(9999*s/max(s)))else integer(length(s))
+    keep<-which(intensity>0);keep<-keep[order(-intensity[keep],mass[keep])]
+    paste0(mass[keep]," (",intensity[keep],")",collapse=", ")
+  },"")
+}
+
 GCMS_write_xlsx <- function(model,time,mass,compounds,path,cdf_file,alkanes_file,seconds,matches=NULL,calibration=NULL,search_settings=NULL) {
   GCMS_xlsx_path(path)
   wb<-openxlsx::createWorkbook(creator="GCMSprime")
   header<-openxlsx::createStyle(fgFill="#102d4d",fontColour="#FFFFFF",textDecoration="bold",
     fontSize=11,wrapText=TRUE,valign="center")
-  compounds$Spectrum<-vapply(compounds$compound,function(k) {
-    s<-model$S[k,];intensity<-as.integer(round(9999*s/max(s)))
-    keep<-which(intensity>0);keep<-keep[order(-intensity[keep],mass[keep])]
-    paste0(mass[keep]," (",intensity[keep],")",collapse=", ")
-  },"")
+  compounds$Spectrum<-GCMS_spectrum_text(model$S[compounds$compound,,drop=FALSE],mass)
   if(any(nchar(compounds$Spectrum)>32767L))
     stop("A spectrum exceeds Excel's cell text limit; use the MSP or R spectra.",call.=FALSE)
   first<-c("compound","retention_time","area","Spectrum")

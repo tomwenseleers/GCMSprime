@@ -12,6 +12,8 @@
 #'   column names.
 #' @param sample_name Sample identity recorded in the header; defaults to the
 #'   output filename without its extension.
+#' @param acquired_at Optional actual acquisition time as POSIXct. This is
+#'   distinct from export time and is used for ordering multisample experiments.
 #' @return Invisibly, the normalized output path.
 #' @details Intensities are stored without rescaling or rounding. Integer data
 #'   fitting in a signed 32-bit integer use ANDI `Long` storage; other data use
@@ -32,7 +34,7 @@
 #' @export
 write_GCMS_cdf <- function(y, cdf_file, time = as.numeric(rownames(y)),
                            mass = as.numeric(colnames(y)),
-                           sample_name = tools::file_path_sans_ext(basename(cdf_file))) {
+                           sample_name = tools::file_path_sans_ext(basename(cdf_file)), acquired_at=NULL) {
   if (!requireNamespace("ncdf4", quietly = TRUE)) stop("Install ncdf4 to write ANDI-MS files.", call. = FALSE)
   if (!is.matrix(y) || !is.numeric(y) || nrow(y) < 2L || !ncol(y) ||
       any(!is.finite(y) | y < 0)) stop("y must be a finite nonnegative scan-by-mass matrix with at least two scans.", call. = FALSE)
@@ -45,6 +47,8 @@ write_GCMS_cdf <- function(y, cdf_file, time = as.numeric(rownames(y)),
     stop("cdf_file must end in .cdf.", call. = FALSE)
   if (!is.character(sample_name) || length(sample_name) != 1L || is.na(sample_name) || !nzchar(sample_name))
     stop("sample_name must be a nonempty string.", call. = FALSE)
+  if(!is.null(acquired_at)&&(!inherits(acquired_at,"POSIXt")||length(acquired_at)!=1L||is.na(acquired_at)))
+    stop("acquired_at must be one nonmissing POSIXct acquisition time.")
   points <- as.double(n) * m
   if (points > .Machine$integer.max) stop("The ANDI-MS scan index exceeds signed 32-bit storage.", call. = FALSE)
   seconds <- time * 60;dt <- c(diff(seconds), stats::median(diff(seconds)))
@@ -85,6 +89,10 @@ write_GCMS_cdf <- function(y, cdf_file, time = as.numeric(rownames(y)),
     actual_delay_time = min(seconds), actual_run_time = max(seconds),
     actual_run_time_length = max(seconds), global_mass_min = min(mass), global_mass_max = max(mass),
     mass_axis_label = "M/Z", intensity_axis_label = "Abundance")
+  if(!is.null(acquired_at)) {
+    metadata$experiment_date_time_stamp<-format(acquired_at,"%Y%m%d%H%M%S+0000",tz="UTC")
+    metadata$administrative_comments<-"Intensity matrix exported by GCMSprime; acquisition and export times recorded separately."
+  }
   for (name in c("test_separation_type", "test_ms_inlet", "test_ionization_mode", "test_ionization_polarity",
       "test_detector_type", "test_scan_function", "test_scan_direction", "test_scan_law")) metadata[[name]] <- ""
   for (name in names(metadata)) ncdf4::ncatt_put(nc, 0, name, metadata[[name]])

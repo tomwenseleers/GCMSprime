@@ -108,7 +108,13 @@ GCMS_write_msp <- function(model,time,mass,msp_file,compounds=NULL) {
 #' write a NIST-compatible MSP spectral library. All original mass channels
 #' are retained in the final spectra.
 #'
-#' @param cdf_file Local ANDI-MS \code{.cdf} path or HTTP(S) URL. The optional
+#' @param output_dir Directory for batch results; defaults to a sibling directory
+#'   named after the input folder with suffix `_GCMSprime`.
+#' @param coupled Share spectra and refine sample-specific profiles with
+#'   [L0nmf::coupledNMF()] for directory input.
+#' @param batch Named directory options; see [GCMSbatch].
+#' @param cdf_file A directory of sample subdirectories with a `standards`
+#'   subdirectory, or a local ANDI-MS \code{.cdf} path or HTTP(S) URL. The optional
 #'   \pkg{ncdf4} package is required. Masses are binned to the nearest integer
 #'   m/z; traces between the minimum and maximum recorded mass are retained.
 #' @param msp_file Output \code{.msp} path. Parent directories are created if
@@ -234,6 +240,9 @@ GCMS_write_msp <- function(model,time,mass,msp_file,compounds=NULL) {
 #'   RI calibration automatically; a precomputed calibration can be supplied here.
 #'   Identification is stored in the returned object and included in MSP/Excel exports.
 #'
+#' Directory input returns a [GCMSbatch] object, with acquisition-ordered sample
+#' groups, per-sample exports and a consensus area table and spectral library.
+#'
 #' @return An object of class \code{GCMSdeco} containing \code{model} (the full
 #'   factorization), a \code{compounds} table with names, retention times,
 #'   original-file apex scan indices, integrated intensities and ion counts,
@@ -249,12 +258,18 @@ GCMS_write_msp <- function(model,time,mass,msp_file,compounds=NULL) {
 #' @example examples/GCMSdeco.R
 #' @importFrom stats AIC BIC residuals
 #' @export
-GCMSdeco <- function(cdf_file,msp_file,family=quasipoisson("identity"),lambda="gic",nwindows=10L,
+GCMSdeco <- function(cdf_file,msp_file=NULL,family=quasipoisson("identity"),lambda="gic",nwindows=10L,
                      alkanes_file=NULL,time_range=NULL,calibration_range=NULL,
                      baseline_df=NULL,precluster=32L,dispersion=NULL,theta=NULL,
                      correlation=c("auto","none","lag1"),
                      ncores=NULL,control=list(),psf_control=list(),verbose=FALSE,
-                     xlsx_file=NULL,sample_name=NULL,library=NULL,search=list()) {
+                     xlsx_file=NULL,sample_name=NULL,library=NULL,search=list(),
+                     output_dir=NULL,coupled=TRUE,batch=list()) {
+  if(length(cdf_file)==1L&&dir.exists(cdf_file)) {
+    args<-as.list(environment())
+    return(do.call(GCMSdeco_directory,args))
+  }
+  if(is.null(msp_file))stop("Supply msp_file for a single chromatogram.")
   begun<-proc.time()[["elapsed"]];seconds<-numeric()
   if(!is.list(search)||length(search)&&(is.null(names(search))||any(!nzchar(names(search)))||
       anyDuplicated(names(search))||any(names(search)%in%c("x","library","msp_file","xlsx_file"))))

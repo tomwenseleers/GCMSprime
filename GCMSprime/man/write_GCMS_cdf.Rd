@@ -9,7 +9,8 @@ write_GCMS_cdf(
   cdf_file,
   time = as.numeric(rownames(y)),
   mass = as.numeric(colnames(y)),
-  sample_name = tools::file_path_sans_ext(basename(cdf_file))
+  sample_name = tools::file_path_sans_ext(basename(cdf_file)),
+  acquired_at = NULL
 )
 }
 \arguments{
@@ -25,6 +26,9 @@ column names.}
 
 \item{sample_name}{Sample identity recorded in the header; defaults to the
 output filename without its extension.}
+
+\item{acquired_at}{Optional actual acquisition time as POSIXct. This is
+distinct from export time and is used for ordering multisample experiments.}
 }
 \value{
 Invisibly, the normalized output path.

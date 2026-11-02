@@ -1,5 +1,7 @@
 # GCMSprime 0.1.0
 
+* Directory-based multisample GC/MS workflows preserve sample groups and acquisition order, calibrate against alkane standards, share spectra through coupled log-concave NMF, and export consensus areas and spectral libraries.
+
 
 * Original-channel completion checks conditional deletions, local profile/spectral fusions and missed residual peaks, with complete-likelihood safeguards and native local updates.
 * ANDI-MS CDF import and export, PSF calibration and sparse chromatographic deconvolution.

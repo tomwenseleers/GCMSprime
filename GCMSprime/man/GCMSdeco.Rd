@@ -25,7 +25,7 @@
 
 GCMSdeco(
   cdf_file,
-  msp_file,
+  msp_file = NULL,
   family = quasipoisson("identity"),
   lambda = "gic",
   nwindows = 10L,
@@ -44,7 +44,10 @@ GCMSdeco(
   xlsx_file = NULL,
   sample_name = NULL,
   library = NULL,
-  search = list()
+  search = list(),
+  output_dir = NULL,
+  coupled = TRUE,
+  batch = list()
 )
 
 \method{coef}{GCMSdeco}(object, ..., normalize = c("none", "l1"))
@@ -81,7 +84,8 @@ interval or select a chromatographic window.}
 
 \item{...}{Further method arguments.}
 
-\item{cdf_file}{Local ANDI-MS \code{.cdf} path or HTTP(S) URL. The optional
+\item{cdf_file}{A directory of sample subdirectories with a \code{standards}
+subdirectory, or a local ANDI-MS \code{.cdf} path or HTTP(S) URL. The optional
 \pkg{ncdf4} package is required. Masses are binned to the nearest integer
 m/z; traces between the minimum and maximum recorded mass are retained.}
 
@@ -189,7 +193,18 @@ its extension. Included in the compound table, MSP entries and workbook.}
 \item{search}{Named options for library_search(), such as phase="DB5",
 ri_tolerance=30, n_matches=5 and method="stein_scott". The alkane file supplies
 RI calibration automatically; a precomputed calibration can be supplied here.
-Identification is stored in the returned object and included in MSP/Excel exports.}
+Identification is stored in the returned object and included in MSP/Excel exports.
+
+Directory input returns a \link{GCMSbatch} object, with acquisition-ordered sample
+groups, per-sample exports and a consensus area table and spectral library.}
+
+\item{output_dir}{Directory for batch results; defaults to a sibling directory
+named after the input folder with suffix \verb{_GCMSprime}.}
+
+\item{coupled}{Share spectra and refine sample-specific profiles with
+\code{\link[L0nmf:coupledNMF]{L0nmf::coupledNMF()}} for directory input.}
+
+\item{batch}{Named directory options; see \link{GCMSbatch}.}
 
 \item{normalize}{Spectral coefficient normalization: \code{"none"} returns
 integrated channel intensities; \code{"l1"} gives a unit-sum spectrum per
