@@ -76,7 +76,7 @@ the spectra use all 518 channels.
 
 The [single-sample tutorial](articles/gcms-deconvolution.html) includes both
 datasets, fitted-signal heatmaps, profile/spectrum panels, timings and downloadable
-MSP/PDF outputs. [How chromatograms become compounds](articles/algorithm.html)
+MSP/PDF outputs. [GC/MS deconvolution: mathematical basis](articles/algorithm.html)
 explains the progression from known PSFs to estimated and component-specific shapes.
 
 ## Automatic deconvolution for multiple samples

@@ -262,8 +262,8 @@ details](https://tomwenseleers.github.io/L0nmf/articles/algorithm.html).
 
 ## Understand the method
 
-[How chromatograms become
-compounds](https://tomwenseleers.github.io/GCMSprime/articles/algorithm.md)
+[GC/MS deconvolution: mathematical
+basis](https://tomwenseleers.github.io/GCMSprime/articles/algorithm.md)
 explains known and estimated PSFs, compound-dependent profiles, noise,
 background and best rank tuning. [L0nmf’s mathematical
 article](https://tomwenseleers.github.io/L0nmf/articles/algorithm.html)

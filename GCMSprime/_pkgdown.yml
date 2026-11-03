@@ -48,7 +48,7 @@ navbar:
     algorithm:
       text: Algorithm & theory
       menu:
-        - text: How chromatograms become compounds
+        - text: "GC/MS deconvolution: mathematical basis"
           href: articles/algorithm.html
         - text: Retention indices and spectral identification
           href: articles/identification-theory.html

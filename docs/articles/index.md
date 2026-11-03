@@ -24,11 +24,12 @@
 
 ### Algorithm and theory
 
-- [How chromatograms become
-  compounds](https://tomwenseleers.github.io/GCMSprime/articles/algorithm.md):
+- [GC/MS deconvolution: mathematical
+  basis](https://tomwenseleers.github.io/GCMSprime/articles/algorithm.md):
 
-  An analytical guide from known peak shapes to blind PSF estimation,
-  flexible single-sample deconvolution and coupled multisample analysis.
+  Grouped L0 selection, alternating PSF estimation, log-concave
+  factorization, automatic compound-count selection and noise-aware
+  GC/MS analysis.
 
 - [Retention indices and spectral
   identification](https://tomwenseleers.github.io/GCMSprime/articles/identification-theory.md):

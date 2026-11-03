@@ -95,8 +95,9 @@ contribution](reference/figures/gcms-data2-traces.png)](https://tomwenseleers.gi
 The [single-sample
 tutorial](https://tomwenseleers.github.io/GCMSprime/articles/gcms-deconvolution.md)
 includes both datasets, fitted-signal heatmaps, profile/spectrum panels,
-timings and downloadable MSP/PDF outputs. [How chromatograms become
-compounds](https://tomwenseleers.github.io/GCMSprime/articles/algorithm.md)
+timings and downloadable MSP/PDF outputs. [GC/MS deconvolution:
+mathematical
+basis](https://tomwenseleers.github.io/GCMSprime/articles/algorithm.md)
 explains the progression from known PSFs to estimated and
 component-specific shapes.
 

@@ -202,7 +202,7 @@ available. See [the likelihood and shape-constraint details](https://tomwenselee
 
 ## Understand the method
 
-[How chromatograms become compounds](algorithm.html) explains known and
+[GC/MS deconvolution: mathematical basis](algorithm.html) explains known and
 estimated PSFs, compound-dependent profiles, noise, background and best rank
 tuning. [L0nmf's mathematical article](https://tomwenseleers.github.io/L0nmf/articles/algorithm.html)
 gives the objective functions, constraints and pseudocode.

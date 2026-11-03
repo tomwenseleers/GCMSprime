@@ -1,204 +1,396 @@
 ---
-title: "How chromatograms become compounds"
-description: "An analytical guide from known peak shapes to blind PSF estimation, flexible single-sample deconvolution and coupled multisample analysis."
+title: "GC/MS deconvolution: mathematical basis"
+description: "Grouped L0 selection, alternating PSF estimation, log-concave factorization, automatic compound-count selection and noise-aware GC/MS analysis."
 output: rmarkdown::html_document
 ---
 
-At each scan, a GC/MS instrument records an ion-intensity pattern across mass
-channels. A chromatogram contains overlapping contributions from compounds,
-a varying background and measurement noise. Deconvolution separates those
-contributions into an elution profile and mass spectrum for each compound.
-Integration measures its abundance; spectral and retention-index matching then
-help identify it.
+Let \(Y=(y_{ij})\in\mathbb R_+^{n\times m}\) contain the observed ion
+intensities, with scans \(i=1,\ldots,n\) in rows and mass channels
+\(j=1,\ldots,m\) in columns. Deconvolution estimates the contributions of
+individual compounds to the mean signal \(M=(\mu_{ij})\), together with a
+smooth background. GCMSprime combines grouped sparse regression, PSF
+estimation and shape-constrained matrix factorization in a common
+likelihood-based workflow.
 
-GCMSprime brings these steps into one workflow. This article explains the
-modeling choices in chromatographic terms. The companion
-[identification article](identification-theory.html) explains alkane calibration
-and library search.
-
-## 1. Begin with a known peak shape
-
-Suppose a very narrow injection of one compound produces a known response
-shape. This **point spread function**, or PSF, describes the instrumental peak
-associated with a sharp input. Put a copy at each possible elution position;
-the columns of the resulting design matrix represent candidate peaks.
-
-A compound's coefficient gives its contribution to each ion trace. Most
-candidate positions should have coefficient zero. Selecting a compact set of
-positions and fitting their amplitudes is sparse regression. Joint selection
-across mass channels uses the whole spectrum to support a peak call.
+Write the weighted observation log likelihood as
 
 \[
-\text{expected signal}=
-\text{shifted PSF shapes}\times\text{ion amplitudes}
-+\text{background}.
+\ell_\nu(M;Y)=\sum_{i=1}^n\sum_{j=1}^m
+w_{ij}\ell_\nu(y_{ij};\mu_{ij}),
 \]
 
-[L0glm](https://tomwenseleers.github.io/L0glm/articles/deconvolution.html)
-fits this fixed-shape model efficiently with an automatic regularization preset.
-Its grouped selection identifies common candidate positions across channels,
-and relaxed refitting estimates amplitudes on that support. Sparse pulse-train
-deconvolution follows the idea of
+where \(w_{ij}\geq0\) are supplied observation weights and \(\nu\) contains
+the noise parameters. For quasipoisson data, the corresponding quasi-likelihood
+has the Poisson mean-dependent part divided by the estimated dispersion
+\(\phi\). The same notation below covers likelihood and quasi-likelihood;
+Section 5 specifies the noise models. The
+[identification article](identification-theory.html) covers retention indices
+and spectral library search.
+
+## 1. Deconvolution based on a known peak shape
+
+Suppose the response to a narrow input is a known **point spread function
+(PSF)**, or peak shape function, \(g\). Shifted copies form the columns of
+\(X(g)\in\mathbb R_+^{n\times p}\), where \(p\) is the number of candidate
+peak positions. The mean model is
+
+\[
+M=X(g)C+BA+O,\qquad C\geq0,\quad A\geq0.
+\]
+
+Here \(C\in\mathbb R_+^{p\times m}\) contains the ion amplitudes,
+\(B\in\mathbb R_+^{n\times q}\) is a low-dimensional background basis,
+\(A\) contains its coefficients, and \(O\) is optional known additive signal.
+A nonzero row of \(C\) calls a peak using evidence from all mass channels.
+Define its row-support size by
+
+\[
+s(C)=\|C\|_{2,0}
+=\sum_{r=1}^{p}\mathbf 1\{\|C_{r\cdot}\|_2>0\}.
+\]
+
+The **grouped \(L_0\) selection target** is
+
+\[
+\mathcal G(C,A;g)
+=-2\ell_\nu\{X(g)C+BA+O;Y\}+\lambda_g s(C).
+\]
+
+The row charge \(\lambda_g\) trades improved fit against the number of
+called peaks; background terms are compulsory and unpenalized. Minimizing
+this criterion corresponds to **best subset of groups selection (BSGS)**:
+each group consists of all channel coefficients at one candidate position.
+It seeks the jointly most parsimonious peak calls supported by the complete
+multichannel signal.
+
+[L0glm](https://tomwenseleers.github.io/L0glm/articles/algorithm.html)
+approximates this selection problem using iterative adaptive ridge regression
+within GLM IRLS. The GIC preset supplies the information-criterion scale
+
+\[
+\lambda_{\rm IC}=\log p\,\log\log n,
+\]
+
+with natural logarithms, as motivated for high-dimensional penalized
+likelihood by [Fan & Tang (2013)](https://doi.org/10.1111/rssb.12001).
+The adaptive-ridge calibration uses a quarter of this scale, with the
+appropriate dispersion factor in the working quadratic. Grouped selection
+shares support information across channels; a relaxed fit then re-estimates
+the amplitudes on the selected rows. The total compound charge used by
+GCMSprime's final factorization is specified in Section 3.
+
+The sparse pulse-train formulation was inspired by
 [de Rooi & Eilers (2011)](https://doi.org/10.1016/j.aca.2011.05.030).
+Our extensions add an efficient information-criterion regularization preset,
+grouped selection approximating BSGS, and likelihood-based treatment of
+Poisson or overdispersed Poisson ion-intensity noise. In the overdispersed
+case, the selection target is the corresponding **quasi-GIC**, with the
+estimated variance scale retained in the quasi-likelihood. This is especially
+useful for electron-multiplier measurements, whose variation exceeds that of
+ideal ion counts.
 
-## 2. Estimate an unknown or changing PSF
+## 2. Estimate an unknown or time-varying PSF
 
-Usually the instrument's response is not known exactly. A calibration standard
-with isolated peaks gives direct information about it. GCMSprime can also
-learn from overlapping sample peaks by alternating:
-
-1. Fit candidate peak locations and ion amplitudes using the current shape.
-2. Fit a revised common shape using those estimated locations and amplitudes.
-3. Refit the sample with that shape and retain the better completed model.
-
-Normalization puts overall intensity in the amplitudes, and centroid alignment
-sets the kernel's time origin. An alkane standard provides a useful starting
-shape; blind sample refinement adapts it to the sample signal.
-
-Peak width can change along a chromatogram. Estimating the PSF in overlapping
-windows and smoothly joining those local shapes gives a time-varying design.
-The default full-chromatogram workflow uses ten PSF anchors. Each candidate
-peak gets the shape appropriate to its own retention region.
-
-These methods are implemented in
-[L0nmf's PSF estimator](https://tomwenseleers.github.io/L0nmf/articles/estimate-psf.html).
-GCMSprime handles CDF import, the supplied alkane file and sensible scan/time
-conventions around that estimator.
-
-## 3. Let individual compounds have different shapes
-
-A shared PSF describes the common instrumental response. Compound chemistry
-and concentration can cause additional broadening, overload, long tails or
-sharp acid-like profiles. Several nearby fixed-shape peaks may then describe
-different pieces of the same compound.
-
-Sparse log-concave nonnegative matrix factorization gives each compound its
-own shape. A convenient representation is
+When \(g\) is unknown, the convolution model is bilinear in \(g\) and
+\(C\). For a fixed channel spike train \(c_j=C_{\cdot j}\),
 
 \[
-\mu_{ij}=\sum_{r=1}^{K}H_{ir}S_{rj}+(BA)_{ij}+O_{ij}.
+X(g)c_j=T(c_j)g,
 \]
 
-Here \(H\) contains elution profiles, \(S\) contains mass spectra, and
-\(BA\) is a smooth background. Each compound contributes its profile multiplied
-by its ion intensities. All factors are nonnegative. The optional \(O\) is known
-additive signal.
+where \(T(c_j)\) contains shifted copies of \(c_j\). Thus both conditional
+subproblems can be expressed as nonnegative GLMs. Blind PSF estimation
+alternates **two L0glm fits**:
 
-Profiles are constrained to be **log-concave**: their logarithms bend downwards.
-This permits asymmetric, tailed and triangular profiles while keeping each
-component a coherent single peak. The shape is estimated using the chosen
-noise model on the original intensities. Logarithms parameterize the positive
-profile during the constrained update.
+1. **Spike-train update:** hold \(g\) fixed and estimate \(C,A\) from
+   \(Y\) using grouped sparse regression on \([X(g),B]\).
+2. **PSF update:** hold the spike trains fixed and regress informative ion
+   traces on \(T(c_j)\), with the background and known signal in the offset.
+   The current kernel is the ridge prior center; positive starts preserve
+   eligible tails. Combine the channel estimates, impose the kernel shape
+   constraint, align its centroid and normalize its sum to one.
 
-The algorithm begins with sparse PSF-based components. Spectral similarity,
-profile overlap and shape compatibility suggest which components can be joined.
-Local likelihood fits then refine the proposed profile and spectrum with other
-compounds held fixed. The full fit criterion decides whether to keep a join.
+These are alternating block-coordinate updates for the joint sparse
+likelihood target
 
-## 4. Select the number of compounds automatically
+\[
+\mathcal G(C,A,g)
+=-2\ell_\nu\{X(g)C+BA+O;Y\}+\lambda_g s(C),
+\]
 
-A good fit must explain the signal with a compact set of compounds. GCMSprime
-uses the likelihood together with a penalty on component count. With the GIC
-preset, stronger evidence is required for adding a component than for adjusting
-an existing component's profile or spectrum.
+subject to nonnegativity and a normalized, log-concave kernel. The second
+block uses adaptive ridge regularization and shape smoothing to stabilize
+kernel estimation. Completed kernel proposals are compared after refitting
+their spike trains and backgrounds with the requested information criterion;
+the best synchronized checkpoint is retained. This makes the criterion apply
+to the complete reconstructed signal. The numerical procedure uses approximate
+conditional updates rather than exact minimization of each block.
 
-The rank criterion includes the original number of ion channels in its scale.
-It leaves smooth background coefficients and profile complexity unpenalized.
-The final model can delete unsupported components, join compatible fragments,
-or add peaks supported by residual evidence. Every accepted rank change is
-checked on all original channels.
+The same observation model is carried through both fits. With the default
+quasipoisson model, the pooled dispersion is estimated first and reused as a
+fixed inverse-variance scale. Poisson sets \(\phi=1\); the other supported
+noise families use their corresponding likelihoods. An alkane standard with
+isolated peaks can provide the initial kernel, followed by blind refinement
+on the sample.
 
-For speed, initialization can aggregate ion traces into at most 32
-intensity-adjusted groups. Final spectra and likelihood checks return to every
-original channel. This preserves low-abundance diagnostic ions in the outputs.
-Native local updates work only on the scan windows affected by a proposal.
+For a time-varying PSF, repeat the local estimation in overlapping windows
+centered at \(\tau_1<\cdots<\tau_R\). Between adjacent anchors, interpolate
+the log kernels and renormalize:
 
-The [L0nmf mathematical article](https://tomwenseleers.github.io/L0nmf/articles/algorithm.html)
-gives the precise objectives, rank-charge convention, shape constraints,
-initialization, solvers and pseudocode. Its likelihood formulation connects to
-[deviance matrix factorization](https://doi.org/10.1214/23-EJS2174) and
-[generalized matrix factorization](https://www.jmlr.org/papers/v23/20-1104.html).
-Positive shape modeling is motivated by
-[Eilers' unimodal smoothing](https://doi.org/10.1002/cem.935).
+\[
+g_t=\frac{\exp\{(1-a)\log g_r+a\log g_{r+1}\}}
+{\sum_\ell\exp\{(1-a)\log g_{r\ell}+a\log g_{r+1,\ell}\}},
+\qquad 0\leq a\leq1.
+\]
 
-## 5. Model background and measurement variation
+Convex combinations of concave log profiles preserve log-concavity. Each
+candidate peak receives the interpolated shape for its retention region,
+giving a sparse, time-varying convolution design. The full-chromatogram
+default uses ten PSF anchors. See
+[PSF estimation in L0nmf](https://tomwenseleers.github.io/L0nmf/articles/estimate-psf.html)
+for the calibration and windowed-estimation algorithms.
 
-A low-dimensional nonnegative spline basis describes the smoothly varying
-baseline. Its coefficients are fitted conditionally on the compound signal.
-Full chromatograms use enough knots to follow gradual drift, while a short
-window can use a constant background. Calibration peak detection starts from
-a lower-quantile background estimate.
+## 3. Compound- and concentration-dependent PSFs
 
-Poisson variance grows with expected counts. Instrument-exported intensities
-often have additional variation, so the default quasipoisson model estimates
-a common variance-to-mean scale. Gaussian, NB1/NB2 and Gamma signal models
-are also available. Gamma zeros can represent left-censored measurements below
-a specified detection threshold.
+A time-varying common PSF captures instrumental drift, while compound
+chemistry and concentration can produce additional broadening, tailing or
+overload. To accommodate these effects, each compound receives its own
+profile in the factorization
 
-Temporal differences estimate noise after suppressing slowly varying signal.
-An optional lag-one working adjustment accounts for correlated scan noise in
-the rank charge. The fitted mean and marginal noise model determine Pearson
-residuals, which make the residual heatmaps easier to compare across strong
-and weak ion channels.
+\[
+\mu_{ij}=\sum_{r=1}^{K}H_{ir}S_{rj}+(BA)_{ij}+O_{ij},
+\qquad H,S,A\geq0.
+\]
+
+The columns of \(H\) are elution profiles and the rows of \(S\) are mass
+spectra. Each profile has unit sum and a contiguous positive support, with
+
+\[
+\Delta^2\log H_{\cdot r}\leq0.
+\]
+
+On an equally spaced scan grid this is equivalent, at interior positive
+ordinates, to \(H_{ir}^2\geq H_{i-1,r}H_{i+1,r}\). For an irregular
+time grid, the successive slopes of the log profile must be nonincreasing.
+
+Log-concavity accommodates a broad range of chromatographic shapes:
+Gaussian peaks, exponentially modified Gaussian peaks, and asymmetric
+triangular or shark-fin-shaped acid peaks. Gaussian and exponential profiles
+are log-concave, and their convolution remains log-concave; this gives the
+exponentially modified Gaussian case. See
+[Saumard & Wellner (2014)](https://doi.org/10.1214/14-SS107) for the
+closure properties. Log-concavity implies unimodality and additionally
+constrains the evolution of the rising and falling slopes. It therefore
+provides stronger shape information than the unimodality constraint commonly
+used in MCR-ALS, helping prevent shoulders and fragments from being assigned
+to a single incoherent component. The MCR-ALS framework and its constraints
+are reviewed by [de Juan, Jaumot & Tauler (2014)](https://doi.org/10.1039/C4AY00571F).
+
+The **rank-selection objective** is
+
+\[
+J(H,S,A,K)
+=-2\ell_\nu(HS+BA+O;Y)+\lambda_RK,
+\qquad \lambda_R=m\kappa\lambda_{\rm IC}.
+\]
+
+Here \(m\) is the original number of mass channels and \(\kappa=1\)
+for independent observations; an optional temporal-correlation adjustment
+is described in Section 5. Equivalently, dividing by \(m\) gives
+\(-2\ell_\nu/m+\kappa\lambda_{\rm IC}K\), with one rank-selection
+charge per compound. Smooth background coefficients and profile complexity
+receive no additional penalty under this compound-count convention.
+Reported IC values use \(mK\) plus the number of estimated shared noise
+parameters as their complexity count.
+
+For fixed \(K\), local conditional likelihood fits refine the spectra,
+profiles and background. For example, updating compound \(r\) uses
+
+\[
+\mu_{ij}=R^{(-r)}_{ij}+H_{ir}S_{rj},
+\qquad
+R^{(-r)}=BA+O+\sum_{s\ne r}H_{\cdot s}S_{s\cdot},
+\]
+
+so the remaining fitted signal is an offset. Only the affected scan window
+needs updating. A constrained quadratic step in \(\log H_{\cdot r}\)
+uses the original intensity likelihood and is checked by backtracking.
+This preserves the chosen noise model while imposing a hard shape constraint.
+The model belongs to the broader class of
+[deviance matrix factorization](https://doi.org/10.1214/23-EJS2174)
+and [generalized matrix factorization](https://www.jmlr.org/papers/v23/20-1104.html)
+models, with additional nonnegativity, log-concavity and rank selection.
+
+## 4. Automatically estimate the true number of compounds present
+
+The number of compounds is estimated together with their profiles and
+spectra. Grouped deconvolution with the estimated time-varying PSF first
+supplies a statistically grounded set of candidate components. An unusually
+broad or tailed compound can initially produce several nearby components;
+spectral similarity identifies plausible fragments of the same compound.
+
+The algorithm then proposes fusions of correlated spectra whose profiles
+overlap and whose combined elution profile is compatible with log-concavity.
+Local profile and spectral refinement assesses each proposal under the
+rank-selection objective. Unsupported components can be deleted, and
+residual-supported components can be added. For a move from \(K\) to
+\(K'\), acceptance is based on
+
+\[
+\Delta J=-2\{\ell_\nu(M';Y)-\ell_\nu(M;Y)\}
+          +\lambda_R(K'-K)\leq0,
+\]
+
+up to numerical tolerance. The noise parameters and numerical rank penalty
+are held fixed during these comparisons. This balances explanatory power
+against the number of compounds, yielding an automatically selected
+factorization rank and a data-driven estimate of the underlying compound
+count.
+
+The distinctive contribution is the combination of grouped sparse
+PSF-based initialization, noise-aware log-concave refinement and explicit
+compound-count selection within one objective-driven workflow. It extends
+conventional fixed-rank MCR-ALS formulations by selecting the rank during
+refinement. Automatic component determination also appears in other GC/MS
+approaches, including [ADAP-GC 4.0](https://doi.org/10.1021/acs.analchem.9b01424);
+here it is integrated with the rank-penalized, shape-constrained likelihood.
+
+For speed, initialization and fusion can aggregate ion traces into at most
+32 size-adjusted groups. The compound charge retains the original \(m\),
+and final refinement and acceptance checks use every original channel.
+Thus the fitted spectra retain low-abundance diagnostic ions. The
+[L0nmf mathematical article](https://tomwenseleers.github.io/L0nmf/articles/algorithm.html)
+gives the precise initialization, constrained solvers and pseudocode.
+
+## 5. Modelled smooth background and flexible noise models
+
+A low-dimensional nonnegative B-spline basis represents the smooth
+background \(BA\). Its coefficients are compulsory, unpenalized terms and
+are fitted conditionally on the compound signal. The basis is deliberately
+much smoother than an individual peak: full chromatograms can follow slow
+baseline drift, while short windows can use a constant background. A
+lower-quantile background estimate initializes calibration peak detection.
+
+EI mass-spectrometric intensities commonly exhibit overdispersed counting
+variation. Ion arrivals are approximately Poisson, while the stochastic gain
+of the electron multiplier adds variation to the recorded intensity. In a
+simple compound-Poisson representation,
+
+\[
+Y=\sum_{a=1}^{N}G_a,\quad N\sim\operatorname{Poisson}(\Lambda),
+\qquad
+\operatorname{E}(Y)=\Lambda\operatorname{E}(G),\quad
+\operatorname{Var}(Y)=\Lambda\operatorname{E}(G^2).
+\]
+
+Consequently, variance is proportional to the mean, with a scale determined
+by detector gain and the intensity units. This motivates an overdispersed
+Poisson working model for GC/MS electron-multiplier signals; additional
+electronics and digitization can also contribute noise. See
+[Ipsen (2015)](https://doi.org/10.1021/ac503554u) for a physical derivation
+of mass-spectral intensity variation.
+
+The default is therefore **quasipoisson with estimated dispersion**:
+\(\operatorname{Var}(Y_{ij})=\phi\mu_{ij}\), implemented as
+`family=quasipoisson("identity")`. With \(\widehat\phi\) fixed,
+the mean-dependent quasi-likelihood is
+
+\[
+Q(M;Y)=\frac{1}{\widehat\phi}
+\sum_{ij}w_{ij}\{y_{ij}\log\mu_{ij}-\mu_{ij}\}.
+\]
+
+Thus quasi-GIC comparisons use Poisson deviance divided by
+\(\widehat\phi\), together with the same compound-count penalty.
+The package reports these quasi-criteria through its regular IC methods.
+
+Seven identity-link signal models are available:
+
+| Model | Conditional variance or observation convention |
+| :--- | :--- |
+| Gaussian | \(\sigma^2\) |
+| Poisson | \(\mu\) |
+| Quasipoisson | \(\phi\mu\) |
+| Negative binomial, NB2 | \(\mu+\mu^2/\theta\) |
+| Negative binomial, NB1 | \(\phi\mu\), with \(\phi\geq1\) |
+| Gamma | \(\phi\mu^2\); zeros are left-censored below the specified detection limit |
+| Common-scale Gamma | \(b_0\mu\) for the latent signal, with the same censoring convention |
+
+Noise parameters are pooled across channels. Fourth- and eighth-order
+temporal differences suppress the smooth signal and estimate marginal
+variation; their relationship also supports a lag-one covariance estimate.
+GCMSprime reuses the calibrated noise specification for PSF estimation and
+factorization. This keeps candidate-rank comparisons on a common noise scale.
+An optional negative NB2 `theta` start permits subsequent likelihood-based
+updates as documented in L0nmf.
+
+For temporally correlated scan noise, the working information adjustment
+\(\kappa=1+2\widehat\rho_1\) increases the rank charge. The marginal
+variance remains in the observation model. Pearson residuals use that
+marginal mean-variance relationship, allowing residual heatmaps to compare
+strong and weak ion channels on a common scale.
 
 ## 6. Integrate and inspect each sample
 
-With unit-sum profiles, spectral coefficients carry the component's discrete
-integrated intensities. GCMSprime reports these totals and time-weighted areas,
-alongside normalized spectra for comparison. Output tables retain sample names,
-retention times, widths and compound IDs. Profiles and spectra follow temporal
-order by default.
+With \(\sum_iH_{ir}=1\), \(S_{rj}\) is the discrete integrated intensity
+of ion \(j\) in compound \(r\). The total-intensity profile is
+\(P_{ir}=H_{ir}\sum_jS_{rj}\), and the normalized spectrum is
+\(T_{rj}=S_{rj}/\sum_jS_{rj}\), preserving \(HS=PT\). GCMSprime reports
+both discrete totals and time-weighted integrated areas, alongside sample
+names, retention times, widths and compound IDs. Profiles and spectra are
+ordered by apex retention time by default.
 
-Trace plots place fitted compounds over background-corrected observed ion traces.
-Heatmaps show observations, corrected observations, fitted signal and Pearson
-residuals. These views complement the profile/spectrum panels: they reveal where
-the fit explains a broad peak, resolves neighbours or leaves residual structure.
-
-The [single-sample tutorial](gcms-deconvolution.html) shows two experimental
-windows, CDF export/import and the resulting MSP, Excel and PDF reports.
+Trace plots overlay fitted compounds on background-corrected observed ion
+traces. Heatmaps show observations, corrected observations, fitted signal
+and Pearson residuals. Profile/spectrum panels show the recovered shapes
+and ion patterns. The [single-sample tutorial](gcms-deconvolution.html)
+demonstrates the CDF workflow and MSP, Excel and PDF outputs.
 
 ## 7. Analyze samples together
 
-Across an experiment, retention times drift and a compound may change width,
-tailing and abundance. Some compounds occur in only a subset of samples.
-Coupled factorization starts from independent fits, then estimates a shared
-spectrum for matched occurrences while retaining each sample's own profile,
-area and background.
+Across samples, retention times drift and a compound can vary in width,
+tailing and abundance or be entirely absent. Coupled factorization starts
+from individual-sample fits and estimates a shared spectrum for matched
+occurrences while retaining sample-specific profiles, areas and backgrounds.
 
-High-confidence spectral matches supply alignment anchors. An anchor uses the
-leading 1%-height crossing plus half the width of a small peak in that region;
-this reduces tail-related timing shifts. A robust smooth monotone map captures
-drift, with concentration-related anchor motion accounted for separately.
+High-confidence spectral matches supply alignment anchors. Each anchor is
+the leading 1%-height crossing plus half the width of a small peak in that
+region, reducing tail-related timing shifts. A robust, smooth monotone map
+captures retention-time drift, with concentration-related anchor motion
+accounted for separately.
 
-Candidate matches must agree in spectral shape and aligned timing. Their
-profiles are compared in area order to check compatibility with a coherent
-log-concave ridge across samples. Shared spectra are then refined using pooled
-evidence from every occurrence. The joint criterion counts a shared spectrum
-once and each detected occurrence's amplitude separately.
+Candidate matches must agree in spectral shape and aligned time. Comparing
+their profiles in area order checks compatibility with a coherent
+log-concave ridge across samples. Shared spectra are refined using pooled
+evidence from their occurrences. The coupled criterion counts a shared
+spectrum once and each detected occurrence's amplitude separately.
 
-Alignment retains the measured scan grids. It adjusts profile coordinates and
-bin widths with an area-preserving Jacobian. Known exposure can be supplied
-when the measurement represents integrated counts. Unit exposure preserves
-vendor intensity units by default.
+Alignment retains each sample's measured scan grid. Profile coordinates and
+bin widths transform with an area-preserving Jacobian. Known exposure can
+be supplied for integrated-count measurements; the default unit exposure
+preserves vendor intensity units.
 
-Observations and factor checkpoints are stored per sample on disk. Coupled
-updates read one sample at a time, with common spectra and compact matching
-summaries in memory. Nearby-time comparisons avoid an all-occurrence pairwise
-distance matrix. Samples keep their acquisition order and group labels; alkane
-standards are selected by acquisition time. Missing occurrences remain `NA`.
+Observations and factor checkpoints are stored per sample on disk. Updates
+read one sample at a time while keeping shared spectra and compact matching
+summaries in memory. Local retention-time comparisons avoid an all-pairs
+occurrence-distance matrix. Samples retain acquisition order and group
+labels; alkane standards are selected by acquisition time. Missing
+occurrences are reported as `NA`.
 
-See [multiple-sample deconvolution](multisample.html) for the directory workflow
-and [L0nmf's coupled model](https://tomwenseleers.github.io/L0nmf/articles/algorithm.html#coupled-model)
-for the full mathematical specification.
+See [multiple-sample deconvolution](multisample.html) for the directory
+workflow and [L0nmf's coupled model](https://tomwenseleers.github.io/L0nmf/articles/algorithm.html#coupled-model)
+for its objective and mathematical specification.
 
 ## 8. Identify the recovered compounds
 
-Open and commercial spectral libraries can be imported and searched. GCMSprime
-uses alkane-derived retention indices to filter compatible candidates, then
-ranks their spectral match quality. Consensus IDs connect repeated occurrences
-for a unique-compound summary across the experiment.
+GCMSprime imports open and commercial spectral libraries. Alkane-derived
+retention indices first restrict candidate identities to compounds compatible
+with the selected stationary phase and RI tolerance. Spectral similarity
+then ranks those candidates. Consensus IDs connect repeated occurrences
+to a unique-compound summary across the experiment.
 
 [Retention indices and spectral identification](identification-theory.html)
-explains the diagnostic-ion alkane assignments, calibration, column classes,
+describes diagnostic-ion alkane assignments, calibration, column classes,
 spectral distances and ion weighting. The
-[library-search tutorial](library-search.html) shows the calls and annotated exports.
+[library-search tutorial](library-search.html) gives executable calls and
+annotated exports.
