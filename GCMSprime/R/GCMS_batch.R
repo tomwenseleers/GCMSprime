@@ -332,6 +332,7 @@ nobs.GCMSbatch <- function(object,...) {
   sum(vapply(object$paths,function(p)nobs(readRDS(p)),0L))
 }
 #' @rdname GCMSbatch
+#' @method print GCMSbatch
 #' @export
 print.GCMSbatch <- function(x,...) {
   cat("GC/MS experiment:",nrow(x$samples),"samples in",length(unique(x$samples$group)),"groups\n")

@@ -34,6 +34,7 @@ test_that("coupled directory workflows export original-channel sample and consen
     control=list(profile_cycles=0L,original_cleanup=FALSE),
     batch=list(coupling=list(cycles=1L,initial_cycles=1L,rounds=1L)))
   expect_s3_class(f,"GCMSbatch");expect_equal(nrow(f$samples),2L)
+  expect_output(print(f),"GC/MS experiment")
   expect_equal(dim(fitted(f,sample=1L)),c(n,m));expect_true(is.finite(GIC(f)))
   expect_true(all(file.exists(file.path(out,c("consensus.msp","experiment.xlsx","samples.csv","areas.csv")))))
   expect_identical(openxlsx::getSheetNames(file.path(out,"experiment.xlsx")),c("samples","compounds","areas"))

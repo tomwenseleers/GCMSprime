@@ -35,7 +35,7 @@
 
 \method{nobs}{GCMSbatch}(object, ...)
 
-print.GCMSbatch(x, ...)
+\method{print}{GCMSbatch}(x, ...)
 }
 \arguments{
 \item{sample}{One sample index or identifier. \code{NULL} in \code{coef()} returns the
