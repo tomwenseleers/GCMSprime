@@ -44,13 +44,19 @@
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-tutorials" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Tutorials</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-tutorials">
-<li><a class="dropdown-item" href="articles/multisample.html">Multisample experiments</a></li>
-    <li><a class="dropdown-item" href="articles/gcms-deconvolution.html">GC/MS deconvolution</a></li>
-    <li><a class="dropdown-item" href="articles/spectral-libraries.html">Spectral libraries and storage</a></li>
+<li><a class="dropdown-item" href="articles/gcms-deconvolution.html">GC/MS deconvolution for single samples</a></li>
+    <li><a class="dropdown-item" href="articles/multisample.html">GC/MS deconvolution for multiple samples</a></li>
+    <li><a class="dropdown-item" href="articles/spectral-libraries.html">Spectral library import</a></li>
     <li><a class="dropdown-item" href="articles/library-search.html">Retention indices and library search</a></li>
   </ul>
 </li>
-<li class="nav-item"><a class="external-link nav-link" href="https://tomwenseleers.github.io/L0nmf/articles/log-concave-nmf.html">Algorithm &amp; theory</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-algorithm-theory" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Algorithm &amp; theory</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-algorithm-theory">
+<li><a class="dropdown-item" href="articles/algorithm.html">How chromatograms become compounds</a></li>
+    <li><a class="dropdown-item" href="articles/identification-theory.html">Retention indices and spectral identification</a></li>
+  </ul>
+</li>
 <li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
 <li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
       </ul>
@@ -77,7 +83,7 @@ GC/MS DECONVOLUTION · QUANTIFICATION · IDENTIFICATION
 More compounds.<br><span>Cleaner spectra.</span>
 </h1>
 <p class="l0-lead">
-State-of-the-art GC/MS deconvolution, quantification and library search.
+Fast and scalable GC/MS deconvolution and quantification for single or multiple samples, with inbuilt spectral library search.
 </p>
 <div class="l0-actions">
 <a class="btn btn-primary" href="articles/gcms-deconvolution.html">Get started <span aria-hidden="true">↗</span></a><a class="btn btn-outline-light" href="articles/library-search.html">Search spectral libraries</a>
@@ -91,7 +97,7 @@ R · Full mass spectra · CDF input · MSP &amp; Excel output
 <div class="l0-stat-grid">
 <p><a href="articles/gcms-deconvolution.html"><strong>Deconvolve</strong><span>Resolve overlapping compounds and recover their spectra</span></a> <a href="reference/GCMSdeco.html"><strong>Quantify</strong><span>Integrated areas, fitted profiles and complete reports</span></a> <a href="articles/library-search.html"><strong>Identify</strong><span>Fast spectral matching with column-specific retention indices</span></a></p>
 </div>
-<p>GCMSprime is a new state-of-the-art GC/MS deconvolution pipeline to separate and integrate overlapping chromatographic peaks. It enables unparalleled peak integration accuracy, and has retention index constrained library search using either public or commercial libraries built-in. It is extremely easy to use, and produces detailed sample reports in minutes in a fully automatic way, without any required user intervention or parameter settings. The deconvolution method that it uses is mathematically principled and builds on two other packages. First, <a href="https://tomwenseleers.github.io/L0glm/" class="external-link">L0glm</a> for ultrafast joint feature selection across mass channels (approximating best subset of group selection). Second, <a href="https://tomwenseleers.github.io/L0nmf/" class="external-link">L0nmf</a> to deconvolve spectra based on an estimated time-varying peak shape function (PSF), followed by sparse log-concave nonnegative matrix factorization with automatic best rank detection, which estimates the most parsimonious true number of compounds present, whilst allowing for flexible log-concave peak shape constraints, overdispersed multivariate Poisson noise and a smoothly varying background. In this way, the package can simultaneously estimate the number of compounds present, their elution profiles, and the deconvolved spectra, even based on data from single samples. It succeeds in accurately estimating elution profiles and peak areas, even for challenging cases where peaks are highly overloaded or have awkward shark-fin shapes, as is commonly the case for acids. To our knowledge, it is the first package that can achieve this. Following deconvolution, spectra can then be searched against public (MoNA, GCMS-ID) or commercial libraries (after Openchrom export to .MSP), using a retention index constrained seach, or be exported to NIST MS Search compatible MSP format. Using this workflow, analysts can save weeks of manual work.</p>
+<p>GCMSprime separates overlapping GC/MS signals into compound profiles, mass spectra and integrated areas. It combines automatic response-shape estimation with sparse log-concave factorization and retention-index-constrained identification. Its statistical engines are developed in <a href="https://tomwenseleers.github.io/L0glm/" class="external-link">L0glm</a> and <a href="https://tomwenseleers.github.io/L0nmf/" class="external-link">L0nmf</a>.</p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
@@ -100,64 +106,62 @@ R · Full mass spectra · CDF input · MSP &amp; Excel output
 <span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"tomwenseleers/GCMSprime/GCMSprime"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="fully-automatic-deconvolution">Fully automatic deconvolution<a class="anchor" aria-label="anchor" href="#fully-automatic-deconvolution"></a>
+<h2 id="automatic-deconvolution-for-single-samples">Automatic deconvolution for single samples<a class="anchor" aria-label="anchor" href="#automatic-deconvolution-for-single-samples"></a>
 </h2>
+<p>One call estimates the response shape, smooth background, compound profiles, full mass spectra and integrated areas, then writes NIST-compatible MSP and Excel reports. An alkane ladder can calibrate the PSF and retention indices.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tomwenseleers.github.io/GCMSprime/">GCMSprime</a></span><span class="op">)</span></span>
 <span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/GCMSdeco.html">GCMSdeco</a></span><span class="op">(</span><span class="st">"sample.cdf"</span>, <span class="st">"sample.msp"</span>, xlsx_file<span class="op">=</span><span class="st">"sample.xlsx"</span>,</span>
-<span>                alkanes_file<span class="op">=</span><span class="st">"alkanes.cdf"</span>, precluster<span class="op">=</span><span class="fl">32L</span><span class="op">)</span></span>
-<span><span class="va">fit</span></span>
+<span>  alkanes_file<span class="op">=</span><span class="st">"alkanes.cdf"</span>, precluster<span class="op">=</span><span class="fl">32L</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit</span>, type<span class="op">=</span><span class="st">"lines"</span>, file<span class="op">=</span><span class="st">"sample_traces.pdf"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit</span>, type<span class="op">=</span><span class="st">"heatmap"</span>, file<span class="op">=</span><span class="st">"sample_heatmaps.pdf"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit</span>, type<span class="op">=</span><span class="st">"profiles"</span>, file<span class="op">=</span><span class="st">"sample_profiles_spectra.pdf"</span><span class="op">)</span></span></code></pre></div>
-<p>The workflow calibrates a time-varying PSF, models a smooth baseline, resolves overlapping compounds and refines their spectra on every original mass channel. Results are ordered by apex retention time. MSP files are readable by NIST MS Search; Excel reports contain integrated areas and compact spectra.</p>
-<p>The final original-channel pass checks component deletions, local fusions and missed residual peaks, accepting each change only when the complete likelihood-and-compound criterion improves.</p>
-</div>
-<div class="section level2">
-<h2 id="experimental-examples">Experimental examples<a class="anchor" aria-label="anchor" href="#experimental-examples"></a>
-</h2>
-<p>The <a href="articles/gcms-deconvolution.html">GC/MS tutorial</a> includes two experimental chromatogram windows, complete fitted signals, spectra, timings and exports.</p>
-<div class="float">
-<img src="reference/figures/gcms-data1-traces.png" alt="Co-eluting hydrocarbon profiles"><div class="figcaption">Co-eluting hydrocarbon profiles</div>
-</div>
-<div class="float">
-<img src="reference/figures/gcms-data2-traces.png" alt="Beer volatile profiles"><div class="figcaption">Beer volatile profiles</div>
-</div>
-<p>The underlying <a href="https://tomwenseleers.github.io/L0nmf/" class="external-link">factorization and PSF methods</a> are available independently in L0nmf.</p>
-</div>
-<div class="section level2">
-<h2 id="spectral-libraries">Spectral libraries<a class="anchor" aria-label="anchor" href="#spectral-libraries"></a>
-</h2>
-<p>Import MSP libraries into sparse memory or SQLite storage, preserving raw peaks, chemical identifiers, synonyms and retention-index provenance:</p>
+<p>The fit allows asymmetric and broad profiles under hard log-concavity constraints. Its automatic best rank criterion selects a compact compound set; the final likelihood refinement retains every original mass channel.</p>
+<div class="section level3">
+<h3 id="six-co-eluting-hydrocarbons">Six co-eluting hydrocarbons<a class="anchor" aria-label="anchor" href="#six-co-eluting-hydrocarbons"></a>
+</h3>
+<p>The bundled cuticular-hydrocarbon window illustrates recovered elution profiles and spectra. This short-window example uses a supplied PSF dictionary and a constant background; individual compound shapes are then refined.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">lib</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/read_msp.html">read_msp</a></span><span class="op">(</span><span class="st">"library.msp"</span>, backend<span class="op">=</span><span class="st">"sqlite"</span>, db_file<span class="op">=</span><span class="st">"library.sqlite"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="reference/spectra.html">spectra</a></span><span class="op">(</span><span class="va">lib</span>, which<span class="op">=</span><span class="fl">1</span><span class="op">:</span><span class="fl">1000</span>, nominal<span class="op">=</span><span class="cn">TRUE</span>, normalize<span class="op">=</span><span class="st">"l2"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="reference/library_metadata.html">library_metadata</a></span><span class="op">(</span><span class="va">lib</span>, which<span class="op">=</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">)</span></span>
-<span><span class="fu"><a href="reference/retention_indices.html">retention_indices</a></span><span class="op">(</span><span class="va">lib</span>, which<span class="op">=</span><span class="fl">1</span><span class="op">:</span><span class="fl">1000</span>, phase<span class="op">=</span><span class="st">"DB5"</span><span class="op">)</span></span></code></pre></div>
-<p><a href="articles/spectral-libraries.html">Library formats and storage</a> covers OpenChrom MSP exports, MoNA/Golm MSP and GCMS-ID CSV predictions.</p>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">GCMS_data1</span>, package<span class="op">=</span><span class="st">"L0nmf"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/write_GCMS_cdf.html">write_GCMS_cdf</a></span><span class="op">(</span><span class="va">GCMS_data1</span>, <span class="st">"GCMS_data1.cdf"</span><span class="op">)</span></span>
+<span><span class="va">example_fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/GCMSdeco.html">GCMSdeco</a></span><span class="op">(</span><span class="st">"GCMS_data1.cdf"</span>, <span class="st">"GCMS_data1.msp"</span>,</span>
+<span>  nwindows<span class="op">=</span><span class="fl">1L</span>, baseline_df<span class="op">=</span><span class="fl">1L</span>, precluster<span class="op">=</span><span class="fl">16L</span>, correlation<span class="op">=</span><span class="st">"none"</span>,</span>
+<span>  psf_control<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>kernel_est<span class="op">=</span><span class="fu">L0glm</span><span class="fu">::</span><span class="fu"><a href="https://tomwenseleers.github.io/L0glm/reference/convkernel.html" class="external-link">convkernel</a></span><span class="op">(</span><span class="st">"gaussian"</span>, <span class="fl">65L</span>,</span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>sigma<span class="op">=</span><span class="fl">8</span><span class="op">)</span><span class="op">)</span>, maxiter<span class="op">=</span><span class="fl">0L</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p><a href="articles/gcms-deconvolution.html#cuticular-hydrocarbons"><img src="reference/figures/gcms-data1-profiles-spectra.png" alt="Recovered elution profiles and spectra for six co-eluting hydrocarbons"></a></p>
+</div>
+<div class="section level3">
+<h3 id="beer-volatiles-and-a-broad-acid-peak">Beer volatiles and a broad acid peak<a class="anchor" aria-label="anchor" href="#beer-volatiles-and-a-broad-acid-peak"></a>
+</h3>
+<p>A beer-headspace window contains a strongly asymmetric acid peak mixed with narrower neighbours. Flexible log-concave profiles accommodate this shape while the spectra use all 518 channels.</p>
+<p><a href="articles/gcms-deconvolution.html#beer-volatiles-and-a-broad-acid-peak"><img src="reference/figures/gcms-data2-traces.png" alt="Beer chromatogram with fitted compounds and the broad acid contribution"></a></p>
+<p>The <a href="articles/gcms-deconvolution.html">single-sample tutorial</a> includes both datasets, fitted-signal heatmaps, profile/spectrum panels, timings and downloadable MSP/PDF outputs. <a href="articles/algorithm.html">How chromatograms become compounds</a> explains the progression from known PSFs to estimated and component-specific shapes.</p>
+</div>
 </div>
 <div class="section level2">
-<h2 id="identify-recovered-compounds">Identify recovered compounds<a class="anchor" aria-label="anchor" href="#identify-recovered-compounds"></a>
+<h2 id="automatic-deconvolution-for-multiple-samples">Automatic deconvolution for multiple samples<a class="anchor" aria-label="anchor" href="#automatic-deconvolution-for-multiple-samples"></a>
 </h2>
-<p>Calibrate retention indices from a diagnostic-ion alkane ladder and combine column-specific RI constraints with fast spectral matching:</p>
+<p>Point to a directory containing sample-group folders and a <code>standards/</code> subdirectory with alkane calibrations. Acquisition timestamps determine run order. The coupled model aligns compounds and shares their spectra while retaining sample-specific profiles, backgrounds and areas.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">cal</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/calibrate_ri.html">calibrate_ri</a></span><span class="op">(</span><span class="st">"alkanes.cdf"</span>, carbon<span class="op">=</span><span class="fl">7</span><span class="op">:</span><span class="fl">23</span><span class="op">)</span></span>
-<span><span class="va">identified</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/identify_compounds.html">identify_compounds</a></span><span class="op">(</span><span class="va">fit</span>, <span class="va">lib</span>, calibration<span class="op">=</span><span class="va">cal</span>,</span>
-<span>  phase<span class="op">=</span><span class="st">"DB5"</span>, ri_tolerance<span class="op">=</span><span class="fl">30</span>, n_matches<span class="op">=</span><span class="fl">5</span>,</span>
-<span>  method<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"stein_scott"</span>, <span class="st">"hellinger"</span><span class="op">)</span>,</span>
-<span>  msp_file<span class="op">=</span><span class="st">"sample_identified.msp"</span>, xlsx_file<span class="op">=</span><span class="st">"sample_identified.xlsx"</span><span class="op">)</span></span></code></pre></div>
-<p>For metric spectral distances, use <code>method="angular"</code> or <code>"stein_scott_angular"</code>. Reusable ion-rarity weights come from <code>library_ion_weights(lib)</code> and are passed through <code>ion_weights=</code>. Multinomial matching balances unknown reference counts to the sample total automatically.</p>
-<p><a href="https://tomwenseleers.github.io/GCMSprime/articles/library-search.html">RI calibration and library search</a> compares five similarity measures and explains the peak-onset timing convention, retained ion totals and scalable SQLite search.</p>
+<code class="sourceCode R"><span><span class="va">experiment</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/GCMSdeco.html">GCMSdeco</a></span><span class="op">(</span><span class="st">"chromatograms"</span>, output_dir<span class="op">=</span><span class="st">"experiment_results"</span>,</span>
+<span>  precluster<span class="op">=</span><span class="fl">32L</span>, batch<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>plots<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">experiment</span><span class="op">$</span><span class="va">samples</span></span>
+<span><span class="va">experiment</span><span class="op">$</span><span class="va">areas</span></span></code></pre></div>
+<p><strong>The experiment is processed out of core.</strong> Observations and factor checkpoints are stored per sample on disk, and coupled updates read one sample at a time. Common spectra and compact matching summaries remain in memory. Native sparse local updates and OpenMP keep the computation focused on informative windows. Original scan grids are retained, and compounds absent from a sample stay unassigned in its area table.</p>
+<p>In a three-sample simulation with 258 mass channels, the coupled model recovered all 78 compound occurrences in 29.69 seconds. The directory workflow exports a consensus MSP library and an Excel area table, together with each sample’s spectra and diagnostic reports. See <a href="articles/multisample.html">multiple-sample deconvolution</a> for the layout, calibration, scalability and a complete two-beer example.</p>
 </div>
 <div class="section level2">
-<h2 id="multisample-experiments">Multisample experiments<a class="anchor" aria-label="anchor" href="#multisample-experiments"></a>
+<h2 id="spectral-library-search">Spectral library search<a class="anchor" aria-label="anchor" href="#spectral-library-search"></a>
 </h2>
-<p>Point <code><a href="reference/GCMSdeco.html">GCMSdeco()</a></code> to an experiment directory containing sample groups and a <code>standards/</code> subdirectory with alkane calibrations. Samples are ordered by acquisition time, aligned and fitted with shared spectra and sample-specific log-concave profiles. The output includes a consensus MSP library and an Excel area table, alongside each sample’s spectra and reports.</p>
+<p><strong>Open and commercial libraries can be imported.</strong> MoNA and Golm MSP collections, GCMS-ID CSV predictions, and OpenChrom-exported Agilent or Shimadzu libraries are supported. Large catalogues can remain in indexed SQLite storage.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">experiment</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/GCMSdeco.html">GCMSdeco</a></span><span class="op">(</span><span class="st">"chromatograms"</span>, output_dir<span class="op">=</span><span class="st">"beer_results"</span>,</span>
-<span>  precluster<span class="op">=</span><span class="fl">32L</span>, batch<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>plots<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">experiment</span><span class="op">$</span><span class="va">areas</span></span></code></pre></div>
-<p>See <a href="articles/multisample.html">Multisample GC/MS experiments</a> for the directory layout, acquisition handling, exposure options and a calibrated beer example.</p>
+<code class="sourceCode R"><span><span class="va">lib</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/read_msp.html">read_msp</a></span><span class="op">(</span><span class="st">"library.msp"</span>, backend<span class="op">=</span><span class="st">"sqlite"</span>, db_file<span class="op">=</span><span class="st">"library.sqlite"</span><span class="op">)</span></span>
+<span><span class="va">identified</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/GCMSdeco.html">GCMSdeco</a></span><span class="op">(</span><span class="st">"sample.cdf"</span>, <span class="st">"identified.msp"</span>,</span>
+<span>  xlsx_file<span class="op">=</span><span class="st">"identified.xlsx"</span>, alkanes_file<span class="op">=</span><span class="st">"alkanes.cdf"</span>, library<span class="op">=</span><span class="va">lib</span>,</span>
+<span>  search<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>phase<span class="op">=</span><span class="st">"DB5"</span>, ri_tolerance<span class="op">=</span><span class="fl">30</span>, n_matches<span class="op">=</span><span class="fl">5</span>,</span>
+<span>              method<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"stein_scott"</span>, <span class="st">"hellinger"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p>The compounds recovered from single- or multisample deconvolution can be automatically annotated using <strong>spectral match quality and retention index</strong>. Alkane-derived indices first restrict candidates to the selected column class and tolerance; fast native search then ranks their spectra. Multisample consensus IDs support a unique-compound list across the experiment, with sample-specific RI evidence and full match provenance retained.</p>
+<p>Stein–Scott, cosine/angular, Hellinger and symmetric probability/count comparisons are available, with optional ion-rarity weighting. Excel and MSP reports include the ranked matches and annotations. The <a href="articles/spectral-libraries.html">library-import tutorial</a> covers formats and storage; <a href="articles/library-search.html">retention indices and library search</a> shows single- and multisample identification. The <a href="articles/identification-theory.html">identification theory</a> gives the formulas, calibration and comparison benchmarks.</p>
 </div>
 <div class="section level2">
 <h2 id="citation">Citation<a class="anchor" aria-label="anchor" href="#citation"></a>

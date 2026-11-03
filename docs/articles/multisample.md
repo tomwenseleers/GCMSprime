@@ -1,4 +1,4 @@
-# Multisample GC/MS experiments
+# GC/MS deconvolution for multiple samples
 
 [`GCMSdeco()`](https://tomwenseleers.github.io/GCMSprime/reference/GCMSdeco.md)
 accepts an experiment directory and analyzes its chromatograms together.

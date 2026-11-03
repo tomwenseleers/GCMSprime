@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Identify compounds with spectra and retention indices • GCMSprime</title>
+<title>Retention indices and library search • GCMSprime</title>
 <!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="../favicon-96x96.png">
 <link rel="icon" type="”image/svg+xml”" href="../favicon.svg">
 <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
@@ -17,7 +17,7 @@
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><link href="../extra.css" rel="stylesheet">
-<meta property="og:title" content="Identify compounds with spectra and retention indices">
+<meta property="og:title" content="Retention indices and library search">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -40,13 +40,19 @@
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-tutorials" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Tutorials</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-tutorials">
-<li><a class="dropdown-item" href="../articles/multisample.html">Multisample experiments</a></li>
-    <li><a class="dropdown-item" href="../articles/gcms-deconvolution.html">GC/MS deconvolution</a></li>
-    <li><a class="dropdown-item" href="../articles/spectral-libraries.html">Spectral libraries and storage</a></li>
+<li><a class="dropdown-item" href="../articles/gcms-deconvolution.html">GC/MS deconvolution for single samples</a></li>
+    <li><a class="dropdown-item" href="../articles/multisample.html">GC/MS deconvolution for multiple samples</a></li>
+    <li><a class="dropdown-item" href="../articles/spectral-libraries.html">Spectral library import</a></li>
     <li><a class="dropdown-item" href="../articles/library-search.html">Retention indices and library search</a></li>
   </ul>
 </li>
-<li class="nav-item"><a class="external-link nav-link" href="https://tomwenseleers.github.io/L0nmf/articles/log-concave-nmf.html">Algorithm &amp; theory</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-algorithm-theory" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Algorithm &amp; theory</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-algorithm-theory">
+<li><a class="dropdown-item" href="../articles/algorithm.html">How chromatograms become compounds</a></li>
+    <li><a class="dropdown-item" href="../articles/identification-theory.html">Retention indices and spectral identification</a></li>
+  </ul>
+</li>
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul>
@@ -67,7 +73,7 @@
 
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-      <img src="../logo.png" class="logo" alt=""><h1>Identify compounds with spectra and retention indices</h1>
+      <img src="../logo.png" class="logo" alt=""><h1>Retention indices and library search</h1>
             
       
       <small class="dont-index">Source: <a href="https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSprime/vignettes/articles/library-search.Rmd" class="external-link"><code>vignettes/articles/library-search.Rmd</code></a></small>
@@ -112,311 +118,100 @@ objective stay unchanged.</p>
 <span>              method<span class="op">=</span><span class="st">"stein_scott"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="alkane-identification-and-ri-calibration">Alkane identification and RI calibration<a class="anchor" aria-label="anchor" href="#alkane-identification-and-ri-calibration"></a>
+<h2 id="inspect-calibration-and-retention-constraints">Inspect calibration and retention constraints<a class="anchor" aria-label="anchor" href="#inspect-calibration-and-retention-constraints"></a>
 </h2>
-<p>The standard is identified using the alkyl-fragment series at m/z 43,
-57, 71, 85, 99 and 113, together with the molecular ion at <span class="math inline">M=14c+2</span> for an n-alkane with <span class="math inline">c</span> carbons. The molecular-ion signal is
-corrected for the carbon-13 isotope contribution of the neighbouring
-alkyl ion. Minimum molecular-ion evidence and fragment-series abundance
-screen candidates; a maximum-weight increasing carbon-number sequence
-resolves duplicate maxima and inconsistent assignments. Supply the known
-carbon range when available. All candidates and their acceptance
-decisions are retained for inspection.</p>
-<p>The retention coordinate follows</p>
-<p><span class="math display">
-t^\star=t_{\mathrm{onset}}+\frac{w_{\mathrm{small}}(t_{\mathrm{onset}})}2.
-</span></p>
-<p>Onset is the leading crossing at 1% of the background-corrected peak
-height. The local calibrated narrow-peak PSF supplies the full width at
-the same 1% height. Pass it through <code>psf=fit$psf_standard</code>; a
-time-varying PSF gives a smoothly varying local duration. If no PSF is
-supplied, a smooth lower envelope of the standard peak widths estimates
-the small-peak duration. This reduces the influence of overloaded or
-tailing peaks on the retention coordinate. Both standard peaks and
-recovered sample profiles use this timing convention. The
-relative-height fraction is configurable through
-<code>control=list(fraction=.01)</code>.</p>
-<p>A smoothing spline maps <span class="math inline">t^\star_c</span> to
-<span class="math inline">100c</span>; monotone interpolation through
-its fitted anchor values preserves the chromatographic ordering.
-Smoothing is selected by GCV unless <code>spar</code> is supplied.
-Predictions outside the accepted standard range remain unassigned by
-default. Verified anchors can be supplied directly, including a
-<code>narrow_width</code> column when timing fitted profiles.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">cal</span><span class="op">$</span><span class="va">anchors</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"carbon"</span>, <span class="st">"apex"</span>, <span class="st">"start"</span>, <span class="st">"narrow_width"</span>,</span>
-<span>                 <span class="st">"retention_time"</span>, <span class="st">"RI"</span>, <span class="st">"residual"</span><span class="op">)</span><span class="op">]</span></span>
-<span><span class="va">cal</span><span class="op">$</span><span class="va">candidates</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">cal</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">20</span>, <span class="fl">30</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p>This smooth calibration extends the alkane-index construction of <a href="https://doi.org/10.1016/S0021-9673(01)80947-X" class="external-link">van den Dool &amp;
-Kratz (1963)</a>. <a href="https://webbook.nist.gov/chemistry/gc-ri/" class="external-link">NIST describes the
-standard RI conventions</a>. Use a ladder acquired with the sample’s
-column and chromatographic programme.</p>
-<p>The Excel Run sheet records the width source and timing convention.
-<code><a href="../reference/GCMSdeco.html">GCMSdeco()</a></code> reuses its stored standard PSF automatically
-when identification is requested.</p>
+<code class="sourceCode R"><span><span class="va">cal</span><span class="op">$</span><span class="va">anchors</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"carbon"</span>, <span class="st">"start"</span>, <span class="st">"narrow_width"</span>, <span class="st">"retention_time"</span>, <span class="st">"RI"</span>, <span class="st">"residual"</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="va">cal</span><span class="op">$</span><span class="va">candidates</span></span></code></pre></div>
+<p>The timing anchor is peak onset at 1% of height plus half a local
+narrow-peak width. This reduces the influence of long tails on RI
+estimation. Standards and sample profiles use the same convention.
+<code>phase="DB5"</code> is the default; DB1 and DBWAX are also
+supported. <code>ri_tolerance=30</code> admits compatible references
+within 30 index units. Use a standard acquired under the sample’s
+programme.</p>
+<p>Unlabelled reference RIs keep their provenance. If their column class
+is known, set <code>unknown_phase="DB5"</code> explicitly.
+<code>ri_tolerance=Inf</code> requests spectral-only searching. <a href="identification-theory.html">The identification theory</a> gives
+the calibration, column matching and missing-reference rules.</p>
 </div>
 <div class="section level2">
-<h2 id="column-specific-retention-constraints">Column-specific retention constraints<a class="anchor" aria-label="anchor" href="#column-specific-retention-constraints"></a>
+<h2 id="choose-spectral-comparisons">Choose spectral comparisons<a class="anchor" aria-label="anchor" href="#choose-spectral-comparisons"></a>
 </h2>
-<p><code>phase="DB1"</code>, <code>"DB5"</code> and <code>"DBWAX"</code>
-select nonpolar, semi-standard nonpolar and polar RI classes. Only
-references satisfying</p>
-<p><span class="math display">
-|I_{\mathrm{sample}}-I_{\mathrm{reference}}|\leq\texttt{ri\_tolerance}
-</span></p>
-<p>are scored. The closest RI measurement is used when a reference has
-several measurements on the selected phase class. Predicted RI records
-retain their provenance in the match table. Uncalibrated queries and
-spectra without eligible references remain visible in the query
-diagnostics.</p>
-<p>MSP exports sometimes contain RI values without a column class. These
-remain unassigned to a phase. If the library’s documentation establishes
-their column class, pass, for example, <code>unknown_phase="DB5"</code>
-explicitly. <code>ri_tolerance=Inf</code> requests spectral-only
-searching. It is useful for evaluating spectral scores separately from
-RI filtering.</p>
-<p>NIST/OpenChrom comment summaries such as
-<code>SemiStdNP=1000 StdNP=990 StdPolar=1300</code> retain their DB5,
-DB1 and DBWAX column classes during import. Slash-delimited uncertainty
-summaries remain available in the raw RI value. For an explicitly
-justified benchmark assignment, <code>unknown_phase="DB5"</code> also
-admits unlabelled RI values. These matches carry
-<code>ri_assumed=TRUE</code>, and the Excel and MSP reports state the
-assignment. References with missing RIs remain excluded from a
-constrained search.</p>
-</div>
-<div class="section level2">
-<h2 id="spectral-comparisons-and-angular-distance">Spectral comparisons and angular distance<a class="anchor" aria-label="anchor" href="#spectral-comparisons-and-angular-distance"></a>
-</h2>
-<p>For acquired-bin ion vectors <span class="math inline">a,b</span>,
-let <span class="math inline">N=\sum a_j</span>, <span class="math inline">p=a/N</span> and <span class="math inline">q=b/\sum
-b_j</span>. References are restricted to the query’s acquired mass bins,
-including bins with zero query intensity. Let <span class="math inline">w_j\geq0</span> denote optional ion weights, with
-<span class="math inline">w_j=1</span> by default.</p>
-<p>Weighted cosine similarity is</p>
-<p><span class="math display">
-C_w(a,b)=\frac{\sum_j w_j a_jb_j}
-{\sqrt{\sum_jw_ja_j^2}\sqrt{\sum_jw_jb_j^2}}.
-</span></p>
-<p><code>cosine</code> returns distance <span class="math inline">1-C_w^2</span>. <code>stein_scott</code> applies the
-same calculation after transforming intensities to <span class="math inline">I^{0.6}(m/z)^3</span>, following <a href="https://doi.org/10.1016/1044-0305(94)87009-8" class="external-link">Stein &amp; Scott
-(1994)</a> and <a href="https://doi.org/10.1093/bioinformatics/bts083" class="external-link">Kim et
-al. (2012)</a>.</p>
-<p><code>angular</code> and <code>stein_scott_angular</code> instead
-return the corresponding angle</p>
-<p><span class="math display">
-\theta_w=\arccos C_w.
-</span></p>
-<p>With fixed positive weights, this is geodesic distance between the
-unit vectors obtained from <span class="math inline">\sqrt w\,a</span>
-and <span class="math inline">\sqrt w\,b</span>, with the Stein–Scott
-transform added when requested. It satisfies the triangle inequality.
-Zero weights omit ions, and a nonzero weighted norm is required. Since
-intensities are nonnegative, <span class="math inline">0\leq\theta_w\leq\pi/2</span>. Angular distance
-ranks references in the same order as its cosine counterpart: the
-geometric metric property changes, while retrieval accuracy stays the
-same. The native search shares the ranking key, avoiding extra rounding
-ties from <code><a href="https://rdrr.io/r/base/Trig.html" class="external-link">acos()</a></code>.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">w</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/library_ion_weights.html">library_ion_weights</a></span><span class="op">(</span><span class="va">lib</span><span class="op">)</span></span>
-<span><span class="va">matches</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/library_search.html">library_search</a></span><span class="op">(</span><span class="va">fit</span>, <span class="va">lib</span>, calibration<span class="op">=</span><span class="va">cal</span>, phase<span class="op">=</span><span class="st">"DB5"</span>,</span>
-<span>  ri_tolerance<span class="op">=</span><span class="fl">30</span>, method<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"angular"</span>, <span class="st">"stein_scott_angular"</span><span class="op">)</span>,</span>
-<span>  ion_weights<span class="op">=</span><span class="va">w</span>, n_matches<span class="op">=</span><span class="fl">5</span><span class="op">)</span></span></code></pre></div>
-<div class="section level3">
-<h3 id="probability-distances-and-sample-counts">Probability distances and sample counts<a class="anchor" aria-label="anchor" href="#probability-distances-and-sample-counts"></a>
-</h3>
-<p><code>hellinger</code> uses the weighted square-root distance</p>
-<p><span class="math display">
-H_w(p,q)=\sqrt{\frac{1}{2W}\sum_jw_j(\sqrt{p_j}-\sqrt{q_j})^2},
-\qquad W=\max_jw_j.
-</span></p>
-<p>For <span class="math inline">r=(p+q)/2</span>, define the weighted
-Jensen–Shannon divergence</p>
-<p><span class="math display">
-J_w(p,q)=\frac12\sum_jw_j\left[p_j\log\frac{p_j}{r_j}
-                              +q_j\log\frac{q_j}{r_j}\right].
-</span></p>
-<p><code>jensen_shannon</code> returns <span class="math inline">\sqrt{J_w/(W\log2)}</span>. Zero contributions use
-<span class="math inline">0\log0=0</span>. The common bound <span class="math inline">W</span> puts these probability distances on a 0–1
-scale.</p>
-<p>MSP libraries generally provide relative intensities, with unknown
-original ion totals. The default <code>reference_count="auto"</code>
-uses an explicit <code>Pseudocount</code>/<code>Ion_total</code> tag
-when supplied; otherwise it assigns the reference the same total as the
-sample spectrum. <code>reference_count="query"</code> always uses this
-balanced convention, and <code>"library"</code> uses the stored library
-intensity scale.</p>
-<p>For effective reference total <span class="math inline">M</span>, the
-multinomial divergence is</p>
-<p><span class="math display">
-D_w=2\sum_jw_j\left[Np_j\log\frac{p_j}{u_j}
-                   +Mq_j\log\frac{q_j}{u_j}\right],
-\qquad u=\frac{Np+Mq}{N+M}.
-</span></p>
-<p>With <span class="math inline">M=N</span>, it simplifies to</p>
-<p><span class="math display">
-\boxed{D_w=4N J_w(p,q).}
-</span></p>
-<p>Thus balanced multinomial deviance has the same ranking as weighted
-Jensen–Shannon, with its absolute scale determined by the sample’s
-retained pseudocount. At a fixed <span class="math inline">N</span>, it
-is symmetric in the spectral shapes. Each ion contributes a nonnegative
-Jensen gap. Nonconstant weights give an importance-weighted composite
-divergence; uniform weights and known totals give the ordinary
-multinomial likelihood-ratio statistic. Native evaluation uses
-nonnegative scalar gaps and a local series near equality, avoiding
-cancellation amplified by large counts.</p>
-<p><code>query_total</code> preserves the sample total;
-<code>library_total</code> records the reference’s stored/restored
-total. <code>reference_total</code> and <code>reference_count</code>
-show the effective comparison convention, and
-<code>library_mass_coverage</code> records acquisition coverage. For an
-L1-normalized matrix, supply its original totals through
-<code>pseudocount=</code>. A <code>GCMSdeco</code> fit supplies them
-automatically. Explicit count tags also preserve totals through MSP
-export and re-import.</p>
-<p>Scores run from 0 to 1000, with larger values better. Angular scores
-are <span class="math inline">1000(1-2\theta/\pi)</span>; distances
-remain in radians. Probability and count-based scores follow the
-definitions in <a href="../reference/library_search.html">library_search()</a>. Compare
-scores within a method and weighting convention.</p>
-</div>
-</div>
-<div class="section level2">
-<h2 id="ion-uniqueness-weights">Ion uniqueness weights<a class="anchor" aria-label="anchor" href="#ion-uniqueness-weights"></a>
-</h2>
-<p><a href="../reference/library_ion_weights.html">library_ion_weights()</a>
-computes smoothed inverse-document-frequency weights. If <span class="math inline">L</span> nonempty reference spectra are available
-and <span class="math inline">d_j</span> contain ion <span class="math inline">j</span>,</p>
-<p><span class="math display">
-w_j\propto\left[1+\log\frac{L+1}{d_j+1}\right]^\alpha.
-</span></p>
-<p>Weights are normalized to mean one. An ion is counted when it reaches
-at least 1% of the acquired-bin base peak; <code>min_relative</code>
-controls this threshold. <code>power</code> sets <span class="math inline">\alpha</span>, default 1. For cosine matching,
-<code>power=2</code> corresponds to multiplying spectral amplitudes by
-the usual inverse-document-frequency factor. All search methods accept
-the same reusable weight vector.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">w</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/library_ion_weights.html">library_ion_weights</a></span><span class="op">(</span><span class="va">lib</span>, mass<span class="op">=</span><span class="fl">33</span><span class="op">:</span><span class="fl">550</span>, min_relative<span class="op">=</span><span class="fl">.01</span>, power<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">w</span>, <span class="st">"frequency"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">hits</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/library_search.html">library_search</a></span><span class="op">(</span><span class="va">fit</span>, <span class="va">lib</span>, calibration<span class="op">=</span><span class="va">cal</span>, phase<span class="op">=</span><span class="st">"DB5"</span>,</span>
-<span>  method<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"multinomial"</span>, <span class="st">"angular"</span><span class="op">)</span>, ion_weights<span class="op">=</span><span class="va">w</span>,</span>
-<span>  reference_count<span class="op">=</span><span class="st">"query"</span>, n_matches<span class="op">=</span><span class="fl">5</span><span class="op">)</span></span></code></pre></div>
-<p>Frequency estimation reads SQLite records in bounded batches and uses
-native OpenMP counts. Compute the vector once per reference catalogue
-and reuse it for every sample. Named custom vectors are also accepted;
-unspecified masses retain weight one. Frequency-dependent weighting has
-also been studied for <a href="https://doi.org/10.1021/jasms.3c00353" class="external-link">MS/MS library
-annotation</a>, including enhancement of frequently observed ions. The
-inverse-frequency option here emphasizes ion rarity, and its benefit is
-checked directly on EI spectra.</p>
-</div>
-<div class="section level2">
-<h2 id="accuracy-and-speed">Accuracy and speed<a class="anchor" aria-label="anchor" href="#accuracy-and-speed"></a>
-</h2>
-<p>The comparison used 500 MoNA query spectra from distinct InChIKey/CAS
-groups, divided into 250 development and 250 validation queries. Query
-records and near-duplicate same-identity reference shapes (normalized L1
-difference at most 0.05) were excluded, leaving 19,082 nonempty
-reference spectra. Ion frequencies were estimated from those references.
-RI filtering was disabled to measure spectral discrimination
-directly.</p>
-<p>The independent validation results below give <strong>correct first
-match / correct within top five</strong>, in percent. IDF uses
-<code>power=1</code>; IDF² uses <code>power=2</code>, both with a 1%
-presence threshold.</p>
 <table class="table">
 <colgroup>
-<col width="25%">
-<col width="25%">
-<col width="25%">
-<col width="25%">
+<col width="50%">
+<col width="50%">
 </colgroup>
 <thead><tr class="header">
 <th align="left">Method</th>
-<th align="right">Uniform weights</th>
-<th align="right">IDF</th>
-<th align="right">IDF²</th>
+<th align="left">Main use</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td align="left">Stein–Scott / Stein–Scott angular</td>
-<td align="right">49.6 / 60.8</td>
-<td align="right">50.0 / 61.2</td>
-<td align="right">50.0 / 60.8</td>
+<td align="left"><code>stein_scott</code></td>
+<td align="left">Mass- and intensity-weighted dot product; the default
+EI comparison</td>
 </tr>
 <tr class="even">
-<td align="left">Cosine / angular</td>
-<td align="right">36.8 / 56.0</td>
-<td align="right">37.6 / 56.4</td>
-<td align="right">37.6 / 56.0</td>
+<td align="left">
+<code>cosine</code>, <code>angular</code>
+</td>
+<td align="left">Compare spectral directions; angular gives the
+corresponding geometric distance</td>
 </tr>
 <tr class="odd">
-<td align="left">Hellinger</td>
-<td align="right">46.4 / 68.8</td>
-<td align="right">46.8 / 67.2</td>
-<td align="right">48.8 / 66.0</td>
+<td align="left"><code>hellinger</code></td>
+<td align="left">Compare square-root-normalized ion patterns</td>
 </tr>
 <tr class="even">
-<td align="left">Jensen–Shannon / balanced multinomial</td>
-<td align="right">45.6 / 67.6</td>
-<td align="right">46.8 / 67.6</td>
-<td align="right">47.6 / 65.6</td>
+<td align="left">
+<code>jensen_shannon</code>,
+<code>multinomial</code>
+</td>
+<td align="left">Symmetric probability/count comparisons retaining
+fitted query totals</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>stein_scott_angular</code></td>
+<td align="left">Angular distance after the Stein–Scott transform</td>
 </tr>
 </tbody>
 </table>
-<p>Using arbitrary stored library intensity totals for multinomial
-deviance gives 9.2% first-match and 19.2% top-five recovery in this
-comparison. Balancing unknown totals to the sample avoids that scale
-dependence. Rarity weighting gives modest first-match gains, with some
-top-five trade-offs; uniform weights remain the default. Angular metrics
-preserve their corresponding cosine rankings exactly.</p>
-<p>For 500 queries against the 19,082 references, using IDF weights and
-eight physical cores:</p>
-<table class="table">
-<thead><tr class="header">
-<th align="left">Method</th>
-<th align="right">Search time</th>
-</tr></thead>
-<tbody>
-<tr class="odd">
-<td align="left">Stein–Scott</td>
-<td align="right">0.52 s</td>
-</tr>
-<tr class="even">
-<td align="left">Cosine</td>
-<td align="right">0.45 s</td>
-</tr>
-<tr class="odd">
-<td align="left">Angular</td>
-<td align="right">0.44 s</td>
-</tr>
-<tr class="even">
-<td align="left">Stein–Scott angular</td>
-<td align="right">0.58 s</td>
-</tr>
-<tr class="odd">
-<td align="left">Hellinger</td>
-<td align="right">0.57 s</td>
-</tr>
-<tr class="even">
-<td align="left">Jensen–Shannon</td>
-<td align="right">2.14 s</td>
-</tr>
-<tr class="odd">
-<td align="left">Balanced multinomial</td>
-<td align="right">2.15 s</td>
-</tr>
-</tbody>
-</table>
-<p>Preparing the reusable IDF weights took 0.35 s. Timings include
-preparing and searching the imported library, on an HP ZBook Fury G8
-with an Intel i9-11950H and eight physical cores. The <a href="https://github.com/tomwenseleers/GCMSprime/blob/master/benchmarks/library_search_weights.R" class="external-link">benchmark
-script</a> and <a href="https://github.com/tomwenseleers/GCMSprime/tree/master/benchmarks/results" class="external-link">aggregate
-results</a> are available in the repository.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">w</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/library_ion_weights.html">library_ion_weights</a></span><span class="op">(</span><span class="va">lib</span><span class="op">)</span></span>
+<span><span class="va">matches</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/library_search.html">library_search</a></span><span class="op">(</span><span class="va">fit</span>, <span class="va">lib</span>, calibration<span class="op">=</span><span class="va">cal</span>, phase<span class="op">=</span><span class="st">"DB5"</span>,</span>
+<span>  ri_tolerance<span class="op">=</span><span class="fl">30</span>, n_matches<span class="op">=</span><span class="fl">5</span>,</span>
+<span>  method<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"stein_scott"</span>, <span class="st">"hellinger"</span>, <span class="st">"multinomial"</span><span class="op">)</span>, ion_weights<span class="op">=</span><span class="va">w</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">matches</span><span class="op">)</span></span></code></pre></div>
+<p>Uniform ion weights are the default. Reusable rarity weights
+emphasize ions seen in fewer library spectra. Relative-intensity
+references with unknown ion totals are balanced to the query total for
+multinomial comparisons. The <a href="identification-theory.html#spectral-comparisons-and-angular-distance">formulas
+and benchmark</a> explain the transformations, weights, zero handling,
+score scales and accuracy.</p>
+</div>
+<div class="section level2">
+<h2 id="identify-a-multisample-experiment">Identify a multisample experiment<a class="anchor" aria-label="anchor" href="#identify-a-multisample-experiment"></a>
+</h2>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">experiment</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/GCMSdeco.html">GCMSdeco</a></span><span class="op">(</span><span class="st">"chromatograms"</span>, output_dir<span class="op">=</span><span class="st">"identified_results"</span>,</span>
+<span>  precluster<span class="op">=</span><span class="fl">32L</span>, library<span class="op">=</span><span class="va">lib</span>,</span>
+<span>  search<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>phase<span class="op">=</span><span class="st">"DB5"</span>, ri_tolerance<span class="op">=</span><span class="fl">30</span>, n_matches<span class="op">=</span><span class="fl">5</span>,</span>
+<span>              method<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"stein_scott"</span>, <span class="st">"hellinger"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">occurrences</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">rbind</span>, <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">experiment</span><span class="op">$</span><span class="va">paths</span>,</span>
+<span>  <span class="kw">function</span><span class="op">(</span><span class="va">path</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="va">path</span><span class="op">)</span><span class="op">$</span><span class="va">compounds</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">occurrences</span> <span class="op">&lt;-</span> <span class="va">occurrences</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="va">occurrences</span><span class="op">$</span><span class="va">match_score</span>, decreasing<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span>, <span class="op">]</span></span>
+<span><span class="va">unique_compounds</span> <span class="op">&lt;-</span> <span class="va">occurrences</span><span class="op">[</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/duplicated.html" class="external-link">duplicated</a></span><span class="op">(</span><span class="va">occurrences</span><span class="op">$</span><span class="va">coupled_compound</span><span class="op">)</span>, <span class="op">]</span></span></code></pre></div>
+<p>Library search runs on each final original-channel sample spectrum,
+using that sample’s alkane calibration. Consensus IDs connect repeated
+occurrences. The summary above retains the best-scoring occurrence
+annotation per consensus compound; full ranked matches and RI
+differences remain in each sample report.</p>
+<p>See <a href="multisample.html">multiple-sample deconvolution</a> for
+directory structure and <a href="spectral-libraries.html">spectral
+library import</a> for open/commercial data.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

@@ -2,27 +2,43 @@
 
 ## GCMSprime 0.1.0
 
-- Directory-based multisample GC/MS workflows preserve sample groups and
-  acquisition order, calibrate against alkane standards, share spectra
-  through coupled log-concave NMF, and export consensus areas and
-  spectral libraries.
+### Chromatograms and calibration
 
-- Original-channel completion checks conditional deletions, local
-  profile/spectral fusions and missed residual peaks, with
-  complete-likelihood safeguards and native local updates.
+- ANDI-MS CDF import and export preserve scan timing, acquired mass
+  channels and sample metadata.
+- Standard-assisted or blind constant/time-varying PSF estimation,
+  pooled noise calibration and smooth background initialization.
 
-- ANDI-MS CDF import and export, PSF calibration and sparse
-  chromatographic deconvolution.
+### Deconvolution and quantification
 
-- MSP spectra, Excel area tables and signal, residual, profile and
-  spectral reports.
+- Single-sample sparse log-concave NMF resolves overlapping compounds,
+  flexible profiles and full mass spectra with automatic best rank
+  tuning.
+- Optional aggregation to a small number of ion groups accelerates
+  initialization; original-channel likelihood refinement completes the
+  fit.
+- Directory-based multisample analysis preserves acquisition order and
+  group labels, selects alkane standards, aligns samples and estimates
+  shared spectra with sample-specific areas and profiles.
 
-- Native streaming MSP and GCMS-ID CSV import, compact dgCMatrix or
-  SQLite storage, chemical metadata and retention-index provenance.
+### Spectral libraries and identification
 
-- Diagnostic-ion alkane identification, smooth onset-based RI
-  calibration, fast native RI-filtered spectral library search, and
-  annotated Excel/MSP exports.
+- Streaming MSP and GCMS-ID CSV import with sparse in-memory or SQLite
+  storage, chemical metadata, synonyms and retention-index provenance.
+- Diagnostic-ion alkane assignment, smooth onset-based retention-index
+  calibration and column-specific constraints for DB1, DB5 and DBWAX
+  classes.
+- Native spectral search with Stein–Scott, cosine/angular, Hellinger,
+  Jensen–Shannon and multinomial comparisons, plus optional ion-rarity
+  weights.
 
-- Reusable ion-rarity weights, weighted angular distances, and
-  sample-balanced multinomial matching for relative-intensity libraries.
+### Output and diagnostics
+
+- NIST-compatible MSP, Excel compound/area tables and consensus
+  multisample libraries, with retained ion totals and ranked library
+  matches.
+- Observed/fitted/Pearson-residual heatmaps, chromatogram traces,
+  profiles and spectra in temporal order, and compact objects that
+  reload observations.
+- Reproducible caching, experiment manifests and an integrated workflow
+  from sample files to quantified and annotated compounds.

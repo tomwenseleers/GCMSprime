@@ -1,4 +1,4 @@
-# Spectral libraries: import and storage
+# Spectral library import
 
 GCMSprime keeps raw peaks, chemical identifiers and retention-index
 provenance together. Small libraries can be used in memory. Large

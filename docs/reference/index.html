@@ -18,12 +18,16 @@
       <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../articles/gcms-deconvolution.html">Get started</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-tutorials" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Tutorials</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-tutorials"><li><a class="dropdown-item" href="../articles/multisample.html">Multisample experiments</a></li>
-    <li><a class="dropdown-item" href="../articles/gcms-deconvolution.html">GC/MS deconvolution</a></li>
-    <li><a class="dropdown-item" href="../articles/spectral-libraries.html">Spectral libraries and storage</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-tutorials"><li><a class="dropdown-item" href="../articles/gcms-deconvolution.html">GC/MS deconvolution for single samples</a></li>
+    <li><a class="dropdown-item" href="../articles/multisample.html">GC/MS deconvolution for multiple samples</a></li>
+    <li><a class="dropdown-item" href="../articles/spectral-libraries.html">Spectral library import</a></li>
     <li><a class="dropdown-item" href="../articles/library-search.html">Retention indices and library search</a></li>
   </ul></li>
-<li class="nav-item"><a class="external-link nav-link" href="https://tomwenseleers.github.io/L0nmf/articles/log-concave-nmf.html">Algorithm &amp; theory</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-algorithm-theory" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Algorithm &amp; theory</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-algorithm-theory"><li><a class="dropdown-item" href="../articles/algorithm.html">How chromatograms become compounds</a></li>
+    <li><a class="dropdown-item" href="../articles/identification-theory.html">Retention indices and spectral identification</a></li>
+  </ul></li>
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -40,7 +44,88 @@
     </div>
 
     <div class="section level2">
-      <h2 id="all-functions">All functions<a class="anchor" aria-label="anchor" href="#all-functions"></a></h2>
+      <h2 id="deconvolution-quantification-and-reports">Deconvolution, quantification and reports<a class="anchor" aria-label="anchor" href="#deconvolution-quantification-and-reports"></a></h2>
+
+
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="GCMSdeco.html">residuals(<i>&lt;GCMSdeco&gt;</i>)</a></code> <code><a href="GCMSdeco.html">GCMSdeco()</a></code> <code><a href="GCMSdeco.html">coef(<i>&lt;GCMSdeco&gt;</i>)</a></code> <code><a href="GCMSdeco.html">fitted(<i>&lt;GCMSdeco&gt;</i>)</a></code> <code><a href="GCMSdeco.html">nobs(<i>&lt;GCMSdeco&gt;</i>)</a></code> <code><a href="GCMSdeco.html">logLik(<i>&lt;GCMSdeco&gt;</i>)</a></code> <code><a href="GCMSdeco.html">AIC(<i>&lt;GCMSdeco&gt;</i>)</a></code> <code><a href="GCMSdeco.html">BIC(<i>&lt;GCMSdeco&gt;</i>)</a></code> <code><a href="GCMSdeco.html">GIC(<i>&lt;GCMSdeco&gt;</i>)</a></code> <code><a href="GCMSdeco.html">EBIC(<i>&lt;GCMSdeco&gt;</i>)</a></code> <code><a href="GCMSdeco.html">MBIC(<i>&lt;GCMSdeco&gt;</i>)</a></code> <code><a href="GCMSdeco.html">print(<i>&lt;GCMSdeco&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Deconvolve a GC/MS chromatogram and export its compound spectra</dd>
+
+        <dt>
+
+          <code><a href="GCMSbatch.html">fitted(<i>&lt;GCMSbatch&gt;</i>)</a></code> <code><a href="GCMSbatch.html">coef(<i>&lt;GCMSbatch&gt;</i>)</a></code> <code><a href="GCMSbatch.html">plot(<i>&lt;GCMSbatch&gt;</i>)</a></code> <code><a href="GCMSbatch.html">logLik(<i>&lt;GCMSbatch&gt;</i>)</a></code> <code><a href="GCMSbatch.html">GIC(<i>&lt;GCMSbatch&gt;</i>)</a></code> <code><a href="GCMSbatch.html">AIC(<i>&lt;GCMSbatch&gt;</i>)</a></code> <code><a href="GCMSbatch.html">BIC(<i>&lt;GCMSbatch&gt;</i>)</a></code> <code><a href="GCMSbatch.html">EBIC(<i>&lt;GCMSbatch&gt;</i>)</a></code> <code><a href="GCMSbatch.html">MBIC(<i>&lt;GCMSbatch&gt;</i>)</a></code> <code><a href="GCMSbatch.html">nobs(<i>&lt;GCMSbatch&gt;</i>)</a></code> <code><a href="GCMSbatch.html">print(<i>&lt;GCMSbatch&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Multisample GC/MS deconvolution, alignment and shared spectral recovery</dd>
+
+        <dt>
+
+          <code><a href="plot.GCMSdeco.html">plot(<i>&lt;GCMSdeco&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Plot GC/MS signals, compound profiles and recovered spectra</dd>
+
+        <dt>
+
+          <code><a href="write_GCMS_cdf.html">write_GCMS_cdf()</a></code>
+
+        </dt>
+        <dd>Write a chromatogram matrix as an ANDI-MS CDF file</dd>
+      </dl></div><div class="section level2">
+      <h2 id="import-and-inspect-spectral-libraries">Import and inspect spectral libraries<a class="anchor" aria-label="anchor" href="#import-and-inspect-spectral-libraries"></a></h2>
+
+
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="read_msp.html">read_msp()</a></code> <code><a href="read_msp.html">open_library()</a></code> <code><a href="read_msp.html">print(<i>&lt;GCMSlibrary&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Import a mass spectral library</dd>
+
+        <dt>
+
+          <code><a href="read_gcms_id.html">read_gcms_id()</a></code>
+
+        </dt>
+        <dd>Import a GCMS-ID predicted spectral library</dd>
+
+        <dt>
+
+          <code><a href="library_metadata.html">library_metadata()</a></code>
+
+        </dt>
+        <dd>Inspect spectral-library metadata</dd>
+
+        <dt>
+
+          <code><a href="spectra.html">spectra()</a></code>
+
+        </dt>
+        <dd>Extract spectral-library peaks or a sparse mass matrix</dd>
+
+        <dt>
+
+          <code><a href="retention_indices.html">retention_indices()</a></code>
+
+        </dt>
+        <dd>Extract retention indices and their provenance</dd>
+      </dl></div><div class="section level2">
+      <h2 id="calibrate-retention-indices-and-identify-compounds">Calibrate retention indices and identify compounds<a class="anchor" aria-label="anchor" href="#calibrate-retention-indices-and-identify-compounds"></a></h2>
 
 
 
@@ -58,24 +143,10 @@
 
         <dt>
 
-          <code><a href="GCMSbatch.html">fitted(<i>&lt;GCMSbatch&gt;</i>)</a></code> <code><a href="GCMSbatch.html">coef(<i>&lt;GCMSbatch&gt;</i>)</a></code> <code><a href="GCMSbatch.html">plot(<i>&lt;GCMSbatch&gt;</i>)</a></code> <code><a href="GCMSbatch.html">logLik(<i>&lt;GCMSbatch&gt;</i>)</a></code> <code><a href="GCMSbatch.html">GIC(<i>&lt;GCMSbatch&gt;</i>)</a></code> <code><a href="GCMSbatch.html">AIC(<i>&lt;GCMSbatch&gt;</i>)</a></code> <code><a href="GCMSbatch.html">BIC(<i>&lt;GCMSbatch&gt;</i>)</a></code> <code><a href="GCMSbatch.html">EBIC(<i>&lt;GCMSbatch&gt;</i>)</a></code> <code><a href="GCMSbatch.html">MBIC(<i>&lt;GCMSbatch&gt;</i>)</a></code> <code><a href="GCMSbatch.html">nobs(<i>&lt;GCMSbatch&gt;</i>)</a></code> <code><a href="GCMSbatch.html">print(<i>&lt;GCMSbatch&gt;</i>)</a></code>
+          <code><a href="library_search.html">library_search()</a></code> <code><a href="library_search.html">as.data.frame(<i>&lt;GCMSmatches&gt;</i>)</a></code> <code><a href="library_search.html">print(<i>&lt;GCMSmatches&gt;</i>)</a></code>
 
         </dt>
-        <dd>Multisample GC/MS deconvolution, alignment and shared spectral recovery</dd>
-
-        <dt>
-
-          <code><a href="GCMSdeco.html">residuals(<i>&lt;GCMSdeco&gt;</i>)</a></code> <code><a href="GCMSdeco.html">GCMSdeco()</a></code> <code><a href="GCMSdeco.html">coef(<i>&lt;GCMSdeco&gt;</i>)</a></code> <code><a href="GCMSdeco.html">fitted(<i>&lt;GCMSdeco&gt;</i>)</a></code> <code><a href="GCMSdeco.html">nobs(<i>&lt;GCMSdeco&gt;</i>)</a></code> <code><a href="GCMSdeco.html">logLik(<i>&lt;GCMSdeco&gt;</i>)</a></code> <code><a href="GCMSdeco.html">AIC(<i>&lt;GCMSdeco&gt;</i>)</a></code> <code><a href="GCMSdeco.html">BIC(<i>&lt;GCMSdeco&gt;</i>)</a></code> <code><a href="GCMSdeco.html">GIC(<i>&lt;GCMSdeco&gt;</i>)</a></code> <code><a href="GCMSdeco.html">EBIC(<i>&lt;GCMSdeco&gt;</i>)</a></code> <code><a href="GCMSdeco.html">MBIC(<i>&lt;GCMSdeco&gt;</i>)</a></code> <code><a href="GCMSdeco.html">print(<i>&lt;GCMSdeco&gt;</i>)</a></code>
-
-        </dt>
-        <dd>Deconvolve a GC/MS chromatogram and export its compound spectra</dd>
-
-        <dt>
-
-          <code><a href="identify_compounds.html">identify_compounds()</a></code>
-
-        </dt>
-        <dd>Annotate recovered GC/MS compounds and export library matches</dd>
+        <dd>Identify deconvoluted spectra using retention indices and spectral libraries</dd>
 
         <dt>
 
@@ -86,61 +157,36 @@
 
         <dt>
 
-          <code><a href="library_metadata.html">library_metadata()</a></code>
+          <code><a href="identify_compounds.html">identify_compounds()</a></code>
 
         </dt>
-        <dd>Inspect spectral-library metadata</dd>
+        <dd>Annotate recovered GC/MS compounds and export library matches</dd>
+      </dl></div><div class="section level2">
+      <h2 id="shared-tools-and-package-overview">Shared tools and package overview<a class="anchor" aria-label="anchor" href="#shared-tools-and-package-overview"></a></h2>
+
+
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="reexports.html">reexports</a></code> <code><a href="reexports.html">GIC</a></code> <code><a href="reexports.html">EBIC</a></code> <code><a href="reexports.html">MBIC</a></code>
+
+        </dt>
+        <dd>Objects exported from other packages</dd>
 
         <dt>
 
-          <code><a href="library_search.html">library_search()</a></code> <code><a href="library_search.html">as.data.frame(<i>&lt;GCMSmatches&gt;</i>)</a></code> <code><a href="library_search.html">print(<i>&lt;GCMSmatches&gt;</i>)</a></code>
+          <code><a href="GCMSprime-package.html">GCMSprime</a></code> <code><a href="GCMSprime-package.html">GCMSprime-package</a></code>
 
         </dt>
-        <dd>Identify deconvoluted spectra using retention indices and spectral libraries</dd>
-
-        <dt>
-
-          <code><a href="plot.GCMSdeco.html">plot(<i>&lt;GCMSdeco&gt;</i>)</a></code>
-
-        </dt>
-        <dd>Plot GC/MS signals, compound profiles and recovered spectra</dd>
-
-        <dt>
-
-          <code><a href="read_gcms_id.html">read_gcms_id()</a></code>
-
-        </dt>
-        <dd>Import a GCMS-ID predicted spectral library</dd>
-
-        <dt>
-
-          <code><a href="read_msp.html">read_msp()</a></code> <code><a href="read_msp.html">open_library()</a></code> <code><a href="read_msp.html">print(<i>&lt;GCMSlibrary&gt;</i>)</a></code>
-
-        </dt>
-        <dd>Import a mass spectral library</dd>
-
-        <dt>
-
-          <code><a href="retention_indices.html">retention_indices()</a></code>
-
-        </dt>
-        <dd>Extract retention indices and their provenance</dd>
-
-        <dt>
-
-          <code><a href="spectra.html">spectra()</a></code>
-
-        </dt>
-        <dd>Extract spectral-library peaks or a sparse mass matrix</dd>
-
-        <dt>
-
-          <code><a href="write_GCMS_cdf.html">write_GCMS_cdf()</a></code>
-
-        </dt>
-        <dd>Write a chromatogram matrix as an ANDI-MS CDF file</dd>
+        <dd>Scalable and Automated GC–MS Deconvolution, Quantification, and Spectral Library Search in R</dd>
       </dl></div>
-  </main></div>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">

@@ -1,4 +1,4 @@
-# Identify compounds with spectra and retention indices
+# Retention indices and library search
 
 GCMSprime searches recovered spectra directly, preserving the fitted ion
 totals and using retention indices (RIs) to exclude incompatible
@@ -41,261 +41,77 @@ fit <- GCMSdeco("sample.cdf", "sample.msp", xlsx_file="sample.xlsx",
               method="stein_scott"))
 ```
 
-## Alkane identification and RI calibration
-
-The standard is identified using the alkyl-fragment series at m/z 43,
-57, 71, 85, 99 and 113, together with the molecular ion at M=14c+2 for
-an n-alkane with c carbons. The molecular-ion signal is corrected for
-the carbon-13 isotope contribution of the neighbouring alkyl ion.
-Minimum molecular-ion evidence and fragment-series abundance screen
-candidates; a maximum-weight increasing carbon-number sequence resolves
-duplicate maxima and inconsistent assignments. Supply the known carbon
-range when available. All candidates and their acceptance decisions are
-retained for inspection.
-
-The retention coordinate follows
-
-t^\star=t\_{\mathrm{onset}}+\frac{w\_{\mathrm{small}}(t\_{\mathrm{onset}})}2.
-
-Onset is the leading crossing at 1% of the background-corrected peak
-height. The local calibrated narrow-peak PSF supplies the full width at
-the same 1% height. Pass it through `psf=fit$psf_standard`; a
-time-varying PSF gives a smoothly varying local duration. If no PSF is
-supplied, a smooth lower envelope of the standard peak widths estimates
-the small-peak duration. This reduces the influence of overloaded or
-tailing peaks on the retention coordinate. Both standard peaks and
-recovered sample profiles use this timing convention. The
-relative-height fraction is configurable through
-`control=list(fraction=.01)`.
-
-A smoothing spline maps t^\star_c to 100c; monotone interpolation
-through its fitted anchor values preserves the chromatographic ordering.
-Smoothing is selected by GCV unless `spar` is supplied. Predictions
-outside the accepted standard range remain unassigned by default.
-Verified anchors can be supplied directly, including a `narrow_width`
-column when timing fitted profiles.
+## Inspect calibration and retention constraints
 
 ``` r
 
-cal$anchors[, c("carbon", "apex", "start", "narrow_width",
-                 "retention_time", "RI", "residual")]
+cal$anchors[, c("carbon", "start", "narrow_width", "retention_time", "RI", "residual")]
 cal$candidates
-predict(cal, c(10, 20, 30))
 ```
 
-This smooth calibration extends the alkane-index construction of [van
-den Dool & Kratz (1963)](https://doi.org/10.1016/S0021-9673(01)80947-X).
-[NIST describes the standard RI
-conventions](https://webbook.nist.gov/chemistry/gc-ri/). Use a ladder
-acquired with the sample’s column and chromatographic programme.
+The timing anchor is peak onset at 1% of height plus half a local
+narrow-peak width. This reduces the influence of long tails on RI
+estimation. Standards and sample profiles use the same convention.
+`phase="DB5"` is the default; DB1 and DBWAX are also supported.
+`ri_tolerance=30` admits compatible references within 30 index units.
+Use a standard acquired under the sample’s programme.
 
-The Excel Run sheet records the width source and timing convention.
-[`GCMSdeco()`](https://tomwenseleers.github.io/GCMSprime/reference/GCMSdeco.md)
-reuses its stored standard PSF automatically when identification is
-requested.
+Unlabelled reference RIs keep their provenance. If their column class is
+known, set `unknown_phase="DB5"` explicitly. `ri_tolerance=Inf` requests
+spectral-only searching. [The identification
+theory](https://tomwenseleers.github.io/GCMSprime/articles/identification-theory.md)
+gives the calibration, column matching and missing-reference rules.
 
-## Column-specific retention constraints
+## Choose spectral comparisons
 
-`phase="DB1"`, `"DB5"` and `"DBWAX"` select nonpolar, semi-standard
-nonpolar and polar RI classes. Only references satisfying
-
-\|I\_{\mathrm{sample}}-I\_{\mathrm{reference}}\|\leq\texttt{ri\\tolerance}
-
-are scored. The closest RI measurement is used when a reference has
-several measurements on the selected phase class. Predicted RI records
-retain their provenance in the match table. Uncalibrated queries and
-spectra without eligible references remain visible in the query
-diagnostics.
-
-MSP exports sometimes contain RI values without a column class. These
-remain unassigned to a phase. If the library’s documentation establishes
-their column class, pass, for example, `unknown_phase="DB5"` explicitly.
-`ri_tolerance=Inf` requests spectral-only searching. It is useful for
-evaluating spectral scores separately from RI filtering.
-
-NIST/OpenChrom comment summaries such as
-`SemiStdNP=1000 StdNP=990 StdPolar=1300` retain their DB5, DB1 and DBWAX
-column classes during import. Slash-delimited uncertainty summaries
-remain available in the raw RI value. For an explicitly justified
-benchmark assignment, `unknown_phase="DB5"` also admits unlabelled RI
-values. These matches carry `ri_assumed=TRUE`, and the Excel and MSP
-reports state the assignment. References with missing RIs remain
-excluded from a constrained search.
-
-## Spectral comparisons and angular distance
-
-For acquired-bin ion vectors a,b, let N=\sum a_j, p=a/N and q=b/\sum
-b_j. References are restricted to the query’s acquired mass bins,
-including bins with zero query intensity. Let w_j\geq0 denote optional
-ion weights, with w_j=1 by default.
-
-Weighted cosine similarity is
-
-C_w(a,b)=\frac{\sum_j w_j a_jb_j}
-{\sqrt{\sum_jw_ja_j^2}\sqrt{\sum_jw_jb_j^2}}.
-
-`cosine` returns distance 1-C_w^2. `stein_scott` applies the same
-calculation after transforming intensities to I^{0.6}(m/z)^3, following
-[Stein & Scott (1994)](https://doi.org/10.1016/1044-0305(94)87009-8) and
-[Kim et al. (2012)](https://doi.org/10.1093/bioinformatics/bts083).
-
-`angular` and `stein_scott_angular` instead return the corresponding
-angle
-
-\theta_w=\arccos C_w.
-
-With fixed positive weights, this is geodesic distance between the unit
-vectors obtained from \sqrt w\\a and \sqrt w\\b, with the Stein–Scott
-transform added when requested. It satisfies the triangle inequality.
-Zero weights omit ions, and a nonzero weighted norm is required. Since
-intensities are nonnegative, 0\leq\theta_w\leq\pi/2. Angular distance
-ranks references in the same order as its cosine counterpart: the
-geometric metric property changes, while retrieval accuracy stays the
-same. The native search shares the ranking key, avoiding extra rounding
-ties from [`acos()`](https://rdrr.io/r/base/Trig.html).
+| Method | Main use |
+|:---|:---|
+| `stein_scott` | Mass- and intensity-weighted dot product; the default EI comparison |
+| `cosine`, `angular` | Compare spectral directions; angular gives the corresponding geometric distance |
+| `hellinger` | Compare square-root-normalized ion patterns |
+| `jensen_shannon`, `multinomial` | Symmetric probability/count comparisons retaining fitted query totals |
+| `stein_scott_angular` | Angular distance after the Stein–Scott transform |
 
 ``` r
 
 w <- library_ion_weights(lib)
 matches <- library_search(fit, lib, calibration=cal, phase="DB5",
-  ri_tolerance=30, method=c("angular", "stein_scott_angular"),
-  ion_weights=w, n_matches=5)
+  ri_tolerance=30, n_matches=5,
+  method=c("stein_scott", "hellinger", "multinomial"), ion_weights=w)
+as.data.frame(matches)
 ```
 
-### Probability distances and sample counts
+Uniform ion weights are the default. Reusable rarity weights emphasize
+ions seen in fewer library spectra. Relative-intensity references with
+unknown ion totals are balanced to the query total for multinomial
+comparisons. The [formulas and
+benchmark](https://tomwenseleers.github.io/GCMSprime/articles/identification-theory.html#spectral-comparisons-and-angular-distance)
+explain the transformations, weights, zero handling, score scales and
+accuracy.
 
-`hellinger` uses the weighted square-root distance
-
-H_w(p,q)=\sqrt{\frac{1}{2W}\sum_jw_j(\sqrt{p_j}-\sqrt{q_j})^2}, \qquad
-W=\max_jw_j.
-
-For r=(p+q)/2, define the weighted Jensen–Shannon divergence
-
-J_w(p,q)=\frac12\sum_jw_j\left\[p_j\log\frac{p_j}{r_j}
-+q_j\log\frac{q_j}{r_j}\right\].
-
-`jensen_shannon` returns \sqrt{J_w/(W\log2)}. Zero contributions use
-0\log0=0. The common bound W puts these probability distances on a 0–1
-scale.
-
-MSP libraries generally provide relative intensities, with unknown
-original ion totals. The default `reference_count="auto"` uses an
-explicit `Pseudocount`/`Ion_total` tag when supplied; otherwise it
-assigns the reference the same total as the sample spectrum.
-`reference_count="query"` always uses this balanced convention, and
-`"library"` uses the stored library intensity scale.
-
-For effective reference total M, the multinomial divergence is
-
-D_w=2\sum_jw_j\left\[Np_j\log\frac{p_j}{u_j}
-+Mq_j\log\frac{q_j}{u_j}\right\], \qquad u=\frac{Np+Mq}{N+M}.
-
-With M=N, it simplifies to
-
-\boxed{D_w=4N J_w(p,q).}
-
-Thus balanced multinomial deviance has the same ranking as weighted
-Jensen–Shannon, with its absolute scale determined by the sample’s
-retained pseudocount. At a fixed N, it is symmetric in the spectral
-shapes. Each ion contributes a nonnegative Jensen gap. Nonconstant
-weights give an importance-weighted composite divergence; uniform
-weights and known totals give the ordinary multinomial likelihood-ratio
-statistic. Native evaluation uses nonnegative scalar gaps and a local
-series near equality, avoiding cancellation amplified by large counts.
-
-`query_total` preserves the sample total; `library_total` records the
-reference’s stored/restored total. `reference_total` and
-`reference_count` show the effective comparison convention, and
-`library_mass_coverage` records acquisition coverage. For an
-L1-normalized matrix, supply its original totals through `pseudocount=`.
-A `GCMSdeco` fit supplies them automatically. Explicit count tags also
-preserve totals through MSP export and re-import.
-
-Scores run from 0 to 1000, with larger values better. Angular scores are
-1000(1-2\theta/\pi); distances remain in radians. Probability and
-count-based scores follow the definitions in
-[library_search()](https://tomwenseleers.github.io/GCMSprime/reference/library_search.md).
-Compare scores within a method and weighting convention.
-
-## Ion uniqueness weights
-
-[library_ion_weights()](https://tomwenseleers.github.io/GCMSprime/reference/library_ion_weights.md)
-computes smoothed inverse-document-frequency weights. If L nonempty
-reference spectra are available and d_j contain ion j,
-
-w_j\propto\left\[1+\log\frac{L+1}{d_j+1}\right\]^\alpha.
-
-Weights are normalized to mean one. An ion is counted when it reaches at
-least 1% of the acquired-bin base peak; `min_relative` controls this
-threshold. `power` sets \alpha, default 1. For cosine matching,
-`power=2` corresponds to multiplying spectral amplitudes by the usual
-inverse-document-frequency factor. All search methods accept the same
-reusable weight vector.
+## Identify a multisample experiment
 
 ``` r
 
-w <- library_ion_weights(lib, mass=33:550, min_relative=.01, power=1)
-attr(w, "frequency")
+experiment <- GCMSdeco("chromatograms", output_dir="identified_results",
+  precluster=32L, library=lib,
+  search=list(phase="DB5", ri_tolerance=30, n_matches=5,
+              method=c("stein_scott", "hellinger")))
 
-hits <- library_search(fit, lib, calibration=cal, phase="DB5",
-  method=c("multinomial", "angular"), ion_weights=w,
-  reference_count="query", n_matches=5)
+occurrences <- do.call(rbind, lapply(experiment$paths,
+  function(path) readRDS(path)$compounds))
+occurrences <- occurrences[order(occurrences$match_score, decreasing=TRUE), ]
+unique_compounds <- occurrences[!duplicated(occurrences$coupled_compound), ]
 ```
 
-Frequency estimation reads SQLite records in bounded batches and uses
-native OpenMP counts. Compute the vector once per reference catalogue
-and reuse it for every sample. Named custom vectors are also accepted;
-unspecified masses retain weight one. Frequency-dependent weighting has
-also been studied for [MS/MS library
-annotation](https://doi.org/10.1021/jasms.3c00353), including
-enhancement of frequently observed ions. The inverse-frequency option
-here emphasizes ion rarity, and its benefit is checked directly on EI
-spectra.
+Library search runs on each final original-channel sample spectrum,
+using that sample’s alkane calibration. Consensus IDs connect repeated
+occurrences. The summary above retains the best-scoring occurrence
+annotation per consensus compound; full ranked matches and RI
+differences remain in each sample report.
 
-## Accuracy and speed
-
-The comparison used 500 MoNA query spectra from distinct InChIKey/CAS
-groups, divided into 250 development and 250 validation queries. Query
-records and near-duplicate same-identity reference shapes (normalized L1
-difference at most 0.05) were excluded, leaving 19,082 nonempty
-reference spectra. Ion frequencies were estimated from those references.
-RI filtering was disabled to measure spectral discrimination directly.
-
-The independent validation results below give **correct first match /
-correct within top five**, in percent. IDF uses `power=1`; IDF² uses
-`power=2`, both with a 1% presence threshold.
-
-| Method | Uniform weights | IDF | IDF² |
-|:---|---:|---:|---:|
-| Stein–Scott / Stein–Scott angular | 49.6 / 60.8 | 50.0 / 61.2 | 50.0 / 60.8 |
-| Cosine / angular | 36.8 / 56.0 | 37.6 / 56.4 | 37.6 / 56.0 |
-| Hellinger | 46.4 / 68.8 | 46.8 / 67.2 | 48.8 / 66.0 |
-| Jensen–Shannon / balanced multinomial | 45.6 / 67.6 | 46.8 / 67.6 | 47.6 / 65.6 |
-
-Using arbitrary stored library intensity totals for multinomial deviance
-gives 9.2% first-match and 19.2% top-five recovery in this comparison.
-Balancing unknown totals to the sample avoids that scale dependence.
-Rarity weighting gives modest first-match gains, with some top-five
-trade-offs; uniform weights remain the default. Angular metrics preserve
-their corresponding cosine rankings exactly.
-
-For 500 queries against the 19,082 references, using IDF weights and
-eight physical cores:
-
-| Method               | Search time |
-|:---------------------|------------:|
-| Stein–Scott          |      0.52 s |
-| Cosine               |      0.45 s |
-| Angular              |      0.44 s |
-| Stein–Scott angular  |      0.58 s |
-| Hellinger            |      0.57 s |
-| Jensen–Shannon       |      2.14 s |
-| Balanced multinomial |      2.15 s |
-
-Preparing the reusable IDF weights took 0.35 s. Timings include
-preparing and searching the imported library, on an HP ZBook Fury G8
-with an Intel i9-11950H and eight physical cores. The [benchmark
-script](https://github.com/tomwenseleers/GCMSprime/blob/master/benchmarks/library_search_weights.R)
-and [aggregate
-results](https://github.com/tomwenseleers/GCMSprime/tree/master/benchmarks/results)
-are available in the repository.
+See [multiple-sample
+deconvolution](https://tomwenseleers.github.io/GCMSprime/articles/multisample.md)
+for directory structure and [spectral library
+import](https://tomwenseleers.github.io/GCMSprime/articles/spectral-libraries.md)
+for open/commercial data.

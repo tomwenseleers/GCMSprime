@@ -1,0 +1,219 @@
+# How chromatograms become compounds
+
+At each scan, a GC/MS instrument records an ion-intensity pattern across
+mass channels. A chromatogram contains overlapping contributions from
+compounds, a varying background and measurement noise. Deconvolution
+separates those contributions into an elution profile and mass spectrum
+for each compound. Integration measures its abundance; spectral and
+retention-index matching then help identify it.
+
+GCMSprime brings these steps into one workflow. This article explains
+the modeling choices in chromatographic terms. The companion
+[identification
+article](https://tomwenseleers.github.io/GCMSprime/articles/identification-theory.md)
+explains alkane calibration and library search.
+
+## 1. Begin with a known peak shape
+
+Suppose a very narrow injection of one compound produces a known
+response shape. This **point spread function**, or PSF, describes the
+instrumental peak associated with a sharp input. Put a copy at each
+possible elution position; the columns of the resulting design matrix
+represent candidate peaks.
+
+A compound’s coefficient gives its contribution to each ion trace. Most
+candidate positions should have coefficient zero. Selecting a compact
+set of positions and fitting their amplitudes is sparse regression.
+Joint selection across mass channels uses the whole spectrum to support
+a peak call.
+
+\text{expected signal}= \text{shifted PSF shapes}\times\text{ion
+amplitudes} +\text{background}.
+
+[L0glm](https://tomwenseleers.github.io/L0glm/articles/deconvolution.html)
+fits this fixed-shape model efficiently with an automatic regularization
+preset. Its grouped selection identifies common candidate positions
+across channels, and relaxed refitting estimates amplitudes on that
+support. Sparse pulse-train deconvolution follows the idea of [de Rooi &
+Eilers (2011)](https://doi.org/10.1016/j.aca.2011.05.030).
+
+## 2. Estimate an unknown or changing PSF
+
+Usually the instrument’s response is not known exactly. A calibration
+standard with isolated peaks gives direct information about it.
+GCMSprime can also learn from overlapping sample peaks by alternating:
+
+1.  Fit candidate peak locations and ion amplitudes using the current
+    shape.
+2.  Fit a revised common shape using those estimated locations and
+    amplitudes.
+3.  Refit the sample with that shape and retain the better completed
+    model.
+
+Normalization puts overall intensity in the amplitudes, and centroid
+alignment sets the kernel’s time origin. An alkane standard provides a
+useful starting shape; blind sample refinement adapts it to the sample
+signal.
+
+Peak width can change along a chromatogram. Estimating the PSF in
+overlapping windows and smoothly joining those local shapes gives a
+time-varying design. The default full-chromatogram workflow uses ten PSF
+anchors. Each candidate peak gets the shape appropriate to its own
+retention region.
+
+These methods are implemented in [L0nmf’s PSF
+estimator](https://tomwenseleers.github.io/L0nmf/articles/estimate-psf.html).
+GCMSprime handles CDF import, the supplied alkane file and sensible
+scan/time conventions around that estimator.
+
+## 3. Let individual compounds have different shapes
+
+A shared PSF describes the common instrumental response. Compound
+chemistry and concentration can cause additional broadening, overload,
+long tails or sharp acid-like profiles. Several nearby fixed-shape peaks
+may then describe different pieces of the same compound.
+
+Sparse log-concave nonnegative matrix factorization gives each compound
+its own shape. A convenient representation is
+
+\mu\_{ij}=\sum\_{r=1}^{K}H\_{ir}S\_{rj}+(BA)\_{ij}+O\_{ij}.
+
+Here H contains elution profiles, S contains mass spectra, and BA is a
+smooth background. Each compound contributes its profile multiplied by
+its ion intensities. All factors are nonnegative. The optional O is
+known additive signal.
+
+Profiles are constrained to be **log-concave**: their logarithms bend
+downwards. This permits asymmetric, tailed and triangular profiles while
+keeping each component a coherent single peak. The shape is estimated
+using the chosen noise model on the original intensities. Logarithms
+parameterize the positive profile during the constrained update.
+
+The algorithm begins with sparse PSF-based components. Spectral
+similarity, profile overlap and shape compatibility suggest which
+components can be joined. Local likelihood fits then refine the proposed
+profile and spectrum with other compounds held fixed. The full fit
+criterion decides whether to keep a join.
+
+## 4. Select the number of compounds automatically
+
+A good fit must explain the signal with a compact set of compounds.
+GCMSprime uses the likelihood together with a penalty on component
+count. With the GIC preset, stronger evidence is required for adding a
+component than for adjusting an existing component’s profile or
+spectrum.
+
+The rank criterion includes the original number of ion channels in its
+scale. It leaves smooth background coefficients and profile complexity
+unpenalized. The final model can delete unsupported components, join
+compatible fragments, or add peaks supported by residual evidence. Every
+accepted rank change is checked on all original channels.
+
+For speed, initialization can aggregate ion traces into at most 32
+intensity-adjusted groups. Final spectra and likelihood checks return to
+every original channel. This preserves low-abundance diagnostic ions in
+the outputs. Native local updates work only on the scan windows affected
+by a proposal.
+
+The [L0nmf mathematical
+article](https://tomwenseleers.github.io/L0nmf/articles/algorithm.html)
+gives the precise objectives, rank-charge convention, shape constraints,
+initialization, solvers and pseudocode. Its likelihood formulation
+connects to [deviance matrix
+factorization](https://doi.org/10.1214/23-EJS2174) and [generalized
+matrix factorization](https://www.jmlr.org/papers/v23/20-1104.html).
+Positive shape modeling is motivated by [Eilers’ unimodal
+smoothing](https://doi.org/10.1002/cem.935).
+
+## 5. Model background and measurement variation
+
+A low-dimensional nonnegative spline basis describes the smoothly
+varying baseline. Its coefficients are fitted conditionally on the
+compound signal. Full chromatograms use enough knots to follow gradual
+drift, while a short window can use a constant background. Calibration
+peak detection starts from a lower-quantile background estimate.
+
+Poisson variance grows with expected counts. Instrument-exported
+intensities often have additional variation, so the default quasipoisson
+model estimates a common variance-to-mean scale. Gaussian, NB1/NB2 and
+Gamma signal models are also available. Gamma zeros can represent
+left-censored measurements below a specified detection threshold.
+
+Temporal differences estimate noise after suppressing slowly varying
+signal. An optional lag-one working adjustment accounts for correlated
+scan noise in the rank charge. The fitted mean and marginal noise model
+determine Pearson residuals, which make the residual heatmaps easier to
+compare across strong and weak ion channels.
+
+## 6. Integrate and inspect each sample
+
+With unit-sum profiles, spectral coefficients carry the component’s
+discrete integrated intensities. GCMSprime reports these totals and
+time-weighted areas, alongside normalized spectra for comparison. Output
+tables retain sample names, retention times, widths and compound IDs.
+Profiles and spectra follow temporal order by default.
+
+Trace plots place fitted compounds over background-corrected observed
+ion traces. Heatmaps show observations, corrected observations, fitted
+signal and Pearson residuals. These views complement the
+profile/spectrum panels: they reveal where the fit explains a broad
+peak, resolves neighbours or leaves residual structure.
+
+The [single-sample
+tutorial](https://tomwenseleers.github.io/GCMSprime/articles/gcms-deconvolution.md)
+shows two experimental windows, CDF export/import and the resulting MSP,
+Excel and PDF reports.
+
+## 7. Analyze samples together
+
+Across an experiment, retention times drift and a compound may change
+width, tailing and abundance. Some compounds occur in only a subset of
+samples. Coupled factorization starts from independent fits, then
+estimates a shared spectrum for matched occurrences while retaining each
+sample’s own profile, area and background.
+
+High-confidence spectral matches supply alignment anchors. An anchor
+uses the leading 1%-height crossing plus half the width of a small peak
+in that region; this reduces tail-related timing shifts. A robust smooth
+monotone map captures drift, with concentration-related anchor motion
+accounted for separately.
+
+Candidate matches must agree in spectral shape and aligned timing. Their
+profiles are compared in area order to check compatibility with a
+coherent log-concave ridge across samples. Shared spectra are then
+refined using pooled evidence from every occurrence. The joint criterion
+counts a shared spectrum once and each detected occurrence’s amplitude
+separately.
+
+Alignment retains the measured scan grids. It adjusts profile
+coordinates and bin widths with an area-preserving Jacobian. Known
+exposure can be supplied when the measurement represents integrated
+counts. Unit exposure preserves vendor intensity units by default.
+
+Observations and factor checkpoints are stored per sample on disk.
+Coupled updates read one sample at a time, with common spectra and
+compact matching summaries in memory. Nearby-time comparisons avoid an
+all-occurrence pairwise distance matrix. Samples keep their acquisition
+order and group labels; alkane standards are selected by acquisition
+time. Missing occurrences remain `NA`.
+
+See [multiple-sample
+deconvolution](https://tomwenseleers.github.io/GCMSprime/articles/multisample.md)
+for the directory workflow and [L0nmf’s coupled
+model](https://tomwenseleers.github.io/L0nmf/articles/algorithm.html#coupled-model)
+for the full mathematical specification.
+
+## 8. Identify the recovered compounds
+
+Open and commercial spectral libraries can be imported and searched.
+GCMSprime uses alkane-derived retention indices to filter compatible
+candidates, then ranks their spectral match quality. Consensus IDs
+connect repeated occurrences for a unique-compound summary across the
+experiment.
+
+[Retention indices and spectral
+identification](https://tomwenseleers.github.io/GCMSprime/articles/identification-theory.md)
+explains the diagnostic-ion alkane assignments, calibration, column
+classes, spectral distances and ion weighting. The [library-search
+tutorial](https://tomwenseleers.github.io/GCMSprime/articles/library-search.md)
+shows the calls and annotated exports.
