@@ -148,6 +148,29 @@ search](https://tomwenseleers.github.io/GCMSprime/articles/library-search.html)
 compares five similarity measures and explains the peak-onset timing
 convention, retained ion totals and scalable SQLite search.
 
+## Multisample experiments
+
+Point
+[`GCMSdeco()`](https://tomwenseleers.github.io/GCMSprime/reference/GCMSdeco.md)
+to an experiment directory containing sample groups and a `standards/`
+subdirectory with alkane calibrations. Samples are ordered by
+acquisition time, aligned and fitted with shared spectra and
+sample-specific log-concave profiles. The output includes a consensus
+MSP library and an Excel area table, alongside each sample’s spectra and
+reports.
+
+``` r
+
+experiment <- GCMSdeco("chromatograms", output_dir="beer_results",
+  precluster=32L, batch=list(plots=TRUE))
+experiment$areas
+```
+
+See [Multisample GC/MS
+experiments](https://tomwenseleers.github.io/GCMSprime/articles/multisample.md)
+for the directory layout, acquisition handling, exposure options and a
+calibrated beer example.
+
 ## Citation
 
 An article describing the methods implemented in GCMSprime is in

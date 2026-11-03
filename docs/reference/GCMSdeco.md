@@ -20,7 +20,7 @@ residuals(
 
 GCMSdeco(
   cdf_file,
-  msp_file,
+  msp_file = NULL,
   family = quasipoisson("identity"),
   lambda = "gic",
   nwindows = 10L,
@@ -39,7 +39,10 @@ GCMSdeco(
   xlsx_file = NULL,
   sample_name = NULL,
   library = NULL,
-  search = list()
+  search = list(),
+  output_dir = NULL,
+  coupled = TRUE,
+  batch = list()
 )
 
 # S3 method for class 'GCMSdeco'
@@ -100,9 +103,10 @@ print(x, ...)
 
 - cdf_file:
 
-  Local ANDI-MS `.cdf` path or HTTP(S) URL. The optional ncdf4 package
-  is required. Masses are binned to the nearest integer m/z; traces
-  between the minimum and maximum recorded mass are retained.
+  A directory of sample subdirectories with a `standards` subdirectory,
+  or a local ANDI-MS `.cdf` path or HTTP(S) URL. The optional ncdf4
+  package is required. Masses are binned to the nearest integer m/z;
+  traces between the minimum and maximum recorded mass are retained.
 
 - msp_file:
 
@@ -257,6 +261,27 @@ print(x, ...)
   supplies RI calibration automatically; a precomputed calibration can
   be supplied here. Identification is stored in the returned object and
   included in MSP/Excel exports.
+
+  Directory input returns a
+  [GCMSbatch](https://tomwenseleers.github.io/GCMSprime/reference/GCMSbatch.md)
+  object, with acquisition-ordered sample groups, per-sample exports and
+  a consensus area table and spectral library.
+
+- output_dir:
+
+  Directory for batch results; defaults to a sibling directory named
+  after the input folder with suffix `_GCMSprime`.
+
+- coupled:
+
+  Share spectra and refine sample-specific profiles with
+  [`L0nmf::coupledNMF()`](https://tomwenseleers.github.io/L0nmf/reference/coupledNMF.html)
+  for directory input.
+
+- batch:
+
+  Named directory options; see
+  [GCMSbatch](https://tomwenseleers.github.io/GCMSprime/reference/GCMSbatch.md).
 
 - normalize:
 

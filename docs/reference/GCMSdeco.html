@@ -24,7 +24,8 @@ are retained in the final spectra."><meta property="og:image" content="https://t
       <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../articles/gcms-deconvolution.html">Get started</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-tutorials" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Tutorials</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-tutorials"><li><a class="dropdown-item" href="../articles/gcms-deconvolution.html">GC/MS deconvolution</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-tutorials"><li><a class="dropdown-item" href="../articles/multisample.html">Multisample experiments</a></li>
+    <li><a class="dropdown-item" href="../articles/gcms-deconvolution.html">GC/MS deconvolution</a></li>
     <li><a class="dropdown-item" href="../articles/spectral-libraries.html">Spectral libraries and storage</a></li>
     <li><a class="dropdown-item" href="../articles/library-search.html">Retention indices and library search</a></li>
   </ul></li>
@@ -66,7 +67,7 @@ are retained in the final spectra.</p>
 <span></span>
 <span><span class="fu">GCMSdeco</span><span class="op">(</span></span>
 <span>  <span class="va">cdf_file</span>,</span>
-<span>  <span class="va">msp_file</span>,</span>
+<span>  msp_file <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">quasipoisson</a></span><span class="op">(</span><span class="st">"identity"</span><span class="op">)</span>,</span>
 <span>  lambda <span class="op">=</span> <span class="st">"gic"</span>,</span>
 <span>  nwindows <span class="op">=</span> <span class="fl">10L</span>,</span>
@@ -85,7 +86,10 @@ are retained in the final spectra.</p>
 <span>  xlsx_file <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  sample_name <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  library <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  search <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  search <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  output_dir <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  coupled <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  batch <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'GCMSdeco'</span></span>
@@ -147,7 +151,8 @@ interval or select a chromatographic window.</p></dd>
 
 
 <dt id="arg-cdf-file">cdf_file<a class="anchor" aria-label="anchor" href="#arg-cdf-file"></a></dt>
-<dd><p>Local ANDI-MS <code>.cdf</code> path or HTTP(S) URL. The optional
+<dd><p>A directory of sample subdirectories with a <code>standards</code>
+subdirectory, or a local ANDI-MS <code>.cdf</code> path or HTTP(S) URL. The optional
 <span class="pkg">ncdf4</span> package is required. Masses are binned to the nearest integer
 m/z; traces between the minimum and maximum recorded mass are retained.</p></dd>
 
@@ -293,7 +298,23 @@ its extension. Included in the compound table, MSP entries and workbook.</p></dd
 <dd><p>Named options for library_search(), such as phase="DB5",
 ri_tolerance=30, n_matches=5 and method="stein_scott". The alkane file supplies
 RI calibration automatically; a precomputed calibration can be supplied here.
-Identification is stored in the returned object and included in MSP/Excel exports.</p></dd>
+Identification is stored in the returned object and included in MSP/Excel exports.</p>
+<p>Directory input returns a <a href="GCMSbatch.html">GCMSbatch</a> object, with acquisition-ordered sample
+groups, per-sample exports and a consensus area table and spectral library.</p></dd>
+
+
+<dt id="arg-output-dir">output_dir<a class="anchor" aria-label="anchor" href="#arg-output-dir"></a></dt>
+<dd><p>Directory for batch results; defaults to a sibling directory
+named after the input folder with suffix <code>_GCMSprime</code>.</p></dd>
+
+
+<dt id="arg-coupled">coupled<a class="anchor" aria-label="anchor" href="#arg-coupled"></a></dt>
+<dd><p>Share spectra and refine sample-specific profiles with
+<code><a href="https://tomwenseleers.github.io/L0nmf/reference/coupledNMF.html" class="external-link">L0nmf::coupledNMF()</a></code> for directory input.</p></dd>
+
+
+<dt id="arg-batch">batch<a class="anchor" aria-label="anchor" href="#arg-batch"></a></dt>
+<dd><p>Named directory options; see <a href="GCMSbatch.html">GCMSbatch</a>.</p></dd>
 
 
 <dt id="arg-normalize">normalize<a class="anchor" aria-label="anchor" href="#arg-normalize"></a></dt>

@@ -44,7 +44,8 @@
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-tutorials" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Tutorials</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-tutorials">
-<li><a class="dropdown-item" href="articles/gcms-deconvolution.html">GC/MS deconvolution</a></li>
+<li><a class="dropdown-item" href="articles/multisample.html">Multisample experiments</a></li>
+    <li><a class="dropdown-item" href="articles/gcms-deconvolution.html">GC/MS deconvolution</a></li>
     <li><a class="dropdown-item" href="articles/spectral-libraries.html">Spectral libraries and storage</a></li>
     <li><a class="dropdown-item" href="articles/library-search.html">Retention indices and library search</a></li>
   </ul>
@@ -147,6 +148,16 @@ R · Full mass spectra · CDF input · MSP &amp; Excel output
 <span>  msp_file<span class="op">=</span><span class="st">"sample_identified.msp"</span>, xlsx_file<span class="op">=</span><span class="st">"sample_identified.xlsx"</span><span class="op">)</span></span></code></pre></div>
 <p>For metric spectral distances, use <code>method="angular"</code> or <code>"stein_scott_angular"</code>. Reusable ion-rarity weights come from <code>library_ion_weights(lib)</code> and are passed through <code>ion_weights=</code>. Multinomial matching balances unknown reference counts to the sample total automatically.</p>
 <p><a href="https://tomwenseleers.github.io/GCMSprime/articles/library-search.html">RI calibration and library search</a> compares five similarity measures and explains the peak-onset timing convention, retained ion totals and scalable SQLite search.</p>
+</div>
+<div class="section level2">
+<h2 id="multisample-experiments">Multisample experiments<a class="anchor" aria-label="anchor" href="#multisample-experiments"></a>
+</h2>
+<p>Point <code><a href="reference/GCMSdeco.html">GCMSdeco()</a></code> to an experiment directory containing sample groups and a <code>standards/</code> subdirectory with alkane calibrations. Samples are ordered by acquisition time, aligned and fitted with shared spectra and sample-specific log-concave profiles. The output includes a consensus MSP library and an Excel area table, alongside each sample’s spectra and reports.</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">experiment</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/GCMSdeco.html">GCMSdeco</a></span><span class="op">(</span><span class="st">"chromatograms"</span>, output_dir<span class="op">=</span><span class="st">"beer_results"</span>,</span>
+<span>  precluster<span class="op">=</span><span class="fl">32L</span>, batch<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>plots<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">experiment</span><span class="op">$</span><span class="va">areas</span></span></code></pre></div>
+<p>See <a href="articles/multisample.html">Multisample GC/MS experiments</a> for the directory layout, acquisition handling, exposure options and a calibrated beer example.</p>
 </div>
 <div class="section level2">
 <h2 id="citation">Citation<a class="anchor" aria-label="anchor" href="#citation"></a>

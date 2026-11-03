@@ -22,7 +22,8 @@ and ANDI-MS administrative and instrument records."><meta property="og:image" co
       <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../articles/gcms-deconvolution.html">Get started</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-tutorials" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Tutorials</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-tutorials"><li><a class="dropdown-item" href="../articles/gcms-deconvolution.html">GC/MS deconvolution</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-tutorials"><li><a class="dropdown-item" href="../articles/multisample.html">Multisample experiments</a></li>
+    <li><a class="dropdown-item" href="../articles/gcms-deconvolution.html">GC/MS deconvolution</a></li>
     <li><a class="dropdown-item" href="../articles/spectral-libraries.html">Spectral libraries and storage</a></li>
     <li><a class="dropdown-item" href="../articles/library-search.html">Retention indices and library search</a></li>
   </ul></li>
@@ -57,7 +58,8 @@ and ANDI-MS administrative and instrument records.</p>
 <span>  <span class="va">cdf_file</span>,</span>
 <span>  time <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">y</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  mass <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">y</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>  sample_name <span class="op">=</span> <span class="fu">tools</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/tools/fileutils.html" class="external-link">file_path_sans_ext</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/basename.html" class="external-link">basename</a></span><span class="op">(</span><span class="va">cdf_file</span><span class="op">)</span><span class="op">)</span></span>
+<span>  sample_name <span class="op">=</span> <span class="fu">tools</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/tools/fileutils.html" class="external-link">file_path_sans_ext</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/basename.html" class="external-link">basename</a></span><span class="op">(</span><span class="va">cdf_file</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  acquired_at <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -86,6 +88,11 @@ column names.</p></dd>
 <dt id="arg-sample-name">sample_name<a class="anchor" aria-label="anchor" href="#arg-sample-name"></a></dt>
 <dd><p>Sample identity recorded in the header; defaults to the
 output filename without its extension.</p></dd>
+
+
+<dt id="arg-acquired-at">acquired_at<a class="anchor" aria-label="anchor" href="#arg-acquired-at"></a></dt>
+<dd><p>Optional actual acquisition time as POSIXct. This is
+distinct from export time and is used for ordering multisample experiments.</p></dd>
 
 </dl></div>
     <div class="section level2">

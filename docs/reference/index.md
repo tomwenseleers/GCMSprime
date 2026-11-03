@@ -6,6 +6,19 @@
   [`predict(`*`<RIcalibration>`*`)`](https://tomwenseleers.github.io/GCMSprime/reference/calibrate_ri.md)
   [`print(`*`<RIcalibration>`*`)`](https://tomwenseleers.github.io/GCMSprime/reference/calibrate_ri.md)
   : Calibrate retention indices from an n-alkane standard
+- [`fitted(`*`<GCMSbatch>`*`)`](https://tomwenseleers.github.io/GCMSprime/reference/GCMSbatch.md)
+  [`coef(`*`<GCMSbatch>`*`)`](https://tomwenseleers.github.io/GCMSprime/reference/GCMSbatch.md)
+  [`plot(`*`<GCMSbatch>`*`)`](https://tomwenseleers.github.io/GCMSprime/reference/GCMSbatch.md)
+  [`logLik(`*`<GCMSbatch>`*`)`](https://tomwenseleers.github.io/GCMSprime/reference/GCMSbatch.md)
+  [`GIC(`*`<GCMSbatch>`*`)`](https://tomwenseleers.github.io/GCMSprime/reference/GCMSbatch.md)
+  [`AIC(`*`<GCMSbatch>`*`)`](https://tomwenseleers.github.io/GCMSprime/reference/GCMSbatch.md)
+  [`BIC(`*`<GCMSbatch>`*`)`](https://tomwenseleers.github.io/GCMSprime/reference/GCMSbatch.md)
+  [`EBIC(`*`<GCMSbatch>`*`)`](https://tomwenseleers.github.io/GCMSprime/reference/GCMSbatch.md)
+  [`MBIC(`*`<GCMSbatch>`*`)`](https://tomwenseleers.github.io/GCMSprime/reference/GCMSbatch.md)
+  [`nobs(`*`<GCMSbatch>`*`)`](https://tomwenseleers.github.io/GCMSprime/reference/GCMSbatch.md)
+  [`print(`*`<GCMSbatch>`*`)`](https://tomwenseleers.github.io/GCMSprime/reference/GCMSbatch.md)
+  : Multisample GC/MS deconvolution, alignment and shared spectral
+  recovery
 - [`residuals(`*`<GCMSdeco>`*`)`](https://tomwenseleers.github.io/GCMSprime/reference/GCMSdeco.md)
   [`GCMSdeco()`](https://tomwenseleers.github.io/GCMSprime/reference/GCMSdeco.md)
   [`coef(`*`<GCMSdeco>`*`)`](https://tomwenseleers.github.io/GCMSprime/reference/GCMSdeco.md)
