@@ -124,6 +124,21 @@ Intel i9-11950H workstation.
 
 ![](figures/multisample-beer-traces.png)
 
+Across the complete chromatograms, the analysis retains all 518 channels and
+links **599 detected occurrences into 517 consensus compounds**:
+
+| Sample | Detected occurrences | Adjusted weighted R² | Sample GIC |
+|:--|--:|--:|--:|
+| 502131900304_a | 325 | 0.9861 | 16,800,722 |
+| 54040014_a | 274 | 0.9850 | 16,746,915 |
+
+Independent initialization took 671.31 s and 594.48 s, including PSF estimation
+and their initial exports. Starting from these cached fits, coupled refinement
+and the final Excel, MSP and diagnostic PDF exports took 777.01 s. The joint
+GIC is 32,934,308; it counts common spectra once and amplitudes separately for
+each detected occurrence. Sample GIC values count each sample's spectra and
+are available for inspecting its individual fit.
+
 The fitted components can be inspected sample by sample, and common spectra
 can be searched against a library with each sample's alkane-derived retention
 indices. Pass `library=` and `search=` to `GCMSdeco()` to include those
