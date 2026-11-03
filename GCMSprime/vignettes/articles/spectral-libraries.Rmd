@@ -1,5 +1,5 @@
 ---
-title: "Spectral libraries: import and storage"
+title: "Spectral library import"
 description: "Stream MSP libraries into sparse matrices or indexed SQLite storage."
 output: rmarkdown::html_document
 ---

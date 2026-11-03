@@ -1,5 +1,5 @@
 ---
-title: "Multisample GC/MS experiments"
+title: "GC/MS deconvolution for multiple samples"
 description: "Analyze sample directories with alkane calibration, shared spectra and sample-specific compound areas."
 output: rmarkdown::html_document
 ---

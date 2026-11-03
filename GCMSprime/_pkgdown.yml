@@ -31,23 +31,27 @@ navbar:
     left: [intro, tutorials, algorithm, reference, news]
     right: [search, github]
   components:
-    tutorials:
-      text: Tutorials
-      menu:
-        - text: Multisample experiments
-          href: articles/multisample.html
-        - text: GC/MS deconvolution
-          href: articles/gcms-deconvolution.html
-        - text: Spectral libraries and storage
-          href: articles/spectral-libraries.html
-        - text: Retention indices and library search
-          href: articles/library-search.html
     intro:
       text: Get started
       href: articles/gcms-deconvolution.html
+    tutorials:
+      text: Tutorials
+      menu:
+        - text: GC/MS deconvolution for single samples
+          href: articles/gcms-deconvolution.html
+        - text: GC/MS deconvolution for multiple samples
+          href: articles/multisample.html
+        - text: Spectral library import
+          href: articles/spectral-libraries.html
+        - text: Retention indices and library search
+          href: articles/library-search.html
     algorithm:
       text: Algorithm & theory
-      href: https://tomwenseleers.github.io/L0nmf/articles/log-concave-nmf.html
+      menu:
+        - text: How chromatograms become compounds
+          href: articles/algorithm.html
+        - text: Retention indices and spectral identification
+          href: articles/identification-theory.html
     github:
       icon: fab fa-github
       href: https://github.com/tomwenseleers/GCMSprime
@@ -59,3 +63,18 @@ home:
 authors:
   sidebar:
     roles: [aut, cre, ctb]
+
+articles:
+  - title: Tutorials
+    contents: [articles/gcms-deconvolution, articles/multisample, articles/spectral-libraries, articles/library-search]
+  - title: Algorithm and theory
+    contents: [articles/algorithm, articles/identification-theory]
+reference:
+  - title: Deconvolution, quantification and reports
+    contents: [GCMSdeco, GCMSbatch, plot.GCMSdeco, write_GCMS_cdf]
+  - title: Import and inspect spectral libraries
+    contents: [read_msp, read_gcms_id, library_metadata, spectra, retention_indices]
+  - title: Calibrate retention indices and identify compounds
+    contents: [calibrate_ri, library_search, library_ion_weights, identify_compounds]
+  - title: Shared tools and package overview
+    contents: [reexports, GCMSprime-package]

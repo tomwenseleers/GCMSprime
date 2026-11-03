@@ -4,7 +4,7 @@
 <div class="l0-hero-copy">
 <p class="l0-eyebrow">GC/MS DECONVOLUTION · QUANTIFICATION · IDENTIFICATION</p>
 <h1>More compounds.<br><span>Cleaner spectra.</span></h1>
-<p class="l0-lead">State-of-the-art GC/MS deconvolution, quantification and library search.</p>
+<p class="l0-lead">Fast and scalable GC/MS deconvolution and quantification for single or multiple samples, with inbuilt spectral library search.</p>
 <div class="l0-actions"><a class="btn btn-primary" href="articles/gcms-deconvolution.html">Get started <span aria-hidden="true">↗</span></a><a class="btn btn-outline-light" href="articles/library-search.html">Search spectral libraries</a></div>
 <p class="l0-hero-note">R · Full mass spectra · CDF input · MSP &amp; Excel output</p>
 </div>
@@ -17,7 +17,11 @@
 <a href="articles/library-search.html"><strong>Identify</strong><span>Fast spectral matching with column-specific retention indices</span></a>
 </div>
 
-GCMSprime is a new state-of-the-art GC/MS deconvolution pipeline to separate and integrate overlapping chromatographic peaks. It enables unparalleled peak integration accuracy, and has retention index constrained library search using either public or commercial libraries built-in. It is extremely easy to use, and produces detailed sample reports in minutes in a fully automatic way, without any required user intervention or parameter settings. The deconvolution method that it uses is mathematically principled and builds on two other packages. First, [L0glm](https://tomwenseleers.github.io/L0glm/) for ultrafast joint feature selection across mass channels (approximating best subset of group selection). Second, [L0nmf](https://tomwenseleers.github.io/L0nmf/) to deconvolve spectra based on an estimated time-varying peak shape function (PSF), followed by sparse log-concave nonnegative matrix factorization with automatic best rank detection, which estimates the most parsimonious true number of compounds present, whilst allowing for flexible log-concave peak shape constraints, overdispersed multivariate Poisson noise and a smoothly varying background. In this way, the package can simultaneously estimate the number of compounds present, their elution profiles, and the deconvolved spectra, even based on data from single samples. It succeeds in accurately estimating elution profiles and peak areas, even for challenging cases where peaks are highly overloaded or have awkward shark-fin shapes, as is commonly the case for acids. To our knowledge, it is the first package that can achieve this. Following deconvolution, spectra can then be searched against public (MoNA, GCMS-ID) or commercial libraries (after Openchrom export to .MSP), using a retention index constrained seach, or be exported to NIST MS Search compatible MSP format. Using this workflow, analysts can save weeks of manual work.
+GCMSprime separates overlapping GC/MS signals into compound profiles, mass
+spectra and integrated areas. It combines automatic response-shape estimation
+with sparse log-concave factorization and retention-index-constrained identification.
+Its statistical engines are developed in [L0glm](https://tomwenseleers.github.io/L0glm/)
+and [L0nmf](https://tomwenseleers.github.io/L0nmf/).
 
 ## Installation
 
@@ -26,79 +30,113 @@ install.packages("remotes")
 remotes::install_github("tomwenseleers/GCMSprime/GCMSprime")
 ```
 
-## Fully automatic deconvolution
+## Automatic deconvolution for single samples
+
+One call estimates the response shape, smooth background, compound profiles,
+full mass spectra and integrated areas, then writes NIST-compatible MSP and
+Excel reports. An alkane ladder can calibrate the PSF and retention indices.
 
 ```r
 library(GCMSprime)
 fit <- GCMSdeco("sample.cdf", "sample.msp", xlsx_file="sample.xlsx",
-                alkanes_file="alkanes.cdf", precluster=32L)
-fit
+  alkanes_file="alkanes.cdf", precluster=32L)
 plot(fit, type="lines", file="sample_traces.pdf")
 plot(fit, type="heatmap", file="sample_heatmaps.pdf")
 plot(fit, type="profiles", file="sample_profiles_spectra.pdf")
 ```
 
-The workflow calibrates a time-varying PSF, models a smooth baseline, resolves overlapping compounds and refines their spectra on every original mass channel. Results are ordered by apex retention time. MSP files are readable by NIST MS Search; Excel reports contain integrated areas and compact spectra.
+The fit allows asymmetric and broad profiles under hard log-concavity
+constraints. Its automatic best rank criterion selects a compact compound set;
+the final likelihood refinement retains every original mass channel.
 
-The final original-channel pass checks component deletions, local fusions and missed residual peaks, accepting each change only when the complete likelihood-and-compound criterion improves.
+### Six co-eluting hydrocarbons
 
-## Experimental examples
-
-The [GC/MS tutorial](articles/gcms-deconvolution.html) includes two experimental chromatogram windows, complete fitted signals, spectra, timings and exports.
-
-![Co-eluting hydrocarbon profiles](reference/figures/gcms-data1-traces.png)
-
-![Beer volatile profiles](reference/figures/gcms-data2-traces.png)
-
-The underlying [factorization and PSF methods](https://tomwenseleers.github.io/L0nmf/) are available independently in L0nmf.
-
-## Spectral libraries
-
-Import MSP libraries into sparse memory or SQLite storage, preserving raw peaks, chemical identifiers, synonyms and retention-index provenance:
+The bundled cuticular-hydrocarbon window illustrates recovered elution profiles
+and spectra. This short-window example uses a supplied PSF dictionary and a
+constant background; individual compound shapes are then refined.
 
 ```r
-lib <- read_msp("library.msp", backend="sqlite", db_file="library.sqlite")
-spectra(lib, which=1:1000, nominal=TRUE, normalize="l2")
-library_metadata(lib, which=1:10)
-retention_indices(lib, which=1:1000, phase="DB5")
+data(GCMS_data1, package="L0nmf")
+write_GCMS_cdf(GCMS_data1, "GCMS_data1.cdf")
+example_fit <- GCMSdeco("GCMS_data1.cdf", "GCMS_data1.msp",
+  nwindows=1L, baseline_df=1L, precluster=16L, correlation="none",
+  psf_control=list(kernel_est=L0glm::convkernel("gaussian", 65L,
+    list(sigma=8)), maxiter=0L))
 ```
 
-[Library formats and storage](articles/spectral-libraries.html) covers OpenChrom MSP exports, MoNA/Golm MSP and GCMS-ID CSV predictions.
+[![Recovered elution profiles and spectra for six co-eluting hydrocarbons](reference/figures/gcms-data1-profiles-spectra.png)](articles/gcms-deconvolution.html#cuticular-hydrocarbons)
 
-## Identify recovered compounds
+### Beer volatiles and a broad acid peak
 
-Calibrate retention indices from a diagnostic-ion alkane ladder and combine column-specific RI constraints with fast spectral matching:
+A beer-headspace window contains a strongly asymmetric acid peak mixed with
+narrower neighbours. Flexible log-concave profiles accommodate this shape while
+the spectra use all 518 channels.
 
-```r
-cal <- calibrate_ri("alkanes.cdf", carbon=7:23)
-identified <- identify_compounds(fit, lib, calibration=cal,
-  phase="DB5", ri_tolerance=30, n_matches=5,
-  method=c("stein_scott", "hellinger"),
-  msp_file="sample_identified.msp", xlsx_file="sample_identified.xlsx")
-```
+[![Beer chromatogram with fitted compounds and the broad acid contribution](reference/figures/gcms-data2-traces.png)](articles/gcms-deconvolution.html#beer-volatiles-and-a-broad-acid-peak)
 
-For metric spectral distances, use `method="angular"` or `"stein_scott_angular"`.
-Reusable ion-rarity weights come from `library_ion_weights(lib)` and are passed through `ion_weights=`.
-Multinomial matching balances unknown reference counts to the sample total automatically.
+The [single-sample tutorial](articles/gcms-deconvolution.html) includes both
+datasets, fitted-signal heatmaps, profile/spectrum panels, timings and downloadable
+MSP/PDF outputs. [How chromatograms become compounds](articles/algorithm.html)
+explains the progression from known PSFs to estimated and component-specific shapes.
 
-[RI calibration and library search](https://tomwenseleers.github.io/GCMSprime/articles/library-search.html) compares five similarity measures and explains the peak-onset timing convention, retained ion totals and scalable SQLite search.
+## Automatic deconvolution for multiple samples
 
-## Multisample experiments
-
-Point `GCMSdeco()` to an experiment directory containing sample groups and a
-`standards/` subdirectory with alkane calibrations. Samples are ordered by
-acquisition time, aligned and fitted with shared spectra and sample-specific
-log-concave profiles. The output includes a consensus MSP library and an
-Excel area table, alongside each sample's spectra and reports.
+Point to a directory containing sample-group folders and a `standards/`
+subdirectory with alkane calibrations. Acquisition timestamps determine run
+order. The coupled model aligns compounds and shares their spectra while
+retaining sample-specific profiles, backgrounds and areas.
 
 ```r
-experiment <- GCMSdeco("chromatograms", output_dir="beer_results",
+experiment <- GCMSdeco("chromatograms", output_dir="experiment_results",
   precluster=32L, batch=list(plots=TRUE))
+experiment$samples
 experiment$areas
 ```
 
-See [Multisample GC/MS experiments](articles/multisample.html) for the directory
-layout, acquisition handling, exposure options and a calibrated beer example.
+**The experiment is processed out of core.** Observations and factor checkpoints
+are stored per sample on disk, and coupled updates read one sample at a time.
+Common spectra and compact matching summaries remain in memory. Native sparse
+local updates and OpenMP keep the computation focused on informative windows.
+Original scan grids are retained, and compounds absent from a sample stay
+unassigned in its area table.
+
+In a three-sample simulation with 258 mass channels, the coupled model recovered
+all 78 compound occurrences in 29.69 seconds. The directory workflow exports a
+consensus MSP library and an Excel area table, together with each sample's
+spectra and diagnostic reports. See
+[multiple-sample deconvolution](articles/multisample.html) for the layout,
+calibration, scalability and a complete two-beer example.
+
+## Spectral library search
+
+**Open and commercial libraries can be imported.** MoNA and Golm MSP collections,
+GCMS-ID CSV predictions, and OpenChrom-exported Agilent or Shimadzu libraries
+are supported. Large catalogues can remain in indexed SQLite storage.
+
+```r
+lib <- read_msp("library.msp", backend="sqlite", db_file="library.sqlite")
+identified <- GCMSdeco("sample.cdf", "identified.msp",
+  xlsx_file="identified.xlsx", alkanes_file="alkanes.cdf", library=lib,
+  search=list(phase="DB5", ri_tolerance=30, n_matches=5,
+              method=c("stein_scott", "hellinger")))
+```
+
+The compounds recovered from single- or multisample deconvolution can be
+automatically annotated using **spectral match quality and retention index**.
+Alkane-derived indices first restrict candidates to the selected column class
+and tolerance; fast native search then ranks their spectra. Multisample
+consensus IDs support a unique-compound list across the experiment, with
+sample-specific RI evidence and full match provenance retained.
+
+Stein–Scott, cosine/angular, Hellinger and symmetric probability/count
+comparisons are available, with optional ion-rarity weighting. Excel and MSP
+reports include the ranked matches and annotations. The
+[library-import tutorial](articles/spectral-libraries.html) covers formats and
+storage; [retention indices and library search](articles/library-search.html)
+shows single- and multisample identification. The
+[identification theory](articles/identification-theory.html) gives the formulas,
+calibration and comparison benchmarks.
+
 
 ## Citation
 

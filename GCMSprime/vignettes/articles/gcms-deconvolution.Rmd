@@ -1,5 +1,5 @@
 ---
-title: "GC/MS deconvolution"
+title: "GC/MS deconvolution for single samples"
 description: "Separate overlapping compounds into log-concave elution profiles and full mass spectra."
 output: rmarkdown::html_document
 ---
@@ -31,7 +31,7 @@ library(GCMSprime)
 data(GCMS_data1)
 data(GCMS_data2)
 
-out <- file.path(tempdir(), "L0glm-GCMS")
+out <- file.path(tempdir(), "GCMSprime-examples")
 dir.create(out, showWarnings = FALSE)
 write_GCMS_cdf(GCMS_data1, file.path(out, "GCMS_data1.cdf"))
 write_GCMS_cdf(GCMS_data2, file.path(out, "GCMS_data2.cdf"))
@@ -198,93 +198,14 @@ For `GCMS_data2`, a low-dimensional nonnegative spline background can be
 constructed with `splines::bs(as.numeric(rownames(Y)), df=4L, intercept=TRUE)`.
 Quasipoisson is useful for instrumental intensities with extra variation;
 Poisson, Gaussian, negative binomial and Gamma signal models are also
-available. See [the likelihood and shape-constraint details](https://tomwenseleers.github.io/L0nmf/articles/log-concave-nmf.html).
+available. See [the likelihood and shape-constraint details](https://tomwenseleers.github.io/L0nmf/articles/algorithm.html).
 
-## Algorithm
+## Understand the method
 
-For observed scan-by-mass matrix \(Y\), the mean is
-
-\[
-\mu=HS+BA+O,\qquad H,S,A\geq0,\qquad
-\sum_iH_{ir}=1,\quad\Delta^2\log H_{\cdot r}\leq0.
-\]
-
-Each column of \(H\) is one compound's elution profile and each row of \(S\)
-is its spectrum. The low-df basis \(B\) models background; \(O\) is a known
-offset when supplied to `splogconNMF()`. The criterion is
-
-\[
-J=-2\sum_{ij}w_{ij}\ell(y_{ij};\mu_{ij},\nu)
-   +m\kappa\lambda_{IC}K,
-\]
-
-where \(K\) is the compound count, \(m\) the **original** channel count and
-\(\nu\) the shared noise parameters. Dividing this criterion by \(m\) gives
-one rank penalty per compound. Background and profile complexity have no
-additional penalty. For quasi families, the likelihood kernel and IC are
-scaled by the common dispersion. The optional temporal working adjustment
-\(\kappa=1+2\widehat\rho_1\) is held fixed during rank comparisons;
-`correlation="none"` sets \(\kappa=1\).
-
-1. Estimate a shared marginal noise scale from temporal differences, and
-   calibrate the PSF from the sample or an alkane standard.
-2. Cluster ion traces after adjusting for their total intensity. With
-   `precluster=32L`, sum the channels into at most 32 groups.
-3. Fit grouped adaptive ridge on the shifted PSF design and unpenalized
-   background. Fuse spectrally compatible overlapping components when their
-   combined profile is log-concave and the compound-count criterion improves.
-4. Lift the spectra and background to all original channels. Refit their
-   coefficients using the original observations and noise model.
-5. Refine local log-concave profiles and spectra, treating all other compounds
-   as offsets. Consider broad-anchor and compatible-tail fusions, restoring
-   distinct components when the full criterion favours them. A narrow fragment
-   contained within a spectrally matching broad profile can also receive a
-   guarded whole-profile refit with a shared background update. Neighbouring
-   modes remain within one quarter of their starting FWHM; the complete
-   original-channel criterion must decrease for the fusion to be retained.
-6. Apply the conservative broad-profile fusion pass. On every original ion
-   channel, check conditional deletions, nearly proportional-profile fusions
-   and additional PSF candidates from residual evidence. Refit only the affected
-   scan windows and accept moves that decrease the full compound-count
-   criterion. Return profiles and spectra in temporal order. `fit$model$cleanup`
-   records the original-channel changes.
-
-The same original-channel compound penalty is used in the reduced-space
-search. Native Rcpp/OpenMP kernels share the sparse profile design and update
-only the local scan windows. Candidate clustering uses algebraic spectral
-and profile calculations; likelihood refits are reserved for proposed model
-changes and final refinement.
-
-## Mathematical background and references
-
-The model is a sparse log-concave nonnegative
-[generalized matrix factorization](https://doi.org/10.1093/biostatistics/kxag010),
-with an identity link and a smooth background. Its loss gives the connection to
-[deviance matrix factorization](https://doi.org/10.1214/23-EJS2174), with
-rank selection and shape constraints. For standard fixed-parameter
-exponential-family models its likelihood loss is a weighted Bregman
-divergence, giving the connection to
-[Bregman NMF](https://doi.org/10.3390/s23167229).
-The [derivation and noise-specific divergences](https://tomwenseleers.github.io/L0nmf/articles/log-concave-nmf.html#deviance-matrix-factorization-and-bregman-nmf)
-are given in the mathematical article.
-
-Sparse deconvolution with shifted peak shapes follows the idea of
-[de Rooi & Eilers (2011)](https://doi.org/10.1016/j.aca.2011.05.030).
-Adaptive ridge selection is related to
-[Frommlet & Nuel (2016)](https://doi.org/10.1371/journal.pone.0148620).
-Size-adjusted Poisson clustering builds on
-[Witten (2011)](https://doi.org/10.1214/11-AOAS493), while the Poisson likelihood
-connects to KL-divergence NMF as studied by
-[Lee & Seung (2000)](https://proceedings.neurips.cc/paper_files/paper/2000/file/f9d1152547c0bde01830b7e8bd60024c-Paper.pdf).
-Log-concave profile modelling is inspired by
-[Eilers (2005)](https://doi.org/10.1002/cem.935).
-
-The combination of grouped selection, pooled noise calibration, local
-original-scale likelihood updates, hard log-concavity and compound-count
-fusion is developed for L0glm. The
-[sparse log-concave NMF article](https://tomwenseleers.github.io/L0nmf/articles/log-concave-nmf.html#local-quadratic-updates)
-derives its score, working information, constrained profile updates and
-likelihood acceptance rules.
+[How chromatograms become compounds](algorithm.html) explains known and
+estimated PSFs, compound-dependent profiles, noise, background and best rank
+tuning. [L0nmf's mathematical article](https://tomwenseleers.github.io/L0nmf/articles/algorithm.html)
+gives the objective functions, constraints and pseudocode.
 
 The experimental data are described in [Van Oystaeyen et al. (2014)](https://doi.org/10.1126/science.1244899)
 and [Schreurs et al. (2024)](https://doi.org/10.1038/s41467-024-46346-0).

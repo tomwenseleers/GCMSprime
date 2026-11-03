@@ -92,3 +92,7 @@ footer { border-top:1px solid #dce8ec; margin-top:4rem; padding-top:1.7rem; font
   .l0-hero h1 { max-width:100%; font-size:2rem; }
   .l0-hero-logo { width:66px; opacity:1; }
 }
+
+/* Long method names wrap within the viewport. */
+.navbar .dropdown-menu { max-width: min(36rem, calc(100vw - 2rem)); }
+.navbar .dropdown-item { white-space: normal; line-height: 1.4; }
