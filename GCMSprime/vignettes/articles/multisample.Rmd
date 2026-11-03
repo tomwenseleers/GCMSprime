@@ -122,7 +122,7 @@ for the two samples. The complete directory workflow, including PSF calibration,
 independent fits, coupling and exports, took **41.43 seconds** on an eight-core
 Intel i9-11950H workstation.
 
-![](figures/multisample-beer-traces.png)
+![Aligned beer chromatograms with sample-specific profiles and shared compound spectra](figures/multisample-beer-traces.png)
 
 Across the complete chromatograms, the analysis retains all 518 channels and
 links **599 detected occurrences into 517 consensus compounds**:

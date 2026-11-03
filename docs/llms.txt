@@ -75,7 +75,7 @@ then refined.
 data(GCMS_data1, package="L0nmf")
 write_GCMS_cdf(GCMS_data1, "GCMS_data1.cdf")
 example_fit <- GCMSdeco("GCMS_data1.cdf", "GCMS_data1.msp",
-  nwindows=1L, baseline_df=1L, precluster=16L, correlation="none",
+  nwindows=1L, baseline_df=1L, precluster=16L, correlation="auto",
   psf_control=list(kernel_est=L0glm::convkernel("gaussian", 65L,
     list(sigma=8)), maxiter=0L))
 ```
@@ -87,7 +87,12 @@ hydrocarbons](reference/figures/gcms-data1-profiles-spectra.png)](https://tomwen
 
 A beer-headspace window contains a strongly asymmetric acid peak mixed
 with narrower neighbours. Flexible log-concave profiles accommodate this
-shape while the spectra use all 518 channels.
+shape while the spectra use all 518 channels. The full CDF workflows
+recover the six hydrocarbon components in **6.33 seconds** and resolve
+**38 beer-window components in 70.19 seconds**, with the extended acid
+contribution represented by one log-concave profile. These timings use
+eight physical cores and one BLAS thread on the [benchmark
+workstation](https://tomwenseleers.github.io/L0glm/articles/performance.html#reproduce-and-extend).
 
 [![Beer chromatogram with fitted compounds and the broad acid
 contribution](reference/figures/gcms-data2-traces.png)](https://tomwenseleers.github.io/GCMSprime/articles/gcms-deconvolution.html#beer-volatiles-and-a-broad-acid-peak)

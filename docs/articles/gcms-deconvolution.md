@@ -51,13 +51,13 @@ by instrument software:
 fit1 <- GCMSdeco(file.path(out, "GCMS_data1.cdf"),
   file.path(out, "GCMS_data1.msp"), nwindows = 1L, precluster = 16L,
   baseline_df = 1L,
-  correlation = "none", ncores = 8L,
+  correlation = "auto", ncores = 8L,
   psf_control = list(kernel_est = convkernel("gaussian", 65L,
     list(sigma = 8)), maxiter = 0L))
 
 fit2 <- GCMSdeco(file.path(out, "GCMS_data2.cdf"),
   file.path(out, "GCMS_data2.msp"), nwindows = 1L, precluster = 32L,
-  correlation = "none", ncores = 8L,
+  correlation = "auto", ncores = 8L,
   psf_control = list(kernel_est = convkernel("gaussian", 65L,
     list(sigma = 6)), maxiter = 0L))
 
@@ -131,13 +131,23 @@ original-channel completion and MSP export.
 
 | Dataset | Scans | Mass channels | Compounds | Time (s) | GIC | Adjusted weighted R² |
 |:---|---:|---:|---:|---:|---:|---:|
-| `GCMS_data1` | 119 | 671 | 6 | 11.82 | 219,686 | 0.98980 |
-| `GCMS_data2` | 1,764 | 518 | 42 | 100.71 | 1,250,069 | 0.99487 |
+| `GCMS_data1` | 119 | 671 | 6 | 6.33 | 246,473 | 0.98999 |
+| `GCMS_data2` | 1,764 | 518 | 38 | 70.19 | 1,467,419 | 0.99498 |
 
 Weighted R² uses weights `1/pmax(fitted_mean, 0.1)` and a separate
 weighted mean for each ion channel. Its adjustment is conditional on the
 fitted profiles, using the positive spectral coefficients and background
 coefficients as the parameter count.
+
+The default working-correlation adjustment is estimated from temporal
+differences and held fixed during final rank comparisons. Both windows
+have an estimated information factor of 1.98. The permissive
+initialization retains candidates while their profiles are refined;
+final broad-fragment decisions compare merged and equally refined
+unmerged local models. The beer fit represents the extended acid
+contribution with one log-concave profile, retaining all 518 mass
+channels. Diagnostics are available in `fit2$model$contained_fusion` and
+`fit2$model$initialization`.
 
 ### Cuticular hydrocarbons
 
@@ -245,7 +255,7 @@ X <- convmatrix(convkernel("gaussian", 65L, list(sigma = 8)), nrow(Y))
 B <- matrix(1, nrow(Y), 1L)          # constant background in this short window
 nmf <- splogconNMF(X, Y, background = B,
   family = quasipoisson("identity"), precluster = 16L,
-  correlation = "none", ncores = 8L)
+  correlation = "auto", ncores = 8L)
 nmf$rank
 nmf$H                              # unit-sum, log-concave profiles
 coef(nmf)                          # full-channel integrated intensities

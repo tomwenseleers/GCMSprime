@@ -190,7 +190,13 @@ so the remaining fitted signal is an offset. Only the affected scan
 window needs updating. A constrained quadratic step in \log H\_{\cdot r}
 uses the original intensity likelihood and is checked by backtracking.
 This preserves the chosen noise model while imposing a hard shape
-constraint. The model belongs to the broader class of [deviance matrix
+constraint. The spectra serve as covariates for the time profiles, with
+current profiles and spectra supplying the starting values. The native
+solver refines one log profile at a time and jointly refits the
+overlapping spectra. Fine refinement has no additional shrinkage toward
+zero or toward the starting peak shape. It normalizes each updated
+profile and transfers its scale to the spectrum, preserving the fitted
+contribution. The model belongs to the broader class of [deviance matrix
 factorization](https://doi.org/10.1214/23-EJS2174) and [generalized
 matrix factorization](https://www.jmlr.org/papers/v23/20-1104.html)
 models, with additional nonnegativity, log-concavity and rank selection.
@@ -203,6 +209,12 @@ supplies a statistically grounded set of candidate components. An
 unusually broad or tailed compound can initially produce several nearby
 components; spectral similarity identifies plausible fragments of the
 same compound.
+
+The starting search uses an unadjusted IC preset to retain a useful pool
+of candidate components while their shapes are being refined. Final rank
+selection then applies the requested working-correlation multiplier
+\kappa. The initialization and final criterion have separate ledgers
+when their penalties differ.
 
 The algorithm then proposes fusions of correlated spectra whose profiles
 overlap and whose combined elution profile is compatible with
@@ -218,6 +230,17 @@ penalty are held fixed during these comparisons. This balances
 explanatory power against the number of compounds, yielding an
 automatically selected factorization rank and a data-driven estimate of
 the underlying compound count.
+
+For a small fragment contained within a broad peak, spectral similarity
+can be informative even when the two profile shapes differ
+substantially. The final pass considers fragments with spectral cosine
+at least 0.97, at least 99% of their profile mass inside the broad
+parent’s 1%-height interval, and at most 15% of its area. The parent’s
+FWHM must exceed four times the calibrated narrow-peak FWHM. A proposed
+merge and an unmerged control receive the same local joint-refinement
+budget. All original ion channels enter the decision. The other fitted
+components and background remain in an offset, and local windows include
+the entire support of each component whose spectrum changes.
 
 The distinctive contribution is the combination of grouped sparse
 PSF-based initialization, noise-aware log-concave refinement and

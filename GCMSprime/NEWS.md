@@ -7,6 +7,10 @@
 * Standard-assisted or blind constant/time-varying PSF estimation, pooled
   noise calibration and smooth background initialization.
 
+* Contained broad-peak fragments use native local refinement and matched
+  unmerged controls, with permissive initialization and correlation-aware
+  rank selection on every original ion channel.
+
 ## Deconvolution and quantification
 
 * Single-sample sparse log-concave NMF resolves overlapping compounds,

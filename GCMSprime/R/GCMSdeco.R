@@ -214,6 +214,13 @@ GCMS_write_msp <- function(model,time,mass,msp_file,compounds=NULL) {
 #' peaks using the complete compound-count criterion. Its diagnostics are in
 #' `model$cleanup`; `control=list(original_cleanup=FALSE)` skips it. See
 #' [L0nmf::splogconNMF()] for the selection criterion and shape constraints. The
+#' backend uses a permissive component initialization, native log-concave
+#' profile/spectrum refinement, and final rank selection with the requested
+#' working-correlation adjustment. Small fragments contained in a broad peak
+#' are assessed against equally refined unmerged local fits on every original
+#' ion channel. Trial diagnostics are in `model$contained_fusion`; the
+#' initialization criterion and history are in `model$initialization`.
+#' The
 #' spreadsheet and returned coefficient rows use increasing apex retention time. Rank selection,
 #' hard log concavity, censored Gamma intensities and compound-count information
 #' criteria follow [L0nmf::splogconNMF()].

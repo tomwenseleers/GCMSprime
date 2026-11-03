@@ -192,7 +192,7 @@ print(x, ...)
   Named list: `broad_repeats=1L`, `full_sweeps=1L`, `final_polishes=1L`,
   `native_sweeps=6L`, `block_sweeps=6L`, `psf_width=NULL`,
   `screen_factor=1`, `censor=0.5`, `linkage="ward"`,
-  `joint_trials=NULL`, `profile_cycles=10L`, `fusion_passes=5L`,
+  `joint_trials=NULL`, `profile_cycles=4L`, `fusion_passes=0L`,
   `profile_fusion=TRUE`. `joint_trials` uses direct Poisson fusion for
   Poisson data and joint local refinement for the other families.
   `psf_width` supplies the typical FWHM in scans. When omitted, local
@@ -205,17 +205,18 @@ print(x, ...)
   its own detection limit unless overridden here. `linkage` may be
   `"ward"` or `"bregman"`. `joint_trials` allows overlapping compounds
   to adjust together during local fusion refinement. `profile_cycles`
-  bounds the original-channel shape/background refinement; zero disables
-  it. `fusion_passes` bounds broad-anchor and compatible-tail fusion
-  after that refinement. For a narrow, spectrally matching fragment
-  contained in a broad profile, a guarded whole-profile refit can also
-  update the shared background. Neighbouring modes stay within one
-  quarter of their initial FWHM, and the merge is retained only when the
-  original-channel criterion decreases. `profile_fusion` enables a final
-  conservative fusion pass on all original channels, followed by one
-  local likelihood-based profile/spectrum refit. `original_cleanup=TRUE`
-  enables a final original-channel deletion, local fusion and
-  residual-discovery pass. Set it to `FALSE` to skip that pass.
+  bounds the smooth shape/background initialization; positive values
+  also enable fine native profile/spectrum refinement. Zero skips these
+  shape-polishing cycles. `fusion_passes` optionally adds broad-anchor
+  and compatible-tail searches during initialization. `profile_fusion`
+  enables algebraic profile fusion, retained contained-fragment
+  proposals and a final broad-fragment pass on every original channel.
+  Broad fusions are compared with an equally refined unmerged local
+  model. The entire support of every updated component is included in
+  the local fit, with the remaining components and background held in an
+  offset. `original_cleanup=TRUE` enables a final original-channel
+  deletion, local fusion and residual-discovery pass. Set it to `FALSE`
+  to skip that pass.
 
 - psf_control:
 
@@ -368,10 +369,16 @@ fusions and missed residual peaks using the complete compound-count
 criterion. Its diagnostics are in `model$cleanup`;
 `control=list(original_cleanup=FALSE)` skips it. See
 [`L0nmf::splogconNMF()`](https://tomwenseleers.github.io/L0nmf/reference/splogconNMF.html)
-for the selection criterion and shape constraints. The spreadsheet and
-returned coefficient rows use increasing apex retention time. Rank
-selection, hard log concavity, censored Gamma intensities and
-compound-count information criteria follow
+for the selection criterion and shape constraints. The backend uses a
+permissive component initialization, native log-concave profile/spectrum
+refinement, and final rank selection with the requested
+working-correlation adjustment. Small fragments contained in a broad
+peak are assessed against equally refined unmerged local fits on every
+original ion channel. Trial diagnostics are in `model$contained_fusion`;
+the initialization criterion and history are in `model$initialization`.
+The spreadsheet and returned coefficient rows use increasing apex
+retention time. Rank selection, hard log concavity, censored Gamma
+intensities and compound-count information criteria follow
 [`L0nmf::splogconNMF()`](https://tomwenseleers.github.io/L0nmf/reference/splogconNMF.html).
 
 ## Experimental GC/MS examples
@@ -426,12 +433,12 @@ write_GCMS_cdf(GCMS_data2, file.path(out, "GCMS_data2.cdf"))
 fit1 <- GCMSdeco(file.path(out, "GCMS_data1.cdf"),
   file.path(out, "GCMS_data1.msp"), nwindows = 1L, precluster = 16L,
   baseline_df = 1L,
-  correlation = "none", ncores = 8L,
+  correlation = "auto", ncores = 8L,
   psf_control = list(kernel_est = convkernel("gaussian", 65L,
     list(sigma = 8)), maxiter = 0L))
 fit2 <- GCMSdeco(file.path(out, "GCMS_data2.cdf"),
   file.path(out, "GCMS_data2.msp"), nwindows = 1L, precluster = 32L,
-  correlation = "none", ncores = 8L,
+  correlation = "auto", ncores = 8L,
   psf_control = list(kernel_est = convkernel("gaussian", 65L,
     list(sigma = 6)), maxiter = 0L))
 fit1$compounds

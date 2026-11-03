@@ -6,8 +6,13 @@
 
 - ANDI-MS CDF import and export preserve scan timing, acquired mass
   channels and sample metadata.
+
 - Standard-assisted or blind constant/time-varying PSF estimation,
   pooled noise calibration and smooth background initialization.
+
+- Contained broad-peak fragments use native local refinement and matched
+  unmerged controls, with permissive initialization and
+  correlation-aware rank selection on every original ion channel.
 
 ### Deconvolution and quantification
 

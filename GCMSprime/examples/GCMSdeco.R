@@ -11,12 +11,12 @@ write_GCMS_cdf(GCMS_data2, file.path(out, "GCMS_data2.cdf"))
 fit1 <- GCMSdeco(file.path(out, "GCMS_data1.cdf"),
   file.path(out, "GCMS_data1.msp"), nwindows = 1L, precluster = 16L,
   baseline_df = 1L,
-  correlation = "none", ncores = 8L,
+  correlation = "auto", ncores = 8L,
   psf_control = list(kernel_est = convkernel("gaussian", 65L,
     list(sigma = 8)), maxiter = 0L))
 fit2 <- GCMSdeco(file.path(out, "GCMS_data2.cdf"),
   file.path(out, "GCMS_data2.msp"), nwindows = 1L, precluster = 32L,
-  correlation = "none", ncores = 8L,
+  correlation = "auto", ncores = 8L,
   psf_control = list(kernel_est = convkernel("gaussian", 65L,
     list(sigma = 6)), maxiter = 0L))
 fit1$compounds
