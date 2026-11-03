@@ -34,6 +34,8 @@ navbar:
     tutorials:
       text: Tutorials
       menu:
+        - text: Multisample experiments
+          href: articles/multisample.html
         - text: GC/MS deconvolution
           href: articles/gcms-deconvolution.html
         - text: Spectral libraries and storage
