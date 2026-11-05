@@ -133,6 +133,10 @@ GCMS_write_msp <- function(model,time,mass,msp_file,compounds=NULL) {
 #' @param family Identity-link noise model accepted by [L0nmf::splogconNMF()].
 #'   The default \code{quasipoisson("identity")} estimates one pooled dispersion
 #'   across channels, suitable for overdispersed instrumental intensities.
+#' @param ncores Maximum number of threads for native OpenMP computations,
+#'   counting logical CPUs.
+#'   \code{NULL} uses the number of physical cores. For example,
+#'   \code{ncores=16L} permits all 16 logical CPUs on an eight-core workstation.
 #' @param nwindows Number of overlapping blind-PSF windows, default \code{10L}.
 #'   \code{1L} uses a shared PSF. The returned sparse design interpolates the
 #'   PSFs smoothly across the chromatogram.

@@ -136,7 +136,10 @@ updates. A fixed shape in the supplied NB family is respected.}
 adjustment to the selection penalty. \code{"none"} uses independent observations;
 a number between zero and 0.49 supplies the lag-one correlation.}
 
-\item{ncores}{OpenMP workers. \code{NULL} uses the detected physical cores.}
+\item{ncores}{Maximum number of threads for native OpenMP computations,
+counting logical CPUs.
+\code{NULL} uses the number of physical cores. For example,
+\code{ncores=16L} permits all 16 logical CPUs on an eight-core workstation.}
 
 \item{control}{Named list: \code{broad_repeats=1L}, \code{full_sweeps=1L},
 \code{final_polishes=1L}, \code{native_sweeps=6L}, \code{block_sweeps=6L},
