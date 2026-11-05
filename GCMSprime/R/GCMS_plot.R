@@ -192,6 +192,9 @@ plot.GCMSdeco <- function(x,type=c("lines","heatmap","spectra","profiles"),file=
     graphics::par(mfrow=c(4L,1L),mar=c(3,4,2.2,2),mgp=c(1.8,.6,0))
     titles<-c("Observed chromatogram","Observed minus modeled background","Fitted chromatogram","Mean Pearson residual")
     signal_limit<-max(1e-12,as.numeric(stats::quantile(pmax(Y,0)^gamma,clip,names=FALSE)))
+    apex<-x$time[vapply(ids,function(k)which.max(H[,k]),0L)]
+    apex<-apex[apex>=x$time[min(rows)]&apex<=x$time[max(rows)]]
+    marker<-grDevices::adjustcolor("red",.8*sqrt(min(1,35/max(1L,length(apex)))))
     for(panel in 1:4) {
       z<-if(panel==4L) pearson else pmax(switch(panel,Y,Y-background,mu),0)^gamma
       bound<-if(panel==4L) residual_limit else signal_limit
@@ -204,8 +207,7 @@ plot.GCMSdeco <- function(x,type=c("lines","heatmap","spectra","profiles"),file=
         col=palette,zlim=if(signed) c(-bound,bound) else c(0,bound),
         useRaster=TRUE,
         xlab="Retention time (min)",ylab="m/z",main=paste(sample,titles[panel],sep=" | "))
-      graphics::abline(v=x$time[vapply(ids,function(k)which.max(H[,k]),0L)],
-        col=grDevices::adjustcolor("red",.8),lwd=.7)
+      graphics::abline(v=apex,col=marker,lwd=.7)
     }
   } else {
     graphics::par(mfrow=c(nrows,1L),mar=c(3,6,2.2,1),mgp=c(1.8,.6,0))
