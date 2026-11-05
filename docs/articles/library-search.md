@@ -1,10 +1,13 @@
 # Retention indices and library search
 
-GCMSprime searches recovered spectra directly, preserving the fitted ion
-totals and using retention indices (RIs) to exclude incompatible
-candidates. A compiled sparse search compares hundreds of spectra
-against thousands of references in a fraction of a second. The same
-workflow supports sparse in-memory libraries and large SQLite libraries.
+GCMSprime searches recovered spectra using their fitted ion totals. When
+a retention-index (RI) calibration is available, the selected column
+class and tolerance restrict the candidates. Spectral scores then rank
+the remaining references. The same interface accepts sparse in-memory
+libraries and large SQLite libraries. The [search
+benchmark](https://tomwenseleers.github.io/GCMSprime/articles/identification-theory.html#accuracy-and-speed)
+reports the speed and accuracy of each spectral comparison on EI
+reference spectra.
 
 ## One call after deconvolution
 

@@ -86,14 +86,16 @@
 
     
     
-<p><code><a href="../reference/GCMSdeco.html">GCMSdeco()</a></code> takes a chromatogram from an ANDI-MS
-<code>.cdf</code> file to resolved compound profiles, integrated areas
-and a NIST-compatible <code>.msp</code> spectral library. Its
-<code><a href="https://tomwenseleers.github.io/L0nmf/reference/splogconNMF.html" class="external-link">splogconNMF()</a></code> backend combines sparse selection with local
-nonnegative factorization: narrow peaks and broad asymmetric peaks can
-each be represented by a single log-concave profile. A smooth background
-is fitted jointly, while every original mass channel is retained in the
-final spectra.</p>
+<p>When two compounds elute together, their ion traces overlap and the
+spectrum at any one scan contains contributions from both.
+<code><a href="../reference/GCMSdeco.html">GCMSdeco()</a></code> uses the changing ion patterns across scans to
+estimate a separate elution profile, mass spectrum and integrated area
+for each component. It takes an ANDI-MS <code>.cdf</code> file and
+writes a NIST-compatible <code>.msp</code> library. Set
+<code>xlsx_file</code> to export the quantification table as well.</p>
+<p>The fit separates compound profiles from a smooth background. A hard
+log-concavity constraint allows the fitted profiles to be asymmetric or
+broad. Final spectra retain every original mass channel.</p>
 <p>The <a href="https://tomwenseleers.github.io/L0glm/articles/deconvolution.html" class="external-link">single
 and multichannel deconvolution tutorial</a> introduces selection with a
 fixed peak shape. Here the peak shapes are refined as part of the
@@ -137,9 +139,10 @@ exported from R or a chromatogram exported by instrument software:</p>
 <span>  psf_control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>kernel_est <span class="op">=</span> <span class="fu"><a href="https://tomwenseleers.github.io/L0nmf/reference/convkernel.html" class="external-link">convkernel</a></span><span class="op">(</span><span class="st">"gaussian"</span>, <span class="fl">65L</span>,</span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>sigma <span class="op">=</span> <span class="fl">6</span><span class="op">)</span><span class="op">)</span>, maxiter <span class="op">=</span> <span class="fl">0L</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">fit1</span><span class="op">$</span><span class="va">compounds</span></span>
+<span><span class="va">fit1</span><span class="op">$</span><span class="va">compounds</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"retention_time"</span>, <span class="st">"area"</span>, <span class="st">"n_ions"</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="fu"><a href="https://tomwenseleers.github.io/L0glm/reference/model_criteria.html" class="external-link">GIC</a></span><span class="op">(</span><span class="va">fit2</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">fit2</span>, normalize <span class="op">=</span> <span class="st">"l1"</span><span class="op">)</span>       <span class="co"># unit-area spectra in all 518 channels</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">fit2</span>, normalize <span class="op">=</span> <span class="st">"l1"</span><span class="op">)</span>       <span class="co"># relative intensities in all 518 channels</span></span>
+<span><span class="va">fit2</span><span class="op">$</span><span class="va">seconds</span>                      <span class="co"># elapsed time by stage</span></span></code></pre></div>
 <p>These short windows use a supplied Gaussian PSF as the initial
 profile dictionary. <code>maxiter=0L</code> keeps this PSF fixed;
 <code><a href="https://tomwenseleers.github.io/L0nmf/reference/splogconNMF.html" class="external-link">splogconNMF()</a></code> then refines the individual compound
@@ -189,11 +192,11 @@ explicit Gaussian PSFs in <code>fit1</code> and <code>fit2</code> above.
 Automatic calibration is available through the calls in this
 section.</p>
 <!-- BEGIN gcms-results -->
-<p>These results use the calls above on the <a href="https://tomwenseleers.github.io/L0glm/articles/performance.html#reproduce-and-extend" class="external-link">benchmark
-workstation</a>, with eight OpenMP workers and one BLAS thread. Each
-timing measures one complete run, including CDF reading, PSF
-initialization, factorization, original-channel completion and MSP
-export.</p>
+<p>The table reports median elapsed time across three fits on the <a href="https://tomwenseleers.github.io/L0glm/articles/performance.html#reproduce-and-extend" class="external-link">benchmark
+workstation</a>. Each run uses eight OpenMP threads and one BLAS thread.
+Timings include CDF reading, PSF initialization, factorization,
+original-channel completion and MSP export. All three runs return the
+same profiles and spectra.</p>
 <table style="width:100%;" class="table">
 <colgroup>
 <col width="14%">
@@ -208,9 +211,9 @@ export.</p>
 <th align="left">Dataset</th>
 <th align="right">Scans</th>
 <th align="right">Mass channels</th>
-<th align="right">Compounds</th>
-<th align="right">Time (s)</th>
-<th align="right">GIC</th>
+<th align="right">Components</th>
+<th align="right">Seconds</th>
+<th align="right">Quasi-GIC</th>
 <th align="right">Adjusted weighted R²</th>
 </tr></thead>
 <tbody>
@@ -219,7 +222,7 @@ export.</p>
 <td align="right">119</td>
 <td align="right">671</td>
 <td align="right">6</td>
-<td align="right">6.33</td>
+<td align="right">5.14</td>
 <td align="right">246,473</td>
 <td align="right">0.98999</td>
 </tr>
@@ -228,16 +231,16 @@ export.</p>
 <td align="right">1,764</td>
 <td align="right">518</td>
 <td align="right">38</td>
-<td align="right">70.19</td>
+<td align="right">68.46</td>
 <td align="right">1,467,419</td>
 <td align="right">0.99498</td>
 </tr>
 </tbody>
 </table>
 <p>Weighted R² uses weights <code>1/pmax(fitted_mean, 0.1)</code> and a
-separate weighted mean for each ion channel. Its adjustment is
-conditional on the fitted profiles, using the positive spectral
-coefficients and background coefficients as the parameter count.</p>
+separate weighted mean for each mass channel. Its adjustment is
+conditional on the fitted profiles, using the positive spectral and
+background coefficients as the parameter count.</p>
 <p>The default working-correlation adjustment is estimated from temporal
 differences and held fixed during final rank comparisons. Both windows
 have an estimated information factor of 1.98. The permissive

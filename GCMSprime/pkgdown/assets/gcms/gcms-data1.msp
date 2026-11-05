@@ -1,6 +1,6 @@
-Name: gcms_data1_0001_RT26.88667
+Name: GCMS_data1_0001_RT26.88667
 Pseudocount: 96841961.6707999
-Comments: Sample gcms_data1; retention time 26.88667 min; integrated ion intensity 96841961.7; splogconNMF
+Comments: Sample GCMS_data1; apex retention time 26.88667 min; integrated ion intensity 96841961.7; splogconNMF
 Num Peaks: 477
 31 1.0043158;
 32 0.010874631;
@@ -480,9 +480,9 @@ Num Peaks: 477
 699 0.016178815;
 700 0.039609617;
 
-Name: gcms_data1_0002_RT26.90333
+Name: GCMS_data1_0002_RT26.90333
 Pseudocount: 55349251.2757523
-Comments: Sample gcms_data1; retention time 26.90333 min; integrated ion intensity 55349251.3; splogconNMF
+Comments: Sample GCMS_data1; apex retention time 26.90333 min; integrated ion intensity 55349251.3; splogconNMF
 Num Peaks: 404
 31 1.3794334;
 36 0.087749795;
@@ -889,9 +889,9 @@ Num Peaks: 404
 697 0.011208422;
 699 0.027097695;
 
-Name: gcms_data1_0003_RT26.93333
+Name: GCMS_data1_0003_RT26.93333
 Pseudocount: 48500946.5548668
-Comments: Sample gcms_data1; retention time 26.93333 min; integrated ion intensity 48500946.6; splogconNMF
+Comments: Sample GCMS_data1; apex retention time 26.93333 min; integrated ion intensity 48500946.6; splogconNMF
 Num Peaks: 384
 31 1.4614418;
 32 0.028660052;
@@ -1278,9 +1278,9 @@ Num Peaks: 384
 686 0.024486799;
 695 0.10457423;
 
-Name: gcms_data1_0004_RT26.95667
+Name: GCMS_data1_0004_RT26.95667
 Pseudocount: 42511976.5340622
-Comments: Sample gcms_data1; retention time 26.95667 min; integrated ion intensity 42511976.5; splogconNMF
+Comments: Sample GCMS_data1; apex retention time 26.95667 min; integrated ion intensity 42511976.5; splogconNMF
 Num Peaks: 529
 31 1.2264117;
 32 0.26616597;
@@ -1812,9 +1812,9 @@ Num Peaks: 529
 699 0.096142141;
 700 0.1694663;
 
-Name: gcms_data1_0005_RT27.01333
+Name: GCMS_data1_0005_RT27.01333
 Pseudocount: 81526239.4577051
-Comments: Sample gcms_data1; retention time 27.01333 min; integrated ion intensity 81526239.5; splogconNMF
+Comments: Sample GCMS_data1; apex retention time 27.01333 min; integrated ion intensity 81526239.5; splogconNMF
 Num Peaks: 447
 31 1.2270519;
 33 0.10172913;
@@ -2264,9 +2264,9 @@ Num Peaks: 447
 698 0.015640024;
 699 0.00747612;
 
-Name: gcms_data1_0006_RT27.11333
+Name: GCMS_data1_0006_RT27.11333
 Pseudocount: 62173647.5229368
-Comments: Sample gcms_data1; retention time 27.11333 min; integrated ion intensity 62173647.5; splogconNMF
+Comments: Sample GCMS_data1; apex retention time 27.11333 min; integrated ion intensity 62173647.5; splogconNMF
 Num Peaks: 537
 31 1.1848299;
 32 0.10614848;

@@ -165,7 +165,7 @@ cosine similarity to the true spectra was <strong>0.999994</strong>.
 Matching for this assessment used aligned apex times within 0.15 minutes
 and spectral cosine similarity of at least 0.9. The GIC was 9,832,385.06
 at all three core budgets, with equal spectra, areas and accepted fusion
-steps. Median adjusted weighted R² was 0.919.</p>
+steps. Median adjusted weighted R² was 0.920.</p>
 <table style="width:100%;" class="table">
 <colgroup>
 <col width="16%">
@@ -186,35 +186,35 @@ steps. Median adjusted weighted R² was 0.919.</p>
 <tbody>
 <tr class="odd">
 <td align="right">1</td>
-<td align="right">5.14 s</td>
-<td align="right">241.00 s</td>
-<td align="right">47.82 s</td>
-<td align="right">4.98 s</td>
-<td align="right">298.94 s</td>
+<td align="right">5.03 s</td>
+<td align="right">258.74 s</td>
+<td align="right">48.01 s</td>
+<td align="right">4.89 s</td>
+<td align="right">316.67 s</td>
 </tr>
 <tr class="even">
 <td align="right">8</td>
-<td align="right">2.49 s</td>
-<td align="right">52.10 s</td>
-<td align="right">17.17 s</td>
-<td align="right">4.21 s</td>
-<td align="right">75.97 s</td>
+<td align="right">1.42 s</td>
+<td align="right">49.00 s</td>
+<td align="right">17.47 s</td>
+<td align="right">4.06 s</td>
+<td align="right">71.95 s</td>
 </tr>
 <tr class="odd">
 <td align="right">16</td>
-<td align="right">1.85 s</td>
-<td align="right">40.66 s</td>
-<td align="right">17.72 s</td>
-<td align="right">4.82 s</td>
-<td align="right"><strong>65.05 s</strong></td>
+<td align="right">1.38 s</td>
+<td align="right">40.11 s</td>
+<td align="right">18.07 s</td>
+<td align="right">4.35 s</td>
+<td align="right"><strong>63.91 s</strong></td>
 </tr>
 </tbody>
 </table>
-<p>The 16-worker run took <strong>4.6 times less time</strong> than the
-one-worker run. Timings include automatic PSF estimation, deconvolution,
-alignment, coupling and exports on an HP ZBook Fury G8 with an Intel
-Core i9-11950H (8 physical cores, 16 logical cores), R 4.5.0 and
-OpenBLAS. Each sample worker used one native thread. The <a href="https://github.com/tomwenseleers/GCMSprime/blob/master/benchmarks/16_samples_parallel.R" class="external-link">benchmark
+<p>The complete workflow ran <strong>5.0 times as fast</strong> with 16
+workers as with one. Timings include automatic PSF estimation,
+deconvolution, alignment, coupling and exports on an HP ZBook Fury G8
+with an Intel Core i9-11950H (8 physical cores, 16 logical cores), R
+4.5.0 and OpenBLAS. Each sample worker used one native thread. The <a href="https://github.com/tomwenseleers/GCMSprime/blob/master/benchmarks/16_samples_parallel.R" class="external-link">benchmark
 script</a> recreates the chromatograms and evaluates the recovered
 compounds.</p>
 <div class="float">
@@ -340,15 +340,12 @@ narrow-peak width measured at the same height. The natural cubic RI
 spline passes through the alkane anchors exactly. The sample MSPs
 contain phase-labelled indices, and the consensus MSP contains their
 medians.</p>
-<p>Two beer chromatograms were analyzed with their shared alkane ladder,
-using 32 outcome groups for initialization and all <strong>518 mass
-channels</strong> for coupled refinement. In the 4.5–6 minute window,
-the model links <strong>20 detected occurrences into 16 consensus
-compounds</strong>. Adjusted weighted R² is <strong>0.993</strong> and
-<strong>0.995</strong> for the two samples. The complete directory
-workflow, including PSF calibration, independent fits, coupling and
-exports, took <strong>41.43 seconds</strong> on an eight-core Intel
-i9-11950H workstation.</p>
+<p>A separate run on the 4.5–6 minute window uses two PSF windows, 32
+outcome groups, all 518 original channels and eight logical cores. It
+links <strong>31 detected occurrences into 29 consensus
+compounds</strong>. Adjusted weighted R² is <strong>0.995</strong> and
+<strong>0.996</strong> for the two samples. The directory run reports
+<strong>42.14 s</strong> including its exports.</p>
 <div class="float">
 <img src="figures/multisample-beer-traces.png" alt="Aligned beer chromatograms with sample-specific profiles and shared compound spectra"><div class="figcaption">Aligned beer chromatograms with sample-specific
 profiles and shared compound spectra</div>
@@ -391,14 +388,16 @@ compounds</strong>:</p>
 </table>
 <p>The shared TIC calibration took 1.58 s, and constructing each
 sample’s sparse PSF took about 1.6 s. The two independent fits ran
-concurrently with eight native threads per worker. The batch took
-1,754.67 s (29.2 minutes), including 1,291.91 s for independent fits and
-449.35 s for coupled refinement. The joint GIC is 31,335,633; it counts
-common spectra once and amplitudes separately for each detected
-occurrence. Sample GIC values in the table are evaluated after coupling
-and count the spectra separately for each sample. RI annotation uses all
-17 alkanes from C7 to C23, with the fitted curve passing through every
-anchor.</p>
+concurrently with eight native threads per worker. The directory
+workflow took 1,754.67 s (29.2 minutes), including 1,291.91 s for
+independent fits and 449.35 s for coupled refinement. The joint GIC is
+31,335,633; it counts common spectra once and amplitudes separately for
+each detected occurrence. Sample GIC values in the table are evaluated
+after coupling and count the spectra separately for each sample. RI
+annotation uses all 17 alkanes from C7 to C23, with the fitted curve
+passing through every anchor. The directory workflow plus RI annotation
+took 1,759.58 s. These figures exclude separately generated diagnostic
+plots.</p>
 <p>The fitted components can be inspected sample by sample, and common
 spectra can be searched against a library with each sample’s
 alkane-derived retention indices. Pass <code>library=</code> and

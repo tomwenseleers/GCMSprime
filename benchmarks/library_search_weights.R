@@ -1,9 +1,17 @@
 # Ion rarity weights, count balancing and angular metrics on separate cohorts.
+# Set the OpenMP limit before loading the native search library.
+ncores <- 8L
+Sys.setenv(OMP_NUM_THREADS=ncores)
 library(GCMSprime)
-library_file <- "codex_sandbox/library_import/mona_import.rds"
-out <- "codex_sandbox/library_search_weights"
+args <- commandArgs(trailingOnly=TRUE)
+library_file <- if (length(args)) args[[1L]] else "codex_sandbox/library_import/MoNA/MoNA-export-GC-MS_Spectra.msp"
+out <- if (length(args)>1L) args[[2L]] else "codex_sandbox/library_search_weights"
+RhpcBLASctl::blas_set_num_threads(1L)
+RhpcBLASctl::omp_set_num_threads(ncores)
+stopifnot(RhpcBLASctl::omp_get_max_threads() >= ncores)
 dir.create(out,recursive=TRUE,showWarnings=FALSE)
-lib <- readRDS(library_file)
+lib <- if (tolower(tools::file_ext(library_file))=="rds")
+  readRDS(library_file) else read_msp(library_file, backend="memory")
 stopifnot(lib$backend=="memory")
 mass<-33:550;a<-GCMSprime:::search_matrix(lib,NULL,seq_len(lib$n),mass)$matrix
 key<-ifelse(!is.na(lib$metadata$inchikey)&nzchar(lib$metadata$inchikey),lib$metadata$inchikey,
@@ -24,12 +32,12 @@ excluded<-unique(excluded);a[,excluded]<-0;a<-Matrix::drop0(a)
 label<-ifelse(seq_along(query_id)<=250,'development','validation')
 lib$matrix<-a;lib$mass<-mass
 d<-list(q=q,key=key,truth=key[query_id],label=label,mass=mass)
-cases<-list(none=NULL,idf=library_ion_weights(lib,mass=d$mass,power=1,ncores=8),
-  idf_squared=library_ion_weights(lib,mass=d$mass,power=2,ncores=8))
+cases<-list(none=NULL,idf=library_ion_weights(lib,mass=d$mass,power=1,ncores=ncores),
+  idf_squared=library_ion_weights(lib,mass=d$mass,power=2,ncores=ncores))
 cat('Weight preparation seconds:',attr(cases$idf,'seconds'),'; spectra:',attr(cases$idf,'spectra'),'\n')
 summary<-list();matches<-list()
 for(name in names(cases)) {
-  z<-library_search(d$q,lib,ri_tolerance=Inf,method='all',n_matches=5,ncores=8,
+  z<-library_search(d$q,lib,ri_tolerance=Inf,method='all',n_matches=5,ncores=ncores,
     ion_weights=cases[[name]],reference_count='query')
   m<-z$matches;m$correct<-!is.na(d$key[m$library_id])&d$key[m$library_id]==d$truth[m$query]
   for(pair in list(c('cosine','angular'),c('stein_scott','stein_scott_angular'),c('jensen_shannon','multinomial'))) {
@@ -45,7 +53,7 @@ for(name in names(cases)) {
       top5=mean(tapply(h$correct,h$query,any)),seconds=z$seconds)
   }
 }
-raw<-library_search(d$q,lib,ri_tolerance=Inf,method='multinomial',reference_count='library',n_matches=5,ncores=8)
+raw<-library_search(d$q,lib,ri_tolerance=Inf,method='multinomial',reference_count='library',n_matches=5,ncores=ncores)
 h<-raw$matches;h$correct<-!is.na(d$key[h$library_id])&d$key[h$library_id]==d$truth[h$query]
 for(cohort in unique(d$label)) {
   hh<-h[d$label[h$query]==cohort,]
@@ -57,8 +65,18 @@ summary<-do.call(rbind,summary)
 write.csv(summary,file.path(out,'production_accuracy.csv'),row.names=FALSE)
 saveRDS(matches,file.path(out,'production_matches.rds'));saveRDS(cases,file.path(out,'production_weights.rds'))
 times<-do.call(rbind,lapply(c('stein_scott','cosine','angular','stein_scott_angular','multinomial','jensen_shannon','hellinger'),function(m) {
-  z<-library_search(d$q,lib,ri_tolerance=Inf,method=m,n_matches=5,ncores=8,ion_weights=cases$idf)
-  data.frame(method=m,queries=nrow(d$q),seconds=z$seconds)
+  seconds <- replicate(3L, {
+    gc()
+    library_search(d$q,lib,ri_tolerance=Inf,method=m,n_matches=5,
+      ncores=ncores,ion_weights=cases$idf)$seconds
+  })
+  data.frame(method=m,queries=nrow(d$q),seconds=median(seconds),
+    run1=seconds[1L],run2=seconds[2L],run3=seconds[3L])
 }))
 write.csv(times,file.path(out,'production_timing.csv'),row.names=FALSE)
-print(summary[summary$cohort=='validation',],row.names=FALSE);print(times)
+write.csv(data.frame(source=basename(library_file),md5=unname(tools::md5sum(library_file)),
+  library_entries=lib$n,nonempty_references=attr(cases$idf,'spectra'),queries=nrow(d$q),
+  threads=ncores,weight_seconds=attr(cases$idf,'seconds')),
+  file.path(out,'production_run.csv'),row.names=FALSE)
+print(summary[summary$cohort=='validation',],row.names=FALSE)
+print(times)

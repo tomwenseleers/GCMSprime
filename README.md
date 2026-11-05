@@ -10,7 +10,16 @@
 
 [Get started](https://tomwenseleers.github.io/GCMSprime/articles/gcms-deconvolution.html) · [Documentation](https://tomwenseleers.github.io/GCMSprime/reference/index.html) · [Algorithm & theory](https://tomwenseleers.github.io/GCMSprime/articles/algorithm.html)
 
-Fast and scalable GC/MS deconvolution and quantification for single or multiple samples, with inbuilt spectral library search.
+A GC–MS run records mixtures of ions whenever compounds overlap in time.
+GCMSprime separates these signals into elution profiles and full mass spectra,
+then integrates each resolved compound. It accepts ANDI-MS CDF files and
+writes an MSP library of the recovered spectra and an Excel quantification
+table when requested. For a sample series, it aligns retention times and
+shares spectra across related occurrences.
+
+An alkane ladder can calibrate peak shapes and retention indices. Supplying a
+spectral library adds ranked candidate matches, with the retention-index
+agreement and the reference source recorded alongside each score.
 
 ## Installation
 
@@ -34,9 +43,19 @@ plot(fit, type="heatmap", file="sample_heatmaps.pdf")
 plot(fit, type="profiles", file="sample_profiles_spectra.pdf")
 ```
 
-The fit allows asymmetric and broad profiles under hard log-concavity
-constraints. Its automatic best rank criterion selects a compact compound set;
-the final likelihood refinement retains every original mass channel.
+The compound table gives apex retention times, integrated areas and the
+number of fitted ions. Use the trace and heatmap plots to inspect overlapping
+peaks and residual structure, and use the profile and spectrum plots to
+inspect individual components.
+
+```r
+head(fit$compounds[c("compound", "retention_time", "area", "n_ions")])
+fit$seconds
+```
+
+The fit allows asymmetric and broad profiles under a hard log-concavity
+constraint. The rank criterion selects the component set, and final
+refinement uses every original mass channel.
 
 ### Six co-eluting hydrocarbons
 
@@ -48,7 +67,7 @@ constant background; individual compound shapes are then refined.
 data(GCMS_data1, package="L0nmf")
 write_GCMS_cdf(GCMS_data1, "GCMS_data1.cdf")
 example_fit <- GCMSdeco("GCMS_data1.cdf", "GCMS_data1.msp",
-  nwindows=1L, baseline_df=1L, precluster=16L, correlation="auto",
+  nwindows=1L, baseline_df=1L, precluster=16L, correlation="auto", ncores=8L,
   psf_control=list(kernel_est=L0nmf::convkernel("gaussian", 65L,
     list(sigma=8)), maxiter=0L))
 ```
@@ -59,7 +78,9 @@ example_fit <- GCMSdeco("GCMS_data1.cdf", "GCMS_data1.msp",
 
 A beer-headspace window contains a strongly asymmetric acid peak mixed with
 narrower neighbours. Flexible log-concave profiles accommodate this shape while
-the spectra use all 518 channels. The full CDF workflows recover the six hydrocarbon components in **6.33 seconds** and resolve **38 beer-window components in 70.19 seconds**, with the extended acid contribution represented by one log-concave profile. These timings use eight physical cores and one BLAS thread on the [benchmark workstation](https://tomwenseleers.github.io/L0glm/articles/performance.html#reproduce-and-extend).
+the spectra use all 518 channels. The same workflow represents the broad acid
+contribution as one log-concave profile among the narrower peaks. The
+single-sample tutorial reports the measured CDF-to-MSP times and fit metrics.
 
 [![Beer chromatogram with fitted compounds and the broad acid contribution](https://tomwenseleers.github.io/GCMSprime/reference/figures/gcms-data2-traces.png)](https://tomwenseleers.github.io/GCMSprime/articles/gcms-deconvolution.html#beer-volatiles-and-a-broad-acid-peak)
 
@@ -91,12 +112,11 @@ by default. Shared spectra and matching summaries also remain in memory.
 Original scan grids are retained, and compounds absent from a sample stay
 unassigned in its area table.
 
-In a three-sample simulation with 258 mass channels, the coupled model recovered
-all 78 compound occurrences in 29.69 seconds. The directory workflow exports a
-consensus MSP library and an Excel area table, together with each sample's
-spectra and diagnostic reports. See
-[multiple-sample deconvolution](https://tomwenseleers.github.io/GCMSprime/articles/multisample.html) for the layout,
-calibration, scalability and a complete two-beer example.
+In the [16-sample benchmark](https://tomwenseleers.github.io/GCMSprime/articles/multisample.html#sixteen-simulated-chromatograms),
+GCMSprime recovers all 48 shared compounds and all 380 sample occurrences,
+with no false calls in **63.91 s** with 16 workers. It uses 32 groups for initialization and matching, then
+fits the spectra on all 258 original ions. The tutorial shows timings by
+stage, the recovered areas and an application to two full beer chromatograms.
 
 ## Spectral library search
 

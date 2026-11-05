@@ -155,32 +155,50 @@ Frequency estimation reads SQLite records in bounded batches and uses native Ope
 
 ## Accuracy and speed
 
-The comparison used 500 MoNA query spectra from distinct InChIKey/CAS groups, divided into 250 development and 250 validation queries. Query records and near-duplicate same-identity reference shapes (normalized L1 difference at most 0.05) were excluded, leaving 19,082 nonempty reference spectra. Ion frequencies were estimated from those references. RI filtering was disabled to measure spectral discrimination directly.
+The benchmark draws 500 MoNA query spectra from distinct InChIKey or CAS
+groups, split into 250 development and 250 validation queries. Query records
+and near-duplicate same-identity reference shapes are removed at a normalized
+L1 difference of 0.05 or less. The remaining library contains
+19,066 nonempty reference spectra over nominal masses 33–550.
+Ion frequencies are computed on those references. RI filtering is disabled
+to measure the contribution of the spectral scores alone.
 
-The independent validation results below give **correct first match / correct within top five**, in percent. IDF uses `power=1`; IDF² uses `power=2`, both with a 1% presence threshold.
+Entries are percentages for **correct first match / correct within the top
+five** on the 250 validation queries. IDF and IDF² use a 1% presence
+threshold, with `power=1` and `power=2` respectively.
 
 | Method | Uniform weights | IDF | IDF² |
 |:--|--:|--:|--:|
-| Stein–Scott / Stein–Scott angular | 49.6 / 60.8 | 50.0 / 61.2 | 50.0 / 60.8 |
-| Cosine / angular | 36.8 / 56.0 | 37.6 / 56.4 | 37.6 / 56.0 |
-| Hellinger | 46.4 / 68.8 | 46.8 / 67.2 | 48.8 / 66.0 |
-| Jensen–Shannon / balanced multinomial | 45.6 / 67.6 | 46.8 / 67.6 | 47.6 / 65.6 |
+| Stein–Scott / Stein–Scott angular | 57.2 / 68.4 | 57.2 / 65.6 | 56.8 / 65.6 |
+| Cosine / angular | 43.6 / 62.4 | 44.8 / 62.0 | 44.8 / 61.2 |
+| Hellinger | 49.2 / 68.8 | 50.8 / 70.0 | 52.4 / 70.4 |
+| Jensen–Shannon / balanced multinomial | 49.2 / 68.8 | 51.2 / 71.2 | 51.6 / 70.8 |
 
-Using arbitrary stored library intensity totals for multinomial deviance gives 9.2% first-match and 19.2% top-five recovery in this comparison. Balancing unknown totals to the sample avoids that scale dependence. Rarity weighting gives modest first-match gains, with some top-five trade-offs; uniform weights remain the default. Angular metrics preserve their corresponding cosine rankings exactly.
-
-For 500 queries against the 19,082 references, using IDF weights and eight physical cores:
+In this comparison, Stein–Scott with uniform weights has the best
+first-match rate (57.2%). Jensen–Shannon / balanced multinomial with
+IDF weights has the best top-five rate (71.2%).
+Using the stored library intensity totals as multinomial counts gives
+11.6% first-match and 20.8%
+top-five recovery. Balancing the totals to the query reduces this scale
+effect. The angular metrics reproduce their corresponding cosine rankings.
 
 | Method | Search time |
 |:--|--:|
-| Stein–Scott | 0.52 s |
-| Cosine | 0.45 s |
-| Angular | 0.44 s |
-| Stein–Scott angular | 0.58 s |
-| Hellinger | 0.57 s |
-| Jensen–Shannon | 2.14 s |
-| Balanced multinomial | 2.15 s |
+| Stein–Scott | 0.53 s |
+| Cosine | 0.41 s |
+| Angular | 0.42 s |
+| Stein–Scott angular | 0.54 s |
+| Hellinger | 0.42 s |
+| Jensen–Shannon | 2.05 s |
+| Balanced multinomial | 2.01 s |
 
-Preparing the reusable IDF weights took 0.35 s. Timings include preparing and searching the imported library, on an HP ZBook Fury G8 with an Intel i9-11950H and eight physical cores. The [benchmark script](https://github.com/tomwenseleers/GCMSprime/blob/master/benchmarks/library_search_weights.R) and [aggregate results](https://github.com/tomwenseleers/GCMSprime/tree/master/benchmarks/results) are available in the repository.
+Search times are medians of three runs for all 500 queries, with IDF weights
+and eight OpenMP threads on an Intel Core i9-11950H. They include preparation
+of the candidates from an imported in-memory library. Import and the
+0.09 s reusable IDF calculation are separate.
+The [benchmark script](https://github.com/tomwenseleers/GCMSprime/blob/master/benchmarks/library_search_weights.R)
+accepts a MoNA MSP file directly. The [run metadata and aggregate results](https://github.com/tomwenseleers/GCMSprime/tree/master/benchmarks/results)
+identify the source snapshot and retain the replicate timings.
 
 ## Retention-index conventions and interpretation
 

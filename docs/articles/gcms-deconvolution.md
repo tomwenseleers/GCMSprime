@@ -1,14 +1,16 @@
 # GC/MS deconvolution for single samples
 
+When two compounds elute together, their ion traces overlap and the
+spectrum at any one scan contains contributions from both.
 [`GCMSdeco()`](https://tomwenseleers.github.io/GCMSprime/reference/GCMSdeco.md)
-takes a chromatogram from an ANDI-MS `.cdf` file to resolved compound
-profiles, integrated areas and a NIST-compatible `.msp` spectral
-library. Its
-[`splogconNMF()`](https://tomwenseleers.github.io/L0nmf/reference/splogconNMF.html)
-backend combines sparse selection with local nonnegative factorization:
-narrow peaks and broad asymmetric peaks can each be represented by a
-single log-concave profile. A smooth background is fitted jointly, while
-every original mass channel is retained in the final spectra.
+uses the changing ion patterns across scans to estimate a separate
+elution profile, mass spectrum and integrated area for each component.
+It takes an ANDI-MS `.cdf` file and writes a NIST-compatible `.msp`
+library. Set `xlsx_file` to export the quantification table as well.
+
+The fit separates compound profiles from a smooth background. A hard
+log-concavity constraint allows the fitted profiles to be asymmetric or
+broad. Final spectra retain every original mass channel.
 
 The [single and multichannel deconvolution
 tutorial](https://tomwenseleers.github.io/L0glm/articles/deconvolution.html)
@@ -61,9 +63,10 @@ fit2 <- GCMSdeco(file.path(out, "GCMS_data2.cdf"),
   psf_control = list(kernel_est = convkernel("gaussian", 65L,
     list(sigma = 6)), maxiter = 0L))
 
-fit1$compounds
+fit1$compounds[c("retention_time", "area", "n_ions")]
 GIC(fit2)
-coef(fit2, normalize = "l1")       # unit-area spectra in all 518 channels
+coef(fit2, normalize = "l1")       # relative intensities in all 518 channels
+fit2$seconds                      # elapsed time by stage
 ```
 
 These short windows use a supplied Gaussian PSF as the initial profile
@@ -123,20 +126,22 @@ used in the plotted comparison, so the table and figures below use the
 explicit Gaussian PSFs in `fit1` and `fit2` above. Automatic calibration
 is available through the calls in this section.
 
-These results use the calls above on the [benchmark
-workstation](https://tomwenseleers.github.io/L0glm/articles/performance.html#reproduce-and-extend),
-with eight OpenMP workers and one BLAS thread. Each timing measures one
-complete run, including CDF reading, PSF initialization, factorization,
-original-channel completion and MSP export.
+The table reports median elapsed time across three fits on the
+[benchmark
+workstation](https://tomwenseleers.github.io/L0glm/articles/performance.html#reproduce-and-extend).
+Each run uses eight OpenMP threads and one BLAS thread. Timings include
+CDF reading, PSF initialization, factorization, original-channel
+completion and MSP export. All three runs return the same profiles and
+spectra.
 
-| Dataset | Scans | Mass channels | Compounds | Time (s) | GIC | Adjusted weighted R² |
+| Dataset | Scans | Mass channels | Components | Seconds | Quasi-GIC | Adjusted weighted R² |
 |:---|---:|---:|---:|---:|---:|---:|
-| `GCMS_data1` | 119 | 671 | 6 | 6.33 | 246,473 | 0.98999 |
-| `GCMS_data2` | 1,764 | 518 | 38 | 70.19 | 1,467,419 | 0.99498 |
+| `GCMS_data1` | 119 | 671 | 6 | 5.14 | 246,473 | 0.98999 |
+| `GCMS_data2` | 1,764 | 518 | 38 | 68.46 | 1,467,419 | 0.99498 |
 
 Weighted R² uses weights `1/pmax(fitted_mean, 0.1)` and a separate
-weighted mean for each ion channel. Its adjustment is conditional on the
-fitted profiles, using the positive spectral coefficients and background
+weighted mean for each mass channel. Its adjustment is conditional on
+the fitted profiles, using the positive spectral and background
 coefficients as the parameter count.
 
 The default working-correlation adjustment is estimated from temporal

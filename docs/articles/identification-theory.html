@@ -324,17 +324,17 @@ checked directly on EI spectra.</p>
 <div class="section level2">
 <h2 id="accuracy-and-speed">Accuracy and speed<a class="anchor" aria-label="anchor" href="#accuracy-and-speed"></a>
 </h2>
-<p>The comparison used 500 MoNA query spectra from distinct InChIKey/CAS
-groups, divided into 250 development and 250 validation queries. Query
-records and near-duplicate same-identity reference shapes (normalized L1
-difference at most 0.05) were excluded, leaving 19,082 nonempty
-reference spectra. Ion frequencies were estimated from those references.
-RI filtering was disabled to measure spectral discrimination
-directly.</p>
-<p>The independent validation results below give <strong>correct first
-match / correct within top five</strong>, in percent. IDF uses
-<code>power=1</code>; IDF² uses <code>power=2</code>, both with a 1%
-presence threshold.</p>
+<p>The benchmark draws 500 MoNA query spectra from distinct InChIKey or
+CAS groups, split into 250 development and 250 validation queries. Query
+records and near-duplicate same-identity reference shapes are removed at
+a normalized L1 difference of 0.05 or less. The remaining library
+contains 19,066 nonempty reference spectra over nominal masses 33–550.
+Ion frequencies are computed on those references. RI filtering is
+disabled to measure the contribution of the spectral scores alone.</p>
+<p>Entries are percentages for <strong>correct first match / correct
+within the top five</strong> on the 250 validation queries. IDF and IDF²
+use a 1% presence threshold, with <code>power=1</code> and
+<code>power=2</code> respectively.</p>
 <table class="table">
 <colgroup>
 <col width="25%">
@@ -351,38 +351,37 @@ presence threshold.</p>
 <tbody>
 <tr class="odd">
 <td align="left">Stein–Scott / Stein–Scott angular</td>
-<td align="right">49.6 / 60.8</td>
-<td align="right">50.0 / 61.2</td>
-<td align="right">50.0 / 60.8</td>
+<td align="right">57.2 / 68.4</td>
+<td align="right">57.2 / 65.6</td>
+<td align="right">56.8 / 65.6</td>
 </tr>
 <tr class="even">
 <td align="left">Cosine / angular</td>
-<td align="right">36.8 / 56.0</td>
-<td align="right">37.6 / 56.4</td>
-<td align="right">37.6 / 56.0</td>
+<td align="right">43.6 / 62.4</td>
+<td align="right">44.8 / 62.0</td>
+<td align="right">44.8 / 61.2</td>
 </tr>
 <tr class="odd">
 <td align="left">Hellinger</td>
-<td align="right">46.4 / 68.8</td>
-<td align="right">46.8 / 67.2</td>
-<td align="right">48.8 / 66.0</td>
+<td align="right">49.2 / 68.8</td>
+<td align="right">50.8 / 70.0</td>
+<td align="right">52.4 / 70.4</td>
 </tr>
 <tr class="even">
 <td align="left">Jensen–Shannon / balanced multinomial</td>
-<td align="right">45.6 / 67.6</td>
-<td align="right">46.8 / 67.6</td>
-<td align="right">47.6 / 65.6</td>
+<td align="right">49.2 / 68.8</td>
+<td align="right">51.2 / 71.2</td>
+<td align="right">51.6 / 70.8</td>
 </tr>
 </tbody>
 </table>
-<p>Using arbitrary stored library intensity totals for multinomial
-deviance gives 9.2% first-match and 19.2% top-five recovery in this
-comparison. Balancing unknown totals to the sample avoids that scale
-dependence. Rarity weighting gives modest first-match gains, with some
-top-five trade-offs; uniform weights remain the default. Angular metrics
-preserve their corresponding cosine rankings exactly.</p>
-<p>For 500 queries against the 19,082 references, using IDF weights and
-eight physical cores:</p>
+<p>In this comparison, Stein–Scott with uniform weights has the best
+first-match rate (57.2%). Jensen–Shannon / balanced multinomial with IDF
+weights has the best top-five rate (71.2%). Using the stored library
+intensity totals as multinomial counts gives 11.6% first-match and 20.8%
+top-five recovery. Balancing the totals to the query reduces this scale
+effect. The angular metrics reproduce their corresponding cosine
+rankings.</p>
 <table class="table">
 <thead><tr class="header">
 <th align="left">Method</th>
@@ -391,39 +390,42 @@ eight physical cores:</p>
 <tbody>
 <tr class="odd">
 <td align="left">Stein–Scott</td>
-<td align="right">0.52 s</td>
+<td align="right">0.53 s</td>
 </tr>
 <tr class="even">
 <td align="left">Cosine</td>
-<td align="right">0.45 s</td>
+<td align="right">0.41 s</td>
 </tr>
 <tr class="odd">
 <td align="left">Angular</td>
-<td align="right">0.44 s</td>
+<td align="right">0.42 s</td>
 </tr>
 <tr class="even">
 <td align="left">Stein–Scott angular</td>
-<td align="right">0.58 s</td>
+<td align="right">0.54 s</td>
 </tr>
 <tr class="odd">
 <td align="left">Hellinger</td>
-<td align="right">0.57 s</td>
+<td align="right">0.42 s</td>
 </tr>
 <tr class="even">
 <td align="left">Jensen–Shannon</td>
-<td align="right">2.14 s</td>
+<td align="right">2.05 s</td>
 </tr>
 <tr class="odd">
 <td align="left">Balanced multinomial</td>
-<td align="right">2.15 s</td>
+<td align="right">2.01 s</td>
 </tr>
 </tbody>
 </table>
-<p>Preparing the reusable IDF weights took 0.35 s. Timings include
-preparing and searching the imported library, on an HP ZBook Fury G8
-with an Intel i9-11950H and eight physical cores. The <a href="https://github.com/tomwenseleers/GCMSprime/blob/master/benchmarks/library_search_weights.R" class="external-link">benchmark
-script</a> and <a href="https://github.com/tomwenseleers/GCMSprime/tree/master/benchmarks/results" class="external-link">aggregate
-results</a> are available in the repository.</p>
+<p>Search times are medians of three runs for all 500 queries, with IDF
+weights and eight OpenMP threads on an Intel Core i9-11950H. They
+include preparation of the candidates from an imported in-memory
+library. Import and the 0.09 s reusable IDF calculation are separate.
+The <a href="https://github.com/tomwenseleers/GCMSprime/blob/master/benchmarks/library_search_weights.R" class="external-link">benchmark
+script</a> accepts a MoNA MSP file directly. The <a href="https://github.com/tomwenseleers/GCMSprime/tree/master/benchmarks/results" class="external-link">run
+metadata and aggregate results</a> identify the source snapshot and
+retain the replicate timings.</p>
 </div>
 <div class="section level2">
 <h2 id="retention-index-conventions-and-interpretation">Retention-index conventions and interpretation<a class="anchor" aria-label="anchor" href="#retention-index-conventions-and-interpretation"></a>
