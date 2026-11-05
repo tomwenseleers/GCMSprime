@@ -63,6 +63,8 @@ plus half a local narrow-peak duration, reducing the influence of tailing.
 For an alkane with c carbon atoms the nominal molecular ion is
   14c+2. Its excess above the carbon-13 isotope contribution of the adjacent
   alkyl ion is used with the 43, 57, 71, 85, 99 and 113 fragment series.
+  Local spectral backgrounds are measured outside the peak shoulders, so
+  a broad alkane's molecular ion is retained in the corrected spectrum.
   Candidate anchors must have a coherent saturated-hydrocarbon spectrum.
   A maximum-weight increasing carbon-number sequence removes duplicate
   maxima and inconsistent assignments. Solvent-range C6 is excluded by default.

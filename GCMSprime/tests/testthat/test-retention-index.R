@@ -32,6 +32,22 @@ test_that("manual anchors, missing times and extrapolation behave consistently",
   expect_error(calibrate_ri(matrix(0,10,5)),"numeric mass")
 })
 
+test_that("a broad alkane retains its diagnostic ion beside a weak overlapping ion", {
+  t<-seq(0,6,by=.005);mass<-33:300;carbon<-13:17
+  Y<-matrix(0,length(t),length(mass),dimnames=list(as.character(t),as.character(mass)))
+  for(i in seq_along(carbon)) {
+    sigma<-if(carbon[i]==15L)ifelse(t<i,.10,.018)else .018
+    h<-5e3*exp(-.5*((t-i)/sigma)^2)
+    for(j in c(43,57,71,85,99))Y[,as.character(j)]<-Y[,as.character(j)]+h
+    Y[,as.character(14*carbon[i]+2)]<-.02*h
+  }
+  Y[,'282']<-40*exp(-.5*((t-3)/.012)^2)
+  z<-calibrate_ri(Y,carbon=c(carbon,20L))
+  expect_equal(z$anchors$carbon,carbon)
+  expect_gt(z$anchors$molecular_ratio[z$anchors$carbon==15L],2)
+  expect_equal(predict(z,z$anchors$retention_time),100*carbon)
+})
+
 test_that("RI calibration is exact natural cubic interpolation", {
   a<-data.frame(carbon=c(7,8,10,11,14),retention_time=c(1,2.2,4.3,5.7,9),narrow_width=.1)
   z<-calibrate_ri(anchors=a)

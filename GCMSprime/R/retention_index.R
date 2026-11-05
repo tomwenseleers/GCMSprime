@@ -105,6 +105,8 @@ ri_predict_width <- function(object,time) {
 #' @details For an alkane with c carbon atoms the nominal molecular ion is
 #'   14c+2. Its excess above the carbon-13 isotope contribution of the adjacent
 #'   alkyl ion is used with the 43, 57, 71, 85, 99 and 113 fragment series.
+#'   Local spectral backgrounds are measured outside the peak shoulders, so
+#'   a broad alkane's molecular ion is retained in the corrected spectrum.
 #'   Candidate anchors must have a coherent saturated-hydrocarbon spectrum.
 #'   A maximum-weight increasing carbon-number sequence removes duplicate
 #'   maxima and inconsistent assignments. Solvent-range C6 is excluded by default.
@@ -158,8 +160,11 @@ calibrate_ri <- function(standard=NULL,time=NULL,carbon=7:40,anchors=NULL,
     keep<-sort(keep)
     rows<-lapply(keep,function(i) {
       radius<-max(8L,as.integer(round(.08/dt)))
-      at<-seq.int(max(1L,i-radius),min(nrow(Y),i+radius))
-      edge<-unique(c(head(at,3L),tail(at,3L)))
+      geometry<-ri_crossings(time,residual,i,control$fraction)
+      left<-max(1L,min(i-radius,findInterval(geometry[['start']],time)))
+      right<-min(nrow(Y),max(i+radius,findInterval(geometry[['end']],time)+1L))
+      # Estimate spectral background outside the detected peak's shoulders.
+      edge<-unique(c(seq.int(max(1L,left-2L),left),seq.int(right,min(nrow(Y),right+2L))))
       bg<-apply(Y[edge,,drop=FALSE],2L,median)
       peak_rows<-seq.int(max(1L,i-2L),min(nrow(Y),i+2L))
       spectrum<-colSums(pmax(sweep(Y[peak_rows,,drop=FALSE],2L,bg,"-"),0))
@@ -168,7 +173,6 @@ calibrate_ri <- function(standard=NULL,time=NULL,carbon=7:40,anchors=NULL,
       o<-order(excess,decreasing=TRUE);j<-o[1L]
       ratio<-excess[j]/max(1,excess[o[min(2,length(o))]])
       total<-sum(spectrum);fragment<-sum(spectrum[ions])/max(1,total)
-      geometry<-ri_crossings(time,residual,i,control$fraction)
       data.frame(scan=i,apex=time[i],carbon=carbon[j],molecular_mass=14*carbon[j]+2,
         molecular_fraction=excess[j]/max(1,total),molecular_ratio=ratio,
         alkane_fraction=fragment,signal=smooth[i],start=geometry['start'],
