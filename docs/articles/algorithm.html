@@ -484,13 +484,13 @@ separately.</p>
 coordinates and bin widths transform with an area-preserving Jacobian.
 Known exposure can be supplied for integrated-count measurements; the
 default unit exposure preserves vendor intensity units.</p>
-<p>Observations and factor checkpoints are stored per sample on disk.
-Updates read one sample at a time while keeping shared spectra and
-compact matching summaries in memory. Local retention-time comparisons
-avoid an all-pairs occurrence-distance matrix. Samples retain
-acquisition order and group labels; alkane standards are selected by
-acquisition time. Missing occurrences are reported as
-<code>NA</code>.</p>
+<p>Observations and factor checkpoints are stored per sample on disk
+during coupled refinement. Workers can update samples concurrently while
+shared spectra and compact matching summaries remain in memory. Local
+retention-time comparisons avoid an all-pairs occurrence-distance
+matrix. Samples retain acquisition order and group labels; alkane
+standards are selected by acquisition time. Missing occurrences are
+reported as <code>NA</code>.</p>
 <p>See <a href="multisample.html">multiple-sample deconvolution</a> for
 the directory workflow and <a href="https://tomwenseleers.github.io/L0nmf/articles/algorithm.html#coupled-model" class="external-link">L0nmf’s
 coupled model</a> for its objective and mathematical specification.</p>
@@ -522,10 +522,13 @@ calibration.</p>
 <p>A shared aggregation is learned from summed chromatograms in common
 time bins. Matching and Poisson/quasipoisson profile proposals use these
 ion groups; proposal acceptance and spectral estimation use the original
-mass channels. The common grid is used only to learn the groups.
-Original observations are stored on disk, aggregate matrices are cached
-in RAM, and original-channel updates read bounded blocks. Each worker
-receives its assigned sample and compact factors.</p>
+mass channels. The common grid is used only to learn the groups. Each
+worker loads its sample into RAM for the independent fit. During coupled
+refinement, the fit reads bounded blocks of original observations from
+disk to evaluate the likelihood and update spectra and backgrounds. With
+preclustering, aggregate matrices are cached in RAM by default. Profile
+updates that work directly on the original channels and noise updates
+can load a full sample into RAM.</p>
 <p>With shared spectra fixed, profiles and backgrounds can be updated
 independently across samples. Spectral contributions are then pooled in
 acquisition order. The spectral fusion queue retains unaffected

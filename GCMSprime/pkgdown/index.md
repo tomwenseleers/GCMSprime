@@ -93,10 +93,12 @@ experiment$samples
 experiment$areas
 ```
 
-**The experiment is processed out of core.** Observations and factor checkpoints
-are stored per sample on disk, and coupled updates read one sample at a time.
-Common spectra and compact matching summaries remain in memory. Native sparse
-local updates and OpenMP keep the computation focused on informative windows.
+Samples can be fitted in parallel, with each active worker loading its sample
+into RAM for the independent fit. During coupled refinement, original
+observations and factor checkpoints are stored per sample on disk. The fit
+reads blocks of original mass channels to evaluate the likelihood and update
+spectra and backgrounds. With preclustering, grouped traces are cached in RAM
+by default. Shared spectra and matching summaries also remain in memory.
 Original scan grids are retained, and compounds absent from a sample stay
 unassigned in its area table.
 
