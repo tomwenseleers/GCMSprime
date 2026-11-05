@@ -256,21 +256,25 @@ compound spectra](figures/multisample-beer-traces.png)
 Aligned beer chromatograms with sample-specific profiles and shared
 compound spectra
 
-Across the complete chromatograms, the analysis retains all 518 channels
-and links **599 detected occurrences into 517 consensus compounds**:
+With the solvent-trimmed ladder TIC supplying the time-varying PSF, the
+complete chromatograms retain all 518 mass channels and link **746
+detected occurrences into 614 consensus compounds**:
 
-| Sample         | Detected occurrences | Adjusted weighted R² | Sample GIC |
-|:---------------|---------------------:|---------------------:|-----------:|
-| 502131900304_a |                  325 |               0.9861 | 16,800,722 |
-| 54040014_a     |                  274 |               0.9850 | 16,746,915 |
+| Sample | Detected occurrences | Adjusted weighted R² | Sample GIC | Independent fit |
+|:---|---:|---:|---:|---:|
+| 502131900304_a | 388 | 0.9895 | 16,338,999 | 1,287.35 s |
+| 54040014_a | 358 | 0.9885 | 16,495,671 | 848.43 s |
 
-Independent initialization took 671.31 s and 594.48 s, including PSF
-estimation and their initial exports. Starting from these cached fits,
-coupled refinement and the final Excel, MSP and diagnostic PDF exports
-took 777.01 s. The joint GIC is 32,934,308; it counts common spectra
-once and amplitudes separately for each detected occurrence. Sample GIC
-values count each sample’s spectra and are available for inspecting its
-individual fit.
+The shared TIC calibration took 1.58 s, and constructing each sample’s
+sparse PSF took about 1.6 s. The two independent fits ran concurrently
+with eight native threads per worker. The batch took 1,754.67 s (29.2
+minutes), including 1,291.91 s for independent fits and 449.35 s for
+coupled refinement. The joint GIC is 31,335,633; it counts common
+spectra once and amplitudes separately for each detected occurrence.
+Sample GIC values in the table are evaluated after coupling and count
+the spectra separately for each sample. RI annotation uses all 17
+alkanes from C7 to C23, with the fitted curve passing through every
+anchor.
 
 The fitted components can be inspected sample by sample, and common
 spectra can be searched against a library with each sample’s
