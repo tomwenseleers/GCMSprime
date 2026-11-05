@@ -51,7 +51,8 @@ common spectral library. \code{NULL} in \code{plot()} plots the coupled area tab
 }
 \value{
 A \code{GCMSbatch} object with \code{samples}, optional \code{coupled} fit, sample
-RDS \code{paths}, consensus \code{areas}, output files and stage timings. Use
+RDS \code{paths}, consensus \code{areas}, reusable \code{channel_groups}, the \code{parallel}
+thread allocation, output files and stage timings. Use
 \code{readRDS(x$paths[i])} for a full per-sample \code{\link[=GCMSdeco]{GCMSdeco()}} object.
 }
 \description{
@@ -70,7 +71,10 @@ If acquisition dates are absent, pass explicit relative sample paths in
 
 \code{batch} supports \code{method="cosine"} or \code{"hellinger"}, \code{align=TRUE},
 \code{coupling=list()} for \code{\link[L0nmf:coupledNMF]{L0nmf::coupledNMF()}} controls, \code{sample_order=NULL},
-\code{exposure=NULL}, \code{resume=FALSE} and \code{plots=FALSE}. \code{exposure} may be a positive
+\code{exposure=NULL}, \code{resume=FALSE}, \code{plots=FALSE}, \code{workers=NULL} and \code{cache=TRUE}.
+\code{workers} limits concurrent samples within the total \code{ncores} budget.
+\code{cache} controls the aggregated-observation RAM cache during coupled fitting.
+\code{exposure} may be a positive
 scalar, a list with one scan-wise vector per acquisition-ordered sample, or
 a function of a sample's metadata and time vector. The default preserves
 vendor intensities. Known integration durations are appropriate when the
@@ -79,7 +83,10 @@ allocate acquisition time over m/z; exported peak counts and retained traces
 do not identify the per-mass dwell time. No automatic division by the number
 of exported channels is applied.
 
-Each sample has its own initial PSF and smooth background. Original-channel
+Samples run concurrently with their own sparse PSF and smooth background. A
+common channel map is learned from summed, time-binned chromatograms; pass a
+saved \code{\link[L0nmf:channel_groups]{L0nmf::channel_groups()}} map as \code{precluster} to reuse reference groups.
+Matching uses the shared aggregate space. Original-channel
 means and the likelihood are used for coupled updates. Shared spectra are
 exported on the union of recorded mass ranges; unmeasured channels receive
 zero likelihood weight. Missing compounds retain \code{NA} areas. No gap filling
@@ -90,7 +97,12 @@ an acquisition-ordered \code{samples.csv}, \code{areas.csv}, a consensus MSP lib
 and \code{experiment.xlsx} with samples, compounds, areas and packed spectra.
 \code{batch=list(plots=TRUE)} also writes each sample's trace and heatmap PDFs.
 Observations and factors are stored per sample, enabling streamed fitting;
-the returned object contains paths, tables and compact common spectra.
+only aggregate observations are cached across samples in RAM, and the returned
+object contains paths, tables and compact common spectra. Original-channel
+spectral/background updates read blocks of at most 32 channels. Each active
+independent fit has its own temporary working buffers; these are released
+before the next assigned sample. A 10,000-by-32 cache needs 2.56 MB per sample,
+or 2.56 GB for 1,000 samples, in addition to worker and factor memory.
 Keep the output directory with the saved object. Explicit \code{resume=TRUE}
 reuses independent fits only when the file metadata and fitting arguments
 match; coupled refinement is recomputed.

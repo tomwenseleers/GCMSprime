@@ -75,6 +75,6 @@ reference:
   - title: Import and inspect spectral libraries
     contents: [read_msp, read_gcms_id, library_metadata, spectra, retention_indices]
   - title: Calibrate retention indices and identify compounds
-    contents: [calibrate_ri, library_search, library_ion_weights, identify_compounds]
+    contents: [calibrate_ri, annotate_ri, library_search, library_ion_weights, identify_compounds]
   - title: Shared tools and package overview
     contents: [reexports, GCMSprime-package]

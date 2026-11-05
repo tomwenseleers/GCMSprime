@@ -26,6 +26,7 @@ search_queries <- function(x,calibration,ri,pseudocount,extrapolate,require_ri=T
     if(!is.numeric(ri)||length(ri)!=nrow(S)||any(!is.na(ri)&!is.finite(ri))) stop("ri must contain one RI per query spectrum.")
     q$query_RI<-ri
   } else if(fit) {
+    if(is.null(calibration)&&inherits(x$ri_calibration,"RIcalibration"))calibration<-x$ri_calibration
     if(is.null(calibration)&&!is.null(x$alkanes_file)) calibration<-calibrate_ri(x$alkanes_file,psf=x$psf_standard)
     if(!require_ri&&(!inherits(calibration,"RIcalibration")||is.null(calibration$width_curve)))
       return(list(S=S,mass=mass,queries=q,calibration=calibration))

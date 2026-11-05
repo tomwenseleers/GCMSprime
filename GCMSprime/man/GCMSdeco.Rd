@@ -116,7 +116,8 @@ at least four basis functions.
 \code{NULL} chooses a low-dimensional basis from the scan count and typical
 PSF width; an integer of at least four fixes its dimension.}
 
-\item{precluster}{\code{NULL} or \code{FALSE} uses every channel throughout. \code{TRUE}
+\item{precluster}{A saved \code{\link[L0nmf:channel_groups]{channel_groups()}} map shares the same aggregation
+across analyses. \code{NULL} or \code{FALSE} uses every channel throughout. \code{TRUE}
 uses up to 32 groups; an integer supplies another maximum. Size-adjusted
 Poisson clustering, aggregation, selection and fusion operate in that
 reduced space, followed by refinement on all original channels.}
@@ -136,10 +137,12 @@ updates. A fixed shape in the supplied NB family is respected.}
 adjustment to the selection penalty. \code{"none"} uses independent observations;
 a number between zero and 0.49 supplies the lag-one correlation.}
 
-\item{ncores}{Maximum number of threads for native OpenMP computations,
-counting logical CPUs.
-\code{NULL} uses the number of physical cores. For example,
-\code{ncores=16L} permits all 16 logical CPUs on an eight-core workstation.}
+\item{ncores}{Total logical-CPU budget. \code{NULL} uses physical cores.
+Directory analyses run up to \code{min(samples,ncores)} sample workers,
+dividing the native thread budget between them. With at least 16 samples,
+\code{ncores=16L} uses 16 workers with one native thread each. BLAS threads
+are limited during batch fitting and caller settings are restored.
+For a single chromatogram, this sets its native OpenMP thread count.}
 
 \item{control}{Named list: \code{broad_repeats=1L}, \code{full_sweeps=1L},
 \code{final_polishes=1L}, \code{native_sweeps=6L}, \code{block_sweeps=6L},
@@ -176,6 +179,9 @@ Other entries form its \code{control} list, for example
 \code{list(standard=attr(GCMS_data2, "alkanes_TIC"))} uses the bundled calibration
 TIC; its numeric names supply retention times. \code{precluster=1L} uses the
 total-ion signal, \code{FALSE} the original channels, and \code{32L} at most 32 groups.
+A fitted \code{estimate_psf(method="standard")} result can be passed as
+\code{standard} with \code{method="standard"} to reuse a solvent-trimmed ladder
+calibration across samples, rebuilding each sparse design on its own grid.
 The PSF uses the same noise family and fixed noise estimates as the final
 factorization, with its information adjustment included in the weights.}
 
@@ -359,6 +365,36 @@ dim(psf$X)
 calibrated <- GCMSdeco(file.path(out, "GCMS_data2.cdf"),
   file.path(out, "GCMS_data2_calibrated.msp"), nwindows = 3L, precluster = 32L,
   psf_control = list(standard = attr(GCMS_data2, "alkanes_TIC")))
+}
+
+\dontrun{
+# Sixteen related samples, retaining all mass channels. Compounds occur in
+# half the samples on average, with retention drift and concentration-dependent
+# widths and tails. Here the simulated quasipoisson dispersion is known.
+library(L0nmf)
+sim <- simulate_GCMS_samples(samples=16L, n=1200L, k=48L,
+  preset="time_area", presence=0.5, irregular=0, drift=2,
+  family="quasipoisson", dispersion=2, seed=9118)
+input <- file.path(tempdir(), "GCMSprime_samples16")
+dir.create(input, showWarnings=FALSE)
+for(s in sim$samples) {
+  write_GCMS_cdf(s$Y, file.path(input, paste0(s$sample_id, ".cdf")),
+    time=s$time, acquired_at=s$acquired_at)
+}
+rm(sim, s)                         # observations are read from the CDF files
+experiment <- GCMSdeco(input, output_dir=paste0(input, "_results"),
+  family=quasipoisson("identity"), dispersion=2, correlation="none",
+  nwindows=2L, baseline_df=4L, precluster=32L, ncores=16L,
+  psf_control=list(maxiter=3L),
+  batch=list(coupling=list(cycles=2L, initial_cycles=1L, rounds=1L, q=32L)))
+experiment$seconds
+experiment$parallel
+experiment$samples[c("sample_name", "compounds", "GIC")]
+experiment$areas
+plot(experiment, type="areas")
+plot(experiment, sample=1L, type="lines")
+plot(experiment, sample=1L, type="profiles", which=1:6)
+saveRDS(experiment$channel_groups, file.path(input, "channel_groups.rds"))
 }
 }
 \references{

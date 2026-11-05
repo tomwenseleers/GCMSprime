@@ -1,3 +1,10 @@
+GCMS_time_factor <- function(units) {
+  units<-if(is.null(units))""else tolower(trimws(as.character(units)))
+  if (!nzchar(units)||grepl("^s(ec(ond)?s?)?$",units)) 1/60 else
+    if(grepl("^min(ute)?s?$",units)) 1 else if(grepl("^ms$|^milliseconds?$",units)) 1/60000 else
+      stop("Unrecognized scan time units: ",units,call.=FALSE)
+}
+
 GCMS_range <- function(value, name) {
   if (!is.null(value) && (!is.numeric(value) || length(value)!=2L || anyNA(value) || value[1L]>=value[2L]))
     stop(name, " must contain increasing lower and upper retention times in minutes.",call.=FALSE)
@@ -31,9 +38,7 @@ GCMS_read_cdf <- function(cdf_file, time_range=NULL, mass=NULL) {
   if (any(!is.finite(time)|time<0)||any(diff(time)<=0)) stop("Scan times must be finite and increasing.",call.=FALSE)
   att <- ncdf4::ncatt_get(nc,"scan_acquisition_time","units")
   units <- if(isTRUE(att$hasatt)) tolower(trimws(as.character(att$value))) else ""
-  factor <- if (!nzchar(units)||grepl("^s(ec(ond)?s?)?$",units)) 1/60 else
-    if(grepl("^min(ute)?s?$",units)) 1 else if(grepl("^ms$|^milliseconds?$",units)) 1/60000 else
-      stop("Unrecognized scan time units: ",units,call.=FALSE)
+  factor <- GCMS_time_factor(units)
   minutes <- time*factor;time_range <- GCMS_range(time_range,"time_range")
   rows <- if(is.null(time_range)) seq_len(n) else which(minutes>=time_range[1L]&minutes<=time_range[2L])
   if(!length(rows)) stop("No scans in the requested retention-time range.",call.=FALSE)
@@ -82,17 +87,26 @@ GCMS_write_msp <- function(model,time,mass,msp_file,compounds=NULL) {
     if(!length(keep)) stop("Cannot export an empty compound spectrum.",call.=FALSE)
     abundance<-999*s[keep]/max(s[keep])
     annotation<-character()
-    if('retention_index'%in%names(compounds)&&is.finite(compounds$retention_index[index]))
-      annotation<-c(annotation,sprintf("RI_%s: %.6f",compounds$ri_phase[index],compounds$retention_index[index]))
+    if('retention_index'%in%names(compounds)&&is.finite(compounds$retention_index[index])) {
+      phase<-if(is.null(compounds$ri_phase))"User"else compounds$ri_phase[index]
+      tag<-switch(phase,DB5="SemiStdNP",DB1="StdNP",DBWAX="StdPolar","User")
+      annotation<-c(annotation,sprintf("Retention_index: %s=%.6f",tag,compounds$retention_index[index]))
+    }
     if('match_name'%in%names(compounds)&&!is.na(compounds$match_name[index]))
       annotation<-c(annotation,sprintf("Synon: Tentative library match: %s; %s score %.4f; delta RI %.4f%s",
         gsub("[\r\n]"," ",compounds$match_name[index]),compounds$match_method[index],
         compounds$match_score[index],compounds$match_delta_RI[index],
         if('match_ri_assumed'%in%names(compounds)&&isTRUE(compounds$match_ri_assumed[index]))
           paste0("; reference RI column assumed ",compounds$ri_phase[index]) else ""))
+    coordinate<-if('retention_coordinate'%in%names(compounds)&&is.finite(compounds$retention_coordinate[index]))
+      sprintf("; RI retention coordinate %.7g min (1%% onset plus half local narrow-peak width)",
+        compounds$retention_coordinate[index])else ""
     c(paste0("Name: ",names[index]),annotation,sprintf("Pseudocount: %.15g",sum(s)),
-      sprintf("Comments: Sample %s; retention time %.7g min; integrated ion intensity %.9g; splogconNMF",
-        compounds$sample[index],compounds$retention_time[index],sum(s)),
+      sprintf("Comments: Sample %s; apex retention time %.7g min; integrated ion intensity %.9g; splogconNMF%s%s",
+        compounds$sample[index],compounds$retention_time[index],sum(s),
+        coordinate,
+        if('ri_extrapolated'%in%names(compounds)&&isTRUE(compounds$ri_extrapolated[index]))
+          "; retention index extrapolated beyond alkane anchors"else ""),
       sprintf("Num Peaks: %d",length(keep)),sprintf("%d %.8g;",mass[keep],abundance),"")
   }),use.names=FALSE)
   dir.create(dirname(msp_file),recursive=TRUE,showWarnings=FALSE)
@@ -133,10 +147,12 @@ GCMS_write_msp <- function(model,time,mass,msp_file,compounds=NULL) {
 #' @param family Identity-link noise model accepted by [L0nmf::splogconNMF()].
 #'   The default \code{quasipoisson("identity")} estimates one pooled dispersion
 #'   across channels, suitable for overdispersed instrumental intensities.
-#' @param ncores Maximum number of threads for native OpenMP computations,
-#'   counting logical CPUs.
-#'   \code{NULL} uses the number of physical cores. For example,
-#'   \code{ncores=16L} permits all 16 logical CPUs on an eight-core workstation.
+#' @param ncores Total logical-CPU budget. \code{NULL} uses physical cores.
+#'   Directory analyses run up to \code{min(samples,ncores)} sample workers,
+#'   dividing the native thread budget between them. With at least 16 samples,
+#'   \code{ncores=16L} uses 16 workers with one native thread each. BLAS threads
+#'   are limited during batch fitting and caller settings are restored.
+#'   For a single chromatogram, this sets its native OpenMP thread count.
 #' @param nwindows Number of overlapping blind-PSF windows, default \code{10L}.
 #'   \code{1L} uses a shared PSF. The returned sparse design interpolates the
 #'   PSFs smoothly across the chromatogram.
@@ -161,6 +177,9 @@ GCMS_write_msp <- function(model,time,mass,msp_file,compounds=NULL) {
 #'   `list(standard=attr(GCMS_data2, "alkanes_TIC"))` uses the bundled calibration
 #'   TIC; its numeric names supply retention times. `precluster=1L` uses the
 #'   total-ion signal, `FALSE` the original channels, and `32L` at most 32 groups.
+#'   A fitted `estimate_psf(method="standard")` result can be passed as
+#'   `standard` with `method="standard"` to reuse a solvent-trimmed ladder
+#'   calibration across samples, rebuilding each sparse design on its own grid.
 #'   The PSF uses the same noise family and fixed noise estimates as the final
 #'   factorization, with its information adjustment included in the weights.
 #' @inheritParams L0nmf::splogconNMF
@@ -312,7 +331,7 @@ GCMSdeco <- function(cdf_file,msp_file=NULL,family=quasipoisson("identity"),lamb
   spec<-noise$spec;factor<-spec$information_factor
   working_weight<-noise$working_weight
   standard <- NULL
-  if (!is.null(alkanes_file) && is.null(psf_control$kernel_est)) {
+  if (!is.null(alkanes_file) && is.null(psf_control$kernel_est) && is.null(psf_control$standard)) {
     std <- timed("read_standard", if (identical(alkanes_file, cdf_file) &&
       identical(calibration_range, time_range)) raw else GCMS_read_cdf(alkanes_file, calibration_range))
     standard <- std[c("Y", "time")]

@@ -11,7 +11,6 @@ calibrate_ri(
   time = NULL,
   carbon = 7:40,
   anchors = NULL,
-  spar = NULL,
   control = list(),
   psf = NULL
 )
@@ -31,8 +30,6 @@ lie within the acquired mass range. Supply the known standard range when availab
 \item{anchors}{Optional data frame with carbon and retention_time columns,
 supplying verified calibration coordinates directly. An optional narrow_width
 column supplies local small-peak durations for timing sample profiles.}
-
-\item{spar}{Smoothing-spline smoothing parameter; NULL selects it by GCV.}
 
 \item{control}{Named calibration controls, described below.}
 
@@ -55,11 +52,11 @@ FALSE returns NA outside the range.}
 }
 \value{
 An RIcalibration object with accepted anchors, all candidate diagnostics,
-  fitted spline, local narrow-peak widths and timing convention.
+  interpolation method, local narrow-peak widths and timing convention.
 }
 \description{
-Identify a homologous alkane series using diagnostic ions and fit a smooth,
-monotone retention-time calibration. The retention coordinate uses peak onset
+Identify a homologous alkane series using diagnostic ions and interpolate
+their retention indices with a natural cubic spline. The coordinate uses peak onset
 plus half a local narrow-peak duration, reducing the influence of tailing.
 }
 \details{
@@ -73,9 +70,11 @@ For an alkane with c carbon atoms the nominal molecular ion is
   Peak onset and duration use a relative-height fraction of 0.01 by default.
   A supplied calibrated PSF gives its local small-peak duration; otherwise
   a local lower envelope of standard peak durations estimates that duration. Both standards and sample profiles use
-  t_star = onset + narrow_width/2. A smoothing spline maps t_star to 100c;
-  a monotone cubic interpolation through its fitted anchor values prevents
-  local reversals. Extrapolation is disabled by default in predict().
+  t_star = onset + narrow_width/2. A natural cubic spline interpolates
+  the verified coordinates and indices 100c exactly, with zero second
+  derivatives at the boundary anchors. If this curve would reverse direction,
+  a monotone cubic interpolant through the same anchors is used. Extrapolation
+  is disabled by default in predict(); when requested it uses the boundary slopes.
 
   control accepts fraction, baseline_window (minutes), min_separation
   (minutes), min_relative, min_molecular_fraction, min_molecular_ratio,

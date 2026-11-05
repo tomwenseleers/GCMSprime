@@ -87,7 +87,7 @@ test_that("fit annotation preserves factors, orders compounds and exports all ma
   expect_equal(z$compounds$match_library_id,c(2L,1L))
   expect_equal(z$compounds$match_score,c(1000,1000),tolerance=1e-6)
   expect_equal(z$compounds$retention_index,c(1020,1000))
-  expect_match(paste(readLines(out,warn=FALSE),collapse="\n"),"RI_DB5: 1020")
+  expect_match(paste(readLines(out,warn=FALSE),collapse="\n"),"Retention_index: SemiStdNP=1020")
   expect_match(paste(readLines(out,warn=FALSE),collapse="\n"),"Pseudocount: 120")
   if(!is.null(excel)) {
     expect_true(all(c("Compounds","Run","Matches")%in%openxlsx::getSheetNames(excel)))

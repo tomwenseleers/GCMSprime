@@ -45,3 +45,33 @@ calibrated <- GCMSdeco(file.path(out, "GCMS_data2.cdf"),
   file.path(out, "GCMS_data2_calibrated.msp"), nwindows = 3L, precluster = 32L,
   psf_control = list(standard = attr(GCMS_data2, "alkanes_TIC")))
 }
+
+\dontrun{
+# Sixteen related samples, retaining all mass channels. Compounds occur in
+# half the samples on average, with retention drift and concentration-dependent
+# widths and tails. Here the simulated quasipoisson dispersion is known.
+library(L0nmf)
+sim <- simulate_GCMS_samples(samples=16L, n=1200L, k=48L,
+  preset="time_area", presence=0.5, irregular=0, drift=2,
+  family="quasipoisson", dispersion=2, seed=9118)
+input <- file.path(tempdir(), "GCMSprime_samples16")
+dir.create(input, showWarnings=FALSE)
+for(s in sim$samples) {
+  write_GCMS_cdf(s$Y, file.path(input, paste0(s$sample_id, ".cdf")),
+    time=s$time, acquired_at=s$acquired_at)
+}
+rm(sim, s)                         # observations are read from the CDF files
+experiment <- GCMSdeco(input, output_dir=paste0(input, "_results"),
+  family=quasipoisson("identity"), dispersion=2, correlation="none",
+  nwindows=2L, baseline_df=4L, precluster=32L, ncores=16L,
+  psf_control=list(maxiter=3L),
+  batch=list(coupling=list(cycles=2L, initial_cycles=1L, rounds=1L, q=32L)))
+experiment$seconds
+experiment$parallel
+experiment$samples[c("sample_name", "compounds", "GIC")]
+experiment$areas
+plot(experiment, type="areas")
+plot(experiment, sample=1L, type="lines")
+plot(experiment, sample=1L, type="profiles", which=1:6)
+saveRDS(experiment$channel_groups, file.path(input, "channel_groups.rds"))
+}

@@ -417,3 +417,27 @@ describes diagnostic-ion alkane assignments, calibration, column classes,
 spectral distances and ion weighting. The
 [library-search tutorial](library-search.html) gives executable calls and
 annotated exports.
+
+
+## Parallel processing and sample-specific peak shapes
+
+Directory analyses use one total logical-core budget. For example,
+`ncores=16L` uses sixteen single-threaded sample workers when at least sixteen
+chromatograms are available. With fewer samples, each worker receives a larger
+share of the native thread budget. Every sample retains its own sparse PSF,
+scan grid, background and noise calibration.
+
+A shared aggregation is learned from summed chromatograms in common time bins.
+Matching and Poisson/quasipoisson profile proposals use these ion groups;
+proposal acceptance and spectral estimation use the original mass channels.
+The common grid is used only to learn the groups. Original observations are
+stored on disk, aggregate matrices are cached in RAM, and original-channel
+updates read bounded blocks. Each worker receives its assigned sample and
+compact factors.
+
+With shared spectra fixed, profiles and backgrounds can be updated independently
+across samples. Spectral contributions are then pooled in acquisition order.
+The spectral fusion queue retains unaffected candidates and refreshes only
+edges incident to a merged compound, preserving the greedy selection rule.
+These execution details and the complete objective are given in the
+[L0nmf algorithm](https://tomwenseleers.github.io/L0nmf/articles/algorithm.html#parallel-samples-and-bounded-memory-updates).

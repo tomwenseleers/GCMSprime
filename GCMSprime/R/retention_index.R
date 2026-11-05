@@ -83,8 +83,8 @@ ri_predict_width <- function(object,time) {
 
 #' Calibrate retention indices from an n-alkane standard
 #'
-#' Identify a homologous alkane series using diagnostic ions and fit a smooth,
-#' monotone retention-time calibration. The retention coordinate uses peak onset
+#' Identify a homologous alkane series using diagnostic ions and interpolate
+#' their retention indices with a natural cubic spline. The coordinate uses peak onset
 #' plus half a local narrow-peak duration, reducing the influence of tailing.
 #'
 #' @param standard ANDI-MS CDF path, scan-by-mass matrix, or list with Y and time.
@@ -94,7 +94,6 @@ ri_predict_width <- function(object,time) {
 #' @param anchors Optional data frame with carbon and retention_time columns,
 #'   supplying verified calibration coordinates directly. An optional narrow_width
 #'   column supplies local small-peak durations for timing sample profiles.
-#' @param spar Smoothing-spline smoothing parameter; NULL selects it by GCV.
 #' @param control Named calibration controls, described below.
 #' @param psf Optional calibrated PSF from L0nmf::estimate_psf(), or a list with
 #'   psf_kernels (one kernel per row), psf_offsets in minutes and psf_timepoints
@@ -102,7 +101,7 @@ ri_predict_width <- function(object,time) {
 #'   supplies the small-peak duration. A single kernel gives a constant duration.
 #'   NULL estimates a narrow-width envelope from the detected standard peaks.
 #' @return An RIcalibration object with accepted anchors, all candidate diagnostics,
-#'   fitted spline, local narrow-peak widths and timing convention.
+#'   interpolation method, local narrow-peak widths and timing convention.
 #' @details For an alkane with c carbon atoms the nominal molecular ion is
 #'   14c+2. Its excess above the carbon-13 isotope contribution of the adjacent
 #'   alkyl ion is used with the 43, 57, 71, 85, 99 and 113 fragment series.
@@ -113,9 +112,11 @@ ri_predict_width <- function(object,time) {
 #'   Peak onset and duration use a relative-height fraction of 0.01 by default.
 #'   A supplied calibrated PSF gives its local small-peak duration; otherwise
 #'   a local lower envelope of standard peak durations estimates that duration. Both standards and sample profiles use
-#'   t_star = onset + narrow_width/2. A smoothing spline maps t_star to 100c;
-#'   a monotone cubic interpolation through its fitted anchor values prevents
-#'   local reversals. Extrapolation is disabled by default in predict().
+#'   t_star = onset + narrow_width/2. A natural cubic spline interpolates
+#'   the verified coordinates and indices 100c exactly, with zero second
+#'   derivatives at the boundary anchors. If this curve would reverse direction,
+#'   a monotone cubic interpolant through the same anchors is used. Extrapolation
+#'   is disabled by default in predict(); when requested it uses the boundary slopes.
 #'
 #'   control accepts fraction, baseline_window (minutes), min_separation
 #'   (minutes), min_relative, min_molecular_fraction, min_molecular_ratio,
@@ -132,7 +133,7 @@ ri_predict_width <- function(object,time) {
 #' cal
 #' @export
 calibrate_ri <- function(standard=NULL,time=NULL,carbon=7:40,anchors=NULL,
-                         spar=NULL,control=list(),psf=NULL) {
+                         control=list(),psf=NULL) {
   begun<-proc.time()[["elapsed"]];control<-ri_control(control)
   if(!is.numeric(carbon)||anyNA(carbon)||any(carbon<3|carbon!=floor(carbon))||anyDuplicated(carbon))
     stop("carbon must contain distinct integer carbon numbers.",call.=FALSE)
@@ -205,11 +206,18 @@ calibrate_ri <- function(standard=NULL,time=NULL,carbon=7:40,anchors=NULL,
   if(nrow(anchors)<4L||any(!is.finite(anchors$carbon))||any(anchors$carbon!=floor(anchors$carbon))||
       any(!is.finite(anchors$retention_time))||any(diff(anchors$retention_time)<=0)||any(diff(anchors$carbon)<=0))
     stop("Use at least four increasing alkane times and carbon numbers.")
-  spline<-stats::smooth.spline(anchors$retention_time,100*anchors$carbon,spar=spar)
-  fitted<-stats::predict(spline,anchors$retention_time)$y
-  if(any(diff(fitted)<=0)) stop("The smoothed calibration is not increasing; inspect assignments or adjust spar.")
-  anchors$RI<-100*anchors$carbon;anchors$fitted_RI<-fitted;anchors$residual<-anchors$RI-fitted
-  structure(list(anchors=anchors,candidates=candidates,spline=spline,width_curve=width_curve,
+  t<-anchors$retention_time;anchors$RI<-100*anchors$carbon
+  method<-'natural';spline<-stats::splinefun(t,anchors$RI,method=method)
+  # The derivative of a cubic is quadratic. Its interval minimum is at a
+  # knot or where the linearly interpolated second derivative rises through 0.
+  curvature<-spline(t,deriv=2L)
+  i<-which(head(curvature,-1L)<0&tail(curvature,-1L)>0)
+  interior<-t[i]-diff(t)[i]*curvature[i]/(curvature[i+1L]-curvature[i])
+  if(any(spline(c(t,interior),deriv=1L)<0)) {
+    method<-'hyman';spline<-stats::splinefun(t,anchors$RI,method=method)
+  }
+  anchors$fitted_RI<-spline(t);anchors$residual<-anchors$RI-anchors$fitted_RI
+  structure(list(anchors=anchors,candidates=candidates,interpolation=method,width_curve=width_curve,
     fraction=control$fraction,source=source,control=control,
     width_source=if(!is.null(psf)) 'calibrated_psf' else if(nrow(candidates)) 'standard_peak_envelope' else 'provided',
     timing=if(is.null(width_curve)) 'provided' else 'onset_plus_half_narrow_width',
@@ -225,13 +233,13 @@ calibrate_ri <- function(standard=NULL,time=NULL,carbon=7:40,anchors=NULL,
 #' @method predict RIcalibration
 #' @export
 predict.RIcalibration <- function(object,newdata,extrapolate=FALSE,...) {
-  x<-object$anchors$retention_time;y<-object$anchors$fitted_RI
-  value<-stats::splinefun(x,y,method='hyman')(newdata)
-  left<-which(!is.na(newdata)&newdata<min(x));right<-which(!is.na(newdata)&newdata>max(x))
-  if(extrapolate) {
-    value[left]<-y[1]+(newdata[left]-x[1])*diff(y[1:2])/diff(x[1:2])
-    n<-length(x);value[right]<-y[n]+(newdata[right]-x[n])*diff(tail(y,2))/diff(tail(x,2))
-  } else value[c(left,right)]<-NA_real_
+  t<-object$anchors$retention_time;x<-range(t)
+  spline<-stats::splinefun(t,object$anchors$RI,method=object$interpolation)
+  inside<-pmax(x[1L],pmin(x[2L],newdata));value<-spline(inside)
+  outside<-which(!is.na(newdata)&newdata!=inside)
+  if(extrapolate) value[outside]<-value[outside]+(newdata[outside]-inside[outside])*
+    spline(inside[outside],deriv=1L)
+  else value[outside]<-NA_real_
   value
 }
 
