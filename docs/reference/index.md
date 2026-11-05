@@ -54,6 +54,8 @@
   [`predict(`*`<RIcalibration>`*`)`](https://tomwenseleers.github.io/GCMSprime/reference/calibrate_ri.md)
   [`print(`*`<RIcalibration>`*`)`](https://tomwenseleers.github.io/GCMSprime/reference/calibrate_ri.md)
   : Calibrate retention indices from an n-alkane standard
+- [`annotate_ri()`](https://tomwenseleers.github.io/GCMSprime/reference/annotate_ri.md)
+  : Add alkane-calibrated retention indices without a library search
 - [`library_search()`](https://tomwenseleers.github.io/GCMSprime/reference/library_search.md)
   [`as.data.frame(`*`<GCMSmatches>`*`)`](https://tomwenseleers.github.io/GCMSprime/reference/library_search.md)
   [`print(`*`<GCMSmatches>`*`)`](https://tomwenseleers.github.io/GCMSprime/reference/library_search.md)

@@ -130,6 +130,107 @@ in the intended run order:</p>
 <span>                            <span class="st">"beer2/injection003.cdf"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
+<h2 id="sixteen-simulated-chromatograms">Sixteen simulated chromatograms<a class="anchor" aria-label="anchor" href="#sixteen-simulated-chromatograms"></a>
+</h2>
+<p>This example fits 16 chromatograms with 1,200 scans and 258 mass
+channels each. The 48 possible compounds occur in roughly half the
+samples, with retention drift and concentration-dependent peak widths
+and tails. All original ions are retained in the exported spectra. Here
+the simulated quasipoisson dispersion is supplied at its known
+value.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">sim</span> <span class="op">&lt;-</span> <span class="fu">L0nmf</span><span class="fu">::</span><span class="fu"><a href="https://tomwenseleers.github.io/L0nmf/reference/simulate_GCMS_samples.html" class="external-link">simulate_GCMS_samples</a></span><span class="op">(</span>samples<span class="op">=</span><span class="fl">16L</span>, n<span class="op">=</span><span class="fl">1200L</span>, k<span class="op">=</span><span class="fl">48L</span>,</span>
+<span>  preset<span class="op">=</span><span class="st">"time_area"</span>, presence<span class="op">=</span><span class="fl">0.5</span>, irregular<span class="op">=</span><span class="fl">0</span>, drift<span class="op">=</span><span class="fl">2</span>,</span>
+<span>  family<span class="op">=</span><span class="st">"quasipoisson"</span>, dispersion<span class="op">=</span><span class="fl">2</span>, seed<span class="op">=</span><span class="fl">9118</span><span class="op">)</span></span>
+<span><span class="va">input</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="st">"samples16_"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/files2.html" class="external-link">dir.create</a></span><span class="op">(</span><span class="va">input</span><span class="op">)</span></span>
+<span><span class="kw">for</span> <span class="op">(</span><span class="va">s</span> <span class="kw">in</span> <span class="va">sim</span><span class="op">$</span><span class="va">samples</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="../reference/write_GCMS_cdf.html">write_GCMS_cdf</a></span><span class="op">(</span><span class="va">s</span><span class="op">$</span><span class="va">Y</span>, <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">input</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">s</span><span class="op">$</span><span class="va">sample_id</span>, <span class="st">".cdf"</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>    time<span class="op">=</span><span class="va">s</span><span class="op">$</span><span class="va">time</span>, acquired_at<span class="op">=</span><span class="va">s</span><span class="op">$</span><span class="va">acquired_at</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/rm.html" class="external-link">rm</a></span><span class="op">(</span><span class="va">sim</span>, <span class="va">s</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">experiment</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/GCMSdeco.html">GCMSdeco</a></span><span class="op">(</span><span class="va">input</span>, output_dir<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">input</span>, <span class="st">"_results"</span><span class="op">)</span>,</span>
+<span>  family<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">quasipoisson</a></span><span class="op">(</span><span class="st">"identity"</span><span class="op">)</span>, dispersion<span class="op">=</span><span class="fl">2</span>, correlation<span class="op">=</span><span class="st">"none"</span>,</span>
+<span>  nwindows<span class="op">=</span><span class="fl">2L</span>, baseline_df<span class="op">=</span><span class="fl">4L</span>, precluster<span class="op">=</span><span class="fl">32L</span>, ncores<span class="op">=</span><span class="fl">16L</span>,</span>
+<span>  psf_control<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>maxiter<span class="op">=</span><span class="fl">3L</span><span class="op">)</span>,</span>
+<span>  batch<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>coupling<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>cycles<span class="op">=</span><span class="fl">2L</span>, initial_cycles<span class="op">=</span><span class="fl">1L</span>, rounds<span class="op">=</span><span class="fl">1L</span>, q<span class="op">=</span><span class="fl">32L</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">experiment</span><span class="op">$</span><span class="va">seconds</span></span>
+<span><span class="va">experiment</span><span class="op">$</span><span class="va">areas</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">experiment</span>, type<span class="op">=</span><span class="st">"areas"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">experiment</span>, sample<span class="op">=</span><span class="fl">1L</span>, type<span class="op">=</span><span class="st">"profiles"</span>, which<span class="op">=</span><span class="fl">1</span><span class="op">:</span><span class="fl">6</span><span class="op">)</span></span></code></pre></div>
+<p>The fit recovered <strong>all 48 shared compounds and all 380 sample
+occurrences</strong>, with no false calls (F1 = 1, MCC = 1). The median
+cosine similarity to the true spectra was <strong>0.999994</strong>.
+Matching for this assessment used aligned apex times within 0.15 minutes
+and spectral cosine similarity of at least 0.9. The GIC was 9,832,385.06
+at all three core budgets, with equal spectra, areas and accepted fusion
+steps. Median adjusted weighted R² was 0.919.</p>
+<table style="width:100%;" class="table">
+<colgroup>
+<col width="16%">
+<col width="16%">
+<col width="16%">
+<col width="16%">
+<col width="16%">
+<col width="16%">
+</colgroup>
+<thead><tr class="header">
+<th align="right">Logical cores</th>
+<th align="right">Shared grouping</th>
+<th align="right">Independent fits</th>
+<th align="right">Coupled refinement</th>
+<th align="right">Exports and other work</th>
+<th align="right">Total</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="right">1</td>
+<td align="right">5.14 s</td>
+<td align="right">241.00 s</td>
+<td align="right">47.82 s</td>
+<td align="right">4.98 s</td>
+<td align="right">298.94 s</td>
+</tr>
+<tr class="even">
+<td align="right">8</td>
+<td align="right">2.49 s</td>
+<td align="right">52.10 s</td>
+<td align="right">17.17 s</td>
+<td align="right">4.21 s</td>
+<td align="right">75.97 s</td>
+</tr>
+<tr class="odd">
+<td align="right">16</td>
+<td align="right">1.85 s</td>
+<td align="right">40.66 s</td>
+<td align="right">17.72 s</td>
+<td align="right">4.82 s</td>
+<td align="right"><strong>65.05 s</strong></td>
+</tr>
+</tbody>
+</table>
+<p>The 16-worker run took <strong>4.6 times less time</strong> than the
+one-worker run. Timings include automatic PSF estimation, deconvolution,
+alignment, coupling and exports on an HP ZBook Fury G8 with an Intel
+Core i9-11950H (8 physical cores, 16 logical cores), R 4.5.0 and
+OpenBLAS. Each sample worker used one native thread. The <a href="https://github.com/tomwenseleers/GCMSprime/blob/master/benchmarks/16_samples_parallel.R" class="external-link">benchmark
+script</a> recreates the chromatograms and evaluates the recovered
+compounds.</p>
+<div class="float">
+<img src="figures/samples16-performance.png" alt="Total and stage timings, with true and recovered spectral proportions"><div class="figcaption">Total and stage timings, with true and recovered
+spectral proportions</div>
+</div>
+<div class="float">
+<img src="figures/samples16-areas.png" alt="Recovered integrated areas, with crosses marking absent occurrences"><div class="figcaption">Recovered integrated areas, with crosses marking
+absent occurrences</div>
+</div>
+<div class="float">
+<img src="figures/samples16-profiles.png" alt="Aligned peak profiles for three shared compounds across selected samples"><div class="figcaption">Aligned peak profiles for three shared compounds
+across selected samples</div>
+</div>
+</div>
+<div class="section level2">
 <h2 id="outputs-and-memory-use">Outputs and memory use<a class="anchor" aria-label="anchor" href="#outputs-and-memory-use"></a>
 </h2>
 <p>The output directory contains:</p>
@@ -155,11 +256,21 @@ NIST-compatible MSP and Excel results, plus trace and heatmap PDFs when
 </ul>
 <p>Spectral text cells are unwrapped and list fragments by decreasing
 intensity. Sample objects retain factor matrices and CDF paths. Plots
-reload the required observations. Coupled fitting stores observations
-and large weight/offset arrays on disk and processes them sample by
-sample. Shared spectra and compact alignment summaries remain in
-memory.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+reload the required observations. Coupled fitting stores original
+observations and large weight/offset arrays on disk. It caches the
+common aggregate channels in RAM and streams bounded blocks of original
+channels for likelihood and spectral updates. At 10,000 scans and 32
+groups, the aggregate cache occupies 2.56 MB per sample, or 2.56 GB for
+1,000 samples. Factors and active workers need additional memory. Set
+<code>batch=list(cache=FALSE)</code> to read the aggregate data from
+disk as needed. Use <code>batch=list(workers=4L)</code> to cap the
+number of concurrent samples within the <code>ncores</code> budget.</p>
+<p>The same ion groups are used across samples for matching. They are
+learned from a pooled, time-binned chromatogram or supplied through
+<code>precluster</code> as a saved <a href="https://tomwenseleers.github.io/L0nmf/reference/channel_groups.html" class="external-link">channel
+map</a>, for example one trained on reference spectra. Each sample’s PSF
+and scan grid remain separate.</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sample1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="va">experiment</span><span class="op">$</span><span class="va">paths</span><span class="op">[</span><span class="fl">1L</span><span class="op">]</span><span class="op">)</span></span>
 <span><span class="va">sample1</span><span class="op">$</span><span class="va">compounds</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">sample1</span>, type<span class="op">=</span><span class="st">"profiles"</span>, file<span class="op">=</span><span class="st">"sample1_profiles_spectra.pdf"</span><span class="op">)</span></span>
@@ -187,7 +298,7 @@ units, so scan duration and the number of exported mass peaks alone do
 not identify physical count exposure.</p>
 <p>If integrated counts and their durations are known, supply exposure
 explicitly:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">experiment</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/GCMSdeco.html">GCMSdeco</a></span><span class="op">(</span><span class="st">"chromatograms"</span>, output_dir<span class="op">=</span><span class="st">"count_results"</span>,</span>
 <span>  family<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">poisson</a></span><span class="op">(</span><span class="st">"identity"</span><span class="op">)</span>,</span>
 <span>  batch<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>exposure<span class="op">=</span><span class="kw">function</span><span class="op">(</span><span class="va">metadata</span>, <span class="va">time</span><span class="op">)</span> <span class="va">metadata</span><span class="op">$</span><span class="va">scan_duration</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
@@ -201,6 +312,34 @@ background design values during fitting.</p>
 <div class="section level2">
 <h2 id="calibrated-beer-example">Calibrated beer example<a class="anchor" aria-label="anchor" href="#calibrated-beer-example"></a>
 </h2>
+<p>An alkane ladder can supply the peak shapes for every sample in the
+batch. Use its total-ion chromatogram (TIC) after the solvent peak, and
+reuse that calibration on each sample’s own scan grid. The full ladder
+spectra provide the diagnostic ions for RI calibration. The two
+calibrations serve different purposes: the TIC describes narrow peak
+shapes, while the fragment and molecular ions identify the
+retention-index anchors.</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Read the standard's TIC and ANDI-MS scan times (seconds in these files).</span></span>
+<span><span class="va">standard</span> <span class="op">&lt;-</span> <span class="st">"chromatograms/standards/alkanes.cdf"</span></span>
+<span><span class="va">nc</span> <span class="op">&lt;-</span> <span class="fu">ncdf4</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ncdf4/man/nc_open.html" class="external-link">nc_open</a></span><span class="op">(</span><span class="va">standard</span><span class="op">)</span></span>
+<span><span class="va">tic</span> <span class="op">&lt;-</span> <span class="fu">ncdf4</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ncdf4/man/ncvar_get.html" class="external-link">ncvar_get</a></span><span class="op">(</span><span class="va">nc</span>, <span class="st">"total_intensity"</span><span class="op">)</span></span>
+<span><span class="va">time</span> <span class="op">&lt;-</span> <span class="fu">ncdf4</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ncdf4/man/ncvar_get.html" class="external-link">ncvar_get</a></span><span class="op">(</span><span class="va">nc</span>, <span class="st">"scan_acquisition_time"</span><span class="op">)</span> <span class="op">/</span> <span class="fl">60</span></span>
+<span><span class="fu">ncdf4</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ncdf4/man/nc_close.html" class="external-link">nc_close</a></span><span class="op">(</span><span class="va">nc</span><span class="op">)</span></span>
+<span><span class="va">keep</span> <span class="op">&lt;-</span> <span class="va">time</span> <span class="op">&gt;=</span> <span class="fl">3</span></span>
+<span><span class="va">psf</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://tomwenseleers.github.io/L0nmf/reference/estimate_psf.html" class="external-link">estimate_psf</a></span><span class="op">(</span><span class="va">tic</span><span class="op">[</span><span class="va">keep</span><span class="op">]</span>, time<span class="op">=</span><span class="va">time</span><span class="op">[</span><span class="va">keep</span><span class="op">]</span>, method<span class="op">=</span><span class="st">"standard"</span>, nwindows<span class="op">=</span><span class="fl">10L</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">experiment</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/GCMSdeco.html">GCMSdeco</a></span><span class="op">(</span><span class="st">"chromatograms"</span>, output_dir<span class="op">=</span><span class="st">"beer_results"</span>,</span>
+<span>  alkanes_file<span class="op">=</span><span class="va">standard</span>, precluster<span class="op">=</span><span class="fl">32L</span>, ncores<span class="op">=</span><span class="fl">16L</span>,</span>
+<span>  psf_control<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>standard<span class="op">=</span><span class="va">psf</span>, method<span class="op">=</span><span class="st">"standard"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">cal</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/calibrate_ri.html">calibrate_ri</a></span><span class="op">(</span><span class="va">standard</span>, carbon<span class="op">=</span><span class="fl">7</span><span class="op">:</span><span class="fl">23</span>, psf<span class="op">=</span><span class="va">psf</span><span class="op">)</span></span>
+<span><span class="va">experiment</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/annotate_ri.html">annotate_ri</a></span><span class="op">(</span><span class="va">experiment</span>, <span class="va">cal</span>, phase<span class="op">=</span><span class="st">"DB5"</span>,</span>
+<span>  msp_file<span class="op">=</span><span class="st">"beer_results/consensus.msp"</span>, xlsx_file<span class="op">=</span><span class="st">"beer_results/experiment.xlsx"</span><span class="op">)</span></span></code></pre></div>
+<p>The retention coordinate is the 1%-height onset plus half the local
+narrow-peak width measured at the same height. The natural cubic RI
+spline passes through the alkane anchors exactly. The sample MSPs
+contain phase-labelled indices, and the consensus MSP contains their
+medians.</p>
 <p>Two beer chromatograms were analyzed with their shared alkane ladder,
 using 32 outcome groups for initialization and all <strong>518 mass
 channels</strong> for coupled refinement. In the 4.5–6 minute window,

@@ -139,13 +139,17 @@ tailing peaks on the retention coordinate. Both standard peaks and
 recovered sample profiles use this timing convention. The
 relative-height fraction is configurable through
 <code>control=list(fraction=.01)</code>.</p>
-<p>A smoothing spline maps <span class="math inline">t^\star_c</span> to
-<span class="math inline">100c</span>; monotone interpolation through
-its fitted anchor values preserves the chromatographic ordering.
-Smoothing is selected by GCV unless <code>spar</code> is supplied.
-Predictions outside the accepted standard range remain unassigned by
-default. Verified anchors can be supplied directly, including a
-<code>narrow_width</code> column when timing fitted profiles.</p>
+<p>A natural cubic spline interpolates the verified alkane coordinates
+<span class="math inline">t^\star_c</span> and their indices <span class="math inline">100c</span>, with zero second derivatives at the two
+boundary anchors. If the natural spline would decrease between anchors,
+monotone cubic interpolation preserves their order and still passes
+exactly through them. Both the standard and sample coordinates use the
+1%-height onset plus half the local narrow-peak width measured at the
+same height. Predictions outside the accepted standard range remain
+unassigned by default; optional linear extrapolation uses the boundary
+slopes and is flagged in the exports. Verified anchors can be supplied
+directly, including a <code>narrow_width</code> column when timing
+fitted profiles.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cal</span><span class="op">$</span><span class="va">anchors</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"carbon"</span>, <span class="st">"apex"</span>, <span class="st">"start"</span>, <span class="st">"narrow_width"</span>,</span>
 <span>                 <span class="st">"retention_time"</span>, <span class="st">"RI"</span>, <span class="st">"residual"</span><span class="op">)</span><span class="op">]</span></span>

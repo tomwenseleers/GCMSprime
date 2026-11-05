@@ -50,18 +50,22 @@
 <h3 id="chromatograms-and-calibration-0-1-0">Chromatograms and calibration<a class="anchor" aria-label="anchor" href="#chromatograms-and-calibration-0-1-0"></a></h3>
 <ul><li><p>ANDI-MS CDF import and export preserve scan timing, acquired mass channels and sample metadata.</p></li>
 <li><p>Standard-assisted or blind constant/time-varying PSF estimation, pooled noise calibration and smooth background initialization.</p></li>
+<li><p>Reusable TIC-based standard calibration preserves physical scan times and builds each sample’s sparse PSF without repeatedly fitting the standard.</p></li>
 <li><p>Contained broad-peak fragments use native local refinement and matched unmerged controls, with permissive initialization and correlation-aware rank selection on every original ion channel.</p></li>
 </ul></div>
 <div class="section level3">
 <h3 id="deconvolution-and-quantification-0-1-0">Deconvolution and quantification<a class="anchor" aria-label="anchor" href="#deconvolution-and-quantification-0-1-0"></a></h3>
-<ul><li>Single-sample sparse log-concave NMF resolves overlapping compounds, flexible profiles and full mass spectra with automatic best rank tuning.</li>
-<li>Optional aggregation to a small number of ion groups accelerates initialization; original-channel likelihood refinement completes the fit.</li>
-<li>Directory-based multisample analysis preserves acquisition order and group labels, selects alkane standards, aligns samples and estimates shared spectra with sample-specific areas and profiles.</li>
+<ul><li><p>Single-sample sparse log-concave NMF resolves overlapping compounds, flexible profiles and full mass spectra with automatic best rank tuning.</p></li>
+<li><p>Optional aggregation to a small number of ion groups accelerates initialization; original-channel likelihood refinement completes the fit.</p></li>
+<li><p>Directory-based multisample analysis preserves acquisition order and group labels, selects alkane standards, aligns samples and estimates shared spectra with sample-specific areas and profiles.</p></li>
+<li><p><code>ncores</code> is a total logical-CPU budget for concurrent samples and native fitting. A shared reusable ion-group map and bounded coupled updates keep memory use controlled while retaining full spectra and sample-specific PSFs.</p></li>
+<li><p>Stage timings, thread-allocation metadata and a sixteen-sample simulated example accompany serial/parallel result checks.</p></li>
 </ul></div>
 <div class="section level3">
 <h3 id="spectral-libraries-and-identification-0-1-0">Spectral libraries and identification<a class="anchor" aria-label="anchor" href="#spectral-libraries-and-identification-0-1-0"></a></h3>
 <ul><li>Streaming MSP and GCMS-ID CSV import with sparse in-memory or SQLite storage, chemical metadata, synonyms and retention-index provenance.</li>
-<li>Diagnostic-ion alkane assignment, smooth onset-based retention-index calibration and column-specific constraints for DB1, DB5 and DBWAX classes.</li>
+<li>Diagnostic-ion alkane assignment, natural-cubic onset-based retention-index calibration and column-specific constraints for DB1, DB5 and DBWAX classes.</li>
+<li>Retention-index annotation can be exported directly to phase-labelled NIST MSP and Excel files, with extrapolated values explicitly flagged.</li>
 <li>Native spectral search with Stein–Scott, cosine/angular, Hellinger, Jensen–Shannon and multinomial comparisons, plus optional ion-rarity weights.</li>
 </ul></div>
 <div class="section level3">

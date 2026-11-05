@@ -75,7 +75,8 @@ print(x, ...)
 ## Value
 
 A `GCMSbatch` object with `samples`, optional `coupled` fit, sample RDS
-`paths`, consensus `areas`, output files and stage timings. Use
+`paths`, consensus `areas`, reusable `channel_groups`, the `parallel`
+thread allocation, output files and stage timings. Use
 `readRDS(x$paths[i])` for a full per-sample
 [`GCMSdeco()`](https://tomwenseleers.github.io/GCMSprime/reference/GCMSdeco.md)
 object.
@@ -92,33 +93,45 @@ paths in `batch=list(sample_order=...)`.
 `batch` supports `method="cosine"` or `"hellinger"`, `align=TRUE`,
 `coupling=list()` for
 [`L0nmf::coupledNMF()`](https://tomwenseleers.github.io/L0nmf/reference/coupledNMF.html)
-controls, `sample_order=NULL`, `exposure=NULL`, `resume=FALSE` and
-`plots=FALSE`. `exposure` may be a positive scalar, a list with one
-scan-wise vector per acquisition-ordered sample, or a function of a
-sample's metadata and time vector. The default preserves vendor
-intensities. Known integration durations are appropriate when the data
-are integrated ion counts. Sequential full-scan mass spectrometers
-allocate acquisition time over m/z; exported peak counts and retained
-traces do not identify the per-mass dwell time. No automatic division by
-the number of exported channels is applied.
+controls, `sample_order=NULL`, `exposure=NULL`, `resume=FALSE`,
+`plots=FALSE`, `workers=NULL` and `cache=TRUE`. `workers` limits
+concurrent samples within the total `ncores` budget. `cache` controls
+the aggregated-observation RAM cache during coupled fitting. `exposure`
+may be a positive scalar, a list with one scan-wise vector per
+acquisition-ordered sample, or a function of a sample's metadata and
+time vector. The default preserves vendor intensities. Known integration
+durations are appropriate when the data are integrated ion counts.
+Sequential full-scan mass spectrometers allocate acquisition time over
+m/z; exported peak counts and retained traces do not identify the
+per-mass dwell time. No automatic division by the number of exported
+channels is applied.
 
-Each sample has its own initial PSF and smooth background.
-Original-channel means and the likelihood are used for coupled updates.
-Shared spectra are exported on the union of recorded mass ranges;
-unmeasured channels receive zero likelihood weight. Missing compounds
-retain `NA` areas. No gap filling is performed. `coupled=FALSE` keeps
-the independently fitted results.
+Samples run concurrently with their own sparse PSF and smooth
+background. A common channel map is learned from summed, time-binned
+chromatograms; pass a saved
+[`L0nmf::channel_groups()`](https://tomwenseleers.github.io/L0nmf/reference/channel_groups.html)
+map as `precluster` to reuse reference groups. Matching uses the shared
+aggregate space. Original-channel means and the likelihood are used for
+coupled updates. Shared spectra are exported on the union of recorded
+mass ranges; unmeasured channels receive zero likelihood weight. Missing
+compounds retain `NA` areas. No gap filling is performed.
+`coupled=FALSE` keeps the independently fitted results.
 
 The output directory contains per-sample MSP, Excel and fitted RDS
 files, an acquisition-ordered `samples.csv`, `areas.csv`, a consensus
 MSP library, and `experiment.xlsx` with samples, compounds, areas and
 packed spectra. `batch=list(plots=TRUE)` also writes each sample's trace
 and heatmap PDFs. Observations and factors are stored per sample,
-enabling streamed fitting; the returned object contains paths, tables
-and compact common spectra. Keep the output directory with the saved
-object. Explicit `resume=TRUE` reuses independent fits only when the
-file metadata and fitting arguments match; coupled refinement is
-recomputed.
+enabling streamed fitting; only aggregate observations are cached across
+samples in RAM, and the returned object contains paths, tables and
+compact common spectra. Original-channel spectral/background updates
+read blocks of at most 32 channels. Each active independent fit has its
+own temporary working buffers; these are released before the next
+assigned sample. A 10,000-by-32 cache needs 2.56 MB per sample, or 2.56
+GB for 1,000 samples, in addition to worker and factor memory. Keep the
+output directory with the saved object. Explicit `resume=TRUE` reuses
+independent fits only when the file metadata and fitting arguments
+match; coupled refinement is recomputed.
 
 ## See also
 

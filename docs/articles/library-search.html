@@ -125,15 +125,28 @@ objective stay unchanged.</p>
 <span><span class="va">cal</span><span class="op">$</span><span class="va">candidates</span></span></code></pre></div>
 <p>The timing anchor is peak onset at 1% of height plus half a local
 narrow-peak width. This reduces the influence of long tails on RI
-estimation. Standards and sample profiles use the same convention.
-<code>phase="DB5"</code> is the default; DB1 and DBWAX are also
-supported. <code>ri_tolerance=30</code> admits compatible references
-within 30 index units. Use a standard acquired under the sample’s
-programme.</p>
+estimation. Standards and sample profiles use the same convention. A
+natural cubic spline interpolates the alkane coordinates and their
+indices exactly. <code>phase="DB5"</code> is the default; DB1 and DBWAX
+are also supported. <code>ri_tolerance=30</code> admits compatible
+references within 30 index units. Use a standard acquired under the
+sample’s programme.</p>
 <p>Unlabelled reference RIs keep their provenance. If their column class
 is known, set <code>unknown_phase="DB5"</code> explicitly.
 <code>ri_tolerance=Inf</code> requests spectral-only searching. <a href="identification-theory.html">The identification theory</a> gives
 the calibration, column matching and missing-reference rules.</p>
+<p>RIs can also be exported without searching a library:</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/annotate_ri.html">annotate_ri</a></span><span class="op">(</span><span class="va">fit</span>, <span class="va">cal</span>, phase<span class="op">=</span><span class="st">"DB5"</span>,</span>
+<span>  msp_file<span class="op">=</span><span class="st">"sample_RI.msp"</span>, xlsx_file<span class="op">=</span><span class="st">"sample_RI.xlsx"</span><span class="op">)</span></span>
+<span><span class="va">fit</span><span class="op">$</span><span class="va">compounds</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"peak_onset"</span>, <span class="st">"retention_coordinate"</span>, <span class="st">"retention_index"</span><span class="op">)</span><span class="op">]</span></span></code></pre></div>
+<p>The MSP uses NIST’s <code>Retention_index: SemiStdNP=...</code> field
+for a DB5-type column. Excel retains the alkane assignments and timing
+coordinates. By default, peaks outside the calibrated range receive no
+RI. Set <code>extrapolate=TRUE</code> to use the natural spline’s linear
+tails; the compound table and MSP comments flag these values.
+<code><a href="../reference/annotate_ri.html">annotate_ri()</a></code> also annotates a multisample result and
+exports median consensus RIs with the sample values.</p>
 </div>
 <div class="section level2">
 <h2 id="choose-spectral-comparisons">Choose spectral comparisons<a class="anchor" aria-label="anchor" href="#choose-spectral-comparisons"></a>
@@ -178,7 +191,7 @@ fitted query totals</td>
 </tr>
 </tbody>
 </table>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">w</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/library_ion_weights.html">library_ion_weights</a></span><span class="op">(</span><span class="va">lib</span><span class="op">)</span></span>
 <span><span class="va">matches</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/library_search.html">library_search</a></span><span class="op">(</span><span class="va">fit</span>, <span class="va">lib</span>, calibration<span class="op">=</span><span class="va">cal</span>, phase<span class="op">=</span><span class="st">"DB5"</span>,</span>
 <span>  ri_tolerance<span class="op">=</span><span class="fl">30</span>, n_matches<span class="op">=</span><span class="fl">5</span>,</span>
@@ -194,7 +207,7 @@ score scales and accuracy.</p>
 <div class="section level2">
 <h2 id="identify-a-multisample-experiment">Identify a multisample experiment<a class="anchor" aria-label="anchor" href="#identify-a-multisample-experiment"></a>
 </h2>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">experiment</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/GCMSdeco.html">GCMSdeco</a></span><span class="op">(</span><span class="st">"chromatograms"</span>, output_dir<span class="op">=</span><span class="st">"identified_results"</span>,</span>
 <span>  precluster<span class="op">=</span><span class="fl">32L</span>, library<span class="op">=</span><span class="va">lib</span>,</span>
 <span>  search<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>phase<span class="op">=</span><span class="st">"DB5"</span>, ri_tolerance<span class="op">=</span><span class="fl">30</span>, n_matches<span class="op">=</span><span class="fl">5</span>,</span>

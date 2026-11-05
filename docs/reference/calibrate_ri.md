@@ -1,9 +1,9 @@
 # Calibrate retention indices from an n-alkane standard
 
-Identify a homologous alkane series using diagnostic ions and fit a
-smooth, monotone retention-time calibration. The retention coordinate
-uses peak onset plus half a local narrow-peak duration, reducing the
-influence of tailing.
+Identify a homologous alkane series using diagnostic ions and
+interpolate their retention indices with a natural cubic spline. The
+coordinate uses peak onset plus half a local narrow-peak duration,
+reducing the influence of tailing.
 
 ## Usage
 
@@ -13,7 +13,6 @@ calibrate_ri(
   time = NULL,
   carbon = 7:40,
   anchors = NULL,
-  spar = NULL,
   control = list(),
   psf = NULL
 )
@@ -46,10 +45,6 @@ print(x, ...)
   Optional data frame with carbon and retention_time columns, supplying
   verified calibration coordinates directly. An optional narrow_width
   column supplies local small-peak durations for timing sample profiles.
-
-- spar:
-
-  Smoothing-spline smoothing parameter; NULL selects it by GCV.
 
 - control:
 
@@ -88,7 +83,7 @@ print(x, ...)
 ## Value
 
 An RIcalibration object with accepted anchors, all candidate
-diagnostics, fitted spline, local narrow-peak widths and timing
+diagnostics, interpolation method, local narrow-peak widths and timing
 convention.
 
 ## Details
@@ -96,6 +91,8 @@ convention.
 For an alkane with c carbon atoms the nominal molecular ion is 14c+2.
 Its excess above the carbon-13 isotope contribution of the adjacent
 alkyl ion is used with the 43, 57, 71, 85, 99 and 113 fragment series.
+Local spectral backgrounds are measured outside the peak shoulders, so a
+broad alkane's molecular ion is retained in the corrected spectrum.
 Candidate anchors must have a coherent saturated-hydrocarbon spectrum. A
 maximum-weight increasing carbon-number sequence removes duplicate
 maxima and inconsistent assignments. Solvent-range C6 is excluded by
@@ -105,9 +102,12 @@ Peak onset and duration use a relative-height fraction of 0.01 by
 default. A supplied calibrated PSF gives its local small-peak duration;
 otherwise a local lower envelope of standard peak durations estimates
 that duration. Both standards and sample profiles use t_star = onset +
-narrow_width/2. A smoothing spline maps t_star to 100c; a monotone cubic
-interpolation through its fitted anchor values prevents local reversals.
-Extrapolation is disabled by default in predict().
+narrow_width/2. A natural cubic spline interpolates the verified
+coordinates and indices 100c exactly, with zero second derivatives at
+the boundary anchors. If this curve would reverse direction, a monotone
+cubic interpolant through the same anchors is used. Extrapolation is
+disabled by default in predict(); when requested it uses the boundary
+slopes.
 
 control accepts fraction, baseline_window (minutes), min_separation
 (minutes), min_relative, min_molecular_fraction, min_molecular_ratio,

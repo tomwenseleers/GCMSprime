@@ -51,16 +51,35 @@ cal$candidates
 
 The timing anchor is peak onset at 1% of height plus half a local
 narrow-peak width. This reduces the influence of long tails on RI
-estimation. Standards and sample profiles use the same convention.
-`phase="DB5"` is the default; DB1 and DBWAX are also supported.
-`ri_tolerance=30` admits compatible references within 30 index units.
-Use a standard acquired under the sample’s programme.
+estimation. Standards and sample profiles use the same convention. A
+natural cubic spline interpolates the alkane coordinates and their
+indices exactly. `phase="DB5"` is the default; DB1 and DBWAX are also
+supported. `ri_tolerance=30` admits compatible references within 30
+index units. Use a standard acquired under the sample’s programme.
 
 Unlabelled reference RIs keep their provenance. If their column class is
 known, set `unknown_phase="DB5"` explicitly. `ri_tolerance=Inf` requests
 spectral-only searching. [The identification
 theory](https://tomwenseleers.github.io/GCMSprime/articles/identification-theory.md)
 gives the calibration, column matching and missing-reference rules.
+
+RIs can also be exported without searching a library:
+
+``` r
+
+fit <- annotate_ri(fit, cal, phase="DB5",
+  msp_file="sample_RI.msp", xlsx_file="sample_RI.xlsx")
+fit$compounds[c("peak_onset", "retention_coordinate", "retention_index")]
+```
+
+The MSP uses NIST’s `Retention_index: SemiStdNP=...` field for a
+DB5-type column. Excel retains the alkane assignments and timing
+coordinates. By default, peaks outside the calibrated range receive no
+RI. Set `extrapolate=TRUE` to use the natural spline’s linear tails; the
+compound table and MSP comments flag these values.
+[`annotate_ri()`](https://tomwenseleers.github.io/GCMSprime/reference/annotate_ri.md)
+also annotates a multisample result and exports median consensus RIs
+with the sample values.
 
 ## Choose spectral comparisons
 

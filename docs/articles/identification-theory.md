@@ -54,12 +54,17 @@ recovered sample profiles use this timing convention. The
 relative-height fraction is configurable through
 `control=list(fraction=.01)`.
 
-A smoothing spline maps t^\star_c to 100c; monotone interpolation
-through its fitted anchor values preserves the chromatographic ordering.
-Smoothing is selected by GCV unless `spar` is supplied. Predictions
-outside the accepted standard range remain unassigned by default.
-Verified anchors can be supplied directly, including a `narrow_width`
-column when timing fitted profiles.
+A natural cubic spline interpolates the verified alkane coordinates
+t^\star_c and their indices 100c, with zero second derivatives at the
+two boundary anchors. If the natural spline would decrease between
+anchors, monotone cubic interpolation preserves their order and still
+passes exactly through them. Both the standard and sample coordinates
+use the 1%-height onset plus half the local narrow-peak width measured
+at the same height. Predictions outside the accepted standard range
+remain unassigned by default; optional linear extrapolation uses the
+boundary slopes and is flagged in the exports. Verified anchors can be
+supplied directly, including a `narrow_width` column when timing fitted
+profiles.
 
 ``` r
 

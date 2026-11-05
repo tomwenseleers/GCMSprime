@@ -203,7 +203,8 @@ PSF width; an integer of at least four fixes its dimension.</p></dd>
 
 
 <dt id="arg-precluster">precluster<a class="anchor" aria-label="anchor" href="#arg-precluster"></a></dt>
-<dd><p><code>NULL</code> or <code>FALSE</code> uses every channel throughout. <code>TRUE</code>
+<dd><p>A saved <code><a href="https://tomwenseleers.github.io/L0nmf/reference/channel_groups.html" class="external-link">channel_groups()</a></code> map shares the same aggregation
+across analyses. <code>NULL</code> or <code>FALSE</code> uses every channel throughout. <code>TRUE</code>
 uses up to 32 groups; an integer supplies another maximum. Size-adjusted
 Poisson clustering, aggregation, selection and fusion operate in that
 reduced space, followed by refinement on all original channels.</p></dd>
@@ -231,7 +232,12 @@ a number between zero and 0.49 supplies the lag-one correlation.</p></dd>
 
 
 <dt id="arg-ncores">ncores<a class="anchor" aria-label="anchor" href="#arg-ncores"></a></dt>
-<dd><p>OpenMP workers. <code>NULL</code> uses the detected physical cores.</p></dd>
+<dd><p>Total logical-CPU budget. <code>NULL</code> uses physical cores.
+Directory analyses run up to <code>min(samples,ncores)</code> sample workers,
+dividing the native thread budget between them. With at least 16 samples,
+<code>ncores=16L</code> uses 16 workers with one native thread each. BLAS threads
+are limited during batch fitting and caller settings are restored.
+For a single chromatogram, this sets its native OpenMP thread count.</p></dd>
 
 
 <dt id="arg-control">control<a class="anchor" aria-label="anchor" href="#arg-control"></a></dt>
@@ -272,6 +278,9 @@ Other entries form its <code>control</code> list, for example
 <code>list(standard=attr(GCMS_data2, "alkanes_TIC"))</code> uses the bundled calibration
 TIC; its numeric names supply retention times. <code>precluster=1L</code> uses the
 total-ion signal, <code>FALSE</code> the original channels, and <code>32L</code> at most 32 groups.
+A fitted <code>estimate_psf(method="standard")</code> result can be passed as
+<code>standard</code> with <code>method="standard"</code> to reuse a solvent-trimmed ladder
+calibration across samples, rebuilding each sparse design on its own grid.
 The PSF uses the same noise family and fixed noise estimates as the final
 factorization, with its information adjustment included in the weights.</p></dd>
 
@@ -472,6 +481,36 @@ information criteria and all plot types, alongside the algorithm.
 <span><span class="va">calibrated</span> <span class="op">&lt;-</span> <span class="fu">GCMSdeco</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">out</span>, <span class="st">"GCMS_data2.cdf"</span><span class="op">)</span>,</span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">out</span>, <span class="st">"GCMS_data2_calibrated.msp"</span><span class="op">)</span>, nwindows <span class="op">=</span> <span class="fl">3L</span>, precluster <span class="op">=</span> <span class="fl">32L</span>,</span>
 <span>  psf_control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>standard <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">GCMS_data2</span>, <span class="st">"alkanes_TIC"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">}</span> <span class="co"># }</span></span>
+<span></span>
+<span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span>
+<span><span class="co"># Sixteen related samples, retaining all mass channels. Compounds occur in</span></span>
+<span><span class="co"># half the samples on average, with retention drift and concentration-dependent</span></span>
+<span><span class="co"># widths and tails. Here the simulated quasipoisson dispersion is known.</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tomwenseleers.github.io/L0nmf/" class="external-link">L0nmf</a></span><span class="op">)</span></span>
+<span><span class="va">sim</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://tomwenseleers.github.io/L0nmf/reference/simulate_GCMS_samples.html" class="external-link">simulate_GCMS_samples</a></span><span class="op">(</span>samples<span class="op">=</span><span class="fl">16L</span>, n<span class="op">=</span><span class="fl">1200L</span>, k<span class="op">=</span><span class="fl">48L</span>,</span>
+<span>  preset<span class="op">=</span><span class="st">"time_area"</span>, presence<span class="op">=</span><span class="fl">0.5</span>, irregular<span class="op">=</span><span class="fl">0</span>, drift<span class="op">=</span><span class="fl">2</span>,</span>
+<span>  family<span class="op">=</span><span class="st">"quasipoisson"</span>, dispersion<span class="op">=</span><span class="fl">2</span>, seed<span class="op">=</span><span class="fl">9118</span><span class="op">)</span></span>
+<span><span class="va">input</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"GCMSprime_samples16"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/files2.html" class="external-link">dir.create</a></span><span class="op">(</span><span class="va">input</span>, showWarnings<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="kw">for</span><span class="op">(</span><span class="va">s</span> <span class="kw">in</span> <span class="va">sim</span><span class="op">$</span><span class="va">samples</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="write_GCMS_cdf.html">write_GCMS_cdf</a></span><span class="op">(</span><span class="va">s</span><span class="op">$</span><span class="va">Y</span>, <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">input</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">s</span><span class="op">$</span><span class="va">sample_id</span>, <span class="st">".cdf"</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>    time<span class="op">=</span><span class="va">s</span><span class="op">$</span><span class="va">time</span>, acquired_at<span class="op">=</span><span class="va">s</span><span class="op">$</span><span class="va">acquired_at</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/rm.html" class="external-link">rm</a></span><span class="op">(</span><span class="va">sim</span>, <span class="va">s</span><span class="op">)</span>                         <span class="co"># observations are read from the CDF files</span></span>
+<span><span class="va">experiment</span> <span class="op">&lt;-</span> <span class="fu">GCMSdeco</span><span class="op">(</span><span class="va">input</span>, output_dir<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">input</span>, <span class="st">"_results"</span><span class="op">)</span>,</span>
+<span>  family<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">quasipoisson</a></span><span class="op">(</span><span class="st">"identity"</span><span class="op">)</span>, dispersion<span class="op">=</span><span class="fl">2</span>, correlation<span class="op">=</span><span class="st">"none"</span>,</span>
+<span>  nwindows<span class="op">=</span><span class="fl">2L</span>, baseline_df<span class="op">=</span><span class="fl">4L</span>, precluster<span class="op">=</span><span class="fl">32L</span>, ncores<span class="op">=</span><span class="fl">16L</span>,</span>
+<span>  psf_control<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>maxiter<span class="op">=</span><span class="fl">3L</span><span class="op">)</span>,</span>
+<span>  batch<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>coupling<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>cycles<span class="op">=</span><span class="fl">2L</span>, initial_cycles<span class="op">=</span><span class="fl">1L</span>, rounds<span class="op">=</span><span class="fl">1L</span>, q<span class="op">=</span><span class="fl">32L</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">experiment</span><span class="op">$</span><span class="va">seconds</span></span>
+<span><span class="va">experiment</span><span class="op">$</span><span class="va">parallel</span></span>
+<span><span class="va">experiment</span><span class="op">$</span><span class="va">samples</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"sample_name"</span>, <span class="st">"compounds"</span>, <span class="st">"GIC"</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="va">experiment</span><span class="op">$</span><span class="va">areas</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">experiment</span>, type<span class="op">=</span><span class="st">"areas"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">experiment</span>, sample<span class="op">=</span><span class="fl">1L</span>, type<span class="op">=</span><span class="st">"lines"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">experiment</span>, sample<span class="op">=</span><span class="fl">1L</span>, type<span class="op">=</span><span class="st">"profiles"</span>, which<span class="op">=</span><span class="fl">1</span><span class="op">:</span><span class="fl">6</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">saveRDS</a></span><span class="op">(</span><span class="va">experiment</span><span class="op">$</span><span class="va">channel_groups</span>, <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">input</span>, <span class="st">"channel_groups.rds"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">}</span> <span class="co"># }</span></span></code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

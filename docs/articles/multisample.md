@@ -53,6 +53,75 @@ experiment <- GCMSdeco("chromatograms", output_dir="beer_results",
                             "beer2/injection003.cdf")))
 ```
 
+## Sixteen simulated chromatograms
+
+This example fits 16 chromatograms with 1,200 scans and 258 mass
+channels each. The 48 possible compounds occur in roughly half the
+samples, with retention drift and concentration-dependent peak widths
+and tails. All original ions are retained in the exported spectra. Here
+the simulated quasipoisson dispersion is supplied at its known value.
+
+``` r
+
+sim <- L0nmf::simulate_GCMS_samples(samples=16L, n=1200L, k=48L,
+  preset="time_area", presence=0.5, irregular=0, drift=2,
+  family="quasipoisson", dispersion=2, seed=9118)
+input <- tempfile("samples16_")
+dir.create(input)
+for (s in sim$samples) {
+  write_GCMS_cdf(s$Y, file.path(input, paste0(s$sample_id, ".cdf")),
+    time=s$time, acquired_at=s$acquired_at)
+}
+rm(sim, s)
+
+experiment <- GCMSdeco(input, output_dir=paste0(input, "_results"),
+  family=quasipoisson("identity"), dispersion=2, correlation="none",
+  nwindows=2L, baseline_df=4L, precluster=32L, ncores=16L,
+  psf_control=list(maxiter=3L),
+  batch=list(coupling=list(cycles=2L, initial_cycles=1L, rounds=1L, q=32L)))
+experiment$seconds
+experiment$areas
+plot(experiment, type="areas")
+plot(experiment, sample=1L, type="profiles", which=1:6)
+```
+
+The fit recovered **all 48 shared compounds and all 380 sample
+occurrences**, with no false calls (F1 = 1, MCC = 1). The median cosine
+similarity to the true spectra was **0.999994**. Matching for this
+assessment used aligned apex times within 0.15 minutes and spectral
+cosine similarity of at least 0.9. The GIC was 9,832,385.06 at all three
+core budgets, with equal spectra, areas and accepted fusion steps.
+Median adjusted weighted R² was 0.919.
+
+| Logical cores | Shared grouping | Independent fits | Coupled refinement | Exports and other work | Total |
+|---:|---:|---:|---:|---:|---:|
+| 1 | 5.14 s | 241.00 s | 47.82 s | 4.98 s | 298.94 s |
+| 8 | 2.49 s | 52.10 s | 17.17 s | 4.21 s | 75.97 s |
+| 16 | 1.85 s | 40.66 s | 17.72 s | 4.82 s | **65.05 s** |
+
+The 16-worker run took **4.6 times less time** than the one-worker run.
+Timings include automatic PSF estimation, deconvolution, alignment,
+coupling and exports on an HP ZBook Fury G8 with an Intel Core i9-11950H
+(8 physical cores, 16 logical cores), R 4.5.0 and OpenBLAS. Each sample
+worker used one native thread. The [benchmark
+script](https://github.com/tomwenseleers/GCMSprime/blob/master/benchmarks/16_samples_parallel.R)
+recreates the chromatograms and evaluates the recovered compounds.
+
+![Total and stage timings, with true and recovered spectral
+proportions](figures/samples16-performance.png)
+
+Total and stage timings, with true and recovered spectral proportions
+
+![Recovered integrated areas, with crosses marking absent
+occurrences](figures/samples16-areas.png)
+
+Recovered integrated areas, with crosses marking absent occurrences
+
+![Aligned peak profiles for three shared compounds across selected
+samples](figures/samples16-profiles.png)
+
+Aligned peak profiles for three shared compounds across selected samples
+
 ## Outputs and memory use
 
 The output directory contains:
@@ -71,9 +140,22 @@ The output directory contains:
 
 Spectral text cells are unwrapped and list fragments by decreasing
 intensity. Sample objects retain factor matrices and CDF paths. Plots
-reload the required observations. Coupled fitting stores observations
-and large weight/offset arrays on disk and processes them sample by
-sample. Shared spectra and compact alignment summaries remain in memory.
+reload the required observations. Coupled fitting stores original
+observations and large weight/offset arrays on disk. It caches the
+common aggregate channels in RAM and streams bounded blocks of original
+channels for likelihood and spectral updates. At 10,000 scans and 32
+groups, the aggregate cache occupies 2.56 MB per sample, or 2.56 GB for
+1,000 samples. Factors and active workers need additional memory. Set
+`batch=list(cache=FALSE)` to read the aggregate data from disk as
+needed. Use `batch=list(workers=4L)` to cap the number of concurrent
+samples within the `ncores` budget.
+
+The same ion groups are used across samples for matching. They are
+learned from a pooled, time-binned chromatogram or supplied through
+`precluster` as a saved [channel
+map](https://tomwenseleers.github.io/L0nmf/reference/channel_groups.html),
+for example one trained on reference spectra. Each sample’s PSF and scan
+grid remain separate.
 
 ``` r
 
@@ -125,6 +207,39 @@ multiplies the latent mean. It is incorporated into profile and
 background design values during fitting.
 
 ## Calibrated beer example
+
+An alkane ladder can supply the peak shapes for every sample in the
+batch. Use its total-ion chromatogram (TIC) after the solvent peak, and
+reuse that calibration on each sample’s own scan grid. The full ladder
+spectra provide the diagnostic ions for RI calibration. The two
+calibrations serve different purposes: the TIC describes narrow peak
+shapes, while the fragment and molecular ions identify the
+retention-index anchors.
+
+``` r
+
+# Read the standard's TIC and ANDI-MS scan times (seconds in these files).
+standard <- "chromatograms/standards/alkanes.cdf"
+nc <- ncdf4::nc_open(standard)
+tic <- ncdf4::ncvar_get(nc, "total_intensity")
+time <- ncdf4::ncvar_get(nc, "scan_acquisition_time") / 60
+ncdf4::nc_close(nc)
+keep <- time >= 3
+psf <- estimate_psf(tic[keep], time=time[keep], method="standard", nwindows=10L)
+
+experiment <- GCMSdeco("chromatograms", output_dir="beer_results",
+  alkanes_file=standard, precluster=32L, ncores=16L,
+  psf_control=list(standard=psf, method="standard"))
+cal <- calibrate_ri(standard, carbon=7:23, psf=psf)
+experiment <- annotate_ri(experiment, cal, phase="DB5",
+  msp_file="beer_results/consensus.msp", xlsx_file="beer_results/experiment.xlsx")
+```
+
+The retention coordinate is the 1%-height onset plus half the local
+narrow-peak width measured at the same height. The natural cubic RI
+spline passes through the alkane anchors exactly. The sample MSPs
+contain phase-labelled indices, and the consensus MSP contains their
+medians.
 
 Two beer chromatograms were analyzed with their shared alkane ladder,
 using 32 outcome groups for initialization and all **518 mass channels**
