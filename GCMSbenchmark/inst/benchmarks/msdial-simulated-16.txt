@@ -1,0 +1,106 @@
+# MS-DIAL console method file for the 'gcms' command.
+# Written by MS-DIAL 5.5.261105. Every value below is the built-in default.
+# One 'Key: value' per line. Keys are not case-sensitive, and lines starting with # are ignored.
+# A comment must be on its own line: text after a value is read as part of the value.
+# A key left blank, or deleted, keeps its built-in default.
+# Relative file paths are resolved against the folder of this method file.
+# When the run starts, what happened to each key is written beside this file as <name>.keys.json.
+
+# Data type
+# Centroid | Profile
+MS1 data type: Centroid
+# Positive | Negative
+Ion mode: Positive
+
+# Data collection
+# IsNominal | IsAccurate
+Accuracy type: IsNominal
+# IsNominal fixes Mass slice width and MS1 tolerance for centroid at 0.5 regardless of the values below.
+Retention time begin: 0
+Retention time end: 100
+MS1 mass range begin: 0
+MS1 mass range end: 2000
+MS1 tolerance for centroid: 0.01
+Number of threads: 16
+
+# Peak detection
+# SimpleMovingAverage | LinearWeightedMovingAverage | SavitzkyGolayFilter | BinomialFilter | LowessFilter | LoessFilter | TimeBasedLinearWeightedMovingAverage
+Smoothing method: LinearWeightedMovingAverage
+Smoothing level: 3
+Minimum peak width: 5
+Minimum peak height: 100
+Average peak width: 30
+Mass slice width: 0.1
+# Peaks whose m/z lies within the tolerance of one of these masses are removed, as the GUI's exclusion mass list does.
+# In GC-MS those ions are also left out of every deconvoluted spectrum.
+# Every entry is an m/z and then its tolerance in Da, 0.0001 or more: 149 207 removes every peak within 207 of m/z 149.
+# m/z and tolerance pairs separated by semicolons, e.g. 149:0.5; 207:0.5; 281:0.5. Leave blank to keep every peak.
+Exclude mass list:
+
+# Deconvolution
+Sigma window value: 0.5
+Amplitude cut off: 0
+
+# Retention index
+# Tab-separated carbon number and retention time, used when Retention type is RI.
+RI dictionary file path:
+# RT | RI
+Retention type: RT
+# Alkanes | Fames
+RI compound type: Alkanes
+
+# MSP-based annotation
+# EI spectral library (.msp). Leave blank to skip MSP-based annotation.
+MSP file path:
+RT tolerance for MSP-based annotation: 100
+# On the Kovats scale (Alkanes) 20 is a fifth of a carbon; on the Fiehn scale (Fames) a comparable window is about 20000.
+RI tolerance for MSP-based annotation: 100
+Mass range begin for MSP-based annotation: 0
+Mass range end for MSP-based annotation: 2000
+MS1 tolerance for MSP-based annotation: 0.01
+Relative amplitude cutoff for MSP-based annotation: 0
+Absolute amplitude cutoff for MSP-based annotation: 0
+Square root of weighted dot product cutoff for MSP-based annotation: 0.6
+Square root of simple dot product cutoff for MSP-based annotation: 0.6
+Square root of reverse dot product cutoff for MSP-based annotation: 0.8
+Matched peaks percentage cutoff for MSP-based annotation: 0.25
+Minimum spectrum match for MSP-based annotation: 3
+Total score cutoff for MSP-based annotation: 0.8
+Use retention information for MSP-based annotation scoring: False
+Use retention information for MSP-based annotation filtering: False
+Only report top hit for MSP-based annotation: False
+Execute annotation process only for alignment file: False
+
+# Text-based annotation
+# Tab-separated compound list matched by m/z and retention. Leave blank to skip Text-based annotation.
+Text DB file path:
+RT tolerance for Text-based annotation: 0.1
+RI tolerance for Text-based annotation: 100
+Accurate MS1 tolerance for Text-based annotation: 0.01
+Total score cutoff for Text-based annotation: 0.85
+Use retention information for Text-based annotation scoring: False
+Use retention information for Text-based annotation filtering: False
+
+# Alignment
+# RT | RI
+Alignment index type: RT
+Alignment reference file ID: 0
+Retention time tolerance for alignment: 0.1
+Retention index tolerance for alignment: 20
+Retention time factor for alignment: 0.5
+MS1 tolerance for alignment: 0.5
+Force insert peaks in gap filling: True
+Replace quant mass by user defined value: False
+Is quant mass based on base peak mz: False
+
+# Filtering
+Peak count filter: 0
+N percent detected in one group: 0
+Remove feature based on peak height fold-change: False
+# SampleMaxOverBlankAve | SampleAveOverBlankAve
+Blank filtering: SampleMaxOverBlankAve
+Fold change for blank filtering: 5
+Keep reference matched metabolites: True
+Keep suggested metabolites: False
+Keep removable features and assigned tag for checking: True
+Replace true zero values with 1/2 of minimum peak height over all samples: False
