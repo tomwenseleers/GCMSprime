@@ -1,0 +1,14 @@
+Package: GCMSbenchmark
+Type: Package
+Title: Compare GC/MS Chromatogram Deconvolution Workflows
+Version: 0.1.0
+Authors@R: person("Tom", "Wenseleers", role = c("aut", "cre"),
+    email = "tom.wenseleers@kuleuven.be")
+Description: Runs local gas chromatography mass spectrometry deconvolution
+    backends, standardizes their peak, spectrum and elution profile exports,
+    and scores compound recovery against optional simulated truth.
+License: GPL (>= 2)
+Encoding: UTF-8
+Depends: R (>= 4.2)
+Imports: clue, methods, processx, stats, tools, utils
+Suggests: GCMSprime, erah, future, logconNMF, mzR, ncdf4
