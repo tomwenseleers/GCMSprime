@@ -14,11 +14,11 @@ reference spectra.
 ``` r
 
 library(GCMSprime)
-lib <- read_msp("library.msp", backend="sqlite", db_file="library.sqlite")
-cal <- calibrate_ri("alkanes.cdf", carbon=7:23, psf=fit$psf_standard)
-weights <- library_ion_weights(lib)  # compute once and reuse
+lib <- readMSP("library.msp", backend="sqlite", db_file="library.sqlite")
+cal <- calibrateRI("alkanes.cdf", carbon=7:23, psf=fit$psf_standard)
+weights <- libraryIonWeights(lib)  # compute once and reuse
 
-identified <- identify_compounds(fit, lib, calibration=cal,
+identified <- identifyCompounds(fit, lib, calibration=cal,
   phase="DB5", ri_tolerance=30, n_matches=5,
   method=c("stein_scott_angular", "multinomial"), ion_weights=weights,
   msp_file="sample_identified.msp", xlsx_file="sample_identified.xlsx")
@@ -38,7 +38,7 @@ Identification can also run during the CDF workflow:
 
 ``` r
 
-fit <- GCMSdeco("sample.cdf", "sample.msp", xlsx_file="sample.xlsx",
+fit <- gcmsDeco("sample.cdf", "sample.msp", xlsx_file="sample.xlsx",
   alkanes_file="alkanes.cdf", precluster=32L, library=lib,
   search=list(phase="DB5", ri_tolerance=30, n_matches=5,
               method="stein_scott"))
@@ -70,7 +70,7 @@ RIs can also be exported without searching a library:
 
 ``` r
 
-fit <- annotate_ri(fit, cal, phase="DB5",
+fit <- annotateRI(fit, cal, phase="DB5",
   msp_file="sample_RI.msp", xlsx_file="sample_RI.xlsx")
 fit$compounds[c("peak_onset", "retention_coordinate", "retention_index")]
 ```
@@ -80,7 +80,7 @@ DB5-type column. Excel retains the alkane assignments and timing
 coordinates. By default, peaks outside the calibrated range receive no
 RI. Set `extrapolate=TRUE` to use the natural spline’s linear tails; the
 compound table and MSP comments flag these values.
-[`annotate_ri()`](https://tomwenseleers.github.io/GCMSprime/reference/annotate_ri.md)
+[`annotateRI()`](https://tomwenseleers.github.io/GCMSprime/reference/annotateRI.md)
 also annotates a multisample result and exports median consensus RIs
 with the sample values.
 
@@ -96,8 +96,8 @@ with the sample values.
 
 ``` r
 
-w <- library_ion_weights(lib)
-matches <- library_search(fit, lib, calibration=cal, phase="DB5",
+w <- libraryIonWeights(lib)
+matches <- librarySearch(fit, lib, calibration=cal, phase="DB5",
   ri_tolerance=30, n_matches=5,
   method=c("stein_scott", "hellinger", "multinomial"), ion_weights=w)
 as.data.frame(matches)
@@ -115,7 +115,7 @@ accuracy.
 
 ``` r
 
-experiment <- GCMSdeco("chromatograms", output_dir="identified_results",
+experiment <- gcmsDeco("chromatograms", output_dir="identified_results",
   precluster=32L, library=lib,
   search=list(phase="DB5", ri_tolerance=30, n_matches=5,
               method=c("stein_scott", "hellinger")))

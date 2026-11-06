@@ -26,7 +26,7 @@
 )
 }
 \arguments{
-\item{x}{A fitted \code{\link[=GCMSdeco]{GCMSdeco()}} object.}
+\item{x}{A fitted \code{\link[=gcmsDeco]{gcmsDeco()}} object.}
 
 \item{type}{\code{"lines"}, \code{"heatmap"}, \code{"spectra"} or
 \code{"profiles"}. The last places each compound's total-ion profile
@@ -66,7 +66,7 @@ over the same bins, retaining all selected mass channels.}
 \item{clip}{Upper quantile used for heatmap colour saturation, default .999.
 Set to one to display the full transformed range.}
 
-\item{gamma}{Positive heatmap contrast exponent, default .13 as in \code{\link[L0glm:plotmat]{plotmat()}}.}
+\item{gamma}{Positive heatmap contrast exponent, default .13 as in \code{\link[L0glm:plotMat]{plotMat()}}.}
 
 \item{residual_limit}{Symmetric Pearson-residual colour limit, default 3.}
 
@@ -88,7 +88,7 @@ from the source CDF for the requested interval and released after plotting.
 Heatmaps show the observed signal, observed signal minus modeled
 background, fitted chromatogram and Pearson residuals. Spline background and
 any known offset are subtracted in the second heatmap and grey line traces.
-Signal heatmaps use the \code{\link[L0glm:plotmat]{plotmat()}} black-blue-green-yellow-orange-red
+Signal heatmaps use the \code{\link[L0glm:plotMat]{plotMat()}} black-blue-green-yellow-orange-red
 palette and truncate negative corrected intensities at zero. Pearson
 residuals use blue-black-red for negative-zero-positive deviations, without
 an intensity transform. Display time bins contain their average residual.
@@ -99,7 +99,7 @@ beside the integrated area; \code{coef(x,normalize="l1")} returns unit-L1 spectr
 }
 \examples{
 \dontrun{
-fit <- GCMSdeco("beer.cdf", "beer.msp", xlsx_file="beer.xlsx")
+fit <- gcmsDeco("beer.cdf", "beer.msp", xlsx_file="beer.xlsx")
 plot(fit, type="heatmap", file="beer_heatmaps.pdf")
 plot(fit, type="lines", file="beer_traces.pdf", minutes_per_panel=2.5)
 plot(fit, type="spectra", file="beer_spectra.pdf",
@@ -107,5 +107,5 @@ plot(fit, type="spectra", file="beer_spectra.pdf",
 }
 }
 \seealso{
-\code{\link[=GCMSdeco]{GCMSdeco()}}, \code{\link[logconNMF:logconNMF]{logconNMF::logconNMF()}}
+\code{\link[=gcmsDeco]{gcmsDeco()}}, \code{\link[logconNMF:logconNMF]{logconNMF::logconNMF()}}
 }

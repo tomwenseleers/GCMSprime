@@ -1,16 +1,16 @@
 test_that("retention indices export without changing the fitted model", {
   skip_if_not_installed('ncdf4');skip_if_not_installed('openxlsx')
   set.seed(57);n<-100L;m<-8L;kernel<-dnorm(-7:7,sd=1.5)
-  X<-logconNMF::convmatrix(kernel,n);S<-matrix(runif(2*m,1000,3000),2,m)
+  X<-logconNMF::convMatrix(kernel,n);S<-matrix(runif(2*m,1000,3000),2,m)
   directory<-tempfile();dir.create(directory);on.exit(unlink(directory,recursive=TRUE))
   cdf<-file.path(directory,'sample.cdf')
-  write_GCMS_cdf(matrix(rpois(n*m,as.matrix(X[,c(28,72)]%*%S)+2),n,m),cdf,
+  writeGCMSCDF(matrix(rpois(n*m,as.matrix(X[,c(28,72)]%*%S)+2),n,m),cdf,
     time=seq_len(n)/60,mass=40+seq_len(m))
-  fit<-GCMSdeco(cdf,file.path(directory,'sample.msp'),ncores=1L,nwindows=1L,
+  fit<-gcmsDeco(cdf,file.path(directory,'sample.msp'),ncores=1L,nwindows=1L,
     dispersion=1,correlation='none',psf_control=list(kernel_est=kernel,maxiter=0L),
     control=list(profile_cycles=0L,original_cleanup=FALSE))
-  cal<-calibrate_ri(anchors=data.frame(carbon=8:12,retention_time=c(.2,.5,.8,1.1,1.4),narrow_width=.08))
-  result<-annotate_ri(fit,cal,msp_file=file.path(directory,'RI.msp'),xlsx_file=file.path(directory,'RI.xlsx'))
+  cal<-calibrateRI(anchors=data.frame(carbon=8:12,retention_time=c(.2,.5,.8,1.1,1.4),narrow_width=.08))
+  result<-annotateRI(fit,cal,msp_file=file.path(directory,'RI.msp'),xlsx_file=file.path(directory,'RI.xlsx'))
   expect_identical(result$model,fit$model)
   expect_true(all(is.finite(result$compounds$retention_index)))
   expect_true(all(result$compounds$ri_phase=='DB5'))
@@ -19,11 +19,11 @@ test_that("retention indices export without changing the fitted model", {
   expect_equal(result$compounds$retention_index,predict(cal,result$compounds$retention_coordinate))
   expect_false(any(result$compounds$ri_extrapolated))
   expect_match(paste(readLines(result$msp_file),collapse='\n'),'Retention_index: SemiStdNP=')
-  library<-read_msp(result$msp_file,backend='memory')
+  library<-readMSP(result$msp_file,backend='memory')
   expect_true(all(library$indices$phase_class=='DB5'))
   expect_equal(library$indices$value,result$compounds$retention_index,tolerance=1e-6)
-  narrow<-calibrate_ri(anchors=data.frame(carbon=8:11,retention_time=c(.8,.9,1,1.1),narrow_width=.08))
-  bounded<-annotate_ri(fit,narrow);extended<-annotate_ri(fit,narrow,extrapolate=TRUE)
+  narrow<-calibrateRI(anchors=data.frame(carbon=8:11,retention_time=c(.8,.9,1,1.1),narrow_width=.08))
+  bounded<-annotateRI(fit,narrow);extended<-annotateRI(fit,narrow,extrapolate=TRUE)
   expect_true(anyNA(bounded$compounds$retention_index))
   expect_true(any(extended$compounds$ri_extrapolated))
 })

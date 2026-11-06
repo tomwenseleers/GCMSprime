@@ -13,7 +13,7 @@
 
 <div class="l0-stat-grid">
 <a href="articles/gcms-deconvolution.html"><strong>Deconvolve</strong><span>Resolve overlapping compounds and recover their spectra</span></a>
-<a href="reference/GCMSdeco.html"><strong>Quantify</strong><span>Integrated areas, fitted profiles and complete reports</span></a>
+<a href="reference/gcmsDeco.html"><strong>Quantify</strong><span>Integrated areas, fitted profiles and complete reports</span></a>
 <a href="articles/library-search.html"><strong>Identify</strong><span>Fast spectral matching with column-specific retention indices</span></a>
 </div>
 
@@ -43,7 +43,7 @@ Excel reports. An alkane ladder can calibrate the PSF and retention indices.
 
 ```r
 library(GCMSprime)
-fit <- GCMSdeco("sample.cdf", "sample.msp", xlsx_file="sample.xlsx",
+fit <- gcmsDeco("sample.cdf", "sample.msp", xlsx_file="sample.xlsx",
   alkanes_file="alkanes.cdf", precluster=32L)
 plot(fit, type="lines", file="sample_traces.pdf")
 plot(fit, type="heatmap", file="sample_heatmaps.pdf")
@@ -71,11 +71,11 @@ and spectra. This short-window example uses a supplied PSF dictionary and a
 constant background; individual compound shapes are then refined.
 
 ```r
-data(GCMS_data1, package="logconNMF")
-write_GCMS_cdf(GCMS_data1, "GCMS_data1.cdf")
-example_fit <- GCMSdeco("GCMS_data1.cdf", "GCMS_data1.msp",
+data(gcmsData1, package="logconNMF")
+writeGCMSCDF(gcmsData1, "GCMS_data1.cdf")
+example_fit <- gcmsDeco("GCMS_data1.cdf", "GCMS_data1.msp",
   nwindows=1L, baseline_df=1L, precluster=16L, correlation="auto", ncores=8L,
-  psf_control=list(kernel_est=logconNMF::convkernel("gaussian", 65L,
+  psf_control=list(kernel_est=logconNMF::convKernel("gaussian", 65L,
     list(sigma=8)), maxiter=0L))
 ```
 
@@ -104,7 +104,7 @@ order. The coupled model aligns compounds and shares their spectra while
 retaining sample-specific profiles, backgrounds and areas.
 
 ```r
-experiment <- GCMSdeco("chromatograms", output_dir="experiment_results",
+experiment <- gcmsDeco("chromatograms", output_dir="experiment_results",
   precluster=32L, batch=list(plots=TRUE))
 experiment$samples
 experiment$areas
@@ -132,8 +132,8 @@ GCMS-ID CSV predictions, and OpenChrom-exported Agilent or Shimadzu libraries
 are supported. Large catalogues can remain in indexed SQLite storage.
 
 ```r
-lib <- read_msp("library.msp", backend="sqlite", db_file="library.sqlite")
-identified <- GCMSdeco("sample.cdf", "identified.msp",
+lib <- readMSP("library.msp", backend="sqlite", db_file="library.sqlite")
+identified <- gcmsDeco("sample.cdf", "identified.msp",
   xlsx_file="identified.xlsx", alkanes_file="alkanes.cdf", library=lib,
   search=list(phase="DB5", ri_tolerance=30, n_matches=5,
               method=c("stein_scott", "hellinger")))
@@ -164,7 +164,7 @@ appreciate a citation to the package:
 
 Wenseleers T, Vanderaa C (2026).
 *GCMSprime: Scalable and Automated GC–MS Deconvolution, Quantification, and Spectral Library Search in R*.
-R package version 0.1.0,
+R package version 0.1.0.9000,
 <https://tomwenseleers.github.io/GCMSprime/>.
 
 The [Authors and Citation page](authors.html#citation) also provides the

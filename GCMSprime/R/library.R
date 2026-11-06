@@ -90,17 +90,17 @@ library_record <- function(x,id,source,encoding,origin) {
 #' @return A GCMSlibrary object. Memory objects contain sparse spectra;
 #'   disk objects retain a path and open read-only connections when queried.
 #' @details MSP tags are case-insensitive. Repeated tags, synonyms and unknown
-#'   fields remain available through library_metadata(raw=TRUE). Raw masses and
+#'   fields remain available through libraryMetadata(raw=TRUE). Raw masses and
 #'   intensities are retained as double precision arrays. Sparse matrix extraction
 #'   sums duplicate masses; nominal binning and normalization are explicit options.
 #'   Explicit Pseudocount/Ion_total tags retain a supplied full-spectrum total;
-#'   library_search uses it for count-sensitive comparisons without changing raw peaks.
+#'   librarySearch uses it for count-sensitive comparisons without changing raw peaks.
 #'   In-memory libraries store a dgCMatrix plus compact metadata. Exceptional
 #'   unsorted, duplicate or zero-intensity peak records retain exact raw arrays.
 #'
 #'   SQLite stores one pair of little-endian float64 blobs per spectrum, indexed
 #'   metadata and a long retention-index table. Import is transactional and uses
-#'   bounded batches. Library files can be moved and reopened with open_library().
+#'   bounded batches. Library files can be moved and reopened with openLibrary().
 #'   Existing databases are never overwritten. No live connection is serialized.
 #'
 #'   Retention indices retain their raw field, phase class and provenance.
@@ -114,13 +114,13 @@ library_record <- function(x,id,source,encoding,origin) {
 #' f <- tempfile(fileext=".msp")
 #' writeLines(c("Name: example", "Formula: C2H6O", "RI_DB5: 560",
 #'              "Num Peaks: 3", "31 100; 45 60; 46 20;"), f)
-#' lib <- read_msp(f)
+#' lib <- readMSP(f)
 #' lib
-#' library_metadata(lib)
-#' retention_indices(lib)
+#' libraryMetadata(lib)
+#' retentionIndices(lib)
 #' spectra(lib)
 #' @export
-read_msp <- function(file,backend=c("auto","memory","sqlite"),db_file=NULL,
+readMSP <- function(file,backend=c("auto","memory","sqlite"),db_file=NULL,
                      batch_size=1000L,source=basename(file),encoding="UTF-8",
                      origin=c("unknown","experimental","predicted"),strict=TRUE,
                      max_spectra=Inf) {
@@ -155,7 +155,7 @@ read_msp <- function(file,backend=c("auto","memory","sqlite"),db_file=NULL,
       ri<-do.call(rbind,lapply(parsed,`[[`,"indices"))
       DBI::dbWithTransaction(con,{
         if(DBI::dbExistsTable(con,"spectra")) DBI::dbAppendTable(con,"spectra",meta) else DBI::dbWriteTable(con,"spectra",meta)
-        if(!is.null(ri)) {if(DBI::dbExistsTable(con,"retention_indices")) DBI::dbAppendTable(con,"retention_indices",ri) else DBI::dbWriteTable(con,"retention_indices",ri)}
+        if(!is.null(ri)) {if(DBI::dbExistsTable(con,"retentionIndices")) DBI::dbAppendTable(con,"retentionIndices",ri) else DBI::dbWriteTable(con,"retentionIndices",ri)}
       })
     }
     n<-n+length(parsed);if(n>=max_spectra) break
@@ -165,14 +165,14 @@ read_msp <- function(file,backend=c("auto","memory","sqlite"),db_file=NULL,
     library_require()
     DBI::dbExecute(con,"CREATE UNIQUE INDEX spectrum_id ON spectra(id)")
     for(field in c("name","cas","inchikey","source_id")) DBI::dbExecute(con,paste0("CREATE INDEX spectrum_",field," ON spectra(",field,")"))
-    if(DBI::dbExistsTable(con,"retention_indices")) {
-      DBI::dbExecute(con,"CREATE INDEX retention_id ON retention_indices(id)")
-      DBI::dbExecute(con,"CREATE INDEX retention_phase_value ON retention_indices(phase_class,value,id)")
+    if(DBI::dbExistsTable(con,"retentionIndices")) {
+      DBI::dbExecute(con,"CREATE INDEX retention_id ON retentionIndices(id)")
+      DBI::dbExecute(con,"CREATE INDEX retention_phase_value ON retentionIndices(phase_class,value,id)")
     }
     # Close before renaming on Windows; the on.exit handler is then replaced.
     DBI::dbDisconnect(con);on.exit({msp_close_cpp(handle);if(file.exists(temporary)) unlink(temporary)},add=FALSE)
     if(!file.rename(temporary,db_file)) stop("Cannot finalize library database.")
-    return(open_library(db_file))
+    return(openLibrary(db_file))
   }
   metadata<-do.call(rbind,lapply(records,`[[`,"metadata"));rownames(metadata)<-NULL
   fields<-lapply(records,function(x) stats::setNames(x$fields$value,x$fields$tag))
@@ -190,10 +190,10 @@ read_msp <- function(file,backend=c("auto","memory","sqlite"),db_file=NULL,
     source=source),class="GCMSlibrary")
 }
 
-#' @rdname read_msp
+#' @rdname readMSP
 #' @param path Existing spectral-library SQLite file.
 #' @export
-open_library <- function(path) {
+openLibrary <- function(path) {
   if(!file.exists(path)) stop("Library database does not exist.")
   x<-structure(list(backend="sqlite",path=normalizePath(path,winslash="/")),class="GCMSlibrary")
   con<-library_connect(x);on.exit(DBI::dbDisconnect(con))
@@ -237,7 +237,7 @@ library_fetch <- function(x,which,peaks=FALSE) {
 #' @param raw Return a list of original tag/value tables, preserving repeated tags.
 #' @return A metadata data frame, or a list of raw field tables.
 #' @export
-library_metadata <- function(x,which=NULL,raw=FALSE) {
+libraryMetadata <- function(x,which=NULL,raw=FALSE) {
   z<-library_fetch(x,which)
   if(raw) return(lapply(z,`[[`,"fields"))
   do.call(rbind,lapply(z,`[[`,"metadata"))
@@ -275,15 +275,15 @@ spectra <- function(x,which=NULL,format=c("matrix","list"),nominal=FALSE,
 #' @param phase Optional DB1, DB5, DBWAX or unknown phase filter.
 #' @return A long data frame with one row per recorded index.
 #' @export
-retention_indices <- function(x,which=NULL,phase=NULL) {
+retentionIndices <- function(x,which=NULL,phase=NULL) {
   ids<-library_ids(x,which)
   if(x$backend=="memory") {
     z<-x$indices
     if(!is.null(z)) z<-z[z$id%in%ids,,drop=FALSE]
   } else {
     con<-library_connect(x);on.exit(DBI::dbDisconnect(con))
-    z<-if(DBI::dbExistsTable(con,"retention_indices")&&length(ids)) DBI::dbGetQuery(con,
-      paste0("SELECT * FROM retention_indices WHERE id IN (",paste(unique(ids),collapse=","),")")) else NULL
+    z<-if(DBI::dbExistsTable(con,"retentionIndices")&&length(ids)) DBI::dbGetQuery(con,
+      paste0("SELECT * FROM retentionIndices WHERE id IN (",paste(unique(ids),collapse=","),")")) else NULL
   }
   if(is.null(z)) return(data.frame(id=integer(),value=numeric(),phase_class=character(),
     column=character(),convention=character(),origin=character(),source=character(),raw=character()))
@@ -291,7 +291,7 @@ retention_indices <- function(x,which=NULL,phase=NULL) {
   z[order(match(z$id,ids)),,drop=FALSE]
 }
 
-#' @rdname read_msp
+#' @rdname readMSP
 #' @param x A GCMSlibrary object.
 #' @param ... Additional printing arguments.
 #' @method print GCMSlibrary

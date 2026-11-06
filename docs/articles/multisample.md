@@ -1,6 +1,6 @@
 # GC/MS deconvolution for multiple samples
 
-[`GCMSdeco()`](https://tomwenseleers.github.io/GCMSprime/reference/GCMSdeco.md)
+[`gcmsDeco()`](https://tomwenseleers.github.io/GCMSprime/reference/gcmsDeco.md)
 accepts an experiment directory and analyzes its chromatograms together.
 Each sample gets its own time-varying PSF, smooth background and
 log-concave compound profiles. Coupled factorization shares mass spectra
@@ -24,7 +24,7 @@ chromatograms/
 
 library(GCMSprime)
 
-experiment <- GCMSdeco("chromatograms", output_dir="beer_results",
+experiment <- gcmsDeco("chromatograms", output_dir="beer_results",
   family=quasipoisson("identity"), precluster=32L,
   batch=list(plots=TRUE))
 
@@ -47,7 +47,7 @@ the intended run order:
 
 ``` r
 
-experiment <- GCMSdeco("chromatograms", output_dir="beer_results",
+experiment <- gcmsDeco("chromatograms", output_dir="beer_results",
   batch=list(sample_order=c("beer1/injection001.cdf",
                             "beer1/injection002.cdf",
                             "beer2/injection003.cdf")))
@@ -63,18 +63,18 @@ the simulated quasipoisson dispersion is supplied at its known value.
 
 ``` r
 
-sim <- logconNMF::simulate_GCMS_samples(samples=16L, n=1200L, k=48L,
+sim <- logconNMF::simulateGCMSSamples(samples=16L, n=1200L, k=48L,
   preset="time_area", presence=0.5, irregular=0, drift=2,
   family="quasipoisson", dispersion=2, seed=9118)
 input <- tempfile("samples16_")
 dir.create(input)
 for (s in sim$samples) {
-  write_GCMS_cdf(s$Y, file.path(input, paste0(s$sample_id, ".cdf")),
+  writeGCMSCDF(s$Y, file.path(input, paste0(s$sample_id, ".cdf")),
     time=s$time, acquired_at=s$acquired_at)
 }
 rm(sim, s)
 
-experiment <- GCMSdeco(input, output_dir=paste0(input, "_results"),
+experiment <- gcmsDeco(input, output_dir=paste0(input, "_results"),
   family=quasipoisson("identity"), dispersion=2, correlation="none",
   nwindows=2L, baseline_df=4L, precluster=32L, ncores=16L,
   psf_control=list(maxiter=3L),
@@ -153,7 +153,7 @@ samples within the `ncores` budget.
 The same ion groups are used across samples for matching. They are
 learned from a pooled, time-binned chromatogram or supplied through
 `precluster` as a saved [channel
-map](https://tomwenseleers.github.io/logconNMF/reference/channel_groups.html),
+map](https://tomwenseleers.github.io/logconNMF/reference/channelGroups.html),
 for example one trained on reference spectra. Each sample’s PSF and scan
 grid remain separate.
 
@@ -194,7 +194,7 @@ explicitly:
 
 ``` r
 
-experiment <- GCMSdeco("chromatograms", output_dir="count_results",
+experiment <- gcmsDeco("chromatograms", output_dir="count_results",
   family=poisson("identity"),
   batch=list(exposure=function(metadata, time) metadata$scan_duration))
 ```
@@ -225,13 +225,13 @@ tic <- ncdf4::ncvar_get(nc, "total_intensity")
 time <- ncdf4::ncvar_get(nc, "scan_acquisition_time") / 60
 ncdf4::nc_close(nc)
 keep <- time >= 3
-psf <- estimate_psf(tic[keep], time=time[keep], method="standard", nwindows=10L)
+psf <- estimatePSF(tic[keep], time=time[keep], method="standard", nwindows=10L)
 
-experiment <- GCMSdeco("chromatograms", output_dir="beer_results",
+experiment <- gcmsDeco("chromatograms", output_dir="beer_results",
   alkanes_file=standard, precluster=32L, ncores=16L,
   psf_control=list(standard=psf, method="standard"))
-cal <- calibrate_ri(standard, carbon=7:23, psf=psf)
-experiment <- annotate_ri(experiment, cal, phase="DB5",
+cal <- calibrateRI(standard, carbon=7:23, psf=psf)
+experiment <- annotateRI(experiment, cal, phase="DB5",
   msp_file="beer_results/consensus.msp", xlsx_file="beer_results/experiment.xlsx")
 ```
 
@@ -277,7 +277,7 @@ figures exclude separately generated diagnostic plots.
 The fitted components can be inspected sample by sample, and common
 spectra can be searched against a library with each sample’s
 alkane-derived retention indices. Pass `library=` and `search=` to
-[`GCMSdeco()`](https://tomwenseleers.github.io/GCMSprime/reference/GCMSdeco.md)
+[`gcmsDeco()`](https://tomwenseleers.github.io/GCMSprime/reference/gcmsDeco.md)
 to include those identifications in the per-sample MSP and Excel
 exports.
 

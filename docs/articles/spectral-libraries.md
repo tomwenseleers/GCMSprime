@@ -8,11 +8,11 @@ loading every spectrum.
 ``` r
 
 library(GCMSprime)
-lib <- read_msp("library.msp", backend="sqlite", db_file="library.sqlite")
-lib <- open_library("library.sqlite")
-library_metadata(lib, which=1:10)
+lib <- readMSP("library.msp", backend="sqlite", db_file="library.sqlite")
+lib <- openLibrary("library.sqlite")
+libraryMetadata(lib, which=1:10)
 spectra(lib, which=1:1000, nominal=TRUE, normalize="l2")
-retention_indices(lib, which=1:1000, phase="DB5")
+retentionIndices(lib, which=1:1000, phase="DB5")
 ```
 
 Matrix rows identify mass values and columns identify library spectra.
@@ -24,18 +24,18 @@ masses. Nominal binning and normalization are explicit choices.
 
 - OpenChrom Agilent and Shimadzu MSP exports use the streaming native
   reader. Repeated `Synon` and `Comments` tags and unknown fields remain
-  available with `library_metadata(lib, raw=TRUE)`.
+  available with `libraryMetadata(lib, raw=TRUE)`.
 - [MoNA](https://mona.fiehnlab.ucdavis.edu/downloads) provides
   NIST-compatible MSP exports, including its GC-MS collection. Those
   exports use
-  [`read_msp()`](https://tomwenseleers.github.io/GCMSprime/reference/read_msp.md).
+  [`readMSP()`](https://tomwenseleers.github.io/GCMSprime/reference/readMSP.md).
 - [Golm](http://gmd.mpimp-golm.mpg.de/download/) MSP exports use the
   same interface. Source-specific annotations remain in the raw
   metadata; column and index conventions should be verified from the
   library’s accompanying metadata.
 - [GCMS-ID](https://gcms-id.ca/downloads) provides predicted spectra and
   retention indices as CSV archives. After extraction, use
-  `read_gcms_id("NP-Atlas.csv", backend="sqlite", db_file="NP-Atlas.sqlite")`.
+  `readGCMSID("NP-Atlas.csv", backend="sqlite", db_file="NP-Atlas.sqlite")`.
   Their predicted origin is recorded explicitly.
 
 ## Retention indices and chemical information

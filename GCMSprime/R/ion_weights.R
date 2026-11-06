@@ -34,20 +34,20 @@ search_weights <- function(weights,mass) {
 #'   Zero-intensity spectra are omitted. Nominal duplicates are summed before
 #'   applying the relative threshold. Source intensities and totals are preserved.
 #'
-#'   Build weights once and reuse them in library_search(ion_weights=...). SQLite
+#'   Build weights once and reuse them in librarySearch(ion_weights=...). SQLite
 #'   records are read in bounded batches; native frequency counts use OpenMP.
 #'   For validation, estimate weights from the reference catalogue after excluding
 #'   query records and near-duplicates. Uniform weights remain the search default.
-#' @seealso [library_search()]
+#' @seealso [librarySearch()]
 #' @examples
 #' f <- tempfile(fileext=".msp")
 #' writeLines(c("Name: A", "Num Peaks: 2", "43 100;57 20;",
 #'              "Name: B", "Num Peaks: 2", "43 100;91 50;"), f)
-#' lib <- read_msp(f)
-#' w <- library_ion_weights(lib, mass=c(43,57,91), ncores=1)
+#' lib <- readMSP(f)
+#' w <- libraryIonWeights(lib, mass=c(43,57,91), ncores=1)
 #' w
 #' @export
-library_ion_weights <- function(library,mass=33:550,min_relative=.01,power=1,
+libraryIonWeights <- function(library,mass=33:550,min_relative=.01,power=1,
                                 ncores=NULL,batch_size=4096L) {
   begun<-proc.time()[['elapsed']]
   if(!inherits(library,"GCMSlibrary")) stop("Supply a GCMSlibrary.")

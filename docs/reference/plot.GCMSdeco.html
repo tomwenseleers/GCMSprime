@@ -11,7 +11,7 @@ from the source CDF for the requested interval and released after plotting."><me
 
     <a class="navbar-brand me-2" href="../index.html">GCMSprime</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -85,7 +85,7 @@ from the source CDF for the requested interval and released after plotting.</p>
 
 
 <dl><dt id="arg-x">x<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
-<dd><p>A fitted <code><a href="GCMSdeco.html">GCMSdeco()</a></code> object.</p></dd>
+<dd><p>A fitted <code><a href="gcmsDeco.html">gcmsDeco()</a></code> object.</p></dd>
 
 
 <dt id="arg-type">type<a class="anchor" aria-label="anchor" href="#arg-type"></a></dt>
@@ -151,7 +151,7 @@ Set to one to display the full transformed range.</p></dd>
 
 
 <dt id="arg-gamma">gamma<a class="anchor" aria-label="anchor" href="#arg-gamma"></a></dt>
-<dd><p>Positive heatmap contrast exponent, default .13 as in <code><a href="https://tomwenseleers.github.io/L0glm/reference/plotmat.html" class="external-link">plotmat()</a></code>.</p></dd>
+<dd><p>Positive heatmap contrast exponent, default .13 as in <code><a href="https://tomwenseleers.github.io/L0glm/reference/plotMat.html" class="external-link">plotMat()</a></code>.</p></dd>
 
 
 <dt id="arg-residual-limit">residual_limit<a class="anchor" aria-label="anchor" href="#arg-residual-limit"></a></dt>
@@ -177,7 +177,7 @@ area or total-ion peak height; <code>"index"</code> preserves the selected indic
     <p>Heatmaps show the observed signal, observed signal minus modeled
 background, fitted chromatogram and Pearson residuals. Spline background and
 any known offset are subtracted in the second heatmap and grey line traces.
-Signal heatmaps use the <code><a href="https://tomwenseleers.github.io/L0glm/reference/plotmat.html" class="external-link">plotmat()</a></code> black-blue-green-yellow-orange-red
+Signal heatmaps use the <code><a href="https://tomwenseleers.github.io/L0glm/reference/plotMat.html" class="external-link">plotMat()</a></code> black-blue-green-yellow-orange-red
 palette and truncate negative corrected intensities at zero. Pearson
 residuals use blue-black-red for negative-zero-positive deviations, without
 an intensity transform. Display time bins contain their average residual.
@@ -188,13 +188,13 @@ beside the integrated area; <code>coef(x,normalize="l1")</code> returns unit-L1 
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p><code><a href="GCMSdeco.html">GCMSdeco()</a></code>, <code><a href="https://rdrr.io/pkg/logconNMF/man/logconNMF-package.html" class="external-link">logconNMF::logconNMF()</a></code></p></div>
+    <div class="dont-index"><p><code><a href="gcmsDeco.html">gcmsDeco()</a></code>, <code><a href="https://tomwenseleers.github.io/logconNMF/reference/logconNMF.html" class="external-link">logconNMF::logconNMF()</a></code></p></div>
     </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span>
-<span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="GCMSdeco.html">GCMSdeco</a></span><span class="op">(</span><span class="st">"beer.cdf"</span>, <span class="st">"beer.msp"</span>, xlsx_file<span class="op">=</span><span class="st">"beer.xlsx"</span><span class="op">)</span></span>
+<span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="gcmsDeco.html">gcmsDeco</a></span><span class="op">(</span><span class="st">"beer.cdf"</span>, <span class="st">"beer.msp"</span>, xlsx_file<span class="op">=</span><span class="st">"beer.xlsx"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit</span>, type<span class="op">=</span><span class="st">"heatmap"</span>, file<span class="op">=</span><span class="st">"beer_heatmaps.pdf"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit</span>, type<span class="op">=</span><span class="st">"lines"</span>, file<span class="op">=</span><span class="st">"beer_traces.pdf"</span>, minutes_per_panel<span class="op">=</span><span class="fl">2.5</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit</span>, type<span class="op">=</span><span class="st">"spectra"</span>, file<span class="op">=</span><span class="st">"beer_spectra.pdf"</span>,</span>

@@ -22,7 +22,7 @@ mass spectra](logo-dark.svg)
 [**Deconvolve**Resolve overlapping compounds and recover their
 spectra](https://tomwenseleers.github.io/GCMSprime/articles/gcms-deconvolution.md)
 [**Quantify**Integrated areas, fitted profiles and complete
-reports](https://tomwenseleers.github.io/GCMSprime/reference/GCMSdeco.md)
+reports](https://tomwenseleers.github.io/GCMSprime/reference/gcmsDeco.md)
 [**Identify**Fast spectral matching with column-specific retention
 indices](https://tomwenseleers.github.io/GCMSprime/articles/library-search.md)
 
@@ -56,7 +56,7 @@ the PSF and retention indices.
 ``` r
 
 library(GCMSprime)
-fit <- GCMSdeco("sample.cdf", "sample.msp", xlsx_file="sample.xlsx",
+fit <- gcmsDeco("sample.cdf", "sample.msp", xlsx_file="sample.xlsx",
   alkanes_file="alkanes.cdf", precluster=32L)
 plot(fit, type="lines", file="sample_traces.pdf")
 plot(fit, type="heatmap", file="sample_heatmaps.pdf")
@@ -87,11 +87,11 @@ then refined.
 
 ``` r
 
-data(GCMS_data1, package="logconNMF")
-write_GCMS_cdf(GCMS_data1, "GCMS_data1.cdf")
-example_fit <- GCMSdeco("GCMS_data1.cdf", "GCMS_data1.msp",
+data(gcmsData1, package="logconNMF")
+writeGCMSCDF(gcmsData1, "GCMS_data1.cdf")
+example_fit <- gcmsDeco("GCMS_data1.cdf", "GCMS_data1.msp",
   nwindows=1L, baseline_df=1L, precluster=16L, correlation="auto", ncores=8L,
-  psf_control=list(kernel_est=logconNMF::convkernel("gaussian", 65L,
+  psf_control=list(kernel_est=logconNMF::convKernel("gaussian", 65L,
     list(sigma=8)), maxiter=0L))
 ```
 
@@ -128,7 +128,7 @@ while retaining sample-specific profiles, backgrounds and areas.
 
 ``` r
 
-experiment <- GCMSdeco("chromatograms", output_dir="experiment_results",
+experiment <- gcmsDeco("chromatograms", output_dir="experiment_results",
   precluster=32L, batch=list(plots=TRUE))
 experiment$samples
 experiment$areas
@@ -160,8 +160,8 @@ SQLite storage.
 
 ``` r
 
-lib <- read_msp("library.msp", backend="sqlite", db_file="library.sqlite")
-identified <- GCMSdeco("sample.cdf", "identified.msp",
+lib <- readMSP("library.msp", backend="sqlite", db_file="library.sqlite")
+identified <- gcmsDeco("sample.cdf", "identified.msp",
   xlsx_file="identified.xlsx", alkanes_file="alkanes.cdf", library=lib,
   search=list(phase="DB5", ri_tolerance=30, n_matches=5,
               method=c("stein_scott", "hellinger")))
@@ -194,7 +194,8 @@ published, we would appreciate a citation to the package:
 
 Wenseleers T, Vanderaa C (2026). *GCMSprime: Scalable and Automated
 GC–MS Deconvolution, Quantification, and Spectral Library Search in R*.
-R package version 0.1.0, <https://tomwenseleers.github.io/GCMSprime/>.
+R package version 0.1.0.9000,
+<https://tomwenseleers.github.io/GCMSprime/>.
 
 The [Authors and Citation
 page](https://tomwenseleers.github.io/GCMSprime/authors.html#citation)

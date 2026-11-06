@@ -17,9 +17,9 @@ test_that("directory discovery uses acquisition times and separates standards", 
   d<-tempfile();dir.create(d);on.exit(unlink(d,recursive=TRUE))
   for(g in c("standards","beer1","beer2"))dir.create(file.path(d,g))
   t<-as.POSIXct("2026-11-01 08:00:00",tz="UTC");y<-matrix(1,12,3)
-  write_GCMS_cdf(y,file.path(d,"beer1","z.cdf"),time=(1:12)/60,mass=40:42,acquired_at=t)
-  write_GCMS_cdf(y,file.path(d,"beer2","a.cdf"),time=(1:12)/60,mass=40:42,acquired_at=t+3600)
-  write_GCMS_cdf(y,file.path(d,"standards","alkanes.cdf"),time=(1:12)/60,mass=40:42,acquired_at=t-3600)
+  writeGCMSCDF(y,file.path(d,"beer1","z.cdf"),time=(1:12)/60,mass=40:42,acquired_at=t)
+  writeGCMSCDF(y,file.path(d,"beer2","a.cdf"),time=(1:12)/60,mass=40:42,acquired_at=t+3600)
+  writeGCMSCDF(y,file.path(d,"standards","alkanes.cdf"),time=(1:12)/60,mass=40:42,acquired_at=t-3600)
   z<-GCMS_batch_files(d,paste0(d,"_results"))
   expect_identical(z$manifest$sample_name,c("z","a"))
   expect_identical(z$manifest$group,c("beer1","beer2"))
@@ -35,18 +35,18 @@ test_that("directory discovery uses acquisition times and separates standards", 
 test_that("sample workers preserve acquisition order, shared maps and full spectra", {
   skip_if_not_installed("ncdf4");skip_if_not_installed("openxlsx")
   set.seed(661);n<-100L;m<-8L;kernel<-dnorm(-7:7,sd=1.6)
-  X<-logconNMF::convmatrix(kernel,n);S<-matrix(runif(2*m,1500,4500),2,m)
+  X<-logconNMF::convMatrix(kernel,n);S<-matrix(runif(2*m,1500,4500),2,m)
   d<-tempfile();dir.create(d);outputs<-c(tempfile(),tempfile())
   on.exit(unlink(c(d,outputs),recursive=TRUE))
-  for(s in 1:2)write_GCMS_cdf(matrix(rpois(n*m,as.matrix(X[,c(28,72)]%*%S)+2),n,m),
+  for(s in 1:2)writeGCMSCDF(matrix(rpois(n*m,as.matrix(X[,c(28,72)]%*%S)+2),n,m),
     file.path(d,paste0(3-s,".cdf")),time=seq_len(n)/60,mass=40+seq_len(m),
     acquired_at=as.POSIXct("2026-11-01",tz="UTC")+s*3600)
   args<-list(cdf_file=d,nwindows=1L,dispersion=1,correlation="none",precluster=3L,
     psf_control=list(kernel_est=kernel,maxiter=1L),
     control=list(profile_cycles=0L,original_cleanup=FALSE),
     batch=list(coupling=list(cycles=1L,initial_cycles=1L,rounds=1L)))
-  one<-do.call(GCMSdeco,c(args,list(output_dir=outputs[1],ncores=1L)))
-  two<-do.call(GCMSdeco,c(args,list(output_dir=outputs[2],ncores=2L)))
+  one<-do.call(gcmsDeco,c(args,list(output_dir=outputs[1],ncores=1L)))
+  two<-do.call(gcmsDeco,c(args,list(output_dir=outputs[2],ncores=2L)))
   expect_identical(two$samples$sample_name,c("2","1"))
   expect_equal(two$parallel,list(ncores=2L,workers=2L,threads=1L))
   expect_identical(two$channel_groups,one$channel_groups)
@@ -57,16 +57,16 @@ test_that("sample workers preserve acquisition order, shared maps and full spect
   expect_null(two$coupled$store$cache)
   expect_true(all(file.exists(two$paths)))
   args$batch$resume<-TRUE
-  resumed<-do.call(GCMSdeco,c(args,list(output_dir=outputs[2],ncores=1L)))
+  resumed<-do.call(gcmsDeco,c(args,list(output_dir=outputs[2],ncores=1L)))
   expect_true(all(resumed$samples$cache_hit))
   expect_equal(resumed$areas,two$areas,tolerance=1e-9)
-  cal<-calibrate_ri(anchors=data.frame(carbon=8:12,retention_time=c(.2,.5,.8,1.1,1.4),narrow_width=.08))
-  annotated<-annotate_ri(two,cal,msp_file=file.path(outputs[2],'consensus.msp'),
+  cal<-calibrateRI(anchors=data.frame(carbon=8:12,retention_time=c(.2,.5,.8,1.1,1.4),narrow_width=.08))
+  annotated<-annotateRI(two,cal,msp_file=file.path(outputs[2],'consensus.msp'),
     xlsx_file=file.path(outputs[2],'experiment.xlsx'))
   expect_equal(annotated$areas,two$areas)
   expect_equal(coef(annotated),coef(two))
   expect_true(all(annotated$samples$RI_available>0))
-  expect_true(all(is.finite(annotated$retention_indices$retention_index)))
+  expect_true(all(is.finite(annotated$retentionIndices$retention_index)))
   expect_true('alkane_calibration'%in%openxlsx::getSheetNames(file.path(outputs[2],'experiment.xlsx')))
   expect_match(paste(readLines(file.path(outputs[2],'consensus.msp')),collapse='\n'),
     'Retention_index: SemiStdNP=')
@@ -74,16 +74,16 @@ test_that("sample workers preserve acquisition order, shared maps and full spect
 
 test_that("coupled directory workflows export original-channel sample and consensus results", {
   skip_if_not_installed("ncdf4");skip_if_not_installed("openxlsx")
-  set.seed(54);n<-90L;m<-5L;kern<-convkernel("gaussian",13L,list(sigma=1.5));X<-convmatrix(kern,n)
+  set.seed(54);n<-90L;m<-5L;kern<-convKernel("gaussian",13L,list(sigma=1.5));X<-convMatrix(kern,n)
   S<-matrix(rexp(2*m,1/3000),2,m)
   d<-tempfile();out<-paste0(d,"_results");dir.create(d)
   on.exit(unlink(c(d,out),recursive=TRUE))
   for(s in 1:2) {
     mu<-as.matrix(X[,c(25,65)]%*%(S*s))+2;y<-matrix(rpois(n*m,mu),n,m)
-    write_GCMS_cdf(y,file.path(d,paste0(s,".cdf")),time=seq_len(n)/60,mass=40L+seq_len(m),
+    writeGCMSCDF(y,file.path(d,paste0(s,".cdf")),time=seq_len(n)/60,mass=40L+seq_len(m),
       acquired_at=as.POSIXct("2026-11-01",tz="UTC")+s*3600)
   }
-  f<-GCMSdeco(d,output_dir=out,ncores=1L,nwindows=1L,dispersion=1,correlation="none",
+  f<-gcmsDeco(d,output_dir=out,ncores=1L,nwindows=1L,dispersion=1,correlation="none",
     psf_control=list(kernel_est=kern,maxiter=1L),
     control=list(profile_cycles=0L,original_cleanup=FALSE),
     batch=list(coupling=list(cycles=1L,initial_cycles=1L,rounds=1L)))
@@ -95,7 +95,7 @@ test_that("coupled directory workflows export original-channel sample and consen
   z<-readRDS(f$paths[1L]);expect_null(z$model$y);expect_null(z$model$mu)
   expect_equal(unname(fitted(z)),unname(fitted(f$coupled,sample=1L)),tolerance=1e-12)
   expect_equal(ncol(coef(f)),m)
-  again<-GCMSdeco(d,output_dir=out,ncores=1L,nwindows=1L,dispersion=1,correlation="none",
+  again<-gcmsDeco(d,output_dir=out,ncores=1L,nwindows=1L,dispersion=1,correlation="none",
     psf_control=list(kernel_est=kern,maxiter=1L),
     control=list(profile_cycles=0L,original_cleanup=FALSE),
     batch=list(resume=TRUE,coupling=list(cycles=1L,initial_cycles=1L,rounds=1L)))

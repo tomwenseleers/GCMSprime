@@ -95,7 +95,7 @@ ri_predict_width <- function(object,time) {
 #'   supplying verified calibration coordinates directly. An optional narrow_width
 #'   column supplies local small-peak durations for timing sample profiles.
 #' @param control Named calibration controls, described below.
-#' @param psf Optional calibrated PSF from logconNMF::estimate_psf(), or a list with
+#' @param psf Optional calibrated PSF from logconNMF::estimatePSF(), or a list with
 #'   psf_kernels (one kernel per row), psf_offsets in minutes and psf_timepoints
 #'   (or peak_timepoints) in minutes. Its local width at the chosen height fraction
 #'   supplies the small-peak duration. A single kernel gives a constant duration.
@@ -130,11 +130,11 @@ ri_predict_width <- function(object,time) {
 #'   <https://webbook.nist.gov/chemistry/gc-ri/>
 #' @examples
 #' a <- data.frame(carbon=8:15, retention_time=c(3,4,5.2,6.7,8.5,10.6,13,15.7))
-#' cal <- calibrate_ri(anchors=a)
+#' cal <- calibrateRI(anchors=a)
 #' predict(cal, c(5,10))
 #' cal
 #' @export
-calibrate_ri <- function(standard=NULL,time=NULL,carbon=7:40,anchors=NULL,
+calibrateRI <- function(standard=NULL,time=NULL,carbon=7:40,anchors=NULL,
                          control=list(),psf=NULL) {
   begun<-proc.time()[["elapsed"]];control<-ri_control(control)
   if(!is.numeric(carbon)||anyNA(carbon)||any(carbon<3|carbon!=floor(carbon))||anyDuplicated(carbon))
@@ -228,7 +228,7 @@ calibrate_ri <- function(standard=NULL,time=NULL,carbon=7:40,anchors=NULL,
     seconds=proc.time()[['elapsed']]-begun),class='RIcalibration')
 }
 
-#' @rdname calibrate_ri
+#' @rdname calibrateRI
 #' @param object A fitted RIcalibration.
 #' @param newdata Retention coordinates in minutes.
 #' @param extrapolate Use linear continuation outside the calibration range.
@@ -247,7 +247,7 @@ predict.RIcalibration <- function(object,newdata,extrapolate=FALSE,...) {
   value
 }
 
-#' @rdname calibrate_ri
+#' @rdname calibrateRI
 #' @param x An RIcalibration object.
 #' @method print RIcalibration
 #' @export

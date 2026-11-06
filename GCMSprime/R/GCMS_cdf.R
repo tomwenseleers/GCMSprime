@@ -1,6 +1,6 @@
 #' Write a chromatogram matrix as an ANDI-MS CDF file
 #'
-#' Export scan-by-mass intensities for [GCMSdeco()] or external GC/MS software.
+#' Export scan-by-mass intensities for [gcmsDeco()] or external GC/MS software.
 #' The NetCDF classic file includes scan indexing, total ion counts, mass ranges
 #' and ANDI-MS administrative and instrument records.
 #'
@@ -20,19 +20,19 @@
 #'   `Double`. Scan times are converted to seconds in the file. Every channel
 #'   is written in every scan, including exact zeros. The file's timestamp
 #'   records export time; acquisition metadata are left unspecified.
-#' @seealso [GCMSdeco()], [logconNMF::logconNMF()]
+#' @seealso [gcmsDeco()], [logconNMF::logconNMF()]
 #' @examples
 #' \donttest{
 #' if (requireNamespace("ncdf4", quietly = TRUE)) {
-#'   data(GCMS_data1)
+#'   data(gcmsData1)
 #'   cdf <- tempfile(fileext = ".cdf")
-#'   write_GCMS_cdf(GCMS_data1, cdf)
+#'   writeGCMSCDF(gcmsData1, cdf)
 #'   unlink(cdf)
 #' }
 #' }
 #' @md
 #' @export
-write_GCMS_cdf <- function(y, cdf_file, time = as.numeric(rownames(y)),
+writeGCMSCDF <- function(y, cdf_file, time = as.numeric(rownames(y)),
                            mass = as.numeric(colnames(y)),
                            sample_name = tools::file_path_sans_ext(basename(cdf_file)), acquired_at=NULL) {
   if (!requireNamespace("ncdf4", quietly = TRUE)) stop("Install ncdf4 to write ANDI-MS files.", call. = FALSE)

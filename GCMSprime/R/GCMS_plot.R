@@ -34,7 +34,7 @@ GCMS_pearson <- function(x,Y,mu,rows,cols) {
   stats::residuals(x$model,y=Y,rows=rows,channels=cols,type="pearson",mu=mu)
 }
 
-#' @rdname GCMSdeco
+#' @rdname gcmsDeco
 #' @param type Residual type: \code{"pearson"} uses the fitted marginal variance;
 #'   \code{"response"} returns observed minus fitted latent intensity.
 #' @param mass Optional nominal m/z values for residual extraction.
@@ -55,7 +55,7 @@ residuals.GCMSdeco <- function(object,type=c("pearson","response"),
 #' fitted compound profiles, or recovered mass spectra. Observations are read
 #' from the source CDF for the requested interval and released after plotting.
 #'
-#' @param x A fitted [GCMSdeco()] object.
+#' @param x A fitted [gcmsDeco()] object.
 #' @param type \code{"lines"}, \code{"heatmap"}, \code{"spectra"} or
 #'   \code{"profiles"}. The last places each compound's total-ion profile
 #'   beside its spectrum, with one compound per row.
@@ -85,14 +85,14 @@ residuals.GCMSdeco <- function(object,type=c("pearson","response"),
 #'   over the same bins, retaining all selected mass channels.
 #' @param clip Upper quantile used for heatmap colour saturation, default .999.
 #'   Set to one to display the full transformed range.
-#' @param gamma Positive heatmap contrast exponent, default .13 as in [plotmat()].
+#' @param gamma Positive heatmap contrast exponent, default .13 as in [plotMat()].
 #' @param residual_limit Symmetric Pearson-residual colour limit, default 3.
 #' @param ... Graphical arguments passed to the line or spectral panel.
 #' @return Invisibly, \code{x}. Plotting does not attach observed data to it.
 #' @details Heatmaps show the observed signal, observed signal minus modeled
 #'   background, fitted chromatogram and Pearson residuals. Spline background and
 #'   any known offset are subtracted in the second heatmap and grey line traces.
-#'   Signal heatmaps use the [plotmat()] black-blue-green-yellow-orange-red
+#'   Signal heatmaps use the [plotMat()] black-blue-green-yellow-orange-red
 #'   palette and truncate negative corrected intensities at zero. Pearson
 #'   residuals use blue-black-red for negative-zero-positive deviations, without
 #'   an intensity transform. Display time bins contain their average residual.
@@ -100,11 +100,11 @@ residuals.GCMSdeco <- function(object,type=c("pearson","response"),
 #'   red vertical lines mark the selected compound apices. Spectral panels use
 #'   base-peak percentages. The Excel compound sheet places a compact spectrum
 #'   beside the integrated area; \code{coef(x,normalize="l1")} returns unit-L1 spectra.
-#' @seealso [GCMSdeco()], [logconNMF::logconNMF()]
+#' @seealso [gcmsDeco()], [logconNMF::logconNMF()]
 #' @md
 #' @examples
 #' \dontrun{
-#' fit <- GCMSdeco("beer.cdf", "beer.msp", xlsx_file="beer.xlsx")
+#' fit <- gcmsDeco("beer.cdf", "beer.msp", xlsx_file="beer.xlsx")
 #' plot(fit, type="heatmap", file="beer_heatmaps.pdf")
 #' plot(fit, type="lines", file="beer_traces.pdf", minutes_per_panel=2.5)
 #' plot(fit, type="spectra", file="beer_spectra.pdf",

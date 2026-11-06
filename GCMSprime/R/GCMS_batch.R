@@ -57,13 +57,13 @@ GCMS_batch_files <- function(directory,output_dir,sample_order=NULL,alkanes_file
 
 #' Multisample GC/MS deconvolution, alignment and shared spectral recovery
 #'
-#' Supply a directory to [GCMSdeco()] to process an experiment. Sample group
+#' Supply a directory to [gcmsDeco()] to process an experiment. Sample group
 #' subdirectories are retained, and `standards/` contains alkane calibrations.
 #' The closest standard in acquisition time calibrates each sample. Results
 #' share spectra through [logconNMF::logconNMF()] while keeping original scan grids.
 #'
 #' @name GCMSbatch
-#' @param x,object A multisample result returned by [GCMSdeco()].
+#' @param x,object A multisample result returned by [gcmsDeco()].
 #' @param sample One sample index or identifier. `NULL` in `coef()` returns the
 #'   common spectral library. `NULL` in `plot()` plots the coupled area table.
 #' @param normalize Spectrum normalization: unnormalized or unit L1.
@@ -92,7 +92,7 @@ GCMS_batch_files <- function(directory,output_dir,sample_order=NULL,alkanes_file
 #'
 #' Samples run concurrently with their own sparse PSF and smooth background. A
 #' common channel map is learned from summed, time-binned chromatograms; pass a
-#' saved [logconNMF::channel_groups()] map as `precluster` to reuse reference groups.
+#' saved [logconNMF::channelGroups()] map as `precluster` to reuse reference groups.
 #' Matching uses the shared aggregate space. Original-channel
 #' means and the likelihood are used for coupled updates. Shared spectra are
 #' exported on the union of recorded mass ranges; unmeasured channels receive
@@ -117,16 +117,16 @@ GCMS_batch_files <- function(directory,output_dir,sample_order=NULL,alkanes_file
 #' @return A `GCMSbatch` object with `samples`, optional `coupled` fit, sample
 #'   RDS `paths`, consensus `areas`, reusable `channel_groups`, the `parallel`
 #'   thread allocation, output files and stage timings. Use
-#'   `readRDS(x$paths[i])` for a full per-sample [GCMSdeco()] object.
+#'   `readRDS(x$paths[i])` for a full per-sample [gcmsDeco()] object.
 #' @examples
 #' \dontrun{
-#' experiment <- GCMSdeco("chromatograms", output_dir="results",
+#' experiment <- gcmsDeco("chromatograms", output_dir="results",
 #'   family=quasipoisson("identity"), precluster=32L,
 #'   batch=list(method="hellinger",plots=TRUE))
 #' experiment$areas
 #' plot(experiment,sample=1,type="lines")
 #' }
-#' @seealso [GCMSdeco()], [logconNMF::logconNMF()], [write_GCMS_cdf()]
+#' @seealso [gcmsDeco()], [logconNMF::logconNMF()], [writeGCMSCDF()]
 #' @md
 NULL
 
@@ -200,7 +200,7 @@ GCMSdeco_directory <- function(cdf_file,msp_file=NULL,family,lambda,nwindows,
   for(s in seq_along(paths)) {
     fit<-readRDS(paths[s]);d<-dirname(paths[s]);id<-manifest$sample_id[s]
     fit$msp_file<-file.path(d,paste0(id,".msp"));fit$xlsx_file<-file.path(d,paste0(id,".xlsx"))
-    if(!is.null(library))fit<-do.call(identify_compounds,c(list(x=fit,library=library),search))
+    if(!is.null(library))fit<-do.call(identifyCompounds,c(list(x=fit,library=library),search))
     fit$compounds<-GCMS_write_msp(fit$model,fit$time,fit$mass,fit$msp_file,fit$compounds)
     GCMS_write_xlsx(fit$model,fit$time,fit$mass,fit$compounds,fit$xlsx_file,
       fit$cdf_file,fit$alkanes_file,fit$seconds,
@@ -261,9 +261,9 @@ GCMS_batch_consensus <- function(object,msp_file=NULL,xlsx_file=NULL) {
   rt<-vapply(seq_len(G),function(g)weighted.mean(occurrence$anchor[occurrence$root==g],occurrence$area[occurrence$root==g]),0)
   table<-data.frame(sample=rep("consensus",G),compound=seq_len(G),name=paste0("consensus_",seq_len(G)),
     retention_time=rt,area=rowSums(spectra),n_samples=colSums(!is.na(common$areas)),stringsAsFactors=FALSE)
-  if(!is.null(object$retention_indices)) {
-    at<-match(table$compound,object$retention_indices$compound)
-    for(field in c('retention_index','ri_phase','ri_extrapolated'))table[[field]]<-object$retention_indices[[field]][at]
+  if(!is.null(object$retentionIndices)) {
+    at<-match(table$compound,object$retentionIndices$compound)
+    for(field in c('retention_index','ri_phase','ri_extrapolated'))table[[field]]<-object$retentionIndices[[field]][at]
   }
   GCMS_write_msp(list(H=Matrix::Diagonal(G),S=spectra),rt,axis,msp_file,table)
   if(!requireNamespace("openxlsx",quietly=TRUE))stop("Install openxlsx for batch Excel output.")
@@ -367,7 +367,7 @@ GCMS_initial_sample <- function(task) {
     signature<-GCMS_batch_signature(file,standard,args)
     saved<-if(isTRUE(batch$resume)&&file.exists(cache))readRDS(cache)else NULL
     cache_hit<-!is.null(saved)&&identical(saved$signature,signature)
-    fit<-if(cache_hit)saved$fit else do.call(GCMSdeco,args)
+    fit<-if(cache_hit)saved$fit else do.call(gcmsDeco,args)
     saveRDS(list(signature=signature,fit=fit),cache)
     path<-file.path(d,"fit.rds");saveRDS(fit,path)
     raw<-GCMS_read_cdf(file,time_range);yfile<-file.path(d,"observed.rds");saveRDS(raw$Y,yfile,compress=FALSE)
@@ -425,5 +425,5 @@ GCMS_batch_groups <- function(manifest,metadata,precluster,time_range,ncores) {
     pool[ix,js]<-pool[ix,js,drop=FALSE]+z
   }
   if(k>=length(axis))return(NULL)
-  logconNMF::channel_groups(pool,k,as.character(axis),ncores=ncores)
+  logconNMF::channelGroups(pool,k,as.character(axis),ncores=ncores)
 }

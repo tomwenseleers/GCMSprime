@@ -45,7 +45,7 @@ common spectral library. \code{NULL} in \code{plot()} plots the coupled area tab
 
 \item{normalize}{Spectrum normalization: unnormalized or unit L1.}
 
-\item{x, object}{A multisample result returned by \code{\link[=GCMSdeco]{GCMSdeco()}}.}
+\item{x, object}{A multisample result returned by \code{\link[=gcmsDeco]{gcmsDeco()}}.}
 
 \item{k}{Information-criterion multiplier.}
 }
@@ -53,10 +53,10 @@ common spectral library. \code{NULL} in \code{plot()} plots the coupled area tab
 A \code{GCMSbatch} object with \code{samples}, optional \code{coupled} fit, sample
 RDS \code{paths}, consensus \code{areas}, reusable \code{channel_groups}, the \code{parallel}
 thread allocation, output files and stage timings. Use
-\code{readRDS(x$paths[i])} for a full per-sample \code{\link[=GCMSdeco]{GCMSdeco()}} object.
+\code{readRDS(x$paths[i])} for a full per-sample \code{\link[=gcmsDeco]{gcmsDeco()}} object.
 }
 \description{
-Supply a directory to \code{\link[=GCMSdeco]{GCMSdeco()}} to process an experiment. Sample group
+Supply a directory to \code{\link[=gcmsDeco]{gcmsDeco()}} to process an experiment. Sample group
 subdirectories are retained, and \verb{standards/} contains alkane calibrations.
 The closest standard in acquisition time calibrates each sample. Results
 share spectra through \code{\link[logconNMF:logconNMF]{logconNMF::logconNMF()}} while keeping original scan grids.
@@ -85,7 +85,7 @@ of exported channels is applied.
 
 Samples run concurrently with their own sparse PSF and smooth background. A
 common channel map is learned from summed, time-binned chromatograms; pass a
-saved \code{\link[logconNMF:channel_groups]{logconNMF::channel_groups()}} map as \code{precluster} to reuse reference groups.
+saved \code{\link[logconNMF:channelGroups]{logconNMF::channelGroups()}} map as \code{precluster} to reuse reference groups.
 Matching uses the shared aggregate space. Original-channel
 means and the likelihood are used for coupled updates. Shared spectra are
 exported on the union of recorded mass ranges; unmeasured channels receive
@@ -109,7 +109,7 @@ match; coupled refinement is recomputed.
 }
 \examples{
 \dontrun{
-experiment <- GCMSdeco("chromatograms", output_dir="results",
+experiment <- gcmsDeco("chromatograms", output_dir="results",
   family=quasipoisson("identity"), precluster=32L,
   batch=list(method="hellinger",plots=TRUE))
 experiment$areas
@@ -117,5 +117,5 @@ plot(experiment,sample=1,type="lines")
 }
 }
 \seealso{
-\code{\link[=GCMSdeco]{GCMSdeco()}}, \code{\link[logconNMF:logconNMF]{logconNMF::logconNMF()}}, \code{\link[=write_GCMS_cdf]{write_GCMS_cdf()}}
+\code{\link[=gcmsDeco]{gcmsDeco()}}, \code{\link[logconNMF:logconNMF]{logconNMF::logconNMF()}}, \code{\link[=writeGCMSCDF]{writeGCMSCDF()}}
 }

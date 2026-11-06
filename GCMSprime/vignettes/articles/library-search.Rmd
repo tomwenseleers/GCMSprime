@@ -18,11 +18,11 @@ reports the speed and accuracy of each spectral comparison on EI reference spect
 
 ```{r, eval=FALSE}
 library(GCMSprime)
-lib <- read_msp("library.msp", backend="sqlite", db_file="library.sqlite")
-cal <- calibrate_ri("alkanes.cdf", carbon=7:23, psf=fit$psf_standard)
-weights <- library_ion_weights(lib)  # compute once and reuse
+lib <- readMSP("library.msp", backend="sqlite", db_file="library.sqlite")
+cal <- calibrateRI("alkanes.cdf", carbon=7:23, psf=fit$psf_standard)
+weights <- libraryIonWeights(lib)  # compute once and reuse
 
-identified <- identify_compounds(fit, lib, calibration=cal,
+identified <- identifyCompounds(fit, lib, calibration=cal,
   phase="DB5", ri_tolerance=30, n_matches=5,
   method=c("stein_scott_angular", "multinomial"), ion_weights=weights,
   msp_file="sample_identified.msp", xlsx_file="sample_identified.xlsx")
@@ -36,7 +36,7 @@ The first method supplies the best-match columns in the compound table. Every re
 Identification can also run during the CDF workflow:
 
 ```{r, eval=FALSE}
-fit <- GCMSdeco("sample.cdf", "sample.msp", xlsx_file="sample.xlsx",
+fit <- gcmsDeco("sample.cdf", "sample.msp", xlsx_file="sample.xlsx",
   alkanes_file="alkanes.cdf", precluster=32L, library=lib,
   search=list(phase="DB5", ri_tolerance=30, n_matches=5,
               method="stein_scott"))
@@ -64,7 +64,7 @@ calibration, column matching and missing-reference rules.
 RIs can also be exported without searching a library:
 
 ```{r, eval=FALSE}
-fit <- annotate_ri(fit, cal, phase="DB5",
+fit <- annotateRI(fit, cal, phase="DB5",
   msp_file="sample_RI.msp", xlsx_file="sample_RI.xlsx")
 fit$compounds[c("peak_onset", "retention_coordinate", "retention_index")]
 ```
@@ -73,7 +73,7 @@ The MSP uses NIST's `Retention_index: SemiStdNP=...` field for a DB5-type
 column. Excel retains the alkane assignments and timing coordinates. By
 default, peaks outside the calibrated range receive no RI. Set
 `extrapolate=TRUE` to use the natural spline's linear tails; the compound
-table and MSP comments flag these values. `annotate_ri()` also annotates a
+table and MSP comments flag these values. `annotateRI()` also annotates a
 multisample result and exports median consensus RIs with the sample values.
 
 ## Choose spectral comparisons
@@ -87,8 +87,8 @@ multisample result and exports median consensus RIs with the sample values.
 | `stein_scott_angular` | Angular distance after the Stein–Scott transform |
 
 ```{r, eval=FALSE}
-w <- library_ion_weights(lib)
-matches <- library_search(fit, lib, calibration=cal, phase="DB5",
+w <- libraryIonWeights(lib)
+matches <- librarySearch(fit, lib, calibration=cal, phase="DB5",
   ri_tolerance=30, n_matches=5,
   method=c("stein_scott", "hellinger", "multinomial"), ion_weights=w)
 as.data.frame(matches)
@@ -103,7 +103,7 @@ explain the transformations, weights, zero handling, score scales and accuracy.
 ## Identify a multisample experiment
 
 ```{r, eval=FALSE}
-experiment <- GCMSdeco("chromatograms", output_dir="identified_results",
+experiment <- gcmsDeco("chromatograms", output_dir="identified_results",
   precluster=32L, library=lib,
   search=list(phase="DB5", ri_tolerance=30, n_matches=5,
               method=c("stein_scott", "hellinger")))

@@ -1,7 +1,7 @@
 Package: GCMSprime
 Type: Package
 Title: Scalable and Automated GC–MS Deconvolution, Quantification, and Spectral Library Search in R
-Version: 0.1.0
+Version: 0.1.0.9000
 Date: 2026-11-01
 Authors@R: c(
     person("Tom", "Wenseleers", role = c("aut", "cre"),
@@ -12,7 +12,7 @@ Description: Chromatogram deconvolution, compound spectra, integrated areas and 
 License: GPL (>= 2)
 Encoding: UTF-8
 Depends: R (>= 4.1.0)
-Imports: Rcpp, parallel, RhpcBLASctl, logconNMF (>= 0.1.0), L0glm (>= 0.2.0), Matrix, methods, stats, graphics, grDevices, utils
+Imports: Rcpp, parallel, RhpcBLASctl, logconNMF (>= 0.1.0.9000), L0glm (>= 0.2.0.9000), Matrix, methods, stats, graphics, grDevices, utils
 Suggests: testthat (>= 3.0.0), knitr, rmarkdown, pkgdown, mgcv, ncdf4, openxlsx, DBI, RSQLite, jsonlite
 URL: https://tomwenseleers.github.io/GCMSprime/, https://github.com/tomwenseleers/GCMSprime
 BugReports: https://github.com/tomwenseleers/GCMSprime/issues

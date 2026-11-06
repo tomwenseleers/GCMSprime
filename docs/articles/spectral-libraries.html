@@ -31,7 +31,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">GCMSprime</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -92,11 +92,11 @@ libraries are imported in batches into SQLite and queried without
 loading every spectrum.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tomwenseleers.github.io/GCMSprime/">GCMSprime</a></span><span class="op">)</span></span>
-<span><span class="va">lib</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_msp.html">read_msp</a></span><span class="op">(</span><span class="st">"library.msp"</span>, backend<span class="op">=</span><span class="st">"sqlite"</span>, db_file<span class="op">=</span><span class="st">"library.sqlite"</span><span class="op">)</span></span>
-<span><span class="va">lib</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_msp.html">open_library</a></span><span class="op">(</span><span class="st">"library.sqlite"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/library_metadata.html">library_metadata</a></span><span class="op">(</span><span class="va">lib</span>, which<span class="op">=</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">)</span></span>
+<span><span class="va">lib</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/readMSP.html">readMSP</a></span><span class="op">(</span><span class="st">"library.msp"</span>, backend<span class="op">=</span><span class="st">"sqlite"</span>, db_file<span class="op">=</span><span class="st">"library.sqlite"</span><span class="op">)</span></span>
+<span><span class="va">lib</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/readMSP.html">openLibrary</a></span><span class="op">(</span><span class="st">"library.sqlite"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/libraryMetadata.html">libraryMetadata</a></span><span class="op">(</span><span class="va">lib</span>, which<span class="op">=</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/spectra.html">spectra</a></span><span class="op">(</span><span class="va">lib</span>, which<span class="op">=</span><span class="fl">1</span><span class="op">:</span><span class="fl">1000</span>, nominal<span class="op">=</span><span class="cn">TRUE</span>, normalize<span class="op">=</span><span class="st">"l2"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/retention_indices.html">retention_indices</a></span><span class="op">(</span><span class="va">lib</span>, which<span class="op">=</span><span class="fl">1</span><span class="op">:</span><span class="fl">1000</span>, phase<span class="op">=</span><span class="st">"DB5"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="../reference/retentionIndices.html">retentionIndices</a></span><span class="op">(</span><span class="va">lib</span>, which<span class="op">=</span><span class="fl">1</span><span class="op">:</span><span class="fl">1000</span>, phase<span class="op">=</span><span class="st">"DB5"</span><span class="op">)</span></span></code></pre></div>
 <p>Matrix rows identify mass values and columns identify library
 spectra. Raw extraction with <code>format="list"</code> preserves the
 input mass/intensity arrays, including duplicate masses. Sparse
@@ -109,11 +109,11 @@ explicit choices.</p>
 <li>OpenChrom Agilent and Shimadzu MSP exports use the streaming native
 reader. Repeated <code>Synon</code> and <code>Comments</code> tags and
 unknown fields remain available with
-<code>library_metadata(lib, raw=TRUE)</code>.</li>
+<code>libraryMetadata(lib, raw=TRUE)</code>.</li>
 <li>
 <a href="https://mona.fiehnlab.ucdavis.edu/downloads" class="external-link">MoNA</a>
 provides NIST-compatible MSP exports, including its GC-MS collection.
-Those exports use <code><a href="../reference/read_msp.html">read_msp()</a></code>.</li>
+Those exports use <code><a href="../reference/readMSP.html">readMSP()</a></code>.</li>
 <li>
 <a href="http://gmd.mpimp-golm.mpg.de/download/" class="external-link">Golm</a> MSP
 exports use the same interface. Source-specific annotations remain in
@@ -123,7 +123,7 @@ the library’s accompanying metadata.</li>
 <a href="https://gcms-id.ca/downloads" class="external-link">GCMS-ID</a> provides
 predicted spectra and retention indices as CSV archives. After
 extraction, use
-<code>read_gcms_id("NP-Atlas.csv", backend="sqlite", db_file="NP-Atlas.sqlite")</code>.
+<code>readGCMSID("NP-Atlas.csv", backend="sqlite", db_file="NP-Atlas.sqlite")</code>.
 Their predicted origin is recorded explicitly.</li>
 </ul>
 </div>

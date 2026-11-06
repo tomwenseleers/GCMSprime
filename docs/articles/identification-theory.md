@@ -81,7 +81,7 @@ conventions](https://webbook.nist.gov/chemistry/gc-ri/). Use a ladder
 acquired with the sample’s column and chromatographic programme.
 
 The Excel Run sheet records the width source and timing convention.
-[`GCMSdeco()`](https://tomwenseleers.github.io/GCMSprime/reference/GCMSdeco.md)
+[`gcmsDeco()`](https://tomwenseleers.github.io/GCMSprime/reference/gcmsDeco.md)
 reuses its stored standard PSF automatically when identification is
 requested.
 
@@ -147,8 +147,8 @@ ties from [`acos()`](https://rdrr.io/r/base/Trig.html).
 
 ``` r
 
-w <- library_ion_weights(lib)
-matches <- library_search(fit, lib, calibration=cal, phase="DB5",
+w <- libraryIonWeights(lib)
+matches <- librarySearch(fit, lib, calibration=cal, phase="DB5",
   ri_tolerance=30, method=c("angular", "stein_scott_angular"),
   ion_weights=w, n_matches=5)
 ```
@@ -199,18 +199,18 @@ reference’s stored/restored total. `reference_total` and
 `reference_count` show the effective comparison convention, and
 `library_mass_coverage` records acquisition coverage. For an
 L1-normalized matrix, supply its original totals through `pseudocount=`.
-A `GCMSdeco` fit supplies them automatically. Explicit count tags also
+A `gcmsDeco` fit supplies them automatically. Explicit count tags also
 preserve totals through MSP export and re-import.
 
 Scores run from 0 to 1000, with larger values better. Angular scores are
 1000(1-2\theta/\pi); distances remain in radians. Probability and
 count-based scores follow the definitions in
-[library_search()](https://tomwenseleers.github.io/GCMSprime/reference/library_search.md).
+[librarySearch()](https://tomwenseleers.github.io/GCMSprime/reference/librarySearch.md).
 Compare scores within a method and weighting convention.
 
 ## Ion uniqueness weights
 
-[library_ion_weights()](https://tomwenseleers.github.io/GCMSprime/reference/library_ion_weights.md)
+[libraryIonWeights()](https://tomwenseleers.github.io/GCMSprime/reference/libraryIonWeights.md)
 computes smoothed inverse-document-frequency weights. If L nonempty
 reference spectra are available and d_j contain ion j,
 
@@ -225,10 +225,10 @@ reusable weight vector.
 
 ``` r
 
-w <- library_ion_weights(lib, mass=33:550, min_relative=.01, power=1)
+w <- libraryIonWeights(lib, mass=33:550, min_relative=.01, power=1)
 attr(w, "frequency")
 
-hits <- library_search(fit, lib, calibration=cal, phase="DB5",
+hits <- librarySearch(fit, lib, calibration=cal, phase="DB5",
   method=c("multinomial", "angular"), ion_weights=w,
   reference_count="query", n_matches=5)
 ```

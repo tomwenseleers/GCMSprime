@@ -31,7 +31,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">GCMSprime</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -86,7 +86,7 @@
 
     
     
-<p><code><a href="../reference/GCMSdeco.html">GCMSdeco()</a></code> accepts an experiment directory and analyzes
+<p><code><a href="../reference/gcmsDeco.html">gcmsDeco()</a></code> accepts an experiment directory and analyzes
 its chromatograms together. Each sample gets its own time-varying PSF,
 smooth background and log-concave compound profiles. Coupled
 factorization shares mass spectra across samples and returns one
@@ -105,7 +105,7 @@ consensus compound library with a sample-by-compound area table.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tomwenseleers.github.io/GCMSprime/">GCMSprime</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">experiment</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/GCMSdeco.html">GCMSdeco</a></span><span class="op">(</span><span class="st">"chromatograms"</span>, output_dir<span class="op">=</span><span class="st">"beer_results"</span>,</span>
+<span><span class="va">experiment</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gcmsDeco.html">gcmsDeco</a></span><span class="op">(</span><span class="st">"chromatograms"</span>, output_dir<span class="op">=</span><span class="st">"beer_results"</span>,</span>
 <span>  family<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">quasipoisson</a></span><span class="op">(</span><span class="st">"identity"</span><span class="op">)</span>, precluster<span class="op">=</span><span class="fl">32L</span>,</span>
 <span>  batch<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>plots<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
@@ -124,7 +124,7 @@ calibration.</p>
 <p>For files without acquisition timestamps, supply their relative paths
 in the intended run order:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">experiment</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/GCMSdeco.html">GCMSdeco</a></span><span class="op">(</span><span class="st">"chromatograms"</span>, output_dir<span class="op">=</span><span class="st">"beer_results"</span>,</span>
+<code class="sourceCode R"><span><span class="va">experiment</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gcmsDeco.html">gcmsDeco</a></span><span class="op">(</span><span class="st">"chromatograms"</span>, output_dir<span class="op">=</span><span class="st">"beer_results"</span>,</span>
 <span>  batch<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>sample_order<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"beer1/injection001.cdf"</span>,</span>
 <span>                            <span class="st">"beer1/injection002.cdf"</span>,</span>
 <span>                            <span class="st">"beer2/injection003.cdf"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
@@ -139,18 +139,18 @@ and tails. All original ions are retained in the exported spectra. Here
 the simulated quasipoisson dispersion is supplied at its known
 value.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">sim</span> <span class="op">&lt;-</span> <span class="fu">logconNMF</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/logconNMF/man/simulate_GCMS_samples.html" class="external-link">simulate_GCMS_samples</a></span><span class="op">(</span>samples<span class="op">=</span><span class="fl">16L</span>, n<span class="op">=</span><span class="fl">1200L</span>, k<span class="op">=</span><span class="fl">48L</span>,</span>
+<code class="sourceCode R"><span><span class="va">sim</span> <span class="op">&lt;-</span> <span class="fu">logconNMF</span><span class="fu">::</span><span class="fu"><a href="https://tomwenseleers.github.io/logconNMF/reference/simulateGCMSSamples.html" class="external-link">simulateGCMSSamples</a></span><span class="op">(</span>samples<span class="op">=</span><span class="fl">16L</span>, n<span class="op">=</span><span class="fl">1200L</span>, k<span class="op">=</span><span class="fl">48L</span>,</span>
 <span>  preset<span class="op">=</span><span class="st">"time_area"</span>, presence<span class="op">=</span><span class="fl">0.5</span>, irregular<span class="op">=</span><span class="fl">0</span>, drift<span class="op">=</span><span class="fl">2</span>,</span>
 <span>  family<span class="op">=</span><span class="st">"quasipoisson"</span>, dispersion<span class="op">=</span><span class="fl">2</span>, seed<span class="op">=</span><span class="fl">9118</span><span class="op">)</span></span>
 <span><span class="va">input</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="st">"samples16_"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/files2.html" class="external-link">dir.create</a></span><span class="op">(</span><span class="va">input</span><span class="op">)</span></span>
 <span><span class="kw">for</span> <span class="op">(</span><span class="va">s</span> <span class="kw">in</span> <span class="va">sim</span><span class="op">$</span><span class="va">samples</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="fu"><a href="../reference/write_GCMS_cdf.html">write_GCMS_cdf</a></span><span class="op">(</span><span class="va">s</span><span class="op">$</span><span class="va">Y</span>, <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">input</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">s</span><span class="op">$</span><span class="va">sample_id</span>, <span class="st">".cdf"</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="../reference/writeGCMSCDF.html">writeGCMSCDF</a></span><span class="op">(</span><span class="va">s</span><span class="op">$</span><span class="va">Y</span>, <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">input</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">s</span><span class="op">$</span><span class="va">sample_id</span>, <span class="st">".cdf"</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>    time<span class="op">=</span><span class="va">s</span><span class="op">$</span><span class="va">time</span>, acquired_at<span class="op">=</span><span class="va">s</span><span class="op">$</span><span class="va">acquired_at</span><span class="op">)</span></span>
 <span><span class="op">}</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/rm.html" class="external-link">rm</a></span><span class="op">(</span><span class="va">sim</span>, <span class="va">s</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">experiment</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/GCMSdeco.html">GCMSdeco</a></span><span class="op">(</span><span class="va">input</span>, output_dir<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">input</span>, <span class="st">"_results"</span><span class="op">)</span>,</span>
+<span><span class="va">experiment</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gcmsDeco.html">gcmsDeco</a></span><span class="op">(</span><span class="va">input</span>, output_dir<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">input</span>, <span class="st">"_results"</span><span class="op">)</span>,</span>
 <span>  family<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">quasipoisson</a></span><span class="op">(</span><span class="st">"identity"</span><span class="op">)</span>, dispersion<span class="op">=</span><span class="fl">2</span>, correlation<span class="op">=</span><span class="st">"none"</span>,</span>
 <span>  nwindows<span class="op">=</span><span class="fl">2L</span>, baseline_df<span class="op">=</span><span class="fl">4L</span>, precluster<span class="op">=</span><span class="fl">32L</span>, ncores<span class="op">=</span><span class="fl">16L</span>,</span>
 <span>  psf_control<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>maxiter<span class="op">=</span><span class="fl">3L</span><span class="op">)</span>,</span>
@@ -267,7 +267,7 @@ disk as needed. Use <code>batch=list(workers=4L)</code> to cap the
 number of concurrent samples within the <code>ncores</code> budget.</p>
 <p>The same ion groups are used across samples for matching. They are
 learned from a pooled, time-binned chromatogram or supplied through
-<code>precluster</code> as a saved <a href="https://tomwenseleers.github.io/logconNMF/reference/channel_groups.html" class="external-link">channel
+<code>precluster</code> as a saved <a href="https://tomwenseleers.github.io/logconNMF/reference/channelGroups.html" class="external-link">channel
 map</a>, for example one trained on reference spectra. Each sample’s PSF
 and scan grid remain separate.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
@@ -299,7 +299,7 @@ not identify physical count exposure.</p>
 <p>If integrated counts and their durations are known, supply exposure
 explicitly:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">experiment</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/GCMSdeco.html">GCMSdeco</a></span><span class="op">(</span><span class="st">"chromatograms"</span>, output_dir<span class="op">=</span><span class="st">"count_results"</span>,</span>
+<code class="sourceCode R"><span><span class="va">experiment</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gcmsDeco.html">gcmsDeco</a></span><span class="op">(</span><span class="st">"chromatograms"</span>, output_dir<span class="op">=</span><span class="st">"count_results"</span>,</span>
 <span>  family<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">poisson</a></span><span class="op">(</span><span class="st">"identity"</span><span class="op">)</span>,</span>
 <span>  batch<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>exposure<span class="op">=</span><span class="kw">function</span><span class="op">(</span><span class="va">metadata</span>, <span class="va">time</span><span class="op">)</span> <span class="va">metadata</span><span class="op">$</span><span class="va">scan_duration</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>Here <code>scan_duration</code> is appropriate only when it
@@ -327,13 +327,13 @@ retention-index anchors.</p>
 <span><span class="va">time</span> <span class="op">&lt;-</span> <span class="fu">ncdf4</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ncdf4/man/ncvar_get.html" class="external-link">ncvar_get</a></span><span class="op">(</span><span class="va">nc</span>, <span class="st">"scan_acquisition_time"</span><span class="op">)</span> <span class="op">/</span> <span class="fl">60</span></span>
 <span><span class="fu">ncdf4</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ncdf4/man/nc_close.html" class="external-link">nc_close</a></span><span class="op">(</span><span class="va">nc</span><span class="op">)</span></span>
 <span><span class="va">keep</span> <span class="op">&lt;-</span> <span class="va">time</span> <span class="op">&gt;=</span> <span class="fl">3</span></span>
-<span><span class="va">psf</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/logconNMF/man/estimate_psf.html" class="external-link">estimate_psf</a></span><span class="op">(</span><span class="va">tic</span><span class="op">[</span><span class="va">keep</span><span class="op">]</span>, time<span class="op">=</span><span class="va">time</span><span class="op">[</span><span class="va">keep</span><span class="op">]</span>, method<span class="op">=</span><span class="st">"standard"</span>, nwindows<span class="op">=</span><span class="fl">10L</span><span class="op">)</span></span>
+<span><span class="va">psf</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://tomwenseleers.github.io/logconNMF/reference/estimatePSF.html" class="external-link">estimatePSF</a></span><span class="op">(</span><span class="va">tic</span><span class="op">[</span><span class="va">keep</span><span class="op">]</span>, time<span class="op">=</span><span class="va">time</span><span class="op">[</span><span class="va">keep</span><span class="op">]</span>, method<span class="op">=</span><span class="st">"standard"</span>, nwindows<span class="op">=</span><span class="fl">10L</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">experiment</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/GCMSdeco.html">GCMSdeco</a></span><span class="op">(</span><span class="st">"chromatograms"</span>, output_dir<span class="op">=</span><span class="st">"beer_results"</span>,</span>
+<span><span class="va">experiment</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gcmsDeco.html">gcmsDeco</a></span><span class="op">(</span><span class="st">"chromatograms"</span>, output_dir<span class="op">=</span><span class="st">"beer_results"</span>,</span>
 <span>  alkanes_file<span class="op">=</span><span class="va">standard</span>, precluster<span class="op">=</span><span class="fl">32L</span>, ncores<span class="op">=</span><span class="fl">16L</span>,</span>
 <span>  psf_control<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>standard<span class="op">=</span><span class="va">psf</span>, method<span class="op">=</span><span class="st">"standard"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">cal</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/calibrate_ri.html">calibrate_ri</a></span><span class="op">(</span><span class="va">standard</span>, carbon<span class="op">=</span><span class="fl">7</span><span class="op">:</span><span class="fl">23</span>, psf<span class="op">=</span><span class="va">psf</span><span class="op">)</span></span>
-<span><span class="va">experiment</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/annotate_ri.html">annotate_ri</a></span><span class="op">(</span><span class="va">experiment</span>, <span class="va">cal</span>, phase<span class="op">=</span><span class="st">"DB5"</span>,</span>
+<span><span class="va">cal</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/calibrateRI.html">calibrateRI</a></span><span class="op">(</span><span class="va">standard</span>, carbon<span class="op">=</span><span class="fl">7</span><span class="op">:</span><span class="fl">23</span>, psf<span class="op">=</span><span class="va">psf</span><span class="op">)</span></span>
+<span><span class="va">experiment</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/annotateRI.html">annotateRI</a></span><span class="op">(</span><span class="va">experiment</span>, <span class="va">cal</span>, phase<span class="op">=</span><span class="st">"DB5"</span>,</span>
 <span>  msp_file<span class="op">=</span><span class="st">"beer_results/consensus.msp"</span>, xlsx_file<span class="op">=</span><span class="st">"beer_results/experiment.xlsx"</span><span class="op">)</span></span></code></pre></div>
 <p>The retention coordinate is the 1%-height onset plus half the local
 narrow-peak width measured at the same height. The natural cubic RI
@@ -401,7 +401,7 @@ plots.</p>
 <p>The fitted components can be inspected sample by sample, and common
 spectra can be searched against a library with each sample’s
 alkane-derived retention indices. Pass <code>library=</code> and
-<code>search=</code> to <code><a href="../reference/GCMSdeco.html">GCMSdeco()</a></code> to include those
+<code>search=</code> to <code><a href="../reference/gcmsDeco.html">gcmsDeco()</a></code> to include those
 identifications in the per-sample MSP and Excel exports.</p>
 <p>Set <code>coupled=FALSE</code> to export independent fits. Set
 <code>batch=list(resume=TRUE)</code> to reuse independently fitted

@@ -2,7 +2,7 @@
 
 When two compounds elute together, their ion traces overlap and the
 spectrum at any one scan contains contributions from both.
-[`GCMSdeco()`](https://tomwenseleers.github.io/GCMSprime/reference/GCMSdeco.md)
+[`gcmsDeco()`](https://tomwenseleers.github.io/GCMSprime/reference/gcmsDeco.md)
 uses the changing ion patterns across scans to estimate a separate
 elution profile, mass spectrum and integrated area for each component.
 It takes an ANDI-MS `.cdf` file and writes a NIST-compatible `.msp`
@@ -21,8 +21,8 @@ overloaded or shark-fin-shaped peaks.
 ## Two experimental chromatograms
 
 The package includes a cuticular-hydrocarbon window with six co-eluting
-compounds (`GCMS_data1`, 119 scans × 671 mass channels) and a
-beer-headspace window with a prominent broad acid peak (`GCMS_data2`,
+compounds (`gcmsData1`, 119 scans × 671 mass channels) and a
+beer-headspace window with a prominent broad acid peak (`gcmsData2`,
 1,764 scans × 518 mass channels). Their row names give retention times
 in minutes; column names give nominal m/z. Both examples keep all mass
 channels.
@@ -32,35 +32,35 @@ channels.
 library(L0glm)
 library(logconNMF)
 library(GCMSprime)
-data(GCMS_data1)
-data(GCMS_data2)
+data(gcmsData1)
+data(gcmsData2)
 
 out <- file.path(tempdir(), "GCMSprime-examples")
 dir.create(out, showWarnings = FALSE)
-write_GCMS_cdf(GCMS_data1, file.path(out, "GCMS_data1.cdf"))
-write_GCMS_cdf(GCMS_data2, file.path(out, "GCMS_data2.cdf"))
+writeGCMSCDF(gcmsData1, file.path(out, "GCMS_data1.cdf"))
+writeGCMSCDF(gcmsData2, file.path(out, "GCMS_data2.cdf"))
 ```
 
-[`write_GCMS_cdf()`](https://tomwenseleers.github.io/GCMSprime/reference/write_GCMS_cdf.md)
+[`writeGCMSCDF()`](https://tomwenseleers.github.io/GCMSprime/reference/writeGCMSCDF.md)
 preserves the intensity matrix, including silent ions, and writes scan
 times in seconds for ANDI-MS readers. The same
-[`GCMSdeco()`](https://tomwenseleers.github.io/GCMSprime/reference/GCMSdeco.md)
+[`gcmsDeco()`](https://tomwenseleers.github.io/GCMSprime/reference/gcmsDeco.md)
 call then works with a matrix exported from R or a chromatogram exported
 by instrument software:
 
 ``` r
 
-fit1 <- GCMSdeco(file.path(out, "GCMS_data1.cdf"),
+fit1 <- gcmsDeco(file.path(out, "GCMS_data1.cdf"),
   file.path(out, "GCMS_data1.msp"), nwindows = 1L, precluster = 16L,
   baseline_df = 1L,
   correlation = "auto", ncores = 8L,
-  psf_control = list(kernel_est = convkernel("gaussian", 65L,
+  psf_control = list(kernel_est = convKernel("gaussian", 65L,
     list(sigma = 8)), maxiter = 0L))
 
-fit2 <- GCMSdeco(file.path(out, "GCMS_data2.cdf"),
+fit2 <- gcmsDeco(file.path(out, "GCMS_data2.cdf"),
   file.path(out, "GCMS_data2.msp"), nwindows = 1L, precluster = 32L,
   correlation = "auto", ncores = 8L,
-  psf_control = list(kernel_est = convkernel("gaussian", 65L,
+  psf_control = list(kernel_est = convKernel("gaussian", 65L,
     list(sigma = 6)), maxiter = 0L))
 
 fit1$compounds[c("retention_time", "area", "n_ions")]
@@ -71,7 +71,7 @@ fit2$seconds                      # elapsed time by stage
 
 These short windows use a supplied Gaussian PSF as the initial profile
 dictionary. `maxiter=0L` keeps this PSF fixed;
-[`logconNMF()`](https://rdrr.io/pkg/logconNMF/man/logconNMF-package.html)
+[`logconNMF()`](https://tomwenseleers.github.io/logconNMF/reference/logconNMF.html)
 then refines the individual compound profiles. For a full chromatogram,
 the default `nwindows=10L` with positive `maxiter` estimates a smoothly
 varying PSF. An alkane standard can supply its initial calibration
@@ -81,7 +81,7 @@ chosen low-df cubic spline.
 
 ### Estimate the PSF automatically
 
-[`estimate_psf()`](https://rdrr.io/pkg/logconNMF/man/estimate_psf.html)
+[`estimatePSF()`](https://tomwenseleers.github.io/logconNMF/reference/estimatePSF.html)
 provides one interface for standard calibration and blind sample
 estimation. Both bundled matrices include a full alkane TIC in
 `attr(Y, "alkanes_TIC")`; its numeric names give retention times in
@@ -90,34 +90,34 @@ the sample scan interval and refines the PSF on the sample:
 
 ``` r
 
-psf <- estimate_psf(GCMS_data2, nwindows = 3L)
+psf <- estimatePSF(gcmsData2, nwindows = 3L)
 X <- psf$X                         # sparse scan-by-scan PSF design
 psf$width_scans
 
 # A constant PSF, calibration alone, or blind fitting without a standard:
-constant <- estimate_psf(GCMS_data2, nwindows = 1L)
-standard <- estimate_psf(GCMS_data2, method = "standard", nwindows = 3L)
-blind <- estimate_psf(GCMS_data2, standard = NULL, method = "blind",
+constant <- estimatePSF(gcmsData2, nwindows = 1L)
+standard <- estimatePSF(gcmsData2, method = "standard", nwindows = 3L)
+blind <- estimatePSF(gcmsData2, standard = NULL, method = "blind",
   nwindows = 3L, precluster = 32L)
 ```
 
 `precluster=FALSE` uses all ion channels, `1L` uses their total, and
 `32L` uses at most 32 size-adjusted groups. The same identity-link noise
 models are available as in
-[`logconNMF()`](https://rdrr.io/pkg/logconNMF/man/logconNMF-package.html),
+[`logconNMF()`](https://tomwenseleers.github.io/logconNMF/reference/logconNMF.html),
 including negative binomial and Gamma models. The [PSF help
-page](https://tomwenseleers.github.io/logconNMF/reference/estimate_psf.html)
+page](https://tomwenseleers.github.io/logconNMF/reference/estimatePSF.html)
 describes likelihood fitting, noise scaling and aggregation.
 
-[`GCMSdeco()`](https://tomwenseleers.github.io/GCMSprime/reference/GCMSdeco.md)
+[`gcmsDeco()`](https://tomwenseleers.github.io/GCMSprime/reference/gcmsDeco.md)
 uses the same estimator. A CDF contains the sample chromatogram; its
 accompanying R calibration attribute can be supplied explicitly:
 
 ``` r
 
-calibrated <- GCMSdeco(file.path(out, "GCMS_data2.cdf"),
+calibrated <- gcmsDeco(file.path(out, "GCMS_data2.cdf"),
   file.path(out, "GCMS_data2_calibrated.msp"), nwindows = 3L, precluster = 32L,
-  psf_control = list(standard = attr(GCMS_data2, "alkanes_TIC")))
+  psf_control = list(standard = attr(gcmsData2, "alkanes_TIC")))
 ```
 
 Calibration peaks should reflect the sample’s chromatographic
@@ -136,8 +136,8 @@ spectra.
 
 | Dataset | Scans | Mass channels | Components | Seconds | Quasi-GIC | Adjusted weighted R² |
 |:---|---:|---:|---:|---:|---:|---:|
-| `GCMS_data1` | 119 | 671 | 6 | 5.14 | 246,473 | 0.98999 |
-| `GCMS_data2` | 1,764 | 518 | 38 | 68.46 | 1,467,419 | 0.99498 |
+| `gcmsData1` | 119 | 671 | 6 | 5.14 | 246,473 | 0.98999 |
+| `gcmsData2` | 1,764 | 518 | 38 | 68.46 | 1,467,419 | 0.99498 |
 
 Weighted R² uses weights `1/pmax(fitted_mean, 0.1)` and a separate
 weighted mean for each mass channel. Its adjustment is conditional on
@@ -157,19 +157,19 @@ channels. Diagnostics are available in `fit2$model$contained_fusion` and
 ### Cuticular hydrocarbons
 
 ![Background-corrected ion traces and fitted compounds in
-GCMS_data1](../reference/figures/gcms-data1-traces.png)
+gcmsData1](../reference/figures/gcms-data1-traces.png)
 
-Background-corrected ion traces and fitted compounds in GCMS_data1
+Background-corrected ion traces and fitted compounds in gcmsData1
 
 ![Observed, corrected, fitted and Pearson-residual heatmaps for
-GCMS_data1](../reference/figures/gcms-data1-heatmaps.png)
+gcmsData1](../reference/figures/gcms-data1-heatmaps.png)
 
-Observed, corrected, fitted and Pearson-residual heatmaps for GCMS_data1
+Observed, corrected, fitted and Pearson-residual heatmaps for gcmsData1
 
 ![Elution profiles and mass spectra for
-GCMS_data1](../reference/figures/gcms-data1-profiles-spectra.png)
+gcmsData1](../reference/figures/gcms-data1-profiles-spectra.png)
 
-Elution profiles and mass spectra for GCMS_data1
+Elution profiles and mass spectra for gcmsData1
 
 The profile/spectrum panels show every recovered compound.
 
@@ -184,19 +184,19 @@ library](https://tomwenseleers.github.io/GCMSprime/gcms/gcms-data1.msp).
 ### Beer volatiles and a broad acid peak
 
 ![Background-corrected ion traces and fitted compounds in
-GCMS_data2](../reference/figures/gcms-data2-traces.png)
+gcmsData2](../reference/figures/gcms-data2-traces.png)
 
-Background-corrected ion traces and fitted compounds in GCMS_data2
+Background-corrected ion traces and fitted compounds in gcmsData2
 
 ![Observed, corrected, fitted and Pearson-residual heatmaps for
-GCMS_data2](../reference/figures/gcms-data2-heatmaps.png)
+gcmsData2](../reference/figures/gcms-data2-heatmaps.png)
 
-Observed, corrected, fitted and Pearson-residual heatmaps for GCMS_data2
+Observed, corrected, fitted and Pearson-residual heatmaps for gcmsData2
 
 ![Elution profiles and mass spectra for
-GCMS_data2](../reference/figures/gcms-data2-profiles-spectra.png)
+gcmsData2](../reference/figures/gcms-data2-profiles-spectra.png)
 
-Elution profiles and mass spectra for GCMS_data2
+Elution profiles and mass spectra for gcmsData2
 
 The profile/spectrum preview includes the broadest component and five
 other large components, in temporal order. The PDF contains every
@@ -248,15 +248,15 @@ file.
 ## Fit a supplied PSF design directly
 
 Use
-[`logconNMF()`](https://rdrr.io/pkg/logconNMF/man/logconNMF-package.html)
+[`logconNMF()`](https://tomwenseleers.github.io/logconNMF/reference/logconNMF.html)
 when a suitable PSF design and background basis are already available.
 This also gives direct control over the background for a short
 chromatographic window:
 
 ``` r
 
-Y <- GCMS_data1
-X <- convmatrix(convkernel("gaussian", 65L, list(sigma = 8)), nrow(Y))
+Y <- gcmsData1
+X <- convMatrix(convKernel("gaussian", 65L, list(sigma = 8)), nrow(Y))
 B <- matrix(1, nrow(Y), 1L)          # constant background in this short window
 nmf <- logconNMF(Y, X = X, background = B,
   family = quasipoisson("identity"), precluster = 16L,
@@ -267,7 +267,7 @@ coef(nmf)                          # full-channel integrated intensities
 GIC(nmf)
 ```
 
-For `GCMS_data2`, a low-dimensional nonnegative spline background can be
+For `gcmsData2`, a low-dimensional nonnegative spline background can be
 constructed with
 `splines::bs(as.numeric(rownames(Y)), df=4L, intercept=TRUE)`.
 Quasipoisson is useful for instrumental intensities with extra

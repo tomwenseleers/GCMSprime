@@ -71,10 +71,10 @@ articles:
     contents: [articles/algorithm, articles/identification-theory]
 reference:
   - title: Deconvolution, quantification and reports
-    contents: [GCMSdeco, GCMSbatch, plot.GCMSdeco, write_GCMS_cdf]
+    contents: [gcmsDeco, GCMSbatch, plot.GCMSdeco, writeGCMSCDF]
   - title: Import and inspect spectral libraries
-    contents: [read_msp, read_gcms_id, library_metadata, spectra, retention_indices]
+    contents: [readMSP, readGCMSID, libraryMetadata, spectra, retentionIndices]
   - title: Calibrate retention indices and identify compounds
-    contents: [calibrate_ri, annotate_ri, library_search, library_ion_weights, identify_compounds]
+    contents: [calibrateRI, annotateRI, librarySearch, libraryIonWeights, identifyCompounds]
   - title: Shared tools and package overview
     contents: [reexports, GCMSprime-package]

@@ -8,11 +8,11 @@ benchmark_samples16 <- function(output = tempfile("GCMSprime_samples16_"),
   RhpcBLASctl::blas_set_num_threads(1L)
   input <- file.path(output, "cdf")
   dir.create(input, recursive = TRUE)
-  sim <- simulate_GCMS_samples(samples = 16L, n = 1200L, k = 48L,
+  sim <- simulateGCMSSamples(samples = 16L, n = 1200L, k = 48L,
     preset = "time_area", presence = .5, irregular = 0, drift = 2,
     family = "quasipoisson", dispersion = 2, seed = 9118)
   truth <- lapply(sim$samples, function(s) {
-    write_GCMS_cdf(s$Y, file.path(input, paste0(s$sample_id, ".cdf")),
+    writeGCMSCDF(s$Y, file.path(input, paste0(s$sample_id, ".cdf")),
       time = s$time, acquired_at = s$acquired_at)
     list(time = s$time, apex = apply(s$H_true, 2L, which.max))
   })
@@ -20,7 +20,7 @@ benchmark_samples16 <- function(output = tempfile("GCMSprime_samples16_"),
   present <- t(sim$present)
   rm(sim)
   fits <- lapply(cores, function(ncores) {
-    GCMSdeco(input, output_dir = file.path(output, paste0("workers", ncores)),
+    gcmsDeco(input, output_dir = file.path(output, paste0("workers", ncores)),
       family = quasipoisson("identity"), dispersion = 2, correlation = "none",
       nwindows = 2L, baseline_df = 4L, precluster = 32L, ncores = ncores,
       psf_control = list(maxiter = 3L),

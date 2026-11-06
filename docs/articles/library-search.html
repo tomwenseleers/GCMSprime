@@ -27,7 +27,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">GCMSprime</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -94,11 +94,11 @@ on EI reference spectra.</p>
 </h2>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tomwenseleers.github.io/GCMSprime/">GCMSprime</a></span><span class="op">)</span></span>
-<span><span class="va">lib</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_msp.html">read_msp</a></span><span class="op">(</span><span class="st">"library.msp"</span>, backend<span class="op">=</span><span class="st">"sqlite"</span>, db_file<span class="op">=</span><span class="st">"library.sqlite"</span><span class="op">)</span></span>
-<span><span class="va">cal</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/calibrate_ri.html">calibrate_ri</a></span><span class="op">(</span><span class="st">"alkanes.cdf"</span>, carbon<span class="op">=</span><span class="fl">7</span><span class="op">:</span><span class="fl">23</span>, psf<span class="op">=</span><span class="va">fit</span><span class="op">$</span><span class="va">psf_standard</span><span class="op">)</span></span>
-<span><span class="va">weights</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/library_ion_weights.html">library_ion_weights</a></span><span class="op">(</span><span class="va">lib</span><span class="op">)</span>  <span class="co"># compute once and reuse</span></span>
+<span><span class="va">lib</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/readMSP.html">readMSP</a></span><span class="op">(</span><span class="st">"library.msp"</span>, backend<span class="op">=</span><span class="st">"sqlite"</span>, db_file<span class="op">=</span><span class="st">"library.sqlite"</span><span class="op">)</span></span>
+<span><span class="va">cal</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/calibrateRI.html">calibrateRI</a></span><span class="op">(</span><span class="st">"alkanes.cdf"</span>, carbon<span class="op">=</span><span class="fl">7</span><span class="op">:</span><span class="fl">23</span>, psf<span class="op">=</span><span class="va">fit</span><span class="op">$</span><span class="va">psf_standard</span><span class="op">)</span></span>
+<span><span class="va">weights</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/libraryIonWeights.html">libraryIonWeights</a></span><span class="op">(</span><span class="va">lib</span><span class="op">)</span>  <span class="co"># compute once and reuse</span></span>
 <span></span>
-<span><span class="va">identified</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/identify_compounds.html">identify_compounds</a></span><span class="op">(</span><span class="va">fit</span>, <span class="va">lib</span>, calibration<span class="op">=</span><span class="va">cal</span>,</span>
+<span><span class="va">identified</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/identifyCompounds.html">identifyCompounds</a></span><span class="op">(</span><span class="va">fit</span>, <span class="va">lib</span>, calibration<span class="op">=</span><span class="va">cal</span>,</span>
 <span>  phase<span class="op">=</span><span class="st">"DB5"</span>, ri_tolerance<span class="op">=</span><span class="fl">30</span>, n_matches<span class="op">=</span><span class="fl">5</span>,</span>
 <span>  method<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"stein_scott_angular"</span>, <span class="st">"multinomial"</span><span class="op">)</span>, ion_weights<span class="op">=</span><span class="va">weights</span>,</span>
 <span>  msp_file<span class="op">=</span><span class="st">"sample_identified.msp"</span>, xlsx_file<span class="op">=</span><span class="st">"sample_identified.xlsx"</span><span class="op">)</span></span>
@@ -113,7 +113,7 @@ and tentative library annotation. Profiles, spectra and the model
 objective stay unchanged.</p>
 <p>Identification can also run during the CDF workflow:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/GCMSdeco.html">GCMSdeco</a></span><span class="op">(</span><span class="st">"sample.cdf"</span>, <span class="st">"sample.msp"</span>, xlsx_file<span class="op">=</span><span class="st">"sample.xlsx"</span>,</span>
+<code class="sourceCode R"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gcmsDeco.html">gcmsDeco</a></span><span class="op">(</span><span class="st">"sample.cdf"</span>, <span class="st">"sample.msp"</span>, xlsx_file<span class="op">=</span><span class="st">"sample.xlsx"</span>,</span>
 <span>  alkanes_file<span class="op">=</span><span class="st">"alkanes.cdf"</span>, precluster<span class="op">=</span><span class="fl">32L</span>, library<span class="op">=</span><span class="va">lib</span>,</span>
 <span>  search<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>phase<span class="op">=</span><span class="st">"DB5"</span>, ri_tolerance<span class="op">=</span><span class="fl">30</span>, n_matches<span class="op">=</span><span class="fl">5</span>,</span>
 <span>              method<span class="op">=</span><span class="st">"stein_scott"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
@@ -138,7 +138,7 @@ is known, set <code>unknown_phase="DB5"</code> explicitly.
 the calibration, column matching and missing-reference rules.</p>
 <p>RIs can also be exported without searching a library:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/annotate_ri.html">annotate_ri</a></span><span class="op">(</span><span class="va">fit</span>, <span class="va">cal</span>, phase<span class="op">=</span><span class="st">"DB5"</span>,</span>
+<code class="sourceCode R"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/annotateRI.html">annotateRI</a></span><span class="op">(</span><span class="va">fit</span>, <span class="va">cal</span>, phase<span class="op">=</span><span class="st">"DB5"</span>,</span>
 <span>  msp_file<span class="op">=</span><span class="st">"sample_RI.msp"</span>, xlsx_file<span class="op">=</span><span class="st">"sample_RI.xlsx"</span><span class="op">)</span></span>
 <span><span class="va">fit</span><span class="op">$</span><span class="va">compounds</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"peak_onset"</span>, <span class="st">"retention_coordinate"</span>, <span class="st">"retention_index"</span><span class="op">)</span><span class="op">]</span></span></code></pre></div>
 <p>The MSP uses NIST’s <code>Retention_index: SemiStdNP=...</code> field
@@ -146,7 +146,7 @@ for a DB5-type column. Excel retains the alkane assignments and timing
 coordinates. By default, peaks outside the calibrated range receive no
 RI. Set <code>extrapolate=TRUE</code> to use the natural spline’s linear
 tails; the compound table and MSP comments flag these values.
-<code><a href="../reference/annotate_ri.html">annotate_ri()</a></code> also annotates a multisample result and
+<code><a href="../reference/annotateRI.html">annotateRI()</a></code> also annotates a multisample result and
 exports median consensus RIs with the sample values.</p>
 </div>
 <div class="section level2">
@@ -193,8 +193,8 @@ fitted query totals</td>
 </tbody>
 </table>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">w</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/library_ion_weights.html">library_ion_weights</a></span><span class="op">(</span><span class="va">lib</span><span class="op">)</span></span>
-<span><span class="va">matches</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/library_search.html">library_search</a></span><span class="op">(</span><span class="va">fit</span>, <span class="va">lib</span>, calibration<span class="op">=</span><span class="va">cal</span>, phase<span class="op">=</span><span class="st">"DB5"</span>,</span>
+<code class="sourceCode R"><span><span class="va">w</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/libraryIonWeights.html">libraryIonWeights</a></span><span class="op">(</span><span class="va">lib</span><span class="op">)</span></span>
+<span><span class="va">matches</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/librarySearch.html">librarySearch</a></span><span class="op">(</span><span class="va">fit</span>, <span class="va">lib</span>, calibration<span class="op">=</span><span class="va">cal</span>, phase<span class="op">=</span><span class="st">"DB5"</span>,</span>
 <span>  ri_tolerance<span class="op">=</span><span class="fl">30</span>, n_matches<span class="op">=</span><span class="fl">5</span>,</span>
 <span>  method<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"stein_scott"</span>, <span class="st">"hellinger"</span>, <span class="st">"multinomial"</span><span class="op">)</span>, ion_weights<span class="op">=</span><span class="va">w</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">matches</span><span class="op">)</span></span></code></pre></div>
@@ -209,7 +209,7 @@ score scales and accuracy.</p>
 <h2 id="identify-a-multisample-experiment">Identify a multisample experiment<a class="anchor" aria-label="anchor" href="#identify-a-multisample-experiment"></a>
 </h2>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">experiment</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/GCMSdeco.html">GCMSdeco</a></span><span class="op">(</span><span class="st">"chromatograms"</span>, output_dir<span class="op">=</span><span class="st">"identified_results"</span>,</span>
+<code class="sourceCode R"><span><span class="va">experiment</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gcmsDeco.html">gcmsDeco</a></span><span class="op">(</span><span class="st">"chromatograms"</span>, output_dir<span class="op">=</span><span class="st">"identified_results"</span>,</span>
 <span>  precluster<span class="op">=</span><span class="fl">32L</span>, library<span class="op">=</span><span class="va">lib</span>,</span>
 <span>  search<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>phase<span class="op">=</span><span class="st">"DB5"</span>, ri_tolerance<span class="op">=</span><span class="fl">30</span>, n_matches<span class="op">=</span><span class="fl">5</span>,</span>
 <span>              method<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"stein_scott"</span>, <span class="st">"hellinger"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>

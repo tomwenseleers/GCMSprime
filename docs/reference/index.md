@@ -2,18 +2,18 @@
 
 ## Deconvolution, quantification and reports
 
-- [`residuals(`*`<GCMSdeco>`*`)`](https://tomwenseleers.github.io/GCMSprime/reference/GCMSdeco.md)
-  [`GCMSdeco()`](https://tomwenseleers.github.io/GCMSprime/reference/GCMSdeco.md)
-  [`coef(`*`<GCMSdeco>`*`)`](https://tomwenseleers.github.io/GCMSprime/reference/GCMSdeco.md)
-  [`fitted(`*`<GCMSdeco>`*`)`](https://tomwenseleers.github.io/GCMSprime/reference/GCMSdeco.md)
-  [`nobs(`*`<GCMSdeco>`*`)`](https://tomwenseleers.github.io/GCMSprime/reference/GCMSdeco.md)
-  [`logLik(`*`<GCMSdeco>`*`)`](https://tomwenseleers.github.io/GCMSprime/reference/GCMSdeco.md)
-  [`AIC(`*`<GCMSdeco>`*`)`](https://tomwenseleers.github.io/GCMSprime/reference/GCMSdeco.md)
-  [`BIC(`*`<GCMSdeco>`*`)`](https://tomwenseleers.github.io/GCMSprime/reference/GCMSdeco.md)
-  [`GIC(`*`<GCMSdeco>`*`)`](https://tomwenseleers.github.io/GCMSprime/reference/GCMSdeco.md)
-  [`EBIC(`*`<GCMSdeco>`*`)`](https://tomwenseleers.github.io/GCMSprime/reference/GCMSdeco.md)
-  [`MBIC(`*`<GCMSdeco>`*`)`](https://tomwenseleers.github.io/GCMSprime/reference/GCMSdeco.md)
-  [`print(`*`<GCMSdeco>`*`)`](https://tomwenseleers.github.io/GCMSprime/reference/GCMSdeco.md)
+- [`residuals(`*`<GCMSdeco>`*`)`](https://tomwenseleers.github.io/GCMSprime/reference/gcmsDeco.md)
+  [`gcmsDeco()`](https://tomwenseleers.github.io/GCMSprime/reference/gcmsDeco.md)
+  [`coef(`*`<GCMSdeco>`*`)`](https://tomwenseleers.github.io/GCMSprime/reference/gcmsDeco.md)
+  [`fitted(`*`<GCMSdeco>`*`)`](https://tomwenseleers.github.io/GCMSprime/reference/gcmsDeco.md)
+  [`nobs(`*`<GCMSdeco>`*`)`](https://tomwenseleers.github.io/GCMSprime/reference/gcmsDeco.md)
+  [`logLik(`*`<GCMSdeco>`*`)`](https://tomwenseleers.github.io/GCMSprime/reference/gcmsDeco.md)
+  [`AIC(`*`<GCMSdeco>`*`)`](https://tomwenseleers.github.io/GCMSprime/reference/gcmsDeco.md)
+  [`BIC(`*`<GCMSdeco>`*`)`](https://tomwenseleers.github.io/GCMSprime/reference/gcmsDeco.md)
+  [`GIC(`*`<GCMSdeco>`*`)`](https://tomwenseleers.github.io/GCMSprime/reference/gcmsDeco.md)
+  [`EBIC(`*`<GCMSdeco>`*`)`](https://tomwenseleers.github.io/GCMSprime/reference/gcmsDeco.md)
+  [`MBIC(`*`<GCMSdeco>`*`)`](https://tomwenseleers.github.io/GCMSprime/reference/gcmsDeco.md)
+  [`print(`*`<GCMSdeco>`*`)`](https://tomwenseleers.github.io/GCMSprime/reference/gcmsDeco.md)
   : Deconvolve a GC/MS chromatogram and export its compound spectra
 - [`fitted(`*`<GCMSbatch>`*`)`](https://tomwenseleers.github.io/GCMSprime/reference/GCMSbatch.md)
   [`coef(`*`<GCMSbatch>`*`)`](https://tomwenseleers.github.io/GCMSprime/reference/GCMSbatch.md)
@@ -30,40 +30,40 @@
   recovery
 - [`plot(`*`<GCMSdeco>`*`)`](https://tomwenseleers.github.io/GCMSprime/reference/plot.GCMSdeco.md)
   : Plot GC/MS signals, compound profiles and recovered spectra
-- [`write_GCMS_cdf()`](https://tomwenseleers.github.io/GCMSprime/reference/write_GCMS_cdf.md)
+- [`writeGCMSCDF()`](https://tomwenseleers.github.io/GCMSprime/reference/writeGCMSCDF.md)
   : Write a chromatogram matrix as an ANDI-MS CDF file
 
 ## Import and inspect spectral libraries
 
-- [`read_msp()`](https://tomwenseleers.github.io/GCMSprime/reference/read_msp.md)
-  [`open_library()`](https://tomwenseleers.github.io/GCMSprime/reference/read_msp.md)
-  [`print(`*`<GCMSlibrary>`*`)`](https://tomwenseleers.github.io/GCMSprime/reference/read_msp.md)
+- [`readMSP()`](https://tomwenseleers.github.io/GCMSprime/reference/readMSP.md)
+  [`openLibrary()`](https://tomwenseleers.github.io/GCMSprime/reference/readMSP.md)
+  [`print(`*`<GCMSlibrary>`*`)`](https://tomwenseleers.github.io/GCMSprime/reference/readMSP.md)
   : Import a mass spectral library
-- [`read_gcms_id()`](https://tomwenseleers.github.io/GCMSprime/reference/read_gcms_id.md)
+- [`readGCMSID()`](https://tomwenseleers.github.io/GCMSprime/reference/readGCMSID.md)
   : Import a GCMS-ID predicted spectral library
-- [`library_metadata()`](https://tomwenseleers.github.io/GCMSprime/reference/library_metadata.md)
+- [`libraryMetadata()`](https://tomwenseleers.github.io/GCMSprime/reference/libraryMetadata.md)
   : Inspect spectral-library metadata
 - [`spectra()`](https://tomwenseleers.github.io/GCMSprime/reference/spectra.md)
   : Extract spectral-library peaks or a sparse mass matrix
-- [`retention_indices()`](https://tomwenseleers.github.io/GCMSprime/reference/retention_indices.md)
+- [`retentionIndices()`](https://tomwenseleers.github.io/GCMSprime/reference/retentionIndices.md)
   : Extract retention indices and their provenance
 
 ## Calibrate retention indices and identify compounds
 
-- [`calibrate_ri()`](https://tomwenseleers.github.io/GCMSprime/reference/calibrate_ri.md)
-  [`predict(`*`<RIcalibration>`*`)`](https://tomwenseleers.github.io/GCMSprime/reference/calibrate_ri.md)
-  [`print(`*`<RIcalibration>`*`)`](https://tomwenseleers.github.io/GCMSprime/reference/calibrate_ri.md)
+- [`calibrateRI()`](https://tomwenseleers.github.io/GCMSprime/reference/calibrateRI.md)
+  [`predict(`*`<RIcalibration>`*`)`](https://tomwenseleers.github.io/GCMSprime/reference/calibrateRI.md)
+  [`print(`*`<RIcalibration>`*`)`](https://tomwenseleers.github.io/GCMSprime/reference/calibrateRI.md)
   : Calibrate retention indices from an n-alkane standard
-- [`annotate_ri()`](https://tomwenseleers.github.io/GCMSprime/reference/annotate_ri.md)
+- [`annotateRI()`](https://tomwenseleers.github.io/GCMSprime/reference/annotateRI.md)
   : Add alkane-calibrated retention indices without a library search
-- [`library_search()`](https://tomwenseleers.github.io/GCMSprime/reference/library_search.md)
-  [`as.data.frame(`*`<GCMSmatches>`*`)`](https://tomwenseleers.github.io/GCMSprime/reference/library_search.md)
-  [`print(`*`<GCMSmatches>`*`)`](https://tomwenseleers.github.io/GCMSprime/reference/library_search.md)
+- [`librarySearch()`](https://tomwenseleers.github.io/GCMSprime/reference/librarySearch.md)
+  [`as.data.frame(`*`<GCMSmatches>`*`)`](https://tomwenseleers.github.io/GCMSprime/reference/librarySearch.md)
+  [`print(`*`<GCMSmatches>`*`)`](https://tomwenseleers.github.io/GCMSprime/reference/librarySearch.md)
   : Identify deconvoluted spectra using retention indices and spectral
   libraries
-- [`library_ion_weights()`](https://tomwenseleers.github.io/GCMSprime/reference/library_ion_weights.md)
+- [`libraryIonWeights()`](https://tomwenseleers.github.io/GCMSprime/reference/libraryIonWeights.md)
   : Estimate ion-rarity weights from a spectral library
-- [`identify_compounds()`](https://tomwenseleers.github.io/GCMSprime/reference/identify_compounds.md)
+- [`identifyCompounds()`](https://tomwenseleers.github.io/GCMSprime/reference/identifyCompounds.md)
   : Annotate recovered GC/MS compounds and export library matches
 
 ## Shared tools and package overview

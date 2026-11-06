@@ -31,7 +31,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">GCMSprime</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -160,7 +160,7 @@ Kratz (1963)</a>. <a href="https://webbook.nist.gov/chemistry/gc-ri/" class="ext
 standard RI conventions</a>. Use a ladder acquired with the sample’s
 column and chromatographic programme.</p>
 <p>The Excel Run sheet records the width source and timing convention.
-<code><a href="../reference/GCMSdeco.html">GCMSdeco()</a></code> reuses its stored standard PSF automatically
+<code><a href="../reference/gcmsDeco.html">gcmsDeco()</a></code> reuses its stored standard PSF automatically
 when identification is requested.</p>
 </div>
 <div class="section level2">
@@ -226,8 +226,8 @@ geometric metric property changes, while retrieval accuracy stays the
 same. The native search shares the ranking key, avoiding extra rounding
 ties from <code><a href="https://rdrr.io/r/base/Trig.html" class="external-link">acos()</a></code>.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">w</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/library_ion_weights.html">library_ion_weights</a></span><span class="op">(</span><span class="va">lib</span><span class="op">)</span></span>
-<span><span class="va">matches</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/library_search.html">library_search</a></span><span class="op">(</span><span class="va">fit</span>, <span class="va">lib</span>, calibration<span class="op">=</span><span class="va">cal</span>, phase<span class="op">=</span><span class="st">"DB5"</span>,</span>
+<code class="sourceCode R"><span><span class="va">w</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/libraryIonWeights.html">libraryIonWeights</a></span><span class="op">(</span><span class="va">lib</span><span class="op">)</span></span>
+<span><span class="va">matches</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/librarySearch.html">librarySearch</a></span><span class="op">(</span><span class="va">fit</span>, <span class="va">lib</span>, calibration<span class="op">=</span><span class="va">cal</span>, phase<span class="op">=</span><span class="st">"DB5"</span>,</span>
 <span>  ri_tolerance<span class="op">=</span><span class="fl">30</span>, method<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"angular"</span>, <span class="st">"stein_scott_angular"</span><span class="op">)</span>,</span>
 <span>  ion_weights<span class="op">=</span><span class="va">w</span>, n_matches<span class="op">=</span><span class="fl">5</span><span class="op">)</span></span></code></pre></div>
 <div class="section level3">
@@ -280,20 +280,20 @@ total. <code>reference_total</code> and <code>reference_count</code>
 show the effective comparison convention, and
 <code>library_mass_coverage</code> records acquisition coverage. For an
 L1-normalized matrix, supply its original totals through
-<code>pseudocount=</code>. A <code>GCMSdeco</code> fit supplies them
+<code>pseudocount=</code>. A <code>gcmsDeco</code> fit supplies them
 automatically. Explicit count tags also preserve totals through MSP
 export and re-import.</p>
 <p>Scores run from 0 to 1000, with larger values better. Angular scores
 are <span class="math inline">1000(1-2\theta/\pi)</span>; distances
 remain in radians. Probability and count-based scores follow the
-definitions in <a href="../reference/library_search.html">library_search()</a>. Compare
+definitions in <a href="../reference/librarySearch.html">librarySearch()</a>. Compare
 scores within a method and weighting convention.</p>
 </div>
 </div>
 <div class="section level2">
 <h2 id="ion-uniqueness-weights">Ion uniqueness weights<a class="anchor" aria-label="anchor" href="#ion-uniqueness-weights"></a>
 </h2>
-<p><a href="../reference/library_ion_weights.html">library_ion_weights()</a>
+<p><a href="../reference/libraryIonWeights.html">libraryIonWeights()</a>
 computes smoothed inverse-document-frequency weights. If <span class="math inline">L</span> nonempty reference spectra are available
 and <span class="math inline">d_j</span> contain ion <span class="math inline">j</span>,</p>
 <p><span class="math display">
@@ -306,10 +306,10 @@ controls this threshold. <code>power</code> sets <span class="math inline">\alph
 the usual inverse-document-frequency factor. All search methods accept
 the same reusable weight vector.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">w</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/library_ion_weights.html">library_ion_weights</a></span><span class="op">(</span><span class="va">lib</span>, mass<span class="op">=</span><span class="fl">33</span><span class="op">:</span><span class="fl">550</span>, min_relative<span class="op">=</span><span class="fl">.01</span>, power<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">w</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/libraryIonWeights.html">libraryIonWeights</a></span><span class="op">(</span><span class="va">lib</span>, mass<span class="op">=</span><span class="fl">33</span><span class="op">:</span><span class="fl">550</span>, min_relative<span class="op">=</span><span class="fl">.01</span>, power<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">w</span>, <span class="st">"frequency"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">hits</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/library_search.html">library_search</a></span><span class="op">(</span><span class="va">fit</span>, <span class="va">lib</span>, calibration<span class="op">=</span><span class="va">cal</span>, phase<span class="op">=</span><span class="st">"DB5"</span>,</span>
+<span><span class="va">hits</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/librarySearch.html">librarySearch</a></span><span class="op">(</span><span class="va">fit</span>, <span class="va">lib</span>, calibration<span class="op">=</span><span class="va">cal</span>, phase<span class="op">=</span><span class="st">"DB5"</span>,</span>
 <span>  method<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"multinomial"</span>, <span class="st">"angular"</span><span class="op">)</span>, ion_weights<span class="op">=</span><span class="va">w</span>,</span>
 <span>  reference_count<span class="op">=</span><span class="st">"query"</span>, n_matches<span class="op">=</span><span class="fl">5</span><span class="op">)</span></span></code></pre></div>
 <p>Frequency estimation reads SQLite records in bounded batches and uses

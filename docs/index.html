@@ -31,7 +31,7 @@
 
     <a class="navbar-brand me-2" href="index.html">GCMSprime</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -95,7 +95,7 @@ R · Full mass spectra · CDF input · MSP &amp; Excel output
 <p><img class="l0-hero-logo" src="logo-dark.svg" alt="GCMSprime hex logo showing resolved chromatographic peaks and their mass spectra" width="240" height="280"></p>
 </div>
 <div class="l0-stat-grid">
-<p><a href="articles/gcms-deconvolution.html"><strong>Deconvolve</strong><span>Resolve overlapping compounds and recover their spectra</span></a> <a href="reference/GCMSdeco.html"><strong>Quantify</strong><span>Integrated areas, fitted profiles and complete reports</span></a> <a href="articles/library-search.html"><strong>Identify</strong><span>Fast spectral matching with column-specific retention indices</span></a></p>
+<p><a href="articles/gcms-deconvolution.html"><strong>Deconvolve</strong><span>Resolve overlapping compounds and recover their spectra</span></a> <a href="reference/gcmsDeco.html"><strong>Quantify</strong><span>Integrated areas, fitted profiles and complete reports</span></a> <a href="articles/library-search.html"><strong>Identify</strong><span>Fast spectral matching with column-specific retention indices</span></a></p>
 </div>
 <p>A GC–MS run records mixtures of ions whenever compounds overlap in time. GCMSprime separates these signals into elution profiles and full mass spectra, then integrates each resolved compound. It accepts ANDI-MS CDF files and writes an MSP library of the recovered spectra and an Excel quantification table when requested. For a sample series, it aligns retention times and shares spectra across related occurrences.</p>
 <p>An alkane ladder can calibrate peak shapes and retention indices. Supplying a spectral library adds ranked candidate matches, with the retention-index agreement and the reference source recorded alongside each score.</p>
@@ -112,7 +112,7 @@ R · Full mass spectra · CDF input · MSP &amp; Excel output
 <p>One call estimates the response shape, smooth background, compound profiles, full mass spectra and integrated areas, then writes NIST-compatible MSP and Excel reports. An alkane ladder can calibrate the PSF and retention indices.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tomwenseleers.github.io/GCMSprime/">GCMSprime</a></span><span class="op">)</span></span>
-<span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/GCMSdeco.html">GCMSdeco</a></span><span class="op">(</span><span class="st">"sample.cdf"</span>, <span class="st">"sample.msp"</span>, xlsx_file<span class="op">=</span><span class="st">"sample.xlsx"</span>,</span>
+<span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/gcmsDeco.html">gcmsDeco</a></span><span class="op">(</span><span class="st">"sample.cdf"</span>, <span class="st">"sample.msp"</span>, xlsx_file<span class="op">=</span><span class="st">"sample.xlsx"</span>,</span>
 <span>  alkanes_file<span class="op">=</span><span class="st">"alkanes.cdf"</span>, precluster<span class="op">=</span><span class="fl">32L</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit</span>, type<span class="op">=</span><span class="st">"lines"</span>, file<span class="op">=</span><span class="st">"sample_traces.pdf"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit</span>, type<span class="op">=</span><span class="st">"heatmap"</span>, file<span class="op">=</span><span class="st">"sample_heatmaps.pdf"</span><span class="op">)</span></span>
@@ -127,11 +127,11 @@ R · Full mass spectra · CDF input · MSP &amp; Excel output
 </h3>
 <p>The bundled cuticular-hydrocarbon window illustrates recovered elution profiles and spectra. This short-window example uses a supplied PSF dictionary and a constant background; individual compound shapes are then refined.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">GCMS_data1</span>, package<span class="op">=</span><span class="st">"logconNMF"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="reference/write_GCMS_cdf.html">write_GCMS_cdf</a></span><span class="op">(</span><span class="va">GCMS_data1</span>, <span class="st">"GCMS_data1.cdf"</span><span class="op">)</span></span>
-<span><span class="va">example_fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/GCMSdeco.html">GCMSdeco</a></span><span class="op">(</span><span class="st">"GCMS_data1.cdf"</span>, <span class="st">"GCMS_data1.msp"</span>,</span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">gcmsData1</span>, package<span class="op">=</span><span class="st">"logconNMF"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/writeGCMSCDF.html">writeGCMSCDF</a></span><span class="op">(</span><span class="va">gcmsData1</span>, <span class="st">"GCMS_data1.cdf"</span><span class="op">)</span></span>
+<span><span class="va">example_fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/gcmsDeco.html">gcmsDeco</a></span><span class="op">(</span><span class="st">"GCMS_data1.cdf"</span>, <span class="st">"GCMS_data1.msp"</span>,</span>
 <span>  nwindows<span class="op">=</span><span class="fl">1L</span>, baseline_df<span class="op">=</span><span class="fl">1L</span>, precluster<span class="op">=</span><span class="fl">16L</span>, correlation<span class="op">=</span><span class="st">"auto"</span>, ncores<span class="op">=</span><span class="fl">8L</span>,</span>
-<span>  psf_control<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>kernel_est<span class="op">=</span><span class="fu">logconNMF</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/logconNMF/man/convkernel.html" class="external-link">convkernel</a></span><span class="op">(</span><span class="st">"gaussian"</span>, <span class="fl">65L</span>,</span>
+<span>  psf_control<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>kernel_est<span class="op">=</span><span class="fu">logconNMF</span><span class="fu">::</span><span class="fu"><a href="https://tomwenseleers.github.io/logconNMF/reference/convKernel.html" class="external-link">convKernel</a></span><span class="op">(</span><span class="st">"gaussian"</span>, <span class="fl">65L</span>,</span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>sigma<span class="op">=</span><span class="fl">8</span><span class="op">)</span><span class="op">)</span>, maxiter<span class="op">=</span><span class="fl">0L</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><a href="articles/gcms-deconvolution.html#cuticular-hydrocarbons"><img src="reference/figures/gcms-data1-profiles-spectra.png" alt="Recovered elution profiles and spectra for six co-eluting hydrocarbons"></a></p>
 </div>
@@ -148,7 +148,7 @@ R · Full mass spectra · CDF input · MSP &amp; Excel output
 </h2>
 <p>Point to a directory containing sample-group folders and a <code>standards/</code> subdirectory with alkane calibrations. Acquisition timestamps determine run order. The coupled model aligns compounds and shares their spectra while retaining sample-specific profiles, backgrounds and areas.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">experiment</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/GCMSdeco.html">GCMSdeco</a></span><span class="op">(</span><span class="st">"chromatograms"</span>, output_dir<span class="op">=</span><span class="st">"experiment_results"</span>,</span>
+<code class="sourceCode R"><span><span class="va">experiment</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/gcmsDeco.html">gcmsDeco</a></span><span class="op">(</span><span class="st">"chromatograms"</span>, output_dir<span class="op">=</span><span class="st">"experiment_results"</span>,</span>
 <span>  precluster<span class="op">=</span><span class="fl">32L</span>, batch<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>plots<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">experiment</span><span class="op">$</span><span class="va">samples</span></span>
 <span><span class="va">experiment</span><span class="op">$</span><span class="va">areas</span></span></code></pre></div>
@@ -160,8 +160,8 @@ R · Full mass spectra · CDF input · MSP &amp; Excel output
 </h2>
 <p><strong>Open and commercial libraries can be imported.</strong> MoNA and Golm MSP collections, GCMS-ID CSV predictions, and OpenChrom-exported Agilent or Shimadzu libraries are supported. Large catalogues can remain in indexed SQLite storage.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">lib</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/read_msp.html">read_msp</a></span><span class="op">(</span><span class="st">"library.msp"</span>, backend<span class="op">=</span><span class="st">"sqlite"</span>, db_file<span class="op">=</span><span class="st">"library.sqlite"</span><span class="op">)</span></span>
-<span><span class="va">identified</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/GCMSdeco.html">GCMSdeco</a></span><span class="op">(</span><span class="st">"sample.cdf"</span>, <span class="st">"identified.msp"</span>,</span>
+<code class="sourceCode R"><span><span class="va">lib</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/readMSP.html">readMSP</a></span><span class="op">(</span><span class="st">"library.msp"</span>, backend<span class="op">=</span><span class="st">"sqlite"</span>, db_file<span class="op">=</span><span class="st">"library.sqlite"</span><span class="op">)</span></span>
+<span><span class="va">identified</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/gcmsDeco.html">gcmsDeco</a></span><span class="op">(</span><span class="st">"sample.cdf"</span>, <span class="st">"identified.msp"</span>,</span>
 <span>  xlsx_file<span class="op">=</span><span class="st">"identified.xlsx"</span>, alkanes_file<span class="op">=</span><span class="st">"alkanes.cdf"</span>, library<span class="op">=</span><span class="va">lib</span>,</span>
 <span>  search<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>phase<span class="op">=</span><span class="st">"DB5"</span>, ri_tolerance<span class="op">=</span><span class="fl">30</span>, n_matches<span class="op">=</span><span class="fl">5</span>,</span>
 <span>              method<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"stein_scott"</span>, <span class="st">"hellinger"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
@@ -172,7 +172,7 @@ R · Full mass spectra · CDF input · MSP &amp; Excel output
 <h2 id="citation">Citation<a class="anchor" aria-label="anchor" href="#citation"></a>
 </h2>
 <p>An article describing the methods implemented in GCMSprime is in preparation. If you use the package before the article is formally published, we would appreciate a citation to the package:</p>
-<p>Wenseleers T, Vanderaa C (2026). <em>GCMSprime: Scalable and Automated GC–MS Deconvolution, Quantification, and Spectral Library Search in R</em>. R package version 0.1.0, <a href="https://tomwenseleers.github.io/GCMSprime/" class="uri">https://tomwenseleers.github.io/GCMSprime/</a>.</p>
+<p>Wenseleers T, Vanderaa C (2026). <em>GCMSprime: Scalable and Automated GC–MS Deconvolution, Quantification, and Spectral Library Search in R</em>. R package version 0.1.0.9000, <a href="https://tomwenseleers.github.io/GCMSprime/" class="uri">https://tomwenseleers.github.io/GCMSprime/</a>.</p>
 <p>The <a href="authors.html#citation">Authors and Citation page</a> also provides the citation in BibTeX format. Please also cite the methodological sources linked in the help pages where relevant.</p>
 </div>
 <div class="section level2">

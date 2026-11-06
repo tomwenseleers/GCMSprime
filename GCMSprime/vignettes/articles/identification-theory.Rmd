@@ -48,7 +48,7 @@ predict(cal, c(10, 20, 30))
 
 This smooth calibration extends the alkane-index construction of [van den Dool & Kratz (1963)](https://doi.org/10.1016/S0021-9673(01)80947-X). [NIST describes the standard RI conventions](https://webbook.nist.gov/chemistry/gc-ri/). Use a ladder acquired with the sample's column and chromatographic programme.
 
-The Excel Run sheet records the width source and timing convention. `GCMSdeco()` reuses its stored standard PSF automatically when identification is requested.
+The Excel Run sheet records the width source and timing convention. `gcmsDeco()` reuses its stored standard PSF automatically when identification is requested.
 
 ## Column-specific retention constraints
 
@@ -86,8 +86,8 @@ C_w(a,b)=\frac{\sum_j w_j a_jb_j}
 With fixed positive weights, this is geodesic distance between the unit vectors obtained from \(\sqrt w\,a\) and \(\sqrt w\,b\), with the Stein–Scott transform added when requested. It satisfies the triangle inequality. Zero weights omit ions, and a nonzero weighted norm is required. Since intensities are nonnegative, \(0\leq\theta_w\leq\pi/2\). Angular distance ranks references in the same order as its cosine counterpart: the geometric metric property changes, while retrieval accuracy stays the same. The native search shares the ranking key, avoiding extra rounding ties from `acos()`.
 
 ```{r, eval=FALSE}
-w <- library_ion_weights(lib)
-matches <- library_search(fit, lib, calibration=cal, phase="DB5",
+w <- libraryIonWeights(lib)
+matches <- librarySearch(fit, lib, calibration=cal, phase="DB5",
   ri_tolerance=30, method=c("angular", "stein_scott_angular"),
   ion_weights=w, n_matches=5)
 ```
@@ -128,13 +128,13 @@ With \(M=N\), it simplifies to
 
 Thus balanced multinomial deviance has the same ranking as weighted Jensen–Shannon, with its absolute scale determined by the sample's retained pseudocount. At a fixed \(N\), it is symmetric in the spectral shapes. Each ion contributes a nonnegative Jensen gap. Nonconstant weights give an importance-weighted composite divergence; uniform weights and known totals give the ordinary multinomial likelihood-ratio statistic. Native evaluation uses nonnegative scalar gaps and a local series near equality, avoiding cancellation amplified by large counts.
 
-`query_total` preserves the sample total; `library_total` records the reference's stored/restored total. `reference_total` and `reference_count` show the effective comparison convention, and `library_mass_coverage` records acquisition coverage. For an L1-normalized matrix, supply its original totals through `pseudocount=`. A `GCMSdeco` fit supplies them automatically. Explicit count tags also preserve totals through MSP export and re-import.
+`query_total` preserves the sample total; `library_total` records the reference's stored/restored total. `reference_total` and `reference_count` show the effective comparison convention, and `library_mass_coverage` records acquisition coverage. For an L1-normalized matrix, supply its original totals through `pseudocount=`. A `gcmsDeco` fit supplies them automatically. Explicit count tags also preserve totals through MSP export and re-import.
 
-Scores run from 0 to 1000, with larger values better. Angular scores are \(1000(1-2\theta/\pi)\); distances remain in radians. Probability and count-based scores follow the definitions in [library_search()](../reference/library_search.html). Compare scores within a method and weighting convention.
+Scores run from 0 to 1000, with larger values better. Angular scores are \(1000(1-2\theta/\pi)\); distances remain in radians. Probability and count-based scores follow the definitions in [librarySearch()](../reference/librarySearch.html). Compare scores within a method and weighting convention.
 
 ## Ion uniqueness weights
 
-[library_ion_weights()](../reference/library_ion_weights.html) computes smoothed inverse-document-frequency weights. If \(L\) nonempty reference spectra are available and \(d_j\) contain ion \(j\),
+[libraryIonWeights()](../reference/libraryIonWeights.html) computes smoothed inverse-document-frequency weights. If \(L\) nonempty reference spectra are available and \(d_j\) contain ion \(j\),
 
 \[
 w_j\propto\left[1+\log\frac{L+1}{d_j+1}\right]^\alpha.
@@ -143,10 +143,10 @@ w_j\propto\left[1+\log\frac{L+1}{d_j+1}\right]^\alpha.
 Weights are normalized to mean one. An ion is counted when it reaches at least 1% of the acquired-bin base peak; `min_relative` controls this threshold. `power` sets \(\alpha\), default 1. For cosine matching, `power=2` corresponds to multiplying spectral amplitudes by the usual inverse-document-frequency factor. All search methods accept the same reusable weight vector.
 
 ```{r, eval=FALSE}
-w <- library_ion_weights(lib, mass=33:550, min_relative=.01, power=1)
+w <- libraryIonWeights(lib, mass=33:550, min_relative=.01, power=1)
 attr(w, "frequency")
 
-hits <- library_search(fit, lib, calibration=cal, phase="DB5",
+hits <- librarySearch(fit, lib, calibration=cal, phase="DB5",
   method=c("multinomial", "angular"), ion_weights=w,
   reference_count="query", n_matches=5)
 ```

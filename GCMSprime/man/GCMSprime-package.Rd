@@ -11,13 +11,13 @@
 Chromatogram deconvolution, compound spectra, integrated areas and reproducible reports, built on sparse log-concave matrix factorization. Spectral library tools preserve chemical metadata and retention-index provenance.
 }
 \details{
-\code{\link{GCMSdeco}} resolves overlapping GC-MS signals from a single
+\code{\link{gcmsDeco}} resolves overlapping GC-MS signals from a single
 CDF file or a directory of related samples. It returns fitted peak profiles,
 full spectra and integrated areas, with MSP and optional Excel output.
 Directory fits align samples and report a common compound list.
 
-Use \code{\link{calibrate_ri}} to estimate retention indices from alkane
-standards and \code{\link{identify_compounds}} to rank candidates from
+Use \code{\link{calibrateRI}} to estimate retention indices from alkane
+standards and \code{\link{identifyCompounds}} to rank candidates from
 a reference library. A ranked match records spectral and retention-index
 agreement for inspection.
 }

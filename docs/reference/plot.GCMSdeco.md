@@ -36,7 +36,7 @@ plot(
 - x:
 
   A fitted
-  [`GCMSdeco()`](https://tomwenseleers.github.io/GCMSprime/reference/GCMSdeco.md)
+  [`gcmsDeco()`](https://tomwenseleers.github.io/GCMSprime/reference/gcmsDeco.md)
   object.
 
 - type:
@@ -104,7 +104,7 @@ plot(
 - gamma:
 
   Positive heatmap contrast exponent, default .13 as in
-  [`plotmat()`](https://tomwenseleers.github.io/L0glm/reference/plotmat.html).
+  [`plotMat()`](https://tomwenseleers.github.io/L0glm/reference/plotMat.html).
 
 - residual_limit:
 
@@ -130,7 +130,7 @@ Heatmaps show the observed signal, observed signal minus modeled
 background, fitted chromatogram and Pearson residuals. Spline background
 and any known offset are subtracted in the second heatmap and grey line
 traces. Signal heatmaps use the
-[`plotmat()`](https://tomwenseleers.github.io/L0glm/reference/plotmat.html)
+[`plotMat()`](https://tomwenseleers.github.io/L0glm/reference/plotMat.html)
 black-blue-green-yellow-orange-red palette and truncate negative
 corrected intensities at zero. Pearson residuals use blue-black-red for
 negative-zero-positive deviations, without an intensity transform.
@@ -143,14 +143,14 @@ unit-L1 spectra.
 
 ## See also
 
-[`GCMSdeco()`](https://tomwenseleers.github.io/GCMSprime/reference/GCMSdeco.md),
-[`logconNMF::logconNMF()`](https://rdrr.io/pkg/logconNMF/man/logconNMF-package.html)
+[`gcmsDeco()`](https://tomwenseleers.github.io/GCMSprime/reference/gcmsDeco.md),
+[`logconNMF::logconNMF()`](https://tomwenseleers.github.io/logconNMF/reference/logconNMF.html)
 
 ## Examples
 
 ``` r
 if (FALSE) { # \dontrun{
-fit <- GCMSdeco("beer.cdf", "beer.msp", xlsx_file="beer.xlsx")
+fit <- gcmsDeco("beer.cdf", "beer.msp", xlsx_file="beer.xlsx")
 plot(fit, type="heatmap", file="beer_heatmaps.pdf")
 plot(fit, type="lines", file="beer_traces.pdf", minutes_per_panel=2.5)
 plot(fit, type="spectra", file="beer_spectra.pdf",
