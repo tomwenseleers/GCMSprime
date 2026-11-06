@@ -24,7 +24,10 @@ comparison with methods that return aligned retention times.}
 \item{ncores}{Requested maximum number of local threads or workers. AMDIS is serial.}
 \item{control}{Named list of backend-specific argument lists. For external software,
 set the executable path in \code{exe} if it is absent from PATH. The
-README lists the other settings and software requirements.}
+README lists the other settings and software requirements. For
+\code{"xcms+CAMERA"}, \code{detection$fwhm} sets the xcms filter width in
+seconds, \code{fwhm_grouping} sets CAMERA's retention-time grouping
+arguments, and \code{grouping = FALSE} uses FWHM grouping alone.}
 \item{timeout}{Timeout in seconds for each external command.}
 \item{rt_tolerance}{Maximum absolute retention-time discrepancy in minutes for a match.}
 \item{min_cosine}{Minimum cosine similarity between nominal-mass spectra.}

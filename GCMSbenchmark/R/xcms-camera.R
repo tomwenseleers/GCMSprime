@@ -9,7 +9,8 @@ bench_xcms_camera <- function(files,out,ncores,control,timeout,dots) {
   config <- file.path(out,"settings.rds")
   result <- file.path(out,"xcms-camera.rds")
   saveRDS(list(files=files,libraries=.libPaths(),workers=workers,
-    min_ions=min_ions,detection=control$detection,grouping=control$grouping),config)
+    min_ions=min_ions,detection=control$detection,fwhm_grouping=control$fwhm_grouping,
+    grouping=control$grouping),config)
   rscript <- file.path(R.home("bin"),if (.Platform$OS.type=="windows") "Rscript.exe" else "Rscript")
   run <- bench_time(run_logged(rscript,c("--vanilla",adapter_asset("run-xcms-camera.R"),
     config,result),out,file.path(out,"run.log"),timeout))
