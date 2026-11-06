@@ -7,3 +7,4 @@ codex_sandbox/
 *.so
 *.tar.gz
 *.Rcheck/
+.Rproj.user
