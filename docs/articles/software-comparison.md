@@ -1,87 +1,60 @@
 # Comparison with other software
 
-A coeluting compound contributes several ion traces with the same
-elution profile. A single chromatogram already contains that
-information. Across a batch, repeated spectra add evidence, while
-retention time, concentration and peak shape can vary. The workflows
-below use different parts of this information to separate components.
+GCMSprime is the only workflow in this comparison that combines an
+**estimated time-varying point-spread function (PSF)** with
+**compound-specific peak shapes**, **grouped peak selection across mass
+channels** and a **noise-aware information criterion** for the final
+compound set.
 
-| Workflow | How components are resolved and counted | Background and noise | How samples are used | Access and source |
-|:---|:---|:---|:---|:---|
-| GCMSprime | A peak-shape dictionary supplies candidate peaks. A penalized likelihood selects rank with nonnegative spectra and log-concave profiles. | The model fits a smooth baseline and estimates quasi-Poisson overdispersion by default. | Fits one sample directly or shares spectra across a batch, with disk-backed refinement. [Mathematical basis](https://tomwenseleers.github.io/GCMSprime/articles/algorithm.md) | Free, GPL open source. [Repository](https://github.com/tomwenseleers/GCMSprime) |
-| GNPS/MSHub | Within each aligned retention-time group, NMF separates the matrix of peak integrals. Increases in explained sum of squares guide the component count. | Noise filtering and baseline correction precede factorization. | Uses multiple samples for deconvolution. GNPS can also use externally deconvoluted spectra for networking. [Aksenov et al. (2021)](https://doi.org/10.1038/s41587-020-0700-3) | Free hosted workflow with a GNPS account. Public code under the repository’s nonprofit-use licence. [Source](https://github.com/CCMS-UCSD/GNPS_Workflows/tree/master/mshub-gc) · [Licence](https://github.com/CCMS-UCSD/GNPS_Workflows/blob/733ed89372c3754a4c4d132319da5b4313c47288/LICENSE) |
-| PARADISe | Fits candidate PARAFAC2 models within retention intervals. The published workflow includes reviewing the intervals and component counts. | Baseline and tail contributions can enter as factors in the least-squares model. | Fits multiple chromatograms with a common spectral mode and the PARAFAC2 cross-product constraint. [Johnsen et al. (2017)](https://doi.org/10.1016/j.chroma.2017.04.052) · [Protocol](https://doi.org/10.21203/rs.3.pex-2143/v1) | Free Community and paid Professional editions, distributed as applications. [Kromath](https://www.kromath.com/) |
-| mzmine / ADAP-GC | Detected ion peaks define local windows. ADAP-GC 4.0 uses clustering-assisted multivariate curve resolution. | Peak detection and the selected module define preprocessing and separation. | Deconvolves individual chromatograms before batch feature alignment. [Smirnov et al. (2019)](https://doi.org/10.1021/acs.analchem.9b01424) · [mzmine guide](https://mzmine.github.io/mzmine_documentation/latest/module_docs/featdet_spectraldeconvolutiongc/spectraldeconvolutiongc.html) | Free mzmine Community licence for eligible academic users. Commercial use requires a paid plan. [MIT-licensed public source](https://github.com/mzmine/mzmine#license) · [Plans](https://mzio.io/plans/) |
-| MS-DIAL | Uses model peaks to extract EI spectra from detected peaks. | Smoothing, peak detection and deconvolution settings guide local extraction. | Extracts spectra per chromatogram, then aligns features across files. [Lai et al. (2018)](https://doi.org/10.1038/nmeth.4512) | Free download and LGPL-3 source. Vendor readers can have separate terms. [MsdialWorkbench](https://github.com/systemsomicslab/MsdialWorkbench#source-code-license) |
-| XCMS + CAMERA | XCMS detects features. CAMERA uses retention time, peak shape and cross-sample evidence to build pseudospectra. | Upstream peak detection and integration supply the feature list. | Originally developed for LC–MS annotation. Groups detected features across samples. [Kuhl et al. (2012)](https://doi.org/10.1021/ac202450g) | Free, GPL open source. [XCMS](https://bioconductor.org/packages/release/bioc/html/xcms.html) · [CAMERA](https://bioconductor.org/packages/release/bioc/html/CAMERA.html) |
-| eRah | Local covariance and orthogonal signal deconvolution separate coeluting signals. | Noise filtering and baseline removal precede deconvolution. | Deconvolves individual chromatograms, then aligns spectra and can recover missing entries. [Domingo-Almenara et al. (2016)](https://doi.org/10.1021/acs.analchem.6b02927) | Free, GPL open source. [CRAN](https://cran.r-project.org/web/packages/erah/index.html) |
-| AMDIS | Component perception identifies candidates. Selected ion chromatograms supply model shapes for spectrum extraction. | Local noise and background estimates guide component perception and extraction. | Deconvolves individual chromatograms and supports batch processing. [Stein (1999)](https://doi.org/10.1016/S1044-0305%2899%2900047-1) | Free standalone binary. NIST distributes the application without public source. [NIST download](https://www.chemdata.nist.gov/dokuwiki/doku.php?id=chemdata%3Aamdis) |
+The time-varying PSF supplies candidate peaks. Grouped feature selection
+uses the evidence across all ions to call each candidate, and refinement
+gives each compound its own log-concave elution profile. The final model
+fits a smooth background jointly with the peaks and uses the chosen
+noise family in the rank criterion. For overdispersed detector counts,
+the default is quasi-Poisson and the criterion is quasi-GIC.
+[Mathematical
+basis](https://tomwenseleers.github.io/GCMSprime/articles/algorithm.md)
 
-## What MSHub deconvolves
+| Workflow | How it deconvolves and where that can limit recovery | Access |
+|:---|:---|:---|
+| GCMSprime | Fits scan-level profiles and full spectra, with a compound-count penalty. A batch can share spectra while each sample retains its own profiles. | Free, GPL open source. [Repository](https://github.com/tomwenseleers/GCMSprime) |
+| MS-DIAL | Extracts spectra from detected model peaks within each run, then aligns the features. Smoothing, detection thresholds and the deconvolution window affect which components are recovered. [GC–MS tutorial](https://github.com/systemsomicslab/mtbinfo.github.io/blob/master/MS-DIAL/tutorial.md) | Free, LGPL-3 source. Some vendor readers have separate terms. [MsdialWorkbench](https://github.com/systemsomicslab/MsdialWorkbench#source-code-license) |
+| mzmine / ADAP-GC | The benchmark’s GC-EI module groups resolved ions by retention time and shape similarity. Pseudospectra depend on upstream detection, the grouping thresholds and the minimum number of ions. Batch alignment follows extraction. [GC-EI guide](https://mzmine.github.io/mzmine_documentation/latest/module_docs/featdet_spectraldeconvolutiongc/spectraldeconvolutiongc.html) | Free Community licence for eligible academic users. Commercial use requires a paid plan. [Public source](https://github.com/mzmine/mzmine#license) · [Plans](https://mzio.io/plans/) |
+| xcms + CAMERA | Detects ion peaks first and then groups them into pseudospectra. Filter widths and grouping rules affect the coverage of weak and coeluting peaks. CAMERA was developed for LC–MS feature annotation. [Kuhl et al. (2012)](https://doi.org/10.1021/ac202450g) | Free, GPL open source. [xcms](https://bioconductor.org/packages/xcms) · [CAMERA](https://bioconductor.org/packages/CAMERA) |
+| eRah | Uses local covariance and orthogonal signal deconvolution after filtering and baseline removal. Recovery depends on width and signal thresholds. Cross-sample alignment follows per-sample deconvolution. [eRah manual](https://cran.r-project.org/web/packages/erah/vignettes/erah-manual.html) | Free, GPL open source. [CRAN](https://cran.r-project.org/package=erah) |
+| AMDIS | Uses representative ion traces as model peak shapes within each chromatogram. Component width, sensitivity and shape settings govern the calls and extracted spectra. [NIST guide](https://chemdata.nist.gov/mass-spc/amdis/docs/amdis.pdf) | Free standalone binary. [NIST distribution](https://chemdata.nist.gov/dokuwiki/doku.php?id=chemdata%3Aamdis) |
+| GNPS/MSHub | Requires a sample series for its NMF workflow. It factorizes aligned peak integrals, so the model resolves spectra and abundances from variation across samples and drops the scan-level profile information. [Aksenov et al. (2021)](https://doi.org/10.1038/s41587-020-0700-3) · [Workflow guide](https://ccms-ucsd.github.io/GNPSDocumentation/gc-ms-deconvolution/) | Free hosted workflow with a GNPS account. Public source under the repository’s nonprofit-use licence. [Source](https://github.com/CCMS-UCSD/GNPS_Workflows/tree/master/mshub-gc) · [Licence](https://github.com/CCMS-UCSD/GNPS_Workflows/blob/733ed89372c3754a4c4d132319da5b4313c47288/LICENSE) |
+| PARADISe | Fits PARAFAC2 within retention intervals. Intervals and ranks can require review, and the constant cross-product constraint restricts how peak overlap can change across samples. [Johnsen et al. (2017)](https://doi.org/10.1016/j.chroma.2017.04.052) · [Protocol](https://doi.org/10.21203/rs.3.pex-2143/v1) | Free Community and paid Professional editions. [Kromath](https://www.kromath.com/) |
 
-The GNPS implementation first groups aligned peaks by retention time.
-For each group it forms a samples-by-ions matrix of peak integrals. Its
-NMF gives a sample abundance and a mass spectrum for each component in
-the group. The rank search compares successive improvements in explained
-sum of squares. With no scan axis in its input, the factorization cannot
-estimate a time-resolved elution profile for each component in each
-sample or require its ions to follow one common profile. The NMF
-therefore has no component profile on which to impose unimodality.
-[MSHub
-implementation](https://github.com/CCMS-UCSD/GNPS_Workflows/blob/733ed89372c3754a4c4d132319da5b4313c47288/mshub-gc/tools/mshub-gc/proc/preproc/peakdetect.py#L859-L995)
+## Benchmark on 16 simulated chromatograms
 
-MSHub chooses rank automatically using fixed rules in the code. It
-rounds the percentage of explained sum of squares, stops when adding a
-component improves it by fewer than five percentage points, and has an
-additional stopping rule for two consecutive equal improvements. In
-GCMSprime the rank score uses a penalty on the number of components and
-occurrences, evaluated with the selected noise model. [MSHub rank
-search](https://github.com/CCMS-UCSD/GNPS_Workflows/blob/733ed89372c3754a4c4d132319da5b4313c47288/mshub-gc/tools/mshub-gc/proc/preproc/peakdetect.py#L947-L995)
-· [GCMSprime rank
-criterion](https://tomwenseleers.github.io/GCMSprime/articles/algorithm.md)
+The simulation contains 48 compounds with retention-time drift,
+concentration-dependent peak shapes and partial presence across samples.
+Each chromatogram has 1,200 scans and 258 mass channels. GCMSprime
+estimated the PSF from the chromatograms and used quasi-Poisson with the
+simulation’s dispersion of 2. It recovered all 380 true peak occurrences
+with zero false calls.
 
-The matrix has rank at most one for a single sample. Even with multiple
-samples, two coeluting compounds with a fixed abundance ratio contribute
-a rank-one matrix. If their sample abundance vectors are a and ca and
-their spectra are s_1 and s_2, their summed contribution is a(s_1 + c
-s_2)^\mathsf{T}. Distinct profiles across scans can supply separation
-evidence within a single run. GCMSprime retains this scan-level
-information in the fit.
+[![Estimated versus true peak areas on log10 axes for seven GC–MS
+workflows](../reference/figures/simulated-16-area-predictions.png)](https://tomwenseleers.github.io/GCMSprime/reference/figures/simulated-16-area-predictions.png)
 
-The public MSHub code switches to maximum-based spectrum extraction
-below five samples. The GNPS guide recommends another deconvolution
-workflow below about ten files. Networking and library search can then
-use the spectra produced by that external tool. [MSHub sample-count
-check](https://github.com/CCMS-UCSD/GNPS_Workflows/blob/733ed89372c3754a4c4d132319da5b4313c47288/mshub-gc/tools/mshub-gc/proc/preproc/peakdetect.py#L744-L761)
-· [GNPS
-guide](https://ccms-ucsd.github.io/GNPSDocumentation/gc-ms-deconvolution/)
+The area plots show positive one-to-one matches within ±7.2 seconds and
+with a nominal-mass cosine of at least 0.70. Estimated areas use the
+units reported by the engine. Each panel shows adjusted R² and a 95%
+prediction interval for the log–log regression. The dashed 1:1 line
+applies to integrated counts.
 
-## What the coupled model changes
+[![Best-hit spectral cosine distributions with individual matches and a
+logit
+axis](../reference/figures/simulated-16-spectral-violin.png)](https://tomwenseleers.github.io/GCMSprime/reference/figures/simulated-16-spectral-violin.png)
 
-For each component in each sample, GCMSprime multiplies a single elution
-profile by its shared mass spectrum. Every ion contributed by the
-component therefore follows the same profile in that sample. The
-profiles may change width, shift or tail across samples. Coupling enters
-the fit through the shared spectrum, and the rank penalty counts that
-spectrum once, with a separate amplitude for each occurrence. The
-objective and constraints are given in the [algorithm
-article](https://tomwenseleers.github.io/GCMSprime/articles/algorithm.md).
+For each true occurrence, the violin plot shows its best spectral hit
+anywhere in the sample and its best hit within ±7.2 seconds. A recovered
+spectrum can be the best hit for several occurrences. The counts
+indicate how many of the 380 occurrences had a candidate.
 
-PARAFAC uses a common profile for each component up to amplitude.
-PARAFAC2 allows different profiles but constrains their cross-products
-to be constant across samples after separating the sample amplitudes. If
-a broadening acid peak changes its normalized overlap with a
-neighbouring compound, that constant cross-product assumption restricts
-the fit. GCMSprime allows the overlap to vary while requiring each
-profile to be log-concave. The [beer
-example](https://tomwenseleers.github.io/GCMSprime/articles/gcms-deconvolution.html#beer-volatiles-and-a-broad-acid-peak)
-shows a broad, asymmetric acid peak in a single run.
-
-With count noise, fitting the baseline together with the peaks lets the
-model use the original intensity and its mean-dependent variance. A
-background-subtracted trace is useful for display. The count model
-itself uses the sum of background and peak contributions.
-
-For measured runtime, compound recovery and memory layout, see the
-[16-sample simulation and full-beer
-application](https://tomwenseleers.github.io/GCMSprime/articles/multisample.md).
+[GCMSbenchmark](https://github.com/tomwenseleers/GCMSprime/tree/master/GCMSbenchmark#benchmark-on-16-simulated-chromatograms)
+includes the simulation recipe, engine settings, scoring tables and code
+to recreate both figures. The [multisample
+tutorial](https://tomwenseleers.github.io/GCMSprime/articles/multisample.md)
+gives the GCMSprime call, timing and disk-backed workflow.

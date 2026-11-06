@@ -120,8 +120,9 @@ for the complete coupled workflow on two beer chromatograms with about
 15,000 scans and 518 ions each.
 
 The [software comparison](https://tomwenseleers.github.io/GCMSprime/articles/software-comparison.html)
-describes how other workflows resolve coelution, estimate component counts
-and use information across samples.
+shows peak-area accuracy and spectral recovery for seven workflows on these
+simulated chromatograms. [GCMSbenchmark](GCMSbenchmark#benchmark-on-16-simulated-chromatograms)
+includes the simulation, engine settings, scoring tables and plotting code.
 
 ## Spectral library search
 

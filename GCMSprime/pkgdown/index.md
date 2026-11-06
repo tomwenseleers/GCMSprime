@@ -28,6 +28,9 @@ An alkane ladder can calibrate peak shapes and retention indices. Supplying a
 spectral library adds ranked candidate matches, with the retention-index
 agreement and the reference source recorded alongside each score.
 
+See the [16-sample benchmark](#comparison-with-other-software) for peak-area
+and spectral recovery across seven workflows.
+
 ## Installation
 
 ```r
@@ -136,15 +139,26 @@ about 15,000 scans and 518 ions, on the same 16-logical-core laptop.
 
 ## Comparison with other software
 
-GCMSprime can deconvolve one chromatogram or jointly estimate shared spectra
-across a batch. GNPS/MSHub's deconvolution is a multisample method by design.
-Its public implementation switches to spectrum extraction below five
-samples. The workflow guide recommends other deconvolution tools below
-about ten files. [MSHub source](https://github.com/CCMS-UCSD/GNPS_Workflows/blob/733ed89372c3754a4c4d132319da5b4313c47288/mshub-gc/tools/mshub-gc/proc/preproc/peakdetect.py#L744-L761) · [GNPS workflow guide](https://ccms-ucsd.github.io/GNPSDocumentation/gc-ms-deconvolution/)
+In a comparison of seven workflows on **16 simulated chromatograms**,
+GCMSprime recovered **all 380 true peak occurrences with zero false calls**.
+Its integrated areas agreed closely with the true areas, with an adjusted
+R² of **0.99997** on the log₁₀ scale.
 
-The [software comparison](articles/software-comparison.html) describes how
-MSHub, PARADISe, mzmine/ADAP-GC, MS-DIAL, XCMS/CAMERA, eRah and AMDIS resolve
-coelution, determine the number of components and handle multiple samples.
+[![Estimated versus true peak areas for seven GC–MS workflows](reference/figures/simulated-16-area-predictions.png)](reference/figures/simulated-16-area-predictions.png)
+
+Points show matched peak areas in each engine’s native units. The shaded
+regions are 95% prediction intervals. The dashed 1:1 line applies to
+methods reporting integrated counts.
+
+[![Best spectral cosine hits by workflow, with individual points on a logit axis](reference/figures/simulated-16-spectral-violin.png)](reference/figures/simulated-16-spectral-violin.png)
+
+The right panel shows the best spectrum within ±7.2 seconds of each
+true peak. The labels give the median cosine and the number of true
+occurrences with a candidate.
+
+[Reproduce the simulation, fits and figures with GCMSbenchmark](https://github.com/tomwenseleers/GCMSprime/tree/master/GCMSbenchmark#benchmark-on-16-simulated-chromatograms)
+or see the [software comparison](articles/software-comparison.html)
+for the methods and scoring details.
 
 ## Spectral library search
 

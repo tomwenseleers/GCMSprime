@@ -100,6 +100,7 @@ R · Full mass spectra · CDF input · MSP &amp; Excel output
 </div>
 <p>A GC–MS run records mixtures of ions whenever compounds overlap in time. GCMSprime separates these signals into elution profiles and full mass spectra, then integrates each resolved compound. It accepts ANDI-MS CDF files and writes an MSP library of the recovered spectra and an Excel quantification table when requested. For a sample series, it aligns retention times and shares spectra across related occurrences.</p>
 <p>An alkane ladder can calibrate peak shapes and retention indices. Supplying a spectral library adds ranked candidate matches, with the retention-index agreement and the reference source recorded alongside each score.</p>
+<p>See the <a href="#comparison-with-other-software">16-sample benchmark</a> for peak-area and spectral recovery across seven workflows.</p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
@@ -160,8 +161,12 @@ R · Full mass spectra · CDF input · MSP &amp; Excel output
 <div class="section level2">
 <h2 id="comparison-with-other-software">Comparison with other software<a class="anchor" aria-label="anchor" href="#comparison-with-other-software"></a>
 </h2>
-<p>GCMSprime can deconvolve one chromatogram or jointly estimate shared spectra across a batch. GNPS/MSHub’s deconvolution is a multisample method by design. Its public implementation switches to spectrum extraction below five samples. The workflow guide recommends other deconvolution tools below about ten files. <a href="https://github.com/CCMS-UCSD/GNPS_Workflows/blob/733ed89372c3754a4c4d132319da5b4313c47288/mshub-gc/tools/mshub-gc/proc/preproc/peakdetect.py#L744-L761" class="external-link">MSHub source</a> · <a href="https://ccms-ucsd.github.io/GNPSDocumentation/gc-ms-deconvolution/" class="external-link">GNPS workflow guide</a></p>
-<p>The <a href="articles/software-comparison.html">software comparison</a> describes how MSHub, PARADISe, mzmine/ADAP-GC, MS-DIAL, XCMS/CAMERA, eRah and AMDIS resolve coelution, determine the number of components and handle multiple samples.</p>
+<p>In a comparison of seven workflows on <strong>16 simulated chromatograms</strong>, GCMSprime recovered <strong>all 380 true peak occurrences with zero false calls</strong>. Its integrated areas agreed closely with the true areas, with an adjusted R² of <strong>0.99997</strong> on the log₁₀ scale.</p>
+<p><a href="reference/figures/simulated-16-area-predictions.png"><img src="reference/figures/simulated-16-area-predictions.png" alt="Estimated versus true peak areas for seven GC–MS workflows"></a></p>
+<p>Points show matched peak areas in each engine’s native units. The shaded regions are 95% prediction intervals. The dashed 1:1 line applies to methods reporting integrated counts.</p>
+<p><a href="reference/figures/simulated-16-spectral-violin.png"><img src="reference/figures/simulated-16-spectral-violin.png" alt="Best spectral cosine hits by workflow, with individual points on a logit axis"></a></p>
+<p>The right panel shows the best spectrum within ±7.2 seconds of each true peak. The labels give the median cosine and the number of true occurrences with a candidate.</p>
+<p><a href="https://github.com/tomwenseleers/GCMSprime/tree/master/GCMSbenchmark#benchmark-on-16-simulated-chromatograms" class="external-link">Reproduce the simulation, fits and figures with GCMSbenchmark</a> or see the <a href="articles/software-comparison.html">software comparison</a> for the methods and scoring details.</p>
 </div>
 <div class="section level2">
 <h2 id="spectral-library-search">Spectral library search<a class="anchor" aria-label="anchor" href="#spectral-library-search"></a>
