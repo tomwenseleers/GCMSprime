@@ -30,7 +30,7 @@ channels.
 ``` r
 
 library(L0glm)
-library(L0nmf)
+library(logconNMF)
 library(GCMSprime)
 data(GCMS_data1)
 data(GCMS_data2)
@@ -71,7 +71,7 @@ fit2$seconds                      # elapsed time by stage
 
 These short windows use a supplied Gaussian PSF as the initial profile
 dictionary. `maxiter=0L` keeps this PSF fixed;
-[`splogconNMF()`](https://tomwenseleers.github.io/L0nmf/reference/splogconNMF.html)
+[`logconNMF()`](https://rdrr.io/pkg/logconNMF/man/logconNMF-package.html)
 then refines the individual compound profiles. For a full chromatogram,
 the default `nwindows=10L` with positive `maxiter` estimates a smoothly
 varying PSF. An alkane standard can supply its initial calibration
@@ -81,7 +81,7 @@ chosen low-df cubic spline.
 
 ### Estimate the PSF automatically
 
-[`estimate_psf()`](https://tomwenseleers.github.io/L0nmf/reference/estimate_psf.html)
+[`estimate_psf()`](https://rdrr.io/pkg/logconNMF/man/estimate_psf.html)
 provides one interface for standard calibration and blind sample
 estimation. Both bundled matrices include a full alkane TIC in
 `attr(Y, "alkanes_TIC")`; its numeric names give retention times in
@@ -104,9 +104,9 @@ blind <- estimate_psf(GCMS_data2, standard = NULL, method = "blind",
 `precluster=FALSE` uses all ion channels, `1L` uses their total, and
 `32L` uses at most 32 size-adjusted groups. The same identity-link noise
 models are available as in
-[`splogconNMF()`](https://tomwenseleers.github.io/L0nmf/reference/splogconNMF.html),
+[`logconNMF()`](https://rdrr.io/pkg/logconNMF/man/logconNMF-package.html),
 including negative binomial and Gamma models. The [PSF help
-page](https://tomwenseleers.github.io/L0nmf/reference/estimate_psf.html)
+page](https://tomwenseleers.github.io/logconNMF/reference/estimate_psf.html)
 describes likelihood fitting, noise scaling and aggregation.
 
 [`GCMSdeco()`](https://tomwenseleers.github.io/GCMSprime/reference/GCMSdeco.md)
@@ -248,7 +248,7 @@ file.
 ## Fit a supplied PSF design directly
 
 Use
-[`splogconNMF()`](https://tomwenseleers.github.io/L0nmf/reference/splogconNMF.html)
+[`logconNMF()`](https://rdrr.io/pkg/logconNMF/man/logconNMF-package.html)
 when a suitable PSF design and background basis are already available.
 This also gives direct control over the background for a short
 chromatographic window:
@@ -258,7 +258,7 @@ chromatographic window:
 Y <- GCMS_data1
 X <- convmatrix(convkernel("gaussian", 65L, list(sigma = 8)), nrow(Y))
 B <- matrix(1, nrow(Y), 1L)          # constant background in this short window
-nmf <- splogconNMF(X, Y, background = B,
+nmf <- logconNMF(Y, X = X, background = B,
   family = quasipoisson("identity"), precluster = 16L,
   correlation = "auto", ncores = 8L)
 nmf$rank
@@ -273,15 +273,15 @@ constructed with
 Quasipoisson is useful for instrumental intensities with extra
 variation; Poisson, Gaussian, negative binomial and Gamma signal models
 are also available. See [the likelihood and shape-constraint
-details](https://tomwenseleers.github.io/L0nmf/articles/algorithm.html).
+details](https://tomwenseleers.github.io/logconNMF/articles/algorithm.html).
 
 ## Understand the method
 
 [GC/MS deconvolution: mathematical
 basis](https://tomwenseleers.github.io/GCMSprime/articles/algorithm.md)
 explains known and estimated PSFs, compound-dependent profiles, noise,
-background and best rank tuning. [L0nmf’s mathematical
-article](https://tomwenseleers.github.io/L0nmf/articles/algorithm.html)
+background and best rank tuning. [logconNMF’s mathematical
+article](https://tomwenseleers.github.io/logconNMF/articles/algorithm.html)
 gives the objective functions, constraints and pseudocode.
 
 The experimental data are described in [Van Oystaeyen et

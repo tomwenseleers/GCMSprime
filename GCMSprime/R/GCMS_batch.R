@@ -60,7 +60,7 @@ GCMS_batch_files <- function(directory,output_dir,sample_order=NULL,alkanes_file
 #' Supply a directory to [GCMSdeco()] to process an experiment. Sample group
 #' subdirectories are retained, and `standards/` contains alkane calibrations.
 #' The closest standard in acquisition time calibrates each sample. Results
-#' share spectra through [L0nmf::coupledNMF()] while keeping original scan grids.
+#' share spectra through [logconNMF::logconNMF()] while keeping original scan grids.
 #'
 #' @name GCMSbatch
 #' @param x,object A multisample result returned by [GCMSdeco()].
@@ -77,7 +77,7 @@ GCMS_batch_files <- function(directory,output_dir,sample_order=NULL,alkanes_file
 #' `batch=list(sample_order=...)`.
 #'
 #' `batch` supports `method="cosine"` or `"hellinger"`, `align=TRUE`,
-#' `coupling=list()` for [L0nmf::coupledNMF()] controls, `sample_order=NULL`,
+#' `coupling=list()` for [logconNMF::logconNMF()] controls, `sample_order=NULL`,
 #' `exposure=NULL`, `resume=FALSE`, `plots=FALSE`, `workers=NULL` and `cache=TRUE`.
 #' `workers` limits concurrent samples within the total `ncores` budget.
 #' `cache` controls the aggregated-observation RAM cache during coupled fitting.
@@ -92,7 +92,7 @@ GCMS_batch_files <- function(directory,output_dir,sample_order=NULL,alkanes_file
 #'
 #' Samples run concurrently with their own sparse PSF and smooth background. A
 #' common channel map is learned from summed, time-binned chromatograms; pass a
-#' saved [L0nmf::channel_groups()] map as `precluster` to reuse reference groups.
+#' saved [logconNMF::channel_groups()] map as `precluster` to reuse reference groups.
 #' Matching uses the shared aggregate space. Original-channel
 #' means and the likelihood are used for coupled updates. Shared spectra are
 #' exported on the union of recorded mass ranges; unmeasured channels receive
@@ -126,7 +126,7 @@ GCMS_batch_files <- function(directory,output_dir,sample_order=NULL,alkanes_file
 #' experiment$areas
 #' plot(experiment,sample=1,type="lines")
 #' }
-#' @seealso [GCMSdeco()], [L0nmf::coupledNMF()], [write_GCMS_cdf()]
+#' @seealso [GCMSdeco()], [logconNMF::logconNMF()], [write_GCMS_cdf()]
 #' @md
 NULL
 
@@ -185,11 +185,11 @@ GCMSdeco_directory <- function(cdf_file,msp_file=NULL,family,lambda,nwindows,
       descriptors[[s]]<-x
     }
     coupling<-utils::modifyList(list(cache=batch$cache,workers=batch$workers),batch$coupling,keep.null=TRUE)
-    coupled_time<-system.time(common<-L0nmf::coupledNMF(descriptors,family=family,lambda=lambda,
+    coupled_time<-system.time(common<-logconNMF::logconNMF(descriptors,family=family,lambda=lambda,
       path=tempfile("coupled_",tmpdir=output_dir),precluster=effective,
       method=batch$method,align=batch$align,ncores=ncores,control=coupling,verbose=verbose))[["elapsed"]]
     for(s in seq_along(paths)) {
-      fit<-readRDS(paths[s]);fit$model<-L0nmf::sampleNMF(common,s);fit$mass<-axis
+      fit<-readRDS(paths[s]);fit$model<-logconNMF::sampleNMF(common,s);fit$mass<-axis
       fit$compounds<-GCMS_compounds(fit$model,fit$time,fit$sample_name)
       fit$compounds$coupled_compound<-fit$model$compound_id[fit$compounds$compound]
       fit$compounds$integrated_area<-fit$model$integrated_area[fit$compounds$compound]
@@ -425,5 +425,5 @@ GCMS_batch_groups <- function(manifest,metadata,precluster,time_range,ncores) {
     pool[ix,js]<-pool[ix,js,drop=FALSE]+z
   }
   if(k>=length(axis))return(NULL)
-  L0nmf::channel_groups(pool,k,as.character(axis),ncores=ncores)
+  logconNMF::channel_groups(pool,k,as.character(axis),ncores=ncores)
 }

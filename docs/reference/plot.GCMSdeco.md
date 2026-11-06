@@ -144,7 +144,7 @@ unit-L1 spectra.
 ## See also
 
 [`GCMSdeco()`](https://tomwenseleers.github.io/GCMSprime/reference/GCMSdeco.md),
-[`L0nmf::splogconNMF()`](https://tomwenseleers.github.io/L0nmf/reference/splogconNMF.html)
+[`logconNMF::logconNMF()`](https://rdrr.io/pkg/logconNMF/man/logconNMF-package.html)
 
 ## Examples
 

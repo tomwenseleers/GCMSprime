@@ -20,7 +20,7 @@
 #'   `Double`. Scan times are converted to seconds in the file. Every channel
 #'   is written in every scan, including exact zeros. The file's timestamp
 #'   records export time; acquisition metadata are left unspecified.
-#' @seealso [GCMSdeco()], [L0nmf::splogconNMF()]
+#' @seealso [GCMSdeco()], [logconNMF::logconNMF()]
 #' @examples
 #' \donttest{
 #' if (requireNamespace("ncdf4", quietly = TRUE)) {

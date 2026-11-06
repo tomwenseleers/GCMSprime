@@ -52,7 +52,7 @@ print(x, ...)
 
 - psf:
 
-  Optional calibrated PSF from L0nmf::estimate_psf(), or a list with
+  Optional calibrated PSF from logconNMF::estimate_psf(), or a list with
   psf_kernels (one kernel per row), psf_offsets in minutes and
   psf_timepoints (or peak_timepoints) in minutes. Its local width at the
   chosen height fraction supplies the small-peak duration. A single

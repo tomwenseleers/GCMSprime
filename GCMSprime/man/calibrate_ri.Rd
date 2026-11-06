@@ -33,7 +33,7 @@ column supplies local small-peak durations for timing sample profiles.}
 
 \item{control}{Named calibration controls, described below.}
 
-\item{psf}{Optional calibrated PSF from L0nmf::estimate_psf(), or a list with
+\item{psf}{Optional calibrated PSF from logconNMF::estimate_psf(), or a list with
 psf_kernels (one kernel per row), psf_offsets in minutes and psf_timepoints
 (or peak_timepoints) in minutes. Its local width at the chosen height fraction
 supplies the small-peak duration. A single kernel gives a constant duration.

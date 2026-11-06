@@ -13,7 +13,7 @@
 #'
 #' @keywords internal
 #' @import L0glm
-#' @import L0nmf
+#' @import logconNMF
 #' @importFrom Matrix sparseMatrix Diagonal colSums rowSums head tail
 #' @import stats graphics grDevices methods
 #' @importFrom utils data flush.console

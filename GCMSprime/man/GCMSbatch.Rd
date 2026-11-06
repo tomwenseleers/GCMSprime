@@ -59,7 +59,7 @@ thread allocation, output files and stage timings. Use
 Supply a directory to \code{\link[=GCMSdeco]{GCMSdeco()}} to process an experiment. Sample group
 subdirectories are retained, and \verb{standards/} contains alkane calibrations.
 The closest standard in acquisition time calibrates each sample. Results
-share spectra through \code{\link[L0nmf:coupledNMF]{L0nmf::coupledNMF()}} while keeping original scan grids.
+share spectra through \code{\link[logconNMF:logconNMF]{logconNMF::logconNMF()}} while keeping original scan grids.
 }
 \details{
 Directory layout can be \code{experiment/standards/alkanes.cdf},
@@ -70,7 +70,7 @@ If acquisition dates are absent, pass explicit relative sample paths in
 \code{batch=list(sample_order=...)}.
 
 \code{batch} supports \code{method="cosine"} or \code{"hellinger"}, \code{align=TRUE},
-\code{coupling=list()} for \code{\link[L0nmf:coupledNMF]{L0nmf::coupledNMF()}} controls, \code{sample_order=NULL},
+\code{coupling=list()} for \code{\link[logconNMF:logconNMF]{logconNMF::logconNMF()}} controls, \code{sample_order=NULL},
 \code{exposure=NULL}, \code{resume=FALSE}, \code{plots=FALSE}, \code{workers=NULL} and \code{cache=TRUE}.
 \code{workers} limits concurrent samples within the total \code{ncores} budget.
 \code{cache} controls the aggregated-observation RAM cache during coupled fitting.
@@ -85,7 +85,7 @@ of exported channels is applied.
 
 Samples run concurrently with their own sparse PSF and smooth background. A
 common channel map is learned from summed, time-binned chromatograms; pass a
-saved \code{\link[L0nmf:channel_groups]{L0nmf::channel_groups()}} map as \code{precluster} to reuse reference groups.
+saved \code{\link[logconNMF:channel_groups]{logconNMF::channel_groups()}} map as \code{precluster} to reuse reference groups.
 Matching uses the shared aggregate space. Original-channel
 means and the likelihood are used for coupled updates. Shared spectra are
 exported on the union of recorded mass ranges; unmeasured channels receive
@@ -117,5 +117,5 @@ plot(experiment,sample=1,type="lines")
 }
 }
 \seealso{
-\code{\link[=GCMSdeco]{GCMSdeco()}}, \code{\link[L0nmf:coupledNMF]{L0nmf::coupledNMF()}}, \code{\link[=write_GCMS_cdf]{write_GCMS_cdf()}}
+\code{\link[=GCMSdeco]{GCMSdeco()}}, \code{\link[logconNMF:logconNMF]{logconNMF::logconNMF()}}, \code{\link[=write_GCMS_cdf]{write_GCMS_cdf()}}
 }

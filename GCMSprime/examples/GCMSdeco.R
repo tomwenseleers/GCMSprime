@@ -1,4 +1,4 @@
-library(L0nmf)
+library(logconNMF)
 \dontrun{
 library(L0glm)
 data(GCMS_data1)
@@ -50,7 +50,7 @@ calibrated <- GCMSdeco(file.path(out, "GCMS_data2.cdf"),
 # Sixteen related samples, retaining all mass channels. Compounds occur in
 # half the samples on average, with retention drift and concentration-dependent
 # widths and tails. Here the simulated quasipoisson dispersion is known.
-library(L0nmf)
+library(logconNMF)
 sim <- simulate_GCMS_samples(samples=16L, n=1200L, k=48L,
   preset="time_area", presence=0.5, irregular=0, drift=2,
   family="quasipoisson", dispersion=2, seed=9118)

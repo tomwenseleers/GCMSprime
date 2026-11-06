@@ -1,5 +1,5 @@
 library(GCMSprime)
-library(L0nmf)
+library(logconNMF)
 
 benchmark_samples16 <- function(output = tempfile("GCMSprime_samples16_"),
                                 cores = c(1L, 8L, 16L)) {

@@ -129,7 +129,7 @@ Convex combinations of concave log profiles preserve log-concavity. Each
 candidate peak receives the interpolated shape for its retention region,
 giving a sparse, time-varying convolution design. The full-chromatogram
 default uses ten PSF anchors. See [PSF estimation in
-L0nmf](https://tomwenseleers.github.io/L0nmf/articles/estimate-psf.html)
+logconNMF](https://tomwenseleers.github.io/logconNMF/articles/estimate-psf.html)
 for the calibration and windowed-estimation algorithms.
 
 ## 3. Compound- and concentration-dependent PSFs
@@ -255,8 +255,8 @@ For speed, initialization and fusion can aggregate ion traces into at
 most 32 size-adjusted groups. The compound charge retains the original
 m, and final refinement and acceptance checks use every original
 channel. Thus the fitted spectra retain low-abundance diagnostic ions.
-The [L0nmf mathematical
-article](https://tomwenseleers.github.io/L0nmf/articles/algorithm.html)
+The [logconNMF mathematical
+article](https://tomwenseleers.github.io/logconNMF/articles/algorithm.html)
 gives the precise initialization, constrained solvers and pseudocode.
 
 ## 5. Modelled smooth background and flexible noise models
@@ -315,7 +315,7 @@ variation; their relationship also supports a lag-one covariance
 estimate. GCMSprime reuses the calibrated noise specification for PSF
 estimation and factorization. This keeps candidate-rank comparisons on a
 common noise scale. An optional negative NB2 `theta` start permits
-subsequent likelihood-based updates as documented in L0nmf.
+subsequent likelihood-based updates as documented in logconNMF.
 
 For temporally correlated scan noise, the working information adjustment
 \kappa=1+2\widehat\rho_1 increases the rank charge. The marginal
@@ -361,6 +361,18 @@ using pooled evidence from their occurrences. The coupled criterion
 counts a shared spectrum once and each detected occurrence’s amplitude
 separately.
 
+For G shared spectra and L detected sample–compound occurrences over m
+original mass channels, the joint objective is
+
+J=-2\sum_s\ell\_{\nu_s}(M_s;Y_s) +\kappa\lambda\_{\rm
+IC}\\(m-1)G+L+d\_\nu\\.
+
+The m-1 coordinates of each unit-sum spectrum and one amplitude per
+occurrence give the selection count. The term d\_\nu counts estimated
+noise parameters. For one sample, G=L=K gives the same mK compound count
+as in Section 3. The GIC preset for the joint fit uses the total scan
+count for both of its dimension inputs.
+
 Alignment retains each sample’s measured scan grid. Profile coordinates
 and bin widths transform with an area-preserving Jacobian. Known
 exposure can be supplied for integrated-count measurements; the default
@@ -376,8 +388,8 @@ reported as `NA`.
 
 See [multiple-sample
 deconvolution](https://tomwenseleers.github.io/GCMSprime/articles/multisample.md)
-for the directory workflow and [L0nmf’s coupled
-model](https://tomwenseleers.github.io/L0nmf/articles/algorithm.html#coupled-model)
+for the directory workflow and [logconNMF’s coupled
+model](https://tomwenseleers.github.io/logconNMF/articles/algorithm.html#coupled-model)
 for its objective and mathematical specification.
 
 ## 8. Identify the recovered compounds
@@ -419,5 +431,5 @@ independently across samples. Spectral contributions are then pooled in
 acquisition order. The spectral fusion queue retains unaffected
 candidates and refreshes only edges incident to a merged compound,
 preserving the greedy selection rule. These execution details and the
-complete objective are given in the [L0nmf
-algorithm](https://tomwenseleers.github.io/L0nmf/articles/algorithm.html#parallel-samples-and-bounded-memory-updates).
+complete objective are given in the [logconNMF
+algorithm](https://tomwenseleers.github.io/logconNMF/articles/algorithm.html#parallel-samples-and-bounded-memory-updates).

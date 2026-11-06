@@ -87,11 +87,11 @@ then refined.
 
 ``` r
 
-data(GCMS_data1, package="L0nmf")
+data(GCMS_data1, package="logconNMF")
 write_GCMS_cdf(GCMS_data1, "GCMS_data1.cdf")
 example_fit <- GCMSdeco("GCMS_data1.cdf", "GCMS_data1.msp",
   nwindows=1L, baseline_df=1L, precluster=16L, correlation="auto", ncores=8L,
-  psf_control=list(kernel_est=L0nmf::convkernel("gaussian", 65L,
+  psf_control=list(kernel_est=logconNMF::convkernel("gaussian", 65L,
     list(sigma=8)), maxiter=0L))
 ```
 

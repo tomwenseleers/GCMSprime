@@ -107,5 +107,5 @@ plot(fit, type="spectra", file="beer_spectra.pdf",
 }
 }
 \seealso{
-\code{\link[=GCMSdeco]{GCMSdeco()}}, \code{\link[L0nmf:splogconNMF]{L0nmf::splogconNMF()}}
+\code{\link[=GCMSdeco]{GCMSdeco()}}, \code{\link[logconNMF:logconNMF]{logconNMF::logconNMF()}}
 }

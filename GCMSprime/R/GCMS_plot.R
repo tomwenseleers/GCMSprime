@@ -100,7 +100,7 @@ residuals.GCMSdeco <- function(object,type=c("pearson","response"),
 #'   red vertical lines mark the selected compound apices. Spectral panels use
 #'   base-peak percentages. The Excel compound sheet places a compact spectrum
 #'   beside the integrated area; \code{coef(x,normalize="l1")} returns unit-L1 spectra.
-#' @seealso [GCMSdeco()], [L0nmf::splogconNMF()]
+#' @seealso [GCMSdeco()], [logconNMF::logconNMF()]
 #' @md
 #' @examples
 #' \dontrun{

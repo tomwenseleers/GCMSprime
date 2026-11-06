@@ -5,7 +5,7 @@ Supply a directory to
 to process an experiment. Sample group subdirectories are retained, and
 `standards/` contains alkane calibrations. The closest standard in
 acquisition time calibrates each sample. Results share spectra through
-[`L0nmf::coupledNMF()`](https://tomwenseleers.github.io/L0nmf/reference/coupledNMF.html)
+[`logconNMF::logconNMF()`](https://rdrr.io/pkg/logconNMF/man/logconNMF-package.html)
 while keeping original scan grids.
 
 ## Usage
@@ -92,7 +92,7 @@ paths in `batch=list(sample_order=...)`.
 
 `batch` supports `method="cosine"` or `"hellinger"`, `align=TRUE`,
 `coupling=list()` for
-[`L0nmf::coupledNMF()`](https://tomwenseleers.github.io/L0nmf/reference/coupledNMF.html)
+[`logconNMF::logconNMF()`](https://rdrr.io/pkg/logconNMF/man/logconNMF-package.html)
 controls, `sample_order=NULL`, `exposure=NULL`, `resume=FALSE`,
 `plots=FALSE`, `workers=NULL` and `cache=TRUE`. `workers` limits
 concurrent samples within the total `ncores` budget. `cache` controls
@@ -109,7 +109,7 @@ channels is applied.
 Samples run concurrently with their own sparse PSF and smooth
 background. A common channel map is learned from summed, time-binned
 chromatograms; pass a saved
-[`L0nmf::channel_groups()`](https://tomwenseleers.github.io/L0nmf/reference/channel_groups.html)
+[`logconNMF::channel_groups()`](https://rdrr.io/pkg/logconNMF/man/channel_groups.html)
 map as `precluster` to reuse reference groups. Matching uses the shared
 aggregate space. Original-channel means and the likelihood are used for
 coupled updates. Shared spectra are exported on the union of recorded
@@ -136,7 +136,7 @@ match; coupled refinement is recomputed.
 ## See also
 
 [`GCMSdeco()`](https://tomwenseleers.github.io/GCMSprime/reference/GCMSdeco.md),
-[`L0nmf::coupledNMF()`](https://tomwenseleers.github.io/L0nmf/reference/coupledNMF.html),
+[`logconNMF::logconNMF()`](https://rdrr.io/pkg/logconNMF/man/logconNMF-package.html),
 [`write_GCMS_cdf()`](https://tomwenseleers.github.io/GCMSprime/reference/write_GCMS_cdf.md)
 
 ## Examples

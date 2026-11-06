@@ -63,7 +63,7 @@ the simulated quasipoisson dispersion is supplied at its known value.
 
 ``` r
 
-sim <- L0nmf::simulate_GCMS_samples(samples=16L, n=1200L, k=48L,
+sim <- logconNMF::simulate_GCMS_samples(samples=16L, n=1200L, k=48L,
   preset="time_area", presence=0.5, irregular=0, drift=2,
   family="quasipoisson", dispersion=2, seed=9118)
 input <- tempfile("samples16_")
@@ -153,7 +153,7 @@ samples within the `ncores` budget.
 The same ion groups are used across samples for matching. They are
 learned from a pooled, time-binned chromatogram or supplied through
 `precluster` as a saved [channel
-map](https://tomwenseleers.github.io/L0nmf/reference/channel_groups.html),
+map](https://tomwenseleers.github.io/logconNMF/reference/channel_groups.html),
 for example one trained on reference spectra. Each sample’s PSF and scan
 grid remain separate.
 
@@ -166,7 +166,7 @@ fitted(experiment, sample=1L)
 ```
 
 The [coupled NMF
-tutorial](https://tomwenseleers.github.io/L0nmf/articles/coupled-nmf.html)
+tutorial](https://tomwenseleers.github.io/logconNMF/articles/coupled-nmf.html)
 gives the mathematical model, alignment, spectral grouping, local
 updates and simulation results. Its validation includes three samples
 with all 258 mass channels, differing scan grids,

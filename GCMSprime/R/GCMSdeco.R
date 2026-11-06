@@ -102,7 +102,7 @@ GCMS_write_msp <- function(model,time,mass,msp_file,compounds=NULL) {
       sprintf("; RI retention coordinate %.7g min (1%% onset plus half local narrow-peak width)",
         compounds$retention_coordinate[index])else ""
     c(paste0("Name: ",names[index]),annotation,sprintf("Pseudocount: %.15g",sum(s)),
-      sprintf("Comments: Sample %s; apex retention time %.7g min; integrated ion intensity %.9g; splogconNMF%s%s",
+      sprintf("Comments: Sample %s; apex retention time %.7g min; integrated ion intensity %.9g; logconNMF%s%s",
         compounds$sample[index],compounds$retention_time[index],sum(s),
         coordinate,
         if('ri_extrapolated'%in%names(compounds)&&isTRUE(compounds$ri_extrapolated[index]))
@@ -118,14 +118,14 @@ GCMS_write_msp <- function(model,time,mass,msp_file,compounds=NULL) {
 #' Deconvolve a GC/MS chromatogram and export its compound spectra
 #'
 #' Read an ANDI-MS netCDF chromatogram, estimate a smoothly time-varying point
-#' spread function, recover log-concave compounds with [L0nmf::splogconNMF()], and
+#' spread function, recover log-concave compounds with [logconNMF::logconNMF()], and
 #' write a NIST-compatible MSP spectral library. All original mass channels
 #' are retained in the final spectra.
 #'
 #' @param output_dir Directory for batch results; defaults to a sibling directory
 #'   named after the input folder with suffix `_GCMSprime`.
 #' @param coupled Share spectra and refine sample-specific profiles with
-#'   [L0nmf::coupledNMF()] for directory input.
+#'   [logconNMF::logconNMF()] for directory input.
 #' @param batch Named directory options; see [GCMSbatch].
 #' @param cdf_file A directory of sample subdirectories with a `standards`
 #'   subdirectory, or a local ANDI-MS \code{.cdf} path or HTTP(S) URL. The optional
@@ -144,9 +144,14 @@ GCMS_write_msp <- function(model,time,mass,msp_file,compounds=NULL) {
 #' @param normalize Spectral coefficient normalization: \code{"none"} returns
 #'   integrated channel intensities; \code{"l1"} gives a unit-sum spectrum per
 #'   compound, with its magnitude carried by the compound area.
-#' @param family Identity-link noise model accepted by [L0nmf::splogconNMF()].
+#' @param family Identity-link noise model accepted by [logconNMF::logconNMF()].
 #'   The default \code{quasipoisson("identity")} estimates one pooled dispersion
 #'   across channels, suitable for overdispersed instrumental intensities.
+#' @param lambda Information-criterion preset or a nonnegative numeric penalty.
+#'   For an individual chromatogram the numeric value is the total charge
+#'   per compound. The directory workflow uses this charge in each
+#'   initial fit. Its joint refinement uses the numeric value per selection
+#'   degree of freedom. Both charges precede any temporal adjustment.
 #' @param ncores Total logical-CPU budget. \code{NULL} uses physical cores.
 #'   Directory analyses run up to \code{min(samples,ncores)} sample workers,
 #'   dividing the native thread budget between them. With at least 16 samples,
@@ -157,7 +162,7 @@ GCMS_write_msp <- function(model,time,mass,msp_file,compounds=NULL) {
 #'   \code{1L} uses a shared PSF. The returned sparse design interpolates the
 #'   PSFs smoothly across the chromatogram.
 #' @param alkanes_file Optional ANDI-MS alkane-standard chromatogram. Isolated
-#'   peaks calibrate the initial PSF through [L0nmf::estimate_psf()], with automatic
+#'   peaks calibrate the initial PSF through [logconNMF::estimate_psf()], with automatic
 #'   support, sample refinement and resampling to the sample scan interval.
 #' @param time_range Optional increasing pair of sample retention-time bounds
 #'   in minutes. Infinite bounds are accepted. This can exclude the solvent
@@ -170,7 +175,7 @@ GCMS_write_msp <- function(model,time,mass,msp_file,compounds=NULL) {
 #'   \code{NULL} chooses a low-dimensional basis from the scan count and typical
 #'   PSF width; an integer of at least four fixes its dimension.
 #' @param psf_control Named PSF settings. Entries `method`, `standard`,
-#'   `precluster`, `weights` and `offset` are passed directly to [L0nmf::estimate_psf()].
+#'   `precluster`, `weights` and `offset` are passed directly to [logconNMF::estimate_psf()].
 #'   Other entries form its `control` list, for example
 #'   `list(kernel_est=psf, maxiter=0L)` keeps a supplied PSF fixed and
 #'   `list(L=61L, maxiter=8L, tol=1e-3)` estimates a PSF on the sample.
@@ -182,7 +187,7 @@ GCMS_write_msp <- function(model,time,mass,msp_file,compounds=NULL) {
 #'   calibration across samples, rebuilding each sparse design on its own grid.
 #'   The PSF uses the same noise family and fixed noise estimates as the final
 #'   factorization, with its information adjustment included in the weights.
-#' @inheritParams L0nmf::splogconNMF
+#' @inheritParams logconNMF::splogconNMF
 #' @param object,x A fitted \code{GCMSdeco} object.
 #'
 #' @details
@@ -209,7 +214,7 @@ GCMS_write_msp <- function(model,time,mass,msp_file,compounds=NULL) {
 #' are loaded from the CDF only when a plot needs them. Fitted signals are
 #' reconstructed from the factors; the observed matrix is released after fitting.
 #'
-#' **PSF and background.** [L0nmf::estimate_psf()] estimates constant or smoothly
+#' **PSF and background.** [logconNMF::estimate_psf()] estimates constant or smoothly
 #' time-varying PSFs from the sample, optionally starting from an alkane standard.
 #' Original channels, outcome groups and the total-ion signal are supported.
 #' Interpolated columns are projected to log concavity on their local support
@@ -219,7 +224,7 @@ GCMS_write_msp <- function(model,time,mass,msp_file,compounds=NULL) {
 #' Background coefficients are nonnegative and unpenalized. This keeps the
 #' baseline much smoother than an individual elution peak.
 #' The calibrated median PSF width also sets the guard for the final
-#' broad-profile fusion pass in [L0nmf::splogconNMF()]. Set
+#' broad-profile fusion pass in [logconNMF::logconNMF()]. Set
 #' \code{control=list(profile_fusion=FALSE)} to disable that pass.
 #'
 #' **Shared noise model.** Noise parameters are estimated once from the
@@ -227,7 +232,7 @@ GCMS_write_msp <- function(model,time,mass,msp_file,compounds=NULL) {
 #' weights include the information adjustment \eqn{1/\kappa}, where
 #' \eqn{\kappa=1+2\widehat\rho_1}. Aggregation adjusts the variance parameters
 #' according to the selected family; NB2 and ordinary Gamma use moment matching.
-#' See [L0nmf::estimate_psf()] for the distributional details. The returned
+#' See [logconNMF::estimate_psf()] for the distributional details. The returned
 #' `psf_working_weight` summarises the average Poisson-scale precision for
 #' comparing noise scales; the actual PSF likelihood uses the specified family.
 #'
@@ -236,7 +241,7 @@ GCMS_write_msp <- function(model,time,mass,msp_file,compounds=NULL) {
 #' original-channel cleanup checks deletions, local fusions and missed residual
 #' peaks using the complete compound-count criterion. Its diagnostics are in
 #' `model$cleanup`; `control=list(original_cleanup=FALSE)` skips it. See
-#' [L0nmf::splogconNMF()] for the selection criterion and shape constraints. The
+#' [logconNMF::logconNMF()] for the selection criterion and shape constraints. The
 #' backend uses a permissive component initialization, native log-concave
 #' profile/spectrum refinement, and final rank selection with the requested
 #' working-correlation adjustment. Small fragments contained in a broad peak
@@ -246,7 +251,7 @@ GCMS_write_msp <- function(model,time,mass,msp_file,compounds=NULL) {
 #' The
 #' spreadsheet and returned coefficient rows use increasing apex retention time. Rank selection,
 #' hard log concavity, censored Gamma intensities and compound-count information
-#' criteria follow [L0nmf::splogconNMF()].
+#' criteria follow [logconNMF::logconNMF()].
 #'
 #' @section Experimental GC/MS examples:
 #' The [GC/MS deconvolution tutorial](../articles/gcms-deconvolution.html)
@@ -283,7 +288,7 @@ GCMS_write_msp <- function(model,time,mass,msp_file,compounds=NULL) {
 #'   log-likelihood and information-criterion methods delegate to \code{model}.
 #' @references NIST MS Search user manual, section on NIST text format:
 #'   \url{https://chemdata.nist.gov/mass-spc/ms-search/docs/Ver20Man.pdf}.
-#' @seealso [write_GCMS_cdf()], [plot.GCMSdeco()], [L0nmf::splogconNMF()], [L0nmf::estimate_psf()], [L0glm_blind_deco()]
+#' @seealso [write_GCMS_cdf()], [plot.GCMSdeco()], [logconNMF::logconNMF()], [logconNMF::estimate_psf()], [L0glm_blind_deco()]
 #' @md
 #' @example examples/GCMSdeco.R
 #' @importFrom stats AIC BIC residuals
@@ -357,7 +362,8 @@ GCMSdeco <- function(cdf_file,msp_file=NULL,family=quasipoisson("identity"),lamb
   if(baseline_df %in% c(2L,3L)) stop("Use baseline_df=1 for a constant or at least 4 for a cubic spline.",call.=FALSE)
   if(baseline_df>n) stop("baseline_df exceeds the number of scans.",call.=FALSE)
   B<-if(baseline_df==1L) matrix(1,n,1L) else as.matrix(splines::bs(raw$time,df=baseline_df,intercept=TRUE))
-  model<-timed("factorization",splogconNMF(X,Y,family=family,lambda=lambda,background=B,precluster=precluster,
+  nmf_lambda<-if(is.numeric(lambda))lambda/ncol(Y) else lambda
+  model<-timed("factorization",logconNMF(Y,X=X,family=family,lambda=nmf_lambda,background=B,precluster=precluster,
     dispersion=spec$dispersion,theta=if(spec$name=="nb") spec$theta*(if(spec$theta_update) -1 else 1) else NULL,
     correlation=spec$correlation,ncores=ncores,control=control,verbose=verbose))
   model$spec$dispersion_estimated<-spec$dispersion_estimated

@@ -1,7 +1,7 @@
 test_that("retention indices export without changing the fitted model", {
   skip_if_not_installed('ncdf4');skip_if_not_installed('openxlsx')
   set.seed(57);n<-100L;m<-8L;kernel<-dnorm(-7:7,sd=1.5)
-  X<-L0nmf::convmatrix(kernel,n);S<-matrix(runif(2*m,1000,3000),2,m)
+  X<-logconNMF::convmatrix(kernel,n);S<-matrix(runif(2*m,1000,3000),2,m)
   directory<-tempfile();dir.create(directory);on.exit(unlink(directory,recursive=TRUE))
   cdf<-file.path(directory,'sample.cdf')
   write_GCMS_cdf(matrix(rpois(n*m,as.matrix(X[,c(28,72)]%*%S)+2),n,m),cdf,

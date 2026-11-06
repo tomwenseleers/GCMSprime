@@ -15,6 +15,6 @@
 
 The November 2026 benchmark audit used GCMSprime
 [`e10b8bf`](https://github.com/tomwenseleers/GCMSprime/commit/e10b8bf),
-L0nmf [`1c85840`](https://github.com/tomwenseleers/L0nmf/commit/1c85840)
+logconNMF [`1c85840`](https://github.com/tomwenseleers/logconNMF/commit/1c85840)
 and L0glm [`d7bdece`](https://github.com/tomwenseleers/L0glm/commit/d7bdece).
 The workstation and timing boundaries are specified in each tutorial.

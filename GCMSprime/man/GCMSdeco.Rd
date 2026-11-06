@@ -92,19 +92,22 @@ m/z; traces between the minimum and maximum recorded mass are retained.}
 \item{msp_file}{Output \code{.msp} path. Parent directories are created if
 necessary; an existing output file is replaced.}
 
-\item{family}{Identity-link noise model accepted by \code{\link[L0nmf:splogconNMF]{L0nmf::splogconNMF()}}.
+\item{family}{Identity-link noise model accepted by \code{\link[logconNMF:logconNMF]{logconNMF::logconNMF()}}.
 The default \code{quasipoisson("identity")} estimates one pooled dispersion
 across channels, suitable for overdispersed instrumental intensities.}
 
-\item{lambda}{\code{"gic"} (default), \code{"aic"}, \code{"bic"}, \code{"ebic"}, \code{"mbic"}, or
-a nonnegative numeric compound penalty. See Details for its scale.}
+\item{lambda}{Information-criterion preset or a nonnegative numeric penalty.
+For an individual chromatogram the numeric value is the total charge
+per compound. The directory workflow uses this charge in each
+initial fit. Its joint refinement uses the numeric value per selection
+degree of freedom. Both charges precede any temporal adjustment.}
 
 \item{nwindows}{Number of overlapping blind-PSF windows, default \code{10L}.
 \code{1L} uses a shared PSF. The returned sparse design interpolates the
 PSFs smoothly across the chromatogram.}
 
 \item{alkanes_file}{Optional ANDI-MS alkane-standard chromatogram. Isolated
-peaks calibrate the initial PSF through \code{\link[L0nmf:estimate_psf]{L0nmf::estimate_psf()}}, with automatic
+peaks calibrate the initial PSF through \code{\link[logconNMF:estimate_psf]{logconNMF::estimate_psf()}}, with automatic
 support, sample refinement and resampling to the sample scan interval.}
 
 \item{calibration_range}{Optional retention-time bounds in minutes for the
@@ -116,7 +119,7 @@ at least four basis functions.
 \code{NULL} chooses a low-dimensional basis from the scan count and typical
 PSF width; an integer of at least four fixes its dimension.}
 
-\item{precluster}{A saved \code{\link[L0nmf:channel_groups]{channel_groups()}} map shares the same aggregation
+\item{precluster}{A saved \code{\link[logconNMF:channel_groups]{channel_groups()}} map shares the same aggregation
 across analyses. \code{NULL} or \code{FALSE} uses every channel throughout. \code{TRUE}
 uses up to 32 groups; an integer supplies another maximum. Size-adjusted
 Poisson clustering, aggregation, selection and fusion operate in that
@@ -172,7 +175,7 @@ fit, with the remaining components and background held in an offset.
 fusion and residual-discovery pass. Set it to \code{FALSE} to skip that pass.}
 
 \item{psf_control}{Named PSF settings. Entries \code{method}, \code{standard},
-\code{precluster}, \code{weights} and \code{offset} are passed directly to \code{\link[L0nmf:estimate_psf]{L0nmf::estimate_psf()}}.
+\code{precluster}, \code{weights} and \code{offset} are passed directly to \code{\link[logconNMF:estimate_psf]{logconNMF::estimate_psf()}}.
 Other entries form its \code{control} list, for example
 \code{list(kernel_est=psf, maxiter=0L)} keeps a supplied PSF fixed and
 \code{list(L=61L, maxiter=8L, tol=1e-3)} estimates a PSF on the sample.
@@ -211,7 +214,7 @@ groups, per-sample exports and a consensus area table and spectral library.}
 named after the input folder with suffix \verb{_GCMSprime}.}
 
 \item{coupled}{Share spectra and refine sample-specific profiles with
-\code{\link[L0nmf:coupledNMF]{L0nmf::coupledNMF()}} for directory input.}
+\code{\link[logconNMF:logconNMF]{logconNMF::logconNMF()}} for directory input.}
 
 \item{batch}{Named directory options; see \link{GCMSbatch}.}
 
@@ -233,7 +236,7 @@ log-likelihood and information-criterion methods delegate to \code{model}.
 }
 \description{
 Read an ANDI-MS netCDF chromatogram, estimate a smoothly time-varying point
-spread function, recover log-concave compounds with \code{\link[L0nmf:splogconNMF]{L0nmf::splogconNMF()}}, and
+spread function, recover log-concave compounds with \code{\link[logconNMF:logconNMF]{logconNMF::logconNMF()}}, and
 write a NIST-compatible MSP spectral library. All original mass channels
 are retained in the final spectra.
 }
@@ -261,7 +264,7 @@ The returned object stores the factors and source CDF path. Observed data
 are loaded from the CDF only when a plot needs them. Fitted signals are
 reconstructed from the factors; the observed matrix is released after fitting.
 
-\strong{PSF and background.} \code{\link[L0nmf:estimate_psf]{L0nmf::estimate_psf()}} estimates constant or smoothly
+\strong{PSF and background.} \code{\link[logconNMF:estimate_psf]{logconNMF::estimate_psf()}} estimates constant or smoothly
 time-varying PSFs from the sample, optionally starting from an alkane standard.
 Original channels, outcome groups and the total-ion signal are supported.
 Interpolated columns are projected to log concavity on their local support
@@ -271,7 +274,7 @@ and normalized to unit sum. Their typical full width at half maximum,
 Background coefficients are nonnegative and unpenalized. This keeps the
 baseline much smoother than an individual elution peak.
 The calibrated median PSF width also sets the guard for the final
-broad-profile fusion pass in \code{\link[L0nmf:splogconNMF]{L0nmf::splogconNMF()}}. Set
+broad-profile fusion pass in \code{\link[logconNMF:logconNMF]{logconNMF::logconNMF()}}. Set
 \code{control=list(profile_fusion=FALSE)} to disable that pass.
 
 \strong{Shared noise model.} Noise parameters are estimated once from the
@@ -279,7 +282,7 @@ original channels and reused in PSF estimation and factorization. The PSF
 weights include the information adjustment \eqn{1/\kappa}, where
 \eqn{\kappa=1+2\widehat\rho_1}. Aggregation adjusts the variance parameters
 according to the selected family; NB2 and ordinary Gamma use moment matching.
-See \code{\link[L0nmf:estimate_psf]{L0nmf::estimate_psf()}} for the distributional details. The returned
+See \code{\link[logconNMF:estimate_psf]{logconNMF::estimate_psf()}} for the distributional details. The returned
 \code{psf_working_weight} summarises the average Poisson-scale precision for
 comparing noise scales; the actual PSF likelihood uses the specified family.
 
@@ -288,7 +291,7 @@ outcome groups, followed by refinement on every original channel. The final
 original-channel cleanup checks deletions, local fusions and missed residual
 peaks using the complete compound-count criterion. Its diagnostics are in
 \code{model$cleanup}; \code{control=list(original_cleanup=FALSE)} skips it. See
-\code{\link[L0nmf:splogconNMF]{L0nmf::splogconNMF()}} for the selection criterion and shape constraints. The
+\code{\link[logconNMF:logconNMF]{logconNMF::logconNMF()}} for the selection criterion and shape constraints. The
 backend uses a permissive component initialization, native log-concave
 profile/spectrum refinement, and final rank selection with the requested
 working-correlation adjustment. Small fragments contained in a broad peak
@@ -298,12 +301,12 @@ initialization criterion and history are in \code{model$initialization}.
 The
 spreadsheet and returned coefficient rows use increasing apex retention time. Rank selection,
 hard log concavity, censored Gamma intensities and compound-count information
-criteria follow \code{\link[L0nmf:splogconNMF]{L0nmf::splogconNMF()}}.
+criteria follow \code{\link[logconNMF:logconNMF]{logconNMF::logconNMF()}}.
 }
 \section{Experimental GC/MS examples}{
 
 The \href{../articles/gcms-deconvolution.html}{GC/MS deconvolution tutorial}
-converts the bundled \link[L0nmf:GCMS_data1]{GCMS_data1} and \link[L0nmf:GCMS_data2]{GCMS_data2} matrices to CDF, fits the
+converts the bundled \link[logconNMF:GCMS_data1]{GCMS_data1} and \link[logconNMF:GCMS_data2]{GCMS_data2} matrices to CDF, fits the
 full-channel models and exports their spectra. It includes timings,
 information criteria and all plot types, alongside the algorithm.
 \if{html}{
@@ -319,7 +322,7 @@ information criteria and all plot types, alongside the algorithm.
 }
 
 \examples{
-library(L0nmf)
+library(logconNMF)
 \dontrun{
 library(L0glm)
 data(GCMS_data1)
@@ -371,7 +374,7 @@ calibrated <- GCMSdeco(file.path(out, "GCMS_data2.cdf"),
 # Sixteen related samples, retaining all mass channels. Compounds occur in
 # half the samples on average, with retention drift and concentration-dependent
 # widths and tails. Here the simulated quasipoisson dispersion is known.
-library(L0nmf)
+library(logconNMF)
 sim <- simulate_GCMS_samples(samples=16L, n=1200L, k=48L,
   preset="time_area", presence=0.5, irregular=0, drift=2,
   family="quasipoisson", dispersion=2, seed=9118)
@@ -402,5 +405,5 @@ NIST MS Search user manual, section on NIST text format:
 \url{https://chemdata.nist.gov/mass-spc/ms-search/docs/Ver20Man.pdf}.
 }
 \seealso{
-\code{\link[=write_GCMS_cdf]{write_GCMS_cdf()}}, \code{\link[=plot.GCMSdeco]{plot.GCMSdeco()}}, \code{\link[L0nmf:splogconNMF]{L0nmf::splogconNMF()}}, \code{\link[L0nmf:estimate_psf]{L0nmf::estimate_psf()}}, \code{\link[L0nmf:L0glm_blind_deco]{L0glm_blind_deco()}}
+\code{\link[=write_GCMS_cdf]{write_GCMS_cdf()}}, \code{\link[=plot.GCMSdeco]{plot.GCMSdeco()}}, \code{\link[logconNMF:logconNMF]{logconNMF::logconNMF()}}, \code{\link[logconNMF:estimate_psf]{logconNMF::estimate_psf()}}, \code{\link[logconNMF:L0glm_blind_deco]{L0glm_blind_deco()}}
 }

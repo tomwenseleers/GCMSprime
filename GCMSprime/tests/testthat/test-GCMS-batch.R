@@ -35,7 +35,7 @@ test_that("directory discovery uses acquisition times and separates standards", 
 test_that("sample workers preserve acquisition order, shared maps and full spectra", {
   skip_if_not_installed("ncdf4");skip_if_not_installed("openxlsx")
   set.seed(661);n<-100L;m<-8L;kernel<-dnorm(-7:7,sd=1.6)
-  X<-L0nmf::convmatrix(kernel,n);S<-matrix(runif(2*m,1500,4500),2,m)
+  X<-logconNMF::convmatrix(kernel,n);S<-matrix(runif(2*m,1500,4500),2,m)
   d<-tempfile();dir.create(d);outputs<-c(tempfile(),tempfile())
   on.exit(unlink(c(d,outputs),recursive=TRUE))
   for(s in 1:2)write_GCMS_cdf(matrix(rpois(n*m,as.matrix(X[,c(28,72)]%*%S)+2),n,m),

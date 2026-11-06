@@ -56,5 +56,5 @@ if (requireNamespace("ncdf4", quietly = TRUE)) {
 }
 }
 \seealso{
-\code{\link[=GCMSdeco]{GCMSdeco()}}, \code{\link[L0nmf:splogconNMF]{L0nmf::splogconNMF()}}
+\code{\link[=GCMSdeco]{GCMSdeco()}}, \code{\link[logconNMF:logconNMF]{logconNMF::logconNMF()}}
 }
