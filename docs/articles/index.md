@@ -22,6 +22,14 @@
 - [Retention indices and library
   search](https://tomwenseleers.github.io/GCMSprime/articles/library-search.md):
 
+### Software comparison
+
+- [Comparison with other
+  software](https://tomwenseleers.github.io/GCMSprime/articles/software-comparison.md):
+
+  How GC–MS workflows resolve coelution, estimate component counts and
+  use multiple samples.
+
 ### Algorithm and theory
 
 - [GC/MS deconvolution: mathematical

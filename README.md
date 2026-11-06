@@ -114,9 +114,14 @@ unassigned in its area table.
 
 In the [16-sample benchmark](https://tomwenseleers.github.io/GCMSprime/articles/multisample.html#sixteen-simulated-chromatograms),
 GCMSprime recovers all 48 shared compounds and all 380 sample occurrences,
-with no false calls in **63.91 s** with 16 workers. It uses 32 groups for initialization and matching, then
-fits the spectra on all 258 original ions. The tutorial shows timings by
-stage, the recovered areas and an application to two full beer chromatograms.
+with no false calls in **63.91 s** with 16 workers. The simulated chromatograms
+have 1,200 scans and 258 ions each. The same tutorial reports **29.2 min**
+for the complete coupled workflow on two beer chromatograms with about
+15,000 scans and 518 ions each.
+
+The [software comparison](https://tomwenseleers.github.io/GCMSprime/articles/software-comparison.html)
+describes how other workflows resolve coelution, estimate component counts
+and use information across samples.
 
 ## Spectral library search
 

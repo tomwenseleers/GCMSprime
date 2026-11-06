@@ -45,6 +45,8 @@ navbar:
           href: articles/spectral-libraries.html
         - text: Retention indices and library search
           href: articles/library-search.html
+        - text: Comparison with other software
+          href: articles/software-comparison.html
     algorithm:
       text: Algorithm & theory
       menu:
@@ -67,6 +69,8 @@ authors:
 articles:
   - title: Tutorials
     contents: [articles/gcms-deconvolution, articles/multisample, articles/spectral-libraries, articles/library-search]
+  - title: Software comparison
+    contents: [articles/software-comparison]
   - title: Algorithm and theory
     contents: [articles/algorithm, articles/identification-theory]
 reference:

@@ -4,7 +4,7 @@
 <div class="l0-hero-copy">
 <p class="l0-eyebrow">GC/MS DECONVOLUTION · QUANTIFICATION · IDENTIFICATION</p>
 <h1>More compounds.<br><span>Cleaner spectra.</span></h1>
-<p class="l0-lead">Fast and scalable GC/MS deconvolution and quantification for single or multiple samples, with inbuilt spectral library search.</p>
+<p class="l0-lead">Fast and scalable GC/MS deconvolution and quantification for single samples or large multisample experiments, with inbuilt spectral library search.</p>
 <div class="l0-actions"><a class="btn btn-primary" href="articles/gcms-deconvolution.html">Get started <span aria-hidden="true">↗</span></a><a class="btn btn-outline-light" href="articles/library-search.html">Search spectral libraries</a></div>
 <p class="l0-hero-note">R · Full mass spectra · CDF input · MSP &amp; Excel output</p>
 </div>
@@ -119,11 +119,32 @@ by default. Shared spectra and matching summaries also remain in memory.
 Original scan grids are retained, and compounds absent from a sample stay
 unassigned in its area table.
 
+Independent fitting can be distributed across samples. At a fixed worker
+count and comparable chromatogram sizes, the work for this stage grows
+approximately linearly with the number of samples. Coupled refinement also
+depends on the number of shared compounds and how many peaks overlap.
+The blockwise disk-backed workflow keeps the full set of raw chromatograms
+out of RAM for large batches.
+
 In the [16-sample benchmark](articles/multisample.html#sixteen-simulated-chromatograms),
 GCMSprime recovers all 48 shared compounds and all 380 sample occurrences,
-with no false calls in **63.91 s** with 16 workers. It uses 32 groups for initialization and matching, then
-fits the spectra on all 258 original ions. The tutorial shows timings by
-stage, the recovered areas and an application to two full beer chromatograms.
+with no false calls in **63.91 s** with 16 workers. Each chromatogram has
+1,200 scans and 258 ions. Initialization and matching use 32 groups, and the
+final fit uses every original ion. The same tutorial reports **29.2 min**
+for the complete coupled workflow on two beer chromatograms, each with
+about 15,000 scans and 518 ions, on the same 16-logical-core laptop.
+
+## Comparison with other software
+
+GCMSprime can deconvolve one chromatogram or jointly estimate shared spectra
+across a batch. GNPS/MSHub's deconvolution is a multisample method by design.
+Its public implementation switches to spectrum extraction below five
+samples. The workflow guide recommends other deconvolution tools below
+about ten files. [MSHub source](https://github.com/CCMS-UCSD/GNPS_Workflows/blob/733ed89372c3754a4c4d132319da5b4313c47288/mshub-gc/tools/mshub-gc/proc/preproc/peakdetect.py#L744-L761) · [GNPS workflow guide](https://ccms-ucsd.github.io/GNPSDocumentation/gc-ms-deconvolution/)
+
+The [software comparison](articles/software-comparison.html) describes how
+MSHub, PARADISe, mzmine/ADAP-GC, MS-DIAL, XCMS/CAMERA, eRah and AMDIS resolve
+coelution, determine the number of components and handle multiple samples.
 
 ## Spectral library search
 
