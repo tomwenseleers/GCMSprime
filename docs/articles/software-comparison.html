@@ -98,11 +98,40 @@ refinement gives each compound its own log-concave elution profile. The
 final model fits a smooth background jointly with the peaks and uses the
 chosen noise family in the rank criterion. For overdispersed detector
 counts, the default is quasi-Poisson and the criterion is quasi-GIC. <a href="algorithm.html">Mathematical basis</a></p>
+<div class="section level2">
+<h2 id="benchmark-on-16-simulated-chromatograms">Benchmark on 16 simulated chromatograms<a class="anchor" aria-label="anchor" href="#benchmark-on-16-simulated-chromatograms"></a>
+</h2>
+<p>The simulation contains 48 compounds with retention-time drift,
+concentration-dependent peak shapes and partial presence across samples.
+Each chromatogram has 1,200 scans and 258 mass channels. GCMSprime
+estimated the PSF from the chromatograms and used quasi-Poisson with the
+simulation’s dispersion of 2. It recovered all 380 true peak occurrences
+with zero false calls.</p>
+<p><a href="../reference/figures/simulated-16-area-predictions.png"><img src="../reference/figures/simulated-16-area-predictions.png" alt="Estimated versus true peak areas on log10 axes for seven GC–MS workflows"></a></p>
+<p>The area plots show positive one-to-one matches within ±7.2 seconds
+and with a nominal-mass cosine of at least 0.70. Estimated areas use the
+units reported by the engine. Each panel shows adjusted R² and a 95%
+prediction interval for the log–log regression. The dashed 1:1 line
+applies to integrated counts.</p>
+<p><a href="../reference/figures/simulated-16-spectral-violin.png"><img src="../reference/figures/simulated-16-spectral-violin.png" alt="Best-hit spectral cosine distributions with individual matches and a logit axis"></a></p>
+<p>For each true occurrence, the violin plot shows its best spectral hit
+anywhere in the sample and its best hit within ±7.2 seconds. A recovered
+spectrum can be the best hit for several occurrences. The counts
+indicate how many of the 380 occurrences had a candidate.</p>
+<p><a href="https://github.com/tomwenseleers/GCMSprime/tree/master/GCMSbenchmark#benchmark-on-16-simulated-chromatograms" class="external-link">GCMSbenchmark</a>
+includes the simulation recipe, engine settings, scoring tables and code
+to recreate both figures. The <a href="multisample.html">multisample
+tutorial</a> gives the GCMSprime call, timing and disk-backed
+workflow.</p>
+</div>
+<div class="section level2">
+<h2 id="workflow-differences">Workflow differences<a class="anchor" aria-label="anchor" href="#workflow-differences"></a>
+</h2>
 <table class="table">
 <colgroup>
-<col width="33%">
-<col width="33%">
-<col width="33%">
+<col width="15%">
+<col width="60%">
+<col width="24%">
 </colgroup>
 <thead><tr class="header">
 <th align="left">Workflow</th>
@@ -201,33 +230,9 @@ al. (2017)</a> · <a href="https://doi.org/10.21203/rs.3.pex-2143/v1" class="ex
 </tr>
 </tbody>
 </table>
-<div class="section level2">
-<h2 id="benchmark-on-16-simulated-chromatograms">Benchmark on 16 simulated chromatograms<a class="anchor" aria-label="anchor" href="#benchmark-on-16-simulated-chromatograms"></a>
-</h2>
-<p>The simulation contains 48 compounds with retention-time drift,
-concentration-dependent peak shapes and partial presence across samples.
-Each chromatogram has 1,200 scans and 258 mass channels. GCMSprime
-estimated the PSF from the chromatograms and used quasi-Poisson with the
-simulation’s dispersion of 2. It recovered all 380 true peak occurrences
-with zero false calls.</p>
-<p><a href="../reference/figures/simulated-16-area-predictions.png"><img src="../reference/figures/simulated-16-area-predictions.png" alt="Estimated versus true peak areas on log10 axes for seven GC–MS workflows"></a></p>
-<p>The area plots show positive one-to-one matches within ±7.2 seconds
-and with a nominal-mass cosine of at least 0.70. Estimated areas use the
-units reported by the engine. Each panel shows adjusted R² and a 95%
-prediction interval for the log–log regression. The dashed 1:1 line
-applies to integrated counts.</p>
-<p><a href="../reference/figures/simulated-16-spectral-violin.png"><img src="../reference/figures/simulated-16-spectral-violin.png" alt="Best-hit spectral cosine distributions with individual matches and a logit axis"></a></p>
-<p>For each true occurrence, the violin plot shows its best spectral hit
-anywhere in the sample and its best hit within ±7.2 seconds. A recovered
-spectrum can be the best hit for several occurrences. The counts
-indicate how many of the 380 occurrences had a candidate.</p>
-<p><a href="https://github.com/tomwenseleers/GCMSprime/tree/master/GCMSbenchmark#benchmark-on-16-simulated-chromatograms" class="external-link">GCMSbenchmark</a>
-includes the simulation recipe, engine settings, scoring tables and code
-to recreate both figures. The <a href="multisample.html">multisample
-tutorial</a> gives the GCMSprime call, timing and disk-backed
-workflow.</p>
 </div>
-  </main>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    </nav></aside>
 </div>
 
 
