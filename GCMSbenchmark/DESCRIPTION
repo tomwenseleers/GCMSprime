@@ -11,4 +11,5 @@ License: GPL (>= 2)
 Encoding: UTF-8
 Depends: R (>= 4.2)
 Imports: clue, methods, processx, stats, tools, utils
-Suggests: GCMSprime, erah, future, logconNMF, mzR, ncdf4
+Suggests: BiocParallel, CAMERA, GCMSprime, erah, future, logconNMF, mzR, ncdf4,
+    xcms

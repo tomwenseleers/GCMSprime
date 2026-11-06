@@ -17,6 +17,13 @@ stopifnot(s$summary$TP==2L,s$summary$FP==1L,s$summary$FN==0L,
   all(s$matches$spectral_cosine==1),all(s$matches$profile_cosine==1))
 stopifnot(is.na(scoreGCMSbenchmark(x)$summary$F1))
 
+area <- internal$area_regression(data.frame(area_true=c(1,10,100,1,NA),
+  area_estimated=c(5,50,500,0,10)))
+stopifnot(nrow(area$data)==3L,isTRUE(all.equal(area$adjusted_R2,1)),
+  isTRUE(all.equal(unname(stats::coef(area$fit)[2L]),1)))
+stopifnot(is.na(internal$area_regression(data.frame(area_true=rep(1,3),
+  area_estimated=1:3))$adjusted_R2))
+
 f <- tempfile(fileext=".elu")
 writeLines(c("NAME: |SC2|CN1|AM3|FR1-3|RT1|", "RE","0 3 0",
   "NUM PEAKS: 2", "(44,100 )(55,9 B0.1)"),f)

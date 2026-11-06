@@ -14,7 +14,7 @@ scoreGCMSbenchmark(x, truth = NULL, rt_tolerance = 0.12,
 \item{cdf_file}{Local ANDI-MS CDF paths with unique basenames, or a directory of CDF files.}
 \item{output_dir}{A fresh directory for native exports, standardized RDS files and tables.}
 \item{method}{One or more of \code{"GCMSprime"}, \code{"MS-DIAL"}, \code{"mzmine"},
-\code{"eRah"}, \code{"AMDIS"} and \code{"MSHub"}. Use \code{"all"} to run the available
+\code{"eRah"}, \code{"AMDIS"}, \code{"xcms+CAMERA"} and \code{"MSHub"}. Use \code{"all"} to run the available
 adapters for the input structure. MSHub requires at least ten samples.}
 \item{truth}{Optional list keyed by input basename without extension. Each record contains
 \code{id}, \code{time} in minutes, \code{mass}, \code{H} (scan by compound),
@@ -42,6 +42,9 @@ Profile cosine uses linearly interpolated intensities on the original
 time grid. Area errors are calculated among matched peaks with positive
 areas. Direct count-scale errors are available when the backend area has
 the same units as truth. Scale-adjusted errors centre the log area ratios.
+\code{area_adjusted_R2} describes the regression of log estimated area on
+log true area among matched positive pairs. \code{area_pairs} records the
+number of pairs used.
 
 The adapters preserve differences in native output, including model-ion
 and component TIC profiles, alignment groups and area units. Data conversion,

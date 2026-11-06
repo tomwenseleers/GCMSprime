@@ -79,6 +79,21 @@ metric_median <- function(x) {
   if (any(is.finite(x))) stats::median(x[is.finite(x)]) else NA_real_
 }
 
+area_regression <- function(pairs) {
+  true <- pairs$area_true
+  estimated <- pairs$area_estimated
+  keep <- is.finite(true) & true>0 & is.finite(estimated) & estimated>0
+  data <- data.frame(log_true=log10(true[keep]),log_estimated=log10(estimated[keep]))
+  fit <- NULL
+  r2 <- NA_real_
+  if (nrow(data)>=3L && diff(range(data$log_true))>0) {
+    fit <- stats::lm(log_estimated ~ log_true,data=data)
+    if (diff(range(data$log_estimated))>0)
+      r2 <- suppressWarnings(summary(fit)$adj.r.squared)
+  }
+  list(data=data,fit=fit,adjusted_R2=r2)
+}
+
 score_row <- function(method,fit,truth,pairs) {
   ok <- identical(fit$status,"ok")
   optional <- function(x, default=NA_real_) if (length(x)==1L) x else default
@@ -92,6 +107,7 @@ score_row <- function(method,fit,truth,pairs) {
   acid_true <- if(is.null(truth)) NA_integer_ else
     sum(vapply(truth,function(z) sum(z$acid),0))
   acid <- pairs[pairs$acid,,drop=FALSE]
+  area_model <- area_regression(pairs)
   ar <- log(pairs$area_estimated/pairs$area_true)
   ar[!is.finite(ar)] <- NA_real_
   ratio <- if (identical(fit$area_kind,"integrated counts"))
@@ -114,6 +130,7 @@ score_row <- function(method,fit,truth,pairs) {
     profiles_scored=sum(is.finite(pairs$profile_cosine)),
     native_area=optional(fit$area_kind,NA_character_),
     native_profile=optional(fit$profile_kind,NA_character_),
+    area_pairs=nrow(area_model$data),area_adjusted_R2=area_model$adjusted_R2,
     area_median_error_factor=ratio,
     area_median_scaled_error_factor=exp(metric_median(abs(ar-metric_median(ar))))-1,
     within_compound_area_error_factor=exp(metric_median(fold))-1,

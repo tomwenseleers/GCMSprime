@@ -1,4 +1,4 @@
-bench_methods <- c("GCMSprime","MS-DIAL","mzmine","eRah","AMDIS","MSHub")
+bench_methods <- c("GCMSprime","MS-DIAL","mzmine","eRah","AMDIS","xcms+CAMERA","MSHub")
 
 GCMSbenchmark <- function(cdf_file, output_dir, method="GCMSprime", truth=NULL,
                           ncores=1L, control=list(), timeout=7200,
@@ -33,7 +33,7 @@ GCMSbenchmark <- function(cdf_file, output_dir, method="GCMSprime", truth=NULL,
     stop("Choose a fresh output directory for this benchmark.",call.=FALSE)
   dots <- list(...)
   backends <- list(GCMSprime=bench_gcmsprime, "MS-DIAL"=bench_msdial, mzmine=bench_mzmine,
-    eRah=bench_erah, AMDIS=bench_amdis, MSHub=bench_mshub)
+    eRah=bench_erah, AMDIS=bench_amdis, "xcms+CAMERA"=bench_xcms_camera, MSHub=bench_mshub)
   fits <- stats::setNames(lapply(method,function(m) {
     directory <- file.path(output_dir,m)
     dir.create(directory,recursive=TRUE,showWarnings=FALSE)

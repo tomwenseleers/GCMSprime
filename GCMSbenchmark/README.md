@@ -31,6 +31,7 @@ It records a separate status and message for each backend.
 | `mzmine` | Set `control$mzmine$exe` to `mzmine_console.exe` and `user_file` to the existing machine-bound `.mzuser4` file when the CLI requires it. The included mzmine 4.11 batch uses the ADAP-inspired GC-EI workflow and exports its quantification CSV and spectral MGF locally. Supply a different `.mzbatch` with `batch`. |
 | `eRah` | Install eRah and optionally future for multiple samples. Use `control$eRah$deconvolution` and `control$eRah$alignment` to set the arguments to `setDecPar()` and `setAlPar()`. |
 | `AMDIS` | Set `control$AMDIS$exe` to `AMDIS_32.exe`. The adapter stages mzXML and runs serially. To rescore existing files, supply one `.ELU` in `control$AMDIS$elu` for each CDF in the same order. |
+| `xcms+CAMERA` | Install both Bioconductor packages. xcms detects ion peaks with a matched filter and CAMERA groups them within each sample by coelution and EIC correlation. It returns summed ion integrals, pseudospectra, and representative-ion traces. Set `control[["xcms+CAMERA"]]` to override `detection`, `grouping`, or `min_ions` (default 3). |
 | `MSHub` | For a batch of at least 10 samples, set `control$MSHub$exe` to Python and `source` to the standalone [MSHub repository](https://bitbucket.org/iAnalytica/mshub_process/src/master/). The runtime needs NumPy, SciPy, h5py, scikit-learn and netCDF4. An optional `pythonpath` selects an isolated dependency directory. |
 
 Each truth record supplies an ID, an apex in minutes, an area in integrated
@@ -46,3 +47,6 @@ spectral cosine. Profile cosine compares shapes on the original time
 grid. Areas in integrated counts can be compared directly. Other backend
 signals are compared after centring the log area ratios and, with repeated
 samples, after centring within each compound.
+
+The adjusted R² for peak areas uses a log–log regression on positive matched
+areas. The summary reports how many matches contribute to this regression.
