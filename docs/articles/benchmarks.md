@@ -92,6 +92,9 @@ points](../reference/figures/simulated-16-spectral-violin.png)](https://tomwense
 
 Each point is a reciprocal spectral hit. Crosses identify hits to
 compounds absent from that sample; the cosine axis uses logit spacing.
+Display valuesor above 0.999999 are shown at 1, while the statistics
+retain theirvalues. Angled, individually formatted tick labels keep the
+scale readable.
 
 ## Correctness of spectral ion support
 
@@ -120,12 +123,12 @@ The observed counts and true mean, including background, use the plotMat
 palette with **square-root intensity colours**. Red lines mark true
 apices.
 
-[![Method-by-compound peak areas with magenta false
+[![Method-by-compound peak areas with yellow false
 negatives](../reference/figures/simulated-16-area-heatmap.png)](https://tomwenseleers.github.io/GCMSprime/reference/figures/simulated-16-area-heatmap.png)
 
 The ground-truth row and method rows show one sample’s true or inferred
-total-ion areas. **Magenta marks false negatives**; grey marks no signal
-or call. Compounds follow increasing RI. A [pooled
+total-ion areas. **Bright yellow marks false negatives**; grey marks no
+signal or call. Compounds follow increasing RI. A [pooled
 view](https://tomwenseleers.github.io/GCMSprime/reference/figures/simulated-16-area-heatmap-pooled.png)
 summarizes all 16 samples; the [sample-by-sample
 PDF](https://tomwenseleers.github.io/GCMSprime/reference/figures/simulated-16-area-heatmaps-all-samples.pdf)
@@ -159,8 +162,12 @@ missed occurrences as zero, is **0.999 for the regular compound** and
 split their contributions or miss the acid. MS-DIAL also closely
 recovers the selected regular compound (mean cosine 0.998). CAMERA
 supplies a representative-ion trace scaled to the grouped total-ion
-area; mzmine and MSHub do not export component scan profiles in this
-workflow.
+area. The mzmine export here contains spectra and areas without
+component scan profiles. MSHub factorizes aligned ion-peak integrals
+across samples. Its model has no common compound elution profile
+constrained to be shared across mass channels, so component scan
+profiles are absent from the model itself. See [Aksenov et
+al. (2021)](https://pmc.ncbi.nlm.nih.gov/articles/PMC7971188/).
 
 ## Detection settings and reproducibility
 

@@ -71,7 +71,7 @@ plotBenchmark16 <- function(results, output_dir = results) {
   benchmark16Similarity(hits,"spectral_cosine",methods,labels,colour,fill,draw,
     "simulated-16-spectral-violin.png","Cosine similarity (logit scale)",
     "Reciprocal spectral hits across 16 samples",stats::median,"Median",
-    c(.5,.7,.9,.99,.999,.9999,.99999,.999999),nrow(truth),.7)
+    c(.5,.7,.9,.99,.999,.9999,.99999,.999999),nrow(truth),.7,cap=.999999)
   benchmark16Similarity(hits[hits$present,,drop=FALSE],"spectral_F1",methods,
     labels,colour,fill,draw,"simulated-16-spectral-support.png",
     "Within-spectrum F1 (logit scale)","Correctness of spectral ion support",
@@ -83,7 +83,7 @@ plotBenchmark16 <- function(results, output_dir = results) {
 }
 
 benchmark16Similarity <- function(hits,metric,methods,labels,colour,fill,draw,
-    filename,axis,title,statistic,stat_label,ticks,total,cutoff=NULL) {
+    filename,axis,title,statistic,stat_label,ticks,total,cutoff=NULL,cap=NULL) {
   x<-data.frame(method=hits$method,score=hits[[metric]],
     presence=factor(ifelse(hits$present,"Present","Absent"),levels=c("Present","Absent")))
   x<-x[is.finite(x$score),,drop=FALSE]
@@ -96,8 +96,10 @@ benchmark16Similarity <- function(hits,metric,methods,labels,colour,fill,draw,
       compared=nrow(z),true=sum(z$presence=="Present"))
   }))
   stats$label<-sprintf("%s %.6f · %d/%d true",stat_label,stats$value,stats$true,total)
-  span<-range(stats::qlogis(c(x$score,ticks)),finite=TRUE)
+  display<-function(v)if(is.null(cap))v else pmin(v,cap)
+  span<-range(stats::qlogis(display(c(x$score,ticks))),finite=TRUE)
   logit<-function(v) {
+    v<-display(v)
     z<-stats::qlogis(v)
     z[which(v==0)]<-span[1]-1.4
     z[which(v==1)]<-span[2]+1.4
@@ -105,6 +107,9 @@ benchmark16Similarity <- function(hits,metric,methods,labels,colour,fill,draw,
   }
   x$position<-logit(x$score)
   limits<-range(c(x$position,logit(ticks)),finite=TRUE)
+  plot_limits<-limits+c(-.4,.4)
+  tick_labels<-vapply(ticks,function(v)if(!is.null(cap)&&v>=cap)"1"else
+    format(v,trim=TRUE,scientific=FALSE),"")
   stats$label_position<-limits[2]+.7
   varying<-methods[vapply(methods,function(m)length(unique(x$score[x$method==m]))>1L,TRUE)]
   plot<-ggplot2::ggplot(x,ggplot2::aes(x=method,y=position))+
@@ -126,21 +131,23 @@ benchmark16Similarity <- function(hits,metric,methods,labels,colour,fill,draw,
     ggplot2::scale_colour_manual(values=colour,guide="none")+
     ggplot2::scale_x_discrete(labels=labels)+
     ggplot2::scale_y_continuous(breaks=logit(ticks),
-      labels=format(ticks,trim=TRUE,scientific=FALSE),limits=limits+c(-.4,7.2),
+      labels=tick_labels,limits=plot_limits,oob=scales::oob_keep,
       expand=ggplot2::expansion(mult=0))+
-    ggplot2::coord_flip()+
+    ggplot2::coord_flip(clip="off")+
     ggplot2::labs(x=NULL,y=axis,title=title,
       subtitle=paste("RI window ±30 · open dot:",tolower(stat_label),"· bar: interquartile range"),
       caption=if(metric=="spectral_F1")
         "Correctly matched true spectra · shared cutoff: 0.1% of base-peak intensity in reference and estimated spectra."
-      else "Each point is a reciprocal library hit. Crosses identify compounds absent from the sample.")+
+      else "Each point is a reciprocal library hit. Crosses: absent compounds. Display values ≥0.999999 are shown at 1; statistics use original values.")+
     ggplot2::theme_minimal(base_size=13)+
     ggplot2::theme(panel.grid.minor=ggplot2::element_blank(),
       panel.grid.major.y=ggplot2::element_blank(),legend.position="bottom",
       plot.title=ggplot2::element_text(face="bold",colour="#14273b",size=18),
       plot.subtitle=ggplot2::element_text(colour="#526579",margin=ggplot2::margin(3,0,7,0)),
       plot.caption=ggplot2::element_text(hjust=0,colour="#526579"),
-      plot.margin=ggplot2::margin(13,18,9,12))
+      axis.text.x=ggplot2::element_text(angle=if(is.null(cap))0 else 35,hjust=if(is.null(cap)).5 else 1),
+      axis.title.x=ggplot2::element_text(hjust=.5),
+      plot.margin=ggplot2::margin(13,190,9,12))
   if(!is.null(cutoff))plot<-plot+ggplot2::geom_hline(yintercept=logit(cutoff),
     linetype="dotted",colour="#607387",linewidth=.45)
   draw(filename,1900,1050,print(plot))
@@ -238,7 +245,7 @@ benchmark16AreaHeatmaps <- function(results,output_dir,methods,labels,draw) {
   labels<-c("Ground truth"="Ground truth",labels)
   k<-max(x$truth_id)
   lim<-range(log10(x$area_estimated[x$area_estimated>0]),finite=TRUE)
-  palette<-grDevices::colorRampPalette(c("#06154f","#087bff","#ff2424","#650016"))(1000L)
+  palette<-grDevices::colorRampPalette(c("blue2","red2"))(1000L)
   panel<-function(z,title) {
     graphics::layout(matrix(1:2,1,2),widths=c(15,1.7))
     graphics::par(mar=c(4.5,8,3,1),mgp=c(2.7,.7,0),las=1)
@@ -251,12 +258,12 @@ benchmark16AreaHeatmaps <- function(results,output_dir,methods,labels,draw) {
     graphics::image(seq_len(k),seq_along(order),values,add=TRUE,col=palette,
       zlim=lim,useRaster=TRUE)
     j<-which(fn,arr.ind=TRUE)
-    if(nrow(j))graphics::rect(j[,1]-.5,j[,2]-.5,j[,1]+.5,j[,2]+.5,col="#ed20ae",border=NA)
+    if(nrow(j))graphics::rect(j[,1]-.5,j[,2]-.5,j[,1]+.5,j[,2]+.5,col="yellow",border=NA)
     graphics::axis(1,at=unique(c(1,seq(10,k,10))))
     graphics::axis(2,at=seq_along(order),labels=unname(labels[order]),cex.axis=.9)
     graphics::title(main=title,xlab="Compound (ordered by retention index)")
     graphics::box()
-    graphics::mtext("Magenta: false negative · Grey: no signal/call · Positive cells show total-ion count equivalents",1,line=3.6,cex=.83)
+    graphics::mtext("Yellow: false negative · Grey: no signal/call · Positive cells show total-ion count equivalents",1,line=3.6,cex=.83)
     graphics::par(mar=c(4.5,.5,3,4.5))
     levels<-seq(lim[1],lim[2],length.out=1000)
     graphics::image(c(0,1),levels,matrix(rep(levels,each=2),2),col=palette,

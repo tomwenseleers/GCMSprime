@@ -128,17 +128,21 @@ missed occurrences as zero, is **0.999 for the regular compound** and
 **0.953 for the acid**. Other configurations often truncate profiles,
 split their contributions or miss the acid. MS-DIAL also closely recovers
 the selected regular compound (mean cosine 0.998). CAMERA supplies a
-representative-ion trace scaled to the grouped total-ion area; mzmine and
-MSHub do not export component scan profiles in this workflow.
+representative-ion trace scaled to the grouped total-ion area. The mzmine
+export here contains spectra and areas without component scan profiles.
+MSHub factorizes aligned ion-peak integrals across samples. Its model has
+no common compound elution profile constrained to be shared across mass
+channels, so component scan profiles are absent from the model itself.
+See [Aksenov et al. (2021)](https://pmc.ncbi.nlm.nih.gov/articles/PMC7971188/).
 
 ## Signal and peak-area heatmaps
 
 [![Observed and true signal with square-root colours](../GCMSprime/man/figures/simulated-16-sample-heatmap.png)](../GCMSprime/man/figures/simulated-16-sample-heatmap.png)
 
-[![Compound areas with magenta false negatives](../GCMSprime/man/figures/simulated-16-area-heatmap.png)](../GCMSprime/man/figures/simulated-16-area-heatmap.png)
+[![Compound areas with yellow false negatives](../GCMSprime/man/figures/simulated-16-area-heatmap.png)](../GCMSprime/man/figures/simulated-16-area-heatmap.png)
 
 Signal heatmaps use square-root intensity colours. Area heatmaps show total-ion
-count equivalents, with magenta for missed true occurrences.
+count equivalents, with bright yellow for missed true occurrences.
 
 ## Detection settings
 
