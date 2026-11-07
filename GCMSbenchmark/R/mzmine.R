@@ -56,6 +56,7 @@ bench_mzmine <- function(files,out,ncores,control,timeout,dots) {
     if (!rt_column %in% names(a)) stop("No mzmine retention time column.",call.=FALSE)
     ids <- as.character(a[["row ID"]][keep])
     peaks <- peak_table(id,ids,a[[rt_column]][keep],a[[column]][keep],group=ids)
+    peaks$quant_mass<-a[["row m/z"]][keep]
     records(peaks,unname(ms[ids]))
   })
   ans <- combine_records(parts,"mzmine representative-ion area","unavailable")

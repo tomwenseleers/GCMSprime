@@ -10,9 +10,7 @@ plotBenchmark16 <- function(results, output_dir = results) {
 
   labels <- c(GCMSprime = "GCMSprime", "MS-DIAL" = "MS-DIAL", mzmine = "mzmine GC-EI",
     eRah = "eRah", AMDIS = "AMDIS", "xcms+CAMERA" = "xcms + CAMERA", MSHub = "MSHub")
-  units <- c(GCMSprime = "counts", "MS-DIAL" = "model-ion area",
-    mzmine = "representative-ion area", eRah = "eRah area", AMDIS = "counts",
-    "xcms+CAMERA" = "count-seconds", MSHub = "aligned NMF integral")
+  units <- stats::setNames(rep("Total-ion counts",length(labels)),names(labels))
   colour <- stats::setNames(scales::hue_pal(l = 48, c = 82)(length(labels)), names(labels))
   fill <- stats::setNames(scales::hue_pal(l = 88, c = 42)(length(labels)), names(labels))
   reference_colour <- "#26364b"
@@ -40,8 +38,7 @@ plotBenchmark16 <- function(results, output_dir = results) {
         grid <- seq(min(x), max(x), length.out = 160L)
         stats::predict(z$fit, newdata = data.frame(log_true = grid), interval = "prediction")
       } else NULL
-      counts <- identical(summary$native_area[match(m, summary$method)], "integrated counts")
-      ylim <- range(c(y, interval, if (counts) xlim, if (!length(y)) c(0, 1)))
+      ylim <- range(c(y, interval, xlim))
       graphics::plot(x, y, type = "n", xlim = xlim, ylim = ylim,
         xlab = "", ylab = bquote(log[10]~.(unname(units[m]))))
       graphics::grid(col = "#e5ebee", lty = 1)
@@ -53,16 +50,16 @@ plotBenchmark16 <- function(results, output_dir = results) {
         col = grDevices::adjustcolor(colour[m], alpha.f = 0.66))
       if (!is.null(interval))
         graphics::lines(grid, interval[, "fit"], col = colour[m], lwd = 2.3)
-      if (counts) graphics::abline(0, 1, col = reference_colour, lty = 2, lwd = 1.65)
+      graphics::abline(0, 1, col = reference_colour, lty = 2, lwd = 1.65)
       graphics::mtext(labels[m], 3, 2.05, font = 2)
       digits <- if (isTRUE(z$adjusted_R2 > 0.9995)) 5L else 3L
-      graphics::mtext(bquote("Adjusted"~R^2==.(fmt(z$adjusted_R2, digits))~~
+      graphics::mtext(bquote("Robust adjusted"~R^2==.(fmt(z$adjusted_R2, digits))~~
         .(sprintf("(%d / %d peaks)", length(x), nrow(truth)))), 3, 0.65, cex = 0.8)
     }
     graphics::plot.new()
     graphics::legend("center", bty = "n", cex = 1.27, y.intersp = 1.45,
-      legend = c("Matched peak area", "Log–log fit", "95% prediction interval",
-        "1:1 line in count units"),
+      legend = c("Matched peak area", "Robust log–log fit", "95% robust prediction band",
+        "1:1 reference"),
       col = c(colour[1L], colour[1L], fill[1L], reference_colour),
       pch = c(16, NA, 15, NA), lty = c(NA, 1, NA, 2), lwd = c(NA, 2.3, NA, 1.65),
       pt.cex = c(1.06, 1, 1.45, 1))
@@ -70,129 +67,213 @@ plotBenchmark16 <- function(results, output_dir = results) {
       1, outer = TRUE, line = 0.6, cex = 1.1)
   })
 
-  if (!any(is.finite(hits$spectral_cosine)))
-    return(invisible(NULL))
-  plot_hits <- data.frame(method=hits$method,cosine=hits$spectral_cosine,
-    presence=factor(ifelse(hits$present,"Present","Absent"),levels=c("Present","Absent")))
-  plot_hits$method <- factor(plot_hits$method, levels = rev(methods))
-  hit_stats <- do.call(rbind, lapply(methods,function(method) {
-      z<-plot_hits[plot_hits$method==method,]
-      q <- stats::quantile(z$cosine, c(0.25, 0.5, 0.75), na.rm = TRUE, names = FALSE)
-      data.frame(method=method,q25=q[1L],median=q[2L],q75=q[3L],
-        compared=sum(is.finite(z$cosine)),true=sum(z$presence=="Present"),total=nrow(truth))
-    }))
-  hit_stats$label <- sprintf("%s · %d/%d true",fmt(hit_stats$median,6),
-    hit_stats$true,hit_stats$total)
-  plot_hits <- plot_hits[is.finite(plot_hits$cosine), ]
-  ticks <- c(0.5,0.7,0.9,0.99,0.999,0.9999,0.99999,0.999999)
-  span <- range(stats::qlogis(c(plot_hits$cosine, ticks)), finite = TRUE)
-  logit <- function(x) {
-    z <- stats::qlogis(x)
-    # Display exact endpoints just beyond the finite logits, if they occur.
-    z[which(x == 0)] <- span[1L] - 1.4
-    z[which(x == 1)] <- span[2L] + 1.4
-    z
-  }
-  ticks <- sort(unique(c(ticks, intersect(plot_hits$cosine, c(0, 1)))))
-  plot_hits$position <- logit(plot_hits$cosine)
-  limits <- range(c(plot_hits$position, logit(ticks)), finite = TRUE)
-  hit_stats$label_position <- limits[2L] + 0.7
-  violin <- ggplot2::ggplot(plot_hits, ggplot2::aes(x = method, y = position)) +
-    ggplot2::geom_violin(ggplot2::aes(fill = method, colour = method),
-      scale = "width", width = 0.78, adjust = 0.75, linewidth = 0.45) +
-    ggplot2::geom_point(ggplot2::aes(colour=method,shape=presence),size=1.1,alpha=.5,
-      position = ggplot2::position_jitter(width = 0.23, height = 0, seed = 23)) +
-    ggplot2::geom_hline(yintercept = logit(0.70), linetype = "dotted",
-      colour = "#607387", linewidth = 0.45) +
-    ggplot2::geom_linerange(data = hit_stats[hit_stats$compared > 0L, ],
-      ggplot2::aes(x = method, ymin = logit(q25), ymax = logit(q75), colour = method),
-      inherit.aes = FALSE, linewidth = 0.85) +
-    ggplot2::geom_point(data = hit_stats[hit_stats$compared > 0L, ],
-      ggplot2::aes(x = method, y = logit(median), colour = method),
-      inherit.aes = FALSE, shape = 21, fill = "white", stroke = 0.74, size = 2.6) +
-    ggplot2::geom_text(data = hit_stats,
-      ggplot2::aes(x = method, y = label_position, label = label),
-      inherit.aes = FALSE, colour = "#526579", hjust = 0, size = 3.35) +
-    ggplot2::scale_shape_manual(values=c(Present=16,Absent=4),
-      name="Reference compound in the sample") +
-    ggplot2::scale_fill_manual(values = fill, guide = "none") +
-    ggplot2::scale_colour_manual(values = colour, guide = "none") +
-    ggplot2::scale_x_discrete(labels = labels) +
-    ggplot2::scale_y_continuous(breaks = logit(ticks),
-      labels = sub("\\.?0+$", "", format(ticks, trim = TRUE, scientific = FALSE)),
-      limits = limits + c(-0.4, 6), expand = ggplot2::expansion(mult = 0)) +
-    ggplot2::coord_flip() +
-    ggplot2::labs(x = NULL, y = "Cosine similarity (logit scale)",
-      title="Reciprocal spectral hits across 16 simulations",
-      subtitle="RI window ±30 · open dot and bar show the median and interquartile range",
-      caption="Each point is a reciprocal library hit. Crosses identify compounds absent from the sample.") +
-    ggplot2::theme_minimal(base_size = 13) +
-    ggplot2::theme(panel.grid.minor = ggplot2::element_blank(),
-      panel.grid.major.y = ggplot2::element_blank(), panel.spacing.x = grid::unit(1.4, "lines"),
-      strip.text = ggplot2::element_text(face = "bold", colour = "#14273b",
-        margin = ggplot2::margin(5, 0, 8, 0)),
-      plot.title = ggplot2::element_text(face = "bold", colour = "#14273b", size = 18),
-      plot.subtitle = ggplot2::element_text(colour = "#526579", margin = ggplot2::margin(3, 0, 7, 0)),
-      legend.position="bottom",
-      plot.caption = ggplot2::element_text(hjust = 0, colour = "#526579"),
-      plot.margin = ggplot2::margin(13, 18, 9, 12))
-  draw("simulated-16-spectral-violin.png",1800,1050,print(violin))
-  benchmark16Heatmap(results,output_dir,draw)
-  benchmark16AcidPlot(results,methods,labels,draw)
-  invisible(list(area = models, spectral = violin))
+
+  benchmark16Similarity(hits,"spectral_cosine",methods,labels,colour,fill,draw,
+    "simulated-16-spectral-violin.png","Cosine similarity (logit scale)",
+    "Reciprocal spectral hits across 16 samples",stats::median,"Median",
+    c(.5,.7,.9,.99,.999,.9999,.99999,.999999),nrow(truth),.7)
+  benchmark16Similarity(hits[hits$present,,drop=FALSE],"spectral_F1",methods,
+    labels,colour,fill,draw,"simulated-16-spectral-support.png",
+    "Within-spectrum F1 (logit scale)","Correctness of spectral ion support",
+    mean,"Mean",c(0,.25,.5,.75,.9,.95,.99,1),nrow(truth))
+  benchmark16Heatmap(results,draw)
+  benchmark16ProfilePlots(results,methods,labels,draw)
+  benchmark16AreaHeatmaps(results,output_dir,methods,labels,draw)
+  invisible(list(area=models))
 }
 
-benchmark16Heatmap <- function(results,output_dir,draw) {
-  file <- file.path(results,"sample-heatmap.rds")
-  if(!file.exists(file)) return(invisible(NULL))
-  x <- readRDS(file)
-  grid <- seq(min(x$time),max(x$time),length.out=length(x$time))
-  matrices <- lapply(list(x$observed,x$mean),function(z)
+benchmark16Similarity <- function(hits,metric,methods,labels,colour,fill,draw,
+    filename,axis,title,statistic,stat_label,ticks,total,cutoff=NULL) {
+  x<-data.frame(method=hits$method,score=hits[[metric]],
+    presence=factor(ifelse(hits$present,"Present","Absent"),levels=c("Present","Absent")))
+  x<-x[is.finite(x$score),,drop=FALSE]
+  if(!nrow(x))return(invisible(NULL))
+  x$method<-factor(x$method,levels=rev(methods))
+  stats<-do.call(rbind,lapply(methods,function(m) {
+    z<-x[x$method==m,,drop=FALSE]
+    q<-stats::quantile(z$score,c(.25,.75),na.rm=TRUE,names=FALSE)
+    data.frame(method=m,q25=q[1],q75=q[2],value=if(nrow(z))statistic(z$score)else NA_real_,
+      compared=nrow(z),true=sum(z$presence=="Present"))
+  }))
+  stats$label<-sprintf("%s %.6f · %d/%d true",stat_label,stats$value,stats$true,total)
+  span<-range(stats::qlogis(c(x$score,ticks)),finite=TRUE)
+  logit<-function(v) {
+    z<-stats::qlogis(v)
+    z[which(v==0)]<-span[1]-1.4
+    z[which(v==1)]<-span[2]+1.4
+    z
+  }
+  x$position<-logit(x$score)
+  limits<-range(c(x$position,logit(ticks)),finite=TRUE)
+  stats$label_position<-limits[2]+.7
+  varying<-methods[vapply(methods,function(m)length(unique(x$score[x$method==m]))>1L,TRUE)]
+  plot<-ggplot2::ggplot(x,ggplot2::aes(x=method,y=position))+
+    ggplot2::geom_violin(data=x[x$method%in%varying,,drop=FALSE],
+      ggplot2::aes(fill=method,colour=method),scale="width",width=.78,adjust=.75,linewidth=.45)+
+    ggplot2::geom_point(ggplot2::aes(colour=method,shape=presence),size=1.05,alpha=.5,
+      position=ggplot2::position_jitter(width=.23,height=0,seed=23))+
+    ggplot2::geom_linerange(data=stats[stats$compared>0L,],
+      ggplot2::aes(x=method,ymin=logit(q25),ymax=logit(q75),colour=method),
+      inherit.aes=FALSE,linewidth=.85)+
+    ggplot2::geom_point(data=stats[stats$compared>0L,],
+      ggplot2::aes(x=method,y=logit(value),colour=method),inherit.aes=FALSE,
+      shape=21,fill="white",stroke=.74,size=2.6)+
+    ggplot2::geom_text(data=stats,ggplot2::aes(x=method,y=label_position,label=label),
+      inherit.aes=FALSE,colour="#526579",hjust=0,size=3.2)+
+    ggplot2::scale_shape_manual(values=c(Present=16,Absent=4),
+      name="Reference compound in the sample",guide=if(any(x$presence=="Absent"))"legend"else"none")+
+    ggplot2::scale_fill_manual(values=fill,guide="none")+
+    ggplot2::scale_colour_manual(values=colour,guide="none")+
+    ggplot2::scale_x_discrete(labels=labels)+
+    ggplot2::scale_y_continuous(breaks=logit(ticks),
+      labels=format(ticks,trim=TRUE,scientific=FALSE),limits=limits+c(-.4,7.2),
+      expand=ggplot2::expansion(mult=0))+
+    ggplot2::coord_flip()+
+    ggplot2::labs(x=NULL,y=axis,title=title,
+      subtitle=paste("RI window ±30 · open dot:",tolower(stat_label),"· bar: interquartile range"),
+      caption=if(metric=="spectral_F1")
+        "Correctly matched true spectra · shared cutoff: 0.1% of base-peak intensity in reference and estimated spectra."
+      else "Each point is a reciprocal library hit. Crosses identify compounds absent from the sample.")+
+    ggplot2::theme_minimal(base_size=13)+
+    ggplot2::theme(panel.grid.minor=ggplot2::element_blank(),
+      panel.grid.major.y=ggplot2::element_blank(),legend.position="bottom",
+      plot.title=ggplot2::element_text(face="bold",colour="#14273b",size=18),
+      plot.subtitle=ggplot2::element_text(colour="#526579",margin=ggplot2::margin(3,0,7,0)),
+      plot.caption=ggplot2::element_text(hjust=0,colour="#526579"),
+      plot.margin=ggplot2::margin(13,18,9,12))
+  if(!is.null(cutoff))plot<-plot+ggplot2::geom_hline(yintercept=logit(cutoff),
+    linetype="dotted",colour="#607387",linewidth=.45)
+  draw(filename,1900,1050,print(plot))
+  invisible(stats)
+}
+
+benchmark16Palette <- function(n=1000L)
+  grDevices::colorRampPalette(c("black","blue","green","yellow","orange","red"))(n)
+
+benchmark16Heatmap <- function(results,draw) {
+  file<-file.path(results,"sample-heatmap.rds")
+  if(!file.exists(file))return(invisible(NULL))
+  x<-readRDS(file)
+  grid<-seq(min(x$time),max(x$time),length.out=length(x$time))
+  matrices<-lapply(list(x$observed,x$mean),function(z)
     apply(z,2L,function(v)stats::approx(x$time,v,grid)$y))
-  palette <- grDevices::colorRampPalette(
-    c("black","black","blue","green","yellow","orange","red"))(1000L)
-  lim <- range(sqrt(unlist(matrices)))
+  lim<-range(c(0,sqrt(unlist(matrices))))
   draw("simulated-16-sample-heatmap.png",2200,1250,{
-    graphics::par(mfrow=c(2,1),mar=c(3.3,4.2,2.5,1),mgp=c(2.3,.7,0),las=1)
-    titles <- c("Observed counts","True mean, including smooth background")
+    graphics::layout(matrix(c(1,3,2,3),2,2,byrow=TRUE),widths=c(12,1.6))
+    graphics::par(mar=c(3.3,4.2,2.5,1),mgp=c(2.3,.7,0),las=1)
+    titles<-c("Observed counts","True mean, including smooth background")
     for(i in 1:2) {
-      graphics::image(grid,x$mass,sqrt(matrices[[i]]),col=palette,zlim=lim,
+      graphics::image(grid,x$mass,sqrt(matrices[[i]]),col=benchmark16Palette(),zlim=lim,
         useRaster=TRUE,xlab="Retention time (min)",ylab="Mass-to-charge ratio",
         main=paste(x$sample,titles[i],sep=" · "))
-      graphics::abline(v=x$apex[x$present],col=grDevices::adjustcolor("red",.55),lwd=.7)
+      graphics::abline(v=x$apex[x$present],col=grDevices::adjustcolor("red",.4),lwd=.65)
       graphics::abline(v=x$apex[intersect(which(x$present),x$acid)],col="red",lwd=1.8)
     }
+    graphics::par(mar=c(3.3,.2,2.5,4.7))
+    values<-seq(lim[1],lim[2],length.out=1000L)
+    graphics::image(c(0,1),values,matrix(rep(values,each=2),2),axes=FALSE,
+      col=benchmark16Palette(),xlab="",ylab="",useRaster=TRUE)
+    at<-pretty(lim,4);at<-at[at>=lim[1]&at<=lim[2]]
+    graphics::axis(4,at=at,labels=format(at^2,trim=TRUE,scientific=TRUE),cex.axis=.8)
+    graphics::mtext("Intensity (square-root colours)",4,line=3.6,cex=.8,las=0)
   })
 }
 
-benchmark16AcidPlot <- function(results,methods,labels,draw) {
-  file <- file.path(results,"acid-profiles.csv")
-  if(!file.exists(file)) return(invisible(NULL))
-  x <- utils::read.csv(file)
-  available <- intersect(methods,unique(x$method))
-  if(!length(available)) return(invisible(NULL))
-  known <- x[x$method=="Ground truth",]
-  truth <- do.call(rbind,lapply(available,function(m) { z<-known;z$method<-m;z }))
-  estimated <- x[x$method%in%available,]
-  estimated$kind <- "Recovered"
-  truth$kind <- "True"
-  z <- rbind(estimated,truth)
-  z$method <- factor(z$method,levels=available)
-  z$curve <- interaction(z$method,z$sample,z$component,z$kind,drop=TRUE)
-  z$emphasis <- ifelse(z$kind=="True"|z$reciprocal,.75,.35)
-  plot <- ggplot2::ggplot(z,ggplot2::aes(x=ri,y=intensity,colour=sample,
-    linetype=kind,group=curve,linewidth=emphasis)) +
-    ggplot2::geom_line(alpha=.8) +
-    ggplot2::scale_linewidth_identity() +
-    ggplot2::scale_linetype_manual(values=c(True="dashed",Recovered="solid"),name=NULL) +
-    ggplot2::facet_wrap(~method,ncol=2,labeller=ggplot2::as_labeller(labels)) +
-    ggplot2::labs(x="Retention index",y="Relative peak height",
-      title="One broad acid-like compound across samples",
-      subtitle="Dashed curves show truth. Solid curves show each compatible returned component.",
-      colour="Sample",
-      caption="Thin curves are additional calls to the same reference. Profiles use each engine's native export.") +
-    ggplot2::theme_minimal(base_size=13) +
-    ggplot2::theme(legend.position="bottom",strip.text=ggplot2::element_text(face="bold"),
-      panel.grid.minor=ggplot2::element_blank())
-  draw("simulated-16-acid-profiles.png",2100,1500,print(plot))
+benchmark16ProfilePlots <- function(results,methods,labels,draw) {
+  file<-file.path(results,"profiles.rds")
+  if(!file.exists(file))return(invisible(NULL))
+  x<-readRDS(file)
+  quality<-utils::read.csv(file.path(results,"profile-quality.csv"))
+  labels<-c("Ground truth"="Ground truth",labels)
+  available<-c("Ground truth",intersect(methods,unique(x$method)))
+  colours<-grDevices::colorRampPalette(c("#144bb8","#189ad5","#f5c343","#d82b28"))(16)
+  for(kind in unique(x$kind)) {
+    z<-x[x$kind==kind,,drop=FALSE]
+    known<-z[z$method=="Ground truth",,drop=FALSE]
+    window<-range(known$ri[known$intensity>max(known$intensity)*1e-4])
+    window<-window+c(-.1,.1)*diff(window)
+    z<-z[z$ri>=window[1]&z$ri<=window[2],,drop=FALSE]
+    known<-z[z$method=="Ground truth",,drop=FALSE]
+    ymax<-1.06*max(z$intensity)
+    filename<-paste0("simulated-16-",tolower(kind),"-profiles.png")
+    draw(filename,2400,1450,{
+      graphics::layout(matrix(seq_along(available),2L,3L,byrow=TRUE))
+      graphics::par(mar=c(3.6,4.3,3,.6),oma=c(2.8,0,2.6,0),mgp=c(2.5,.7,0),cex=.95)
+      curves<-function(d,lty,lwd) {
+        for(rank in seq_len(16)) {
+          pieces<-split(d[d$sample_rank==rank,,drop=FALSE],d$component[d$sample_rank==rank])
+          for(curve in pieces) {
+            curve<-curve[order(curve$ri),,drop=FALSE]
+            graphics::lines(curve$ri,curve$intensity,col=colours[rank],lty=lty,lwd=lwd)
+          }
+        }
+      }
+      for(method in available) {
+        d<-z[z$method==method,,drop=FALSE]
+        graphics::plot(NA,xlim=window,ylim=c(0,ymax),xlab="Retention index",
+          ylab="Total-ion intensity",main=labels[[method]])
+        graphics::grid(col="#e5ebee",lty=1)
+        if(method!="Ground truth")curves(d,1,1.5)
+        curves(known,2,1.2)
+        q<-quality[quality$kind==kind &quality$method==method,,drop=FALSE]
+        if(nrow(q))graphics::mtext(sprintf("Profile cosine %.3f · %d/%d true calls",
+          q$mean_profile_cosine,q$recovered,q$present),3,line=.2,cex=.75)
+      }
+      graphics::mtext(if(kind=="Regular")"Highest-abundance regular compound"else
+        "Shark-fin-shaped acid compound",3,outer=TRUE,line=.9,font=2,cex=1.3)
+      graphics::mtext("Solid: inferred profiles · Dashed: ground truth · All 16 samples, blue (smallest area) to red (largest area)",
+        1,outer=TRUE,line=1.1,cex=.95)
+      graphics::mtext("Original total-ion amplitudes retained. Zero-area samples are included; no unit-area or peak-height normalization.",
+        1,outer=TRUE,line=.05,cex=.9)
+    })
+  }
+}
+
+benchmark16AreaHeatmaps <- function(results,output_dir,methods,labels,draw) {
+  file<-file.path(results,"area-grid.csv")
+  if(!file.exists(file))return(invisible(NULL))
+  x<-utils::read.csv(file)
+  order<-rev(c("Ground truth",methods))
+  x<-x[x$method%in%order,,drop=FALSE]
+  labels<-c("Ground truth"="Ground truth",labels)
+  k<-max(x$truth_id)
+  lim<-range(log10(x$area_estimated[x$area_estimated>0]),finite=TRUE)
+  palette<-grDevices::colorRampPalette(c("#06154f","#087bff","#ff2424","#650016"))(1000L)
+  panel<-function(z,title) {
+    graphics::layout(matrix(1:2,1,2),widths=c(15,1.7))
+    graphics::par(mar=c(4.5,8,3,1),mgp=c(2.7,.7,0),las=1)
+    values<-matrix(NA_real_,k,length(order));fn<-matrix(FALSE,k,length(order))
+    i<-cbind(z$truth_id,match(z$method,order))
+    values[i]<-ifelse(z$area_estimated>0,log10(z$area_estimated),NA_real_)
+    fn[i]<-z$false_negative
+    graphics::plot.new();graphics::plot.window(c(.5,k+.5),c(.5,length(order)+.5),xaxs="i",yaxs="i")
+    graphics::rect(.5,.5,k+.5,length(order)+.5,col="#edf0f2",border=NA)
+    graphics::image(seq_len(k),seq_along(order),values,add=TRUE,col=palette,
+      zlim=lim,useRaster=TRUE)
+    j<-which(fn,arr.ind=TRUE)
+    if(nrow(j))graphics::rect(j[,1]-.5,j[,2]-.5,j[,1]+.5,j[,2]+.5,col="#ed20ae",border=NA)
+    graphics::axis(1,at=unique(c(1,seq(10,k,10))))
+    graphics::axis(2,at=seq_along(order),labels=unname(labels[order]),cex.axis=.9)
+    graphics::title(main=title,xlab="Compound (ordered by retention index)")
+    graphics::box()
+    graphics::mtext("Magenta: false negative · Grey: no signal/call · Positive cells show total-ion count equivalents",1,line=3.6,cex=.83)
+    graphics::par(mar=c(4.5,.5,3,4.5))
+    levels<-seq(lim[1],lim[2],length.out=1000)
+    graphics::image(c(0,1),levels,matrix(rep(levels,each=2),2),col=palette,
+      axes=FALSE,xlab="",ylab="",useRaster=TRUE)
+    graphics::axis(4,at=pretty(lim,4))
+    graphics::mtext(expression(log[10]*"(peak area)"),4,line=2.8,las=0)
+  }
+  selected<-readRDS(file.path(results,"sample-heatmap.rds"))$sample
+  draw("simulated-16-area-heatmap.png",2300,700,
+    panel(x[x$sample==selected,,drop=FALSE],paste(selected,"· true and inferred peak areas")))
+  pooled<-do.call(rbind,lapply(split(x,interaction(x$method,x$truth_id,drop=TRUE)),function(z)
+    data.frame(method=z$method[1],truth_id=z$truth_id[1],area_estimated=sum(z$area_estimated),
+      false_negative=any(z$present)&!any(z$called &z$present))))
+  draw("simulated-16-area-heatmap-pooled.png",2300,700,
+    panel(pooled,"True and inferred peak areas pooled across 16 samples"))
+  grDevices::pdf(file.path(output_dir,"simulated-16-area-heatmaps-all-samples.pdf"),width=15,height=4.6)
+  on.exit(grDevices::dev.off())
+  for(sample in unique(x$sample))panel(x[x$sample==sample,,drop=FALSE],
+    paste(sample,"· true and inferred peak areas"))
 }

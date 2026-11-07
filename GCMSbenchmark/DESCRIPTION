@@ -10,6 +10,6 @@ Description: Runs local gas chromatography mass spectrometry deconvolution
 License: GPL (>= 2)
 Encoding: UTF-8
 Depends: R (>= 4.2)
-Imports: clue, methods, processx, stats, tools, utils
+Imports: clue, methods, processx, robustbase, stats, tools, utils
 Suggests: BiocParallel, CAMERA, GCMSprime, Matrix, erah, future, ggplot2,
     logconNMF, mzR, ncdf4, scales, xcms

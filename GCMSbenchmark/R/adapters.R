@@ -44,10 +44,12 @@ gcmsprime_single <- function(x,sample) {
   s <- s[j,,drop=FALSE]
   peaks <- peak_table(sample,seq_len(n),x$time[x$compounds$apex_scan],
     x$compounds$area,if(n) apply(h,2,max)*rowSums(s) else numeric())
-  records(peaks,lapply(seq_len(n),function(j) positive_pairs(x$mass,s[j,])),
+  ans <- records(peaks,lapply(seq_len(n),function(j) positive_pairs(x$mass,s[j,])),
     lapply(seq_len(n),function(j) positive_pairs(x$time,h[,j]*sum(s[j,]))),
     area_kind="integrated counts",profile_kind="component TIC",
     native=x$seconds)
+  ans$dispersion <- x$model$spec$dispersion
+  ans
 }
 
 gcmsprime_batch <- function(x, sample) {
@@ -64,11 +66,15 @@ gcmsprime_batch <- function(x, sample) {
     j <- seq_along(f$compound_id)
     peaks <- peak_table(ids[i],j,f$time[f$apex_scan],area,
       vapply(j,function(k) max(h[,k])*area[k],0),group=f$compound_id)
-    records(peaks,lapply(j,function(k) positive_pairs(mass,p[k,])),
+    result <- records(peaks,lapply(j,function(k) positive_pairs(mass,p[k,])),
       lapply(j,function(k) positive_pairs(f$time,h[,k]*area[k])))
+    result$dispersion <- f$spec$dispersion
+    result
   })
   combined <- combine_records(parts,"integrated counts","component TIC")
   combined$shared <- nrow(model$P)
+  combined$dispersion <- stats::setNames(vapply(parts,function(z)
+    if(length(z$dispersion))z$dispersion else NA_real_,0),ids)
   combined
 }
 
@@ -96,16 +102,21 @@ bench_erah <- function(files,out,ncores,control,timeout,dots) {
     }
     x
   })
+  saveRDS(fit$value,file.path(out,"eRah.rds"))
   d <- methods::slot(methods::slot(fit$value,"Data"),"FactorList")
   parsed <- lapply(seq_along(files),function(i) {
     a <- d[[i]]
     if (is.null(a) || !nrow(a)) return(records())
     group <- if ("AlignID" %in% names(a)) as.character(a$AlignID) else NA_character_
     peaks <- peak_table(sample_id(files[i]),a$ID,as.numeric(a$RT),a$Area,a[["Peak Height"]],group)
-    records(peaks,lapply(a$Spectra,numeric_pairs,pattern=","),
-      lapply(a$Profile,numeric_pairs,pattern=","))
+    profiles <- lapply(seq_len(nrow(a)),function(j) {
+      p <- numeric_pairs(a$Profile[j],",")
+      p[,2L] <- p[,2L]*as.numeric(a[["Peak Height"]][j])
+      p
+    })
+    records(peaks,lapply(a$Spectra,numeric_pairs,pattern=","),profiles)
   })
-  combined <- combine_records(parsed,"eRah reported area","relative component profile")
+  combined <- combine_records(parsed,"eRah reported area","eRah component profile")
   if (length(files)>1L) {
     aligned <- methods::slot(methods::slot(fit$value,"Results"),"Alignment")
     groups <- unique(stats::na.omit(combined$peaks$group))
@@ -116,7 +127,6 @@ bench_erah <- function(files,out,ncores,control,timeout,dots) {
   }
   combined$analysis <- fit$seconds
   combined$workers <- workers
-  saveRDS(fit$value,file.path(out,"eRah.rds"))
   combined
 }
 
