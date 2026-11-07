@@ -2,114 +2,225 @@
 
 ## Sixteen simulated chromatograms
 
-Each sample contains 1,200 scans and 258 mass channels. The 48 reference
-spectra retain the RI metadata supplied with
-[`L0glm::simulatedSpectra`](https://tomwenseleers.github.io/L0glm/reference/simulatedSpectra.html).
-A monotone retention-time–RI map places the compounds along the
-chromatogram. Their presence varies across samples, giving 380 true
-occurrences.
+The **16 chromatograms** share a library of **100 reference compounds**.
+Each spans a 20-minute retention window, with 1,200 scans and all 258
+mass channels. Compounds are absent from about half the samples, giving
+**769 true occurrences**. Library retention indices determine their
+positions. One compound has a broad shark-fin-shaped acid profile; the
+remaining profiles are exponentially modified Gaussians. Higher
+concentrations extend peaks towards later times from approximately fixed
+leading edges, and a small positive drift shifts successive injections
+to the right.
 
-One compound has a broad, acid-like profile. The remaining compounds
-have exponentially modified Gaussian profiles. Increasing concentration
-broadens both types towards later times while keeping the leading edge
-approximately fixed. A small positive drift shifts successive samples to
-the right. The signal also contains a smooth background and
-quasi-Poisson noise with dispersion 2.
+The smooth B-spline background is derived from the experimental
+`gcmsData2` window and contributes 3.03% of the integrated compound
+signal. The simulation retains its native abundance scale and uses
+quasi-Poisson noise with **dispersion 783.18**, estimated from that
+window. GCMSprime estimates dispersion separately in each sample, with a
+**median estimate of 829.55**. The generating retention-index maps are
+used for scoring; the deconvolution receives neither the known areas nor
+the true profiles.
 
-GCMSprime estimates its PSF from the chromatograms and uses the
-generating dispersion for this comparison. The simulation’s calibration
-maps are used to score the recovered spectra.
+GCMSprime recovers **734 of 769 occurrences**, with **90 false
+positives** (peak F1 **0.922**), including the acid in all seven samples
+where it occurs.
 
-| Method        | Seconds |  TP |  FP |    F1 |
-|:--------------|--------:|----:|----:|------:|
-| GCMSprime     |   70.48 | 372 |   2 | 0.987 |
-| MS-DIAL       |   21.08 | 364 |  56 | 0.910 |
-| mzmine        |   41.83 | 348 |  91 | 0.850 |
-| eRah          |   10.73 | 347 | 258 | 0.705 |
-| AMDIS         |   36.04 | 351 | 492 | 0.574 |
-| xcms + CAMERA |   26.97 | 349 |  34 | 0.915 |
-| MSHub         |   14.56 | 331 | 422 | 0.584 |
+| Method        | Seconds |  TP |   FP | Sensitivity | Peak F1 | Ion F1 |
+|:--------------|--------:|----:|-----:|------------:|--------:|-------:|
+| GCMSprime     |  318.42 | 734 |   90 |       95.4% |   0.922 |  0.938 |
+| MS-DIAL       |   17.61 | 675 |  641 |       87.8% |   0.647 |  0.858 |
+| mzmine GC-EI  |   38.47 | 622 |   70 |       80.9% |   0.851 |  0.860 |
+| eRah          |   17.07 | 645 | 1912 |       83.9% |   0.388 |  0.771 |
+| AMDIS         |   92.58 | 671 | 1153 |       87.3% |   0.518 |  0.854 |
+| xcms + CAMERA |   24.06 | 635 |  146 |       82.6% |   0.819 |  0.617 |
+| MSHub         |   20.58 | 635 | 2797 |       82.6% |   0.302 |  0.844 |
 
-Times are wall-clock analysis times on an HP ZBook Fury G8 with an Intel
-Core i9-11950H, eight physical cores and 16 logical threads. AMDIS runs
-serially and xcms + CAMERA uses four sample workers. Input conversion
-time is recorded separately in the downloadable tables.
+Times are wall-clock analysis times on an HP ZBook Fury G8 Mobile
+Workstation with an Intel Core i9-11950H at 2.60 GHz, eight physical
+cores and 16 logical threads, Windows and R 4.5.0. GCMSprime uses 16
+single-threaded sample workers, AMDIS runs serially, and xcms + CAMERA
+uses four workers. Input conversion is timed separately.
 
 ## Reciprocal spectral matches and integrated areas
 
-Each recovered spectrum is compared with all 48 reference spectra,
-including compounds absent from that sample. Candidates must lie within
-30 RI units and have cosine similarity of at least 0.70. A pair is
-retained when the recovered and reference spectra select each other as
-their best eligible hit. Equal cosine scores are ordered by RI
-difference and then ID.
+The reference library contains all 100 compounds, including those absent
+from an individual sample. Candidate spectra must fall within **30 RI
+units** and have cosine similarity of at least **0.70**. A reciprocal
+pair selects each other as the best eligible spectral hit. Ties are
+resolved by RI difference and then ID. A reciprocal hit to a compound
+actually present is a true positive; every other returned component is a
+false positive. Additional calls to the same reference compound are
+included in those counts. Their areas are not added to the selected
+match.
 
-A true positive is a reciprocal hit to a compound present in the sample.
-All other called components count as false positives, and each missed
-true occurrence counts as a false negative. The RI calibration follows
-the known generating map, including sample drift. MSHub’s aligned
-outputs use the corresponding mean reference clock.
+[![Robust log–log peak-area fits and 95% prediction
+bands](../reference/figures/simulated-16-area-predictions.png)](https://tomwenseleers.github.io/GCMSprime/reference/figures/simulated-16-area-predictions.png)
 
-[![Estimated versus true peak areas for reciprocal RI-constrained
-hits](../reference/figures/simulated-16-area-predictions.png)](https://tomwenseleers.github.io/GCMSprime/reference/figures/simulated-16-area-predictions.png)
+All panels use **total-ion count equivalents**. Spectra are normalized
+to unit L1 norm, with their magnitude transferred to the corresponding
+profile or area. Native model-ion areas are corrected for their ion
+fraction and integration-time units. The conversions use each engine’s
+exported factors and acquisition metadata, without calibration against
+the known answers. The native values and conversion factors remain in
+the result objects.
 
-The area plots use the recorded area of each selected true match. Both
-axes are on the log10 scale. Each panel shows adjusted R², the number of
-contributing matches and a 95% prediction interval. Areas retain their
-engine’s native units. The dashed 1:1 line applies to integrated counts.
+For a component with profile h and spectrum s, let c=\sum_j s_j, p=s/c
+and \widetilde h=ch. Then hs^\top=\widetilde h p^\top and \sum_j p_j=1.
+An area measured for a particular ion q becomes
+A\_{\mathrm{TIC}}=A_q/p_q, after converting its integration-time units.
 
-[![Reciprocal spectral cosine hits with individual points on a logit
-axis](../reference/figures/simulated-16-spectral-violin.png)](https://tomwenseleers.github.io/GCMSprime/reference/figures/simulated-16-spectral-violin.png)
+The line is a robust log–log fit using
+`robustbase::lmrob(setting="KS2014")`. The shaded 95% prediction band
+uses its robust residual scale and coefficient covariance, describing
+the main approximately Gaussian log-error distribution. Every observed
+point remains visible, and the dashed **1:1 reference is drawn last in
+every panel**. The headings report robust adjusted R²; ordinary
+least-squares statistics are retained in the downloadable tables.
+GCMSprime has robust adjusted R² **0.995** and a **median absolute area
+error of 2.05%**. Area agreement is conditional on recovered true
+matches, so it is shown together with sensitivity and false-positive
+counts.
 
-The violin plot includes all reciprocal hits within the RI window.
-Crosses identify hits to compounds absent from that sample. The tick
-labels retain the original cosine units on the logit-spaced axis.
+[![Reciprocal spectral cosine similarity with individual
+points](../reference/figures/simulated-16-spectral-violin.png)](https://tomwenseleers.github.io/GCMSprime/reference/figures/simulated-16-spectral-violin.png)
 
-### Additional AMDIS calls
+Each point is a reciprocal spectral hit. Crosses identify hits to
+compounds absent from that sample; the cosine axis uses logit spacing.
 
-AMDIS returned **843 components**, of which **351** were reciprocal hits
-to true occurrences. **489 additional calls** shared their best eligible
-reference hit with another call in the same sample. Its area regression
-has adjusted R² **0.840**, conditional on the 351 selected true matches;
-these are the individual returned areas, without adding duplicate calls.
+## Correctness of spectral ion support
 
-Area agreement is calculated for selected true matches. Every additional
-call contributes to the false-positive count, including extra spectra
-whose best eligible library hit is the same compound. The saved
-identification table records these alternatives, so the area and
-spectral scores can be read alongside the number of components called.
+[![Within-spectrum ion-support F1 with the shared 0.1%
+cutoff](../reference/figures/simulated-16-spectral-support.png)](https://tomwenseleers.github.io/GCMSprime/reference/figures/simulated-16-spectral-support.png)
 
-## One simulated chromatogram
+Ion support uses a shared **0.1% of base-peak intensity cutoff**,
+applied independently to reference and recovered spectra for every
+method: I_j\>0 and I_j\geq0.001\max_l I_l. Within-spectrum
+F_1=2TP/(2TP+FP+FN) is averaged over correctly matched true spectra.
+GCMSprime achieves **mean ion F1 0.938**, compared with **0.860** for
+the strongest comparator. Individual points accompany the violins; the
+logit-spaced axis retains labels in the original F1 units.
 
-[![Observed and true mean signals for a simulated
-sample](../reference/figures/simulated-16-sample-heatmap.png)](https://tomwenseleers.github.io/GCMSprime/reference/figures/simulated-16-sample-heatmap.png)
+This is also GCMSprime’s default spectral reporting cutoff for
+coefficient summaries, library queries and MSP/Excel output.
+`ion_threshold=0` retains all positive ions. Reporting preserves fitted
+total ion counts, peak areas, profiles and information criteria.
 
-This is the first sample containing the acid-like compound. The two
-panels show observed counts and the true mean, including background,
-with the plotMat colour palette on a square-root intensity scale. Red
-lines mark the true apices. The display is interpolated onto a regular
-time grid.
+## Observed signal and recovered peak areas
 
-## Acid-like peak profiles across samples
+[![Observed and true signal with square-root intensity
+colours](../reference/figures/simulated-16-sample-heatmap.png)](https://tomwenseleers.github.io/GCMSprime/reference/figures/simulated-16-sample-heatmap.png)
 
-[![True and recovered acid-like profiles across
-samples](../reference/figures/simulated-16-acid-profiles.png)](https://tomwenseleers.github.io/GCMSprime/reference/figures/simulated-16-acid-profiles.png)
+The observed counts and true mean, including background, use the plotMat
+palette with **square-root intensity colours**. Red lines mark true
+apices.
 
-Colours identify samples. Dashed curves show the true profiles, and
-solid curves show compatible returned components, each scaled to its own
-maximum. Thin curves are additional calls to the same reference
-compound. Retention indices place the profiles on a common axis while
-preserving concentration-dependent broadening. The panels use each
-engine’s exported profile type. mzmine and MSHub export spectra and
-areas without per-component scan profiles in this workflow.
+[![Method-by-compound peak areas with magenta false
+negatives](../reference/figures/simulated-16-area-heatmap.png)](https://tomwenseleers.github.io/GCMSprime/reference/figures/simulated-16-area-heatmap.png)
 
-## Reproduce the comparison
+The ground-truth row and method rows show one sample’s true or inferred
+total-ion areas. **Magenta marks false negatives**; grey marks no signal
+or call. Compounds follow increasing RI. A [pooled
+view](https://tomwenseleers.github.io/GCMSprime/reference/figures/simulated-16-area-heatmap-pooled.png)
+summarizes all 16 samples; the [sample-by-sample
+PDF](https://tomwenseleers.github.io/GCMSprime/reference/figures/simulated-16-area-heatmaps-all-samples.pdf)
+shows every acquisition.
 
-[GCMSbenchmark](https://github.com/tomwenseleers/GCMSprime/tree/master/GCMSbenchmark)
-includes the seeded simulation, full reference library, engine settings,
-scoring tables and code to recreate the figures. Its [installation
+## Correctness of inferred elution profiles
+
+[![Solid inferred and dashed true regular-compound profiles, blue to red
+by true
+area](../reference/figures/simulated-16-regular-profiles.png)](https://tomwenseleers.github.io/GCMSprime/reference/figures/simulated-16-regular-profiles.png)
+
+[![Solid inferred and dashed true acid-compound profiles, blue to red by
+true
+area](../reference/figures/simulated-16-acid-profiles.png)](https://tomwenseleers.github.io/GCMSprime/reference/figures/simulated-16-acid-profiles.png)
+
+The first panel set shows the regular compound with the largest total
+true area across samples; the second shows the acid compound. All 16
+samples are included and ordered by true abundance, from **blue for the
+smallest area to red for the largest**. **Dashed curves are ground
+truth; solid curves are returned profiles.** Intensities retain their
+original total-ion scale, without unit-area or peak-height
+normalization. Absent compounds have zero true signal. Compatible
+fragments remain separate curves so splitting stays visible. The
+generating retention-index calibration supplies the common horizontal
+axis; profile amplitudes remain on their native total-ion scale.
+
+GCMSprime recovers these elution profiles most accurately for both the
+regular EMG and the shark-fin-shaped acid. Mean profile cosine, counting
+missed occurrences as zero, is **0.999 for the regular compound** and
+**0.953 for the acid**. Other configurations often truncate profiles,
+split their contributions or miss the acid. MS-DIAL also closely
+recovers the selected regular compound (mean cosine 0.998). CAMERA
+supplies a representative-ion trace scaled to the grouped total-ion
+area; mzmine and MSHub do not export component scan profiles in this
+workflow.
+
+## Detection settings and reproducibility
+
+The xcms + CAMERA configuration uses an **8.6-second filter FWHM**,
+signal-to-noise threshold **1.5**, a minimum of **four ions**, and
+CAMERA FWHM grouping with `perfwhm=0.8`. Eight alternatives were
+compared on odd-numbered samples. The selected setting recovered 321
+rather than 301 true occurrences there, while keeping peak F1 within
+0.01 of the best candidate. On the even-numbered samples reserved for
+checking, recovery increased from 286 to 314 and F1 from 0.773 to 0.803.
+Across all samples, sensitivity increased from **76.3% to 82.6%**. No
+matching or RI thresholds were relaxed.
+
+### Recovery across true peak sizes
+
+Sensitivity is also calculated separately in quartiles of true
+integrated peak area, including every true occurrence. This makes the
+preferential recovery of large peaks visible alongside the conditional
+area regressions.
+
+| Method        | Smallest quarter | Lower-middle | Upper-middle | Largest quarter |
+|:--------------|-----------------:|-------------:|-------------:|----------------:|
+| GCMSprime     |            91.2% |        95.3% |        96.4% |           99.0% |
+| MS-DIAL       |            79.3% |        84.4% |        91.1% |           96.4% |
+| mzmine GC-EI  |            70.5% |        79.2% |        82.3% |           91.7% |
+| eRah          |            72.0% |        78.6% |        89.1% |           95.8% |
+| AMDIS         |            78.2% |        83.3% |        89.6% |           97.9% |
+| xcms + CAMERA |            66.3% |        81.8% |        84.9% |           97.4% |
+| MSHub         |            73.6% |        82.8% |        86.5% |           87.5% |
+
+GCMSbenchmark includes the seeded simulation, empirical-background
+template, engine settings, scoring tables and plotting code. Its
+[installation
 guide](https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/INSTALL.md)
-covers the R packages, external engines and platform requirements.
+covers the R packages and external engines.
+
+``` r
+
+library(GCMSbenchmark)
+bench <- system.file("benchmarks", package="GCMSbenchmark", mustWork=TRUE)
+source(file.path(bench, "simulated-16.R"), encoding="UTF-8")
+source(file.path(bench, "plot-simulated-16.R"), encoding="UTF-8")
+
+# Recreate the plots from the included results.
+plotBenchmark16(file.path(bench, "results"), "benchmark-figures")
+
+# Generate the same samples and rerun selected installed workflows.
+fit <- runBenchmark16("benchmark-run",
+  method=c("GCMSprime", "xcms+CAMERA"), ncores=16L)
+```
+
+The simulation uses seed 9118. The tested versions are MS-DIAL
+5.5.261105, mzmine 4.11.0, eRah 2.2.0, AMDIS 2.71, xcms 4.6.4, CAMERA
+1.64.0 and standalone MSHub revision `59fe5d5d7ad5`. Native engine
+exports are retained. The MS-DIAL method and mzmine batch are included.
+AMDIS uses component width 16 scans, sensitivity 60, resolution 0 and
+peak-shape setting 0.
+
+Download the [summary
+table](https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst/benchmarks/results/benchmark.csv),
+[matched
+pairs](https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst/benchmarks/results/matches.csv),
+[all component
+identifications](https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst/benchmarks/results/identifications.csv)
+and [xcms tuning
+results](https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst/benchmarks/results/xcms-training-results.csv).
 
 ## Comparison with other software
 

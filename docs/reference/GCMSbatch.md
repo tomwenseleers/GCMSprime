@@ -15,7 +15,13 @@ while keeping original scan grids.
 fitted(object, sample = 1L, ...)
 
 # S3 method for class 'GCMSbatch'
-coef(object, sample = NULL, normalize = c("none", "l1"), ...)
+coef(
+  object,
+  sample = NULL,
+  normalize = c("none", "l1"),
+  ...,
+  ion_threshold = GCMS_ion_threshold(object)
+)
 
 # S3 method for class 'GCMSbatch'
 plot(x, sample = NULL, ...)

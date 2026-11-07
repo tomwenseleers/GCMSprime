@@ -26,7 +26,8 @@ simulateGCMSSamples(
   dispersion = 1,
   theta = 20,
   retentionIndex = NULL,
-  retentionMap = NULL
+  retentionMap = NULL,
+  background = NULL
 )
 }
 \arguments{
@@ -70,6 +71,11 @@ attribute of the spectral library.}
 \code{ri} and \code{time} columns. Times are reference retention times in minutes.
 Compound locations follow this map and sample drift warps the map for
 each injection. Each sample returns its known calibration.}
+
+\item{background}{Optional nonnegative baseline intensity per unit exposure:
+a scalar, one value per mass channel, or a reference-time-by-channel matrix.
+Matrix rows are interpolated across the reference chromatogram for each
+sample's scan grid. The default uses a random low-dimensional spline.}
 }
 \value{
 Simulation truth and a list of samples with observations, original

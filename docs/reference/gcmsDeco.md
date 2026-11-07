@@ -42,11 +42,17 @@ gcmsDeco(
   search = list(),
   output_dir = NULL,
   coupled = TRUE,
-  batch = list()
+  batch = list(),
+  ion_threshold = 0.001
 )
 
 # S3 method for class 'GCMSdeco'
-coef(object, ..., normalize = c("none", "l1"))
+coef(
+  object,
+  ...,
+  normalize = c("none", "l1"),
+  ion_threshold = GCMS_ion_threshold(object)
+)
 
 # S3 method for class 'GCMSdeco'
 fitted(object, ...)
@@ -299,6 +305,16 @@ print(x, ...)
   Named directory options; see
   [GCMSbatch](https://tomwenseleers.github.io/GCMSprime/reference/GCMSbatch.md).
 
+- ion_threshold:
+
+  Reported ion-intensity cutoff as a fraction of each spectrum's base
+  peak, default `0.001` (0.1%). Applied consistently to coefficient
+  summaries, library queries, MSP and Excel spectra. Retained
+  intensities are rescaled to preserve the fitted total ion pseudocount.
+  Use zero to retain every positive ion. The fitted model, profiles,
+  peak areas and information criteria are unaffected; raw factors remain
+  in `model$S`.
+
 - normalize:
 
   Spectral coefficient normalization: `"none"` returns integrated
@@ -335,13 +351,11 @@ arrays.
 MSP entries are ordered by profile apex time, with a unique compound
 name, retention time and integrated ion intensity in the comments,
 followed by mass/intensity pairs. Exported spectra have base peak 999
-and retain every positive fitted ion.
-[`coef()`](https://rdrr.io/r/stats/coef.html) returns unnormalized
-fitted spectra. With `normalize="l1"`,
-[`coef()`](https://rdrr.io/r/stats/coef.html) returns spectra summing to
-one. The MSP and R object retain every positive fitted ion. The
-spreadsheet's compact spectrum text is a rounded display alongside the
-integrated areas. Their compound profiles are \\P\_{ir}=H\_{ir}\sum_j
+and use `ion_threshold`. [`coef()`](https://rdrr.io/r/stats/coef.html)
+returns thresholded fitted ion totals; `normalize="l1"` returns unit-L1
+spectra. The original factors remain available in `model$S`. The
+spreadsheet's compact spectrum text uses the same cutoff, followed by
+display rounding. Their compound profiles are \\P\_{ir}=H\_{ir}\sum_j
 S\_{rj}\\, preserving \\HS=PT\\. The workbook reports `area`, equal to
 \\\sum_j S\_{rj}\\, in intensity-scans, and `area_min`, the trapezoidal
 integral of \\P\_{\cdot r}\\ over retention time, in intensity-minutes.

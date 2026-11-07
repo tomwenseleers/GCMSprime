@@ -58,6 +58,12 @@ integration-time units. The conversions use each engine's exported factors
 and acquisition metadata, without calibration against the known answers.
 The native values and conversion factors remain in the result objects.
 
+For a component with profile $h$ and spectrum $s$, let
+$c=\sum_j s_j$, $p=s/c$ and $\widetilde h=ch$.
+Then $hs^\top=\widetilde h p^\top$ and $\sum_j p_j=1$.
+An area measured for a particular ion $q$ becomes
+$A_{\mathrm{TIC}}=A_q/p_q$, after converting its integration-time units.
+
 The line is a robust log–log fit using `robustbase::lmrob(setting="KS2014")`.
 The shaded 95% prediction band uses its robust residual scale and coefficient
 covariance, describing the main approximately Gaussian log-error distribution.
@@ -83,8 +89,8 @@ Their areas are not added to the selected match.
 
 Ion support uses a shared **0.1% of base-peak intensity cutoff**, applied
 independently to reference and recovered spectra for every method:
-\(I_j>0\) and \(I_j\geq0.001\max_l I_l\).
-Within-spectrum \(F_1=2TP/(2TP+FP+FN)\) is averaged over correctly matched
+$I_j>0$ and $I_j\geq0.001\max_l I_l$.
+Within-spectrum $F_1=2TP/(2TP+FP+FN)$ is averaged over correctly matched
 true spectra. GCMSprime achieves **mean ion F1 0.938**, compared with
 **0.860** for the strongest comparator. Individual points accompany the
 violins; the logit-spaced axis retains labels in the original F1 units.
@@ -107,7 +113,8 @@ area to red for the largest**. **Dashed curves are ground truth; solid curves
 are returned profiles.** Intensities retain their original total-ion scale,
 without unit-area or peak-height normalization. Absent compounds have zero
 true signal. Compatible fragments remain separate curves so splitting stays
-visible.
+visible. The generating retention-index calibration supplies the common
+horizontal axis; profile amplitudes remain on their native total-ion scale.
 
 GCMSprime recovers these elution profiles most accurately for both the
 regular EMG and the shark-fin-shaped acid. Mean profile cosine, counting

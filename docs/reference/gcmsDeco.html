@@ -94,11 +94,17 @@ are retained in the final spectra.</p>
 <span>  search <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  output_dir <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  coupled <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  batch <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  batch <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  ion_threshold <span class="op">=</span> <span class="fl">0.001</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'GCMSdeco'</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">object</span>, <span class="va">...</span>, normalize <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"none"</span>, <span class="st">"l1"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span></span>
+<span>  <span class="va">object</span>,</span>
+<span>  <span class="va">...</span>,</span>
+<span>  normalize <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"none"</span>, <span class="st">"l1"</span><span class="op">)</span>,</span>
+<span>  ion_threshold <span class="op">=</span> <span class="fu">GCMS_ion_threshold</span><span class="op">(</span><span class="va">object</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'GCMSdeco'</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/stats/fitted.values.html" class="external-link">fitted</a></span><span class="op">(</span><span class="va">object</span>, <span class="va">...</span><span class="op">)</span></span>
@@ -334,6 +340,16 @@ named after the input folder with suffix <code>_GCMSprime</code>.</p></dd>
 <dd><p>Named directory options; see <a href="GCMSbatch.html">GCMSbatch</a>.</p></dd>
 
 
+<dt id="arg-ion-threshold">ion_threshold<a class="anchor" aria-label="anchor" href="#arg-ion-threshold"></a></dt>
+<dd><p>Reported ion-intensity cutoff as a fraction of each
+spectrum's base peak, default <code>0.001</code> (0.1%). Applied consistently to
+coefficient summaries, library queries, MSP and Excel spectra. Retained
+intensities are rescaled to preserve the fitted total ion pseudocount.
+Use zero to retain every positive ion. The fitted model, profiles, peak
+areas and information criteria are unaffected; raw factors remain in
+<code>model$S</code>.</p></dd>
+
+
 <dt id="arg-normalize">normalize<a class="anchor" aria-label="anchor" href="#arg-normalize"></a></dt>
 <dd><p>Spectral coefficient normalization: <code>"none"</code> returns
 integrated channel intensities; <code>"l1"</code> gives a unit-sum spectrum per
@@ -365,11 +381,11 @@ to minutes; absent units use the ANDI-MS seconds convention. The selected
 retention-time interval is read directly from the point arrays.</p>
 <p>MSP entries are ordered by profile apex time, with a unique compound name,
 retention time and integrated ion intensity in the comments, followed by
-mass/intensity pairs. Exported spectra have base peak 999 and retain every
-positive fitted ion. <code><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef()</a></code> returns unnormalized fitted spectra.
-With <code>normalize="l1"</code>, <code><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef()</a></code> returns spectra summing to one.
-The MSP and R object retain every positive fitted ion. The spreadsheet's
-compact spectrum text is a rounded display alongside the integrated areas.
+mass/intensity pairs. Exported spectra have base peak 999 and use
+<code>ion_threshold</code>. <code><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef()</a></code> returns thresholded fitted ion totals;
+<code>normalize="l1"</code> returns unit-L1 spectra. The original factors remain
+available in <code>model$S</code>. The spreadsheet's compact spectrum text uses
+the same cutoff, followed by display rounding.
 Their compound profiles are \(P_{ir}=H_{ir}\sum_j S_{rj}\), preserving
 \(HS=PT\). The workbook reports <code>area</code>, equal to \(\sum_j S_{rj}\), in
 intensity-scans, and <code>area_min</code>, the trapezoidal integral of

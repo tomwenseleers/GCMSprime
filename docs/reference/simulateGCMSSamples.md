@@ -30,7 +30,8 @@ simulateGCMSSamples(
   dispersion = 1,
   theta = 20,
   retentionIndex = NULL,
-  retentionMap = NULL
+  retentionMap = NULL,
+  background = NULL
 )
 ```
 
@@ -111,6 +112,14 @@ simulateGCMSSamples(
   columns. Times are reference retention times in minutes. Compound
   locations follow this map and sample drift warps the map for each
   injection. Each sample returns its known calibration.
+
+- background:
+
+  Optional nonnegative baseline intensity per unit exposure: a scalar,
+  one value per mass channel, or a reference-time-by-channel matrix.
+  Matrix rows are interpolated across the reference chromatogram for
+  each sample's scan grid. The default uses a random low-dimensional
+  spline.
 
 ## Value
 

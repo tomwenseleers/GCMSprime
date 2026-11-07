@@ -27,8 +27,8 @@
 - [Benchmarks against other
   software](https://tomwenseleers.github.io/GCMSprime/articles/benchmarks.md):
 
-  RI-constrained reciprocal spectral matching, peak areas and
-  acid-profile recovery in a reproducible 16-sample GC–MS comparison.
+  Peak-area accuracy, spectral ion support and elution-profile recovery
+  across seven workflows on 16 RI-aware simulated GC–MS chromatograms.
 
 ### Algorithm and theory
 

@@ -76,6 +76,7 @@ spectrum plots to inspect individual components.
 
 head(fit$compounds[c("compound", "retention_time", "area", "n_ions")])
 fit$seconds
+spectra <- coef(fit, normalize="l1")  # unit-L1 spectra, shared 0.1% ion cutoff
 ```
 
 The fit allows asymmetric and broad profiles under a hard log-concavity
@@ -156,46 +157,47 @@ chromatograms out of RAM for large batches.
 
 In the [16-sample
 benchmark](https://tomwenseleers.github.io/GCMSprime/articles/benchmarks.md),
-GCMSprime recovers **372 of 380 compound occurrences with just 2 false
-positives in 70.48 s** using 16 workers. Each chromatogram has 1,200
-scans and 258 ions, with retention drift, concentration-dependent
-broadening and one broad acid-like compound. Initialization and matching
-use 32 groups, and the final fit uses every original ion. The
-[multisample
-tutorial](https://tomwenseleers.github.io/GCMSprime/articles/multisample.md)
-also reports **29.2 min** for the complete coupled workflow on two beer
-chromatograms with about 15,000 scans and 518 ions each.
+GCMSprime recovers **734 of 769 true occurrences in 318.42 s**,
+including the acid compound in all seven samples where it occurs. Each
+chromatogram has 100 candidate compounds, 1,200 scans and 258 mass
+channels, with drift, concentration-dependent broadening and a smooth
+background derived from experimental GC/MS data. Initialization uses 32
+ion groups and the final fit uses every original ion.
 
 ## Benchmarks against other software
 
-On **16 simulated chromatograms**, GCMSprime recovered **372 of 380 true
-peak occurrences with just 2 false positives**. Its integrated areas
-agreed closely with the true areas: adjusted R² **0.993** on the log₁₀
-scale.
+On **16 chromatograms with 100 reference compounds**, GCMSprime recovers
+**734 of 769 true peak occurrences**, with **90 false positives** (peak
+F1 **0.922**). Its total-ion peak areas show **robust adjusted R²
+0.995** and **median absolute area error 2.05%**.
 
-[![Estimated versus true peak areas for seven GC–MS
-workflows](reference/figures/simulated-16-area-predictions.png)](https://tomwenseleers.github.io/GCMSprime/reference/figures/simulated-16-area-predictions.png)
+[![True and estimated total-ion peak areas with robust
+fits](reference/figures/simulated-16-area-predictions.png)](https://tomwenseleers.github.io/GCMSprime/reference/figures/simulated-16-area-predictions.png)
 
-Points show RI-constrained reciprocal matches and their peak areas in
-each engine’s native units. The shaded regions are 95% prediction
-intervals. The dashed 1:1 line applies to methods reporting integrated
-counts.
+All methods use total-ion count equivalents, accounting for native
+model-ion fractions and integration-time units. The robust log–log fit
+and prediction band show the main error distribution; every point
+remains visible, with the dashed 1:1 reference above the other layers.
 
-[![Best spectral cosine hits by workflow, with individual points on a
-logit
-axis](reference/figures/simulated-16-spectral-violin.png)](https://tomwenseleers.github.io/GCMSprime/reference/figures/simulated-16-spectral-violin.png)
+[![Reciprocal spectral cosine similarities for seven
+workflows](reference/figures/simulated-16-spectral-violin.png)](https://tomwenseleers.github.io/GCMSprime/reference/figures/simulated-16-spectral-violin.png)
 
-Each point is a reciprocal best spectral hit within **30 retention-index
-units**. The comparison includes all 48 reference compounds, including
-those absent from a sample. Crosses identify hits to absent compounds;
-the labels give the median cosine and the number of true occurrences
-recovered.
+[![Within-spectrum F1 using the shared 0.1% base-peak
+cutoff](reference/figures/simulated-16-spectral-support.png)](https://tomwenseleers.github.io/GCMSprime/reference/figures/simulated-16-spectral-support.png)
 
-[Reproduce the simulation, fits and figures with
-GCMSbenchmark](https://github.com/tomwenseleers/GCMSprime/tree/master/GCMSbenchmark#benchmark-on-16-simulated-chromatograms)
-or see the [benchmarks against other
+The shared **0.1% base-peak cutoff** gives GCMSprime **mean ion-support
+F1 0.938**, compared with **0.860** for the strongest comparator. This
+is also the default cutoff for GCMSprime’s reported spectra and spectral
+exports. Matching requires reciprocal best spectral hits within **30 RI
+units**. The reference includes compounds absent from individual
+samples.
+
+See [benchmarks against other
 software](https://tomwenseleers.github.io/GCMSprime/articles/benchmarks.md)
-for the methods and scoring details.
+for timings, TP/FP counts, square-root signal heatmaps, recovered
+compound areas and regular/acid elution profiles. The [GCMSbenchmark
+package](https://github.com/tomwenseleers/GCMSprime/tree/master/GCMSbenchmark)
+provides the seeded simulation and reproducible comparison.
 
 ## Spectral library search
 

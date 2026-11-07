@@ -80,7 +80,8 @@ dependent peak widths and tails. Missing compounds can be simulated explicitly.<
 <span>  dispersion <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  theta <span class="op">=</span> <span class="fl">20</span>,</span>
 <span>  retentionIndex <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  retentionMap <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  retentionMap <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  background <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -161,6 +162,13 @@ attribute of the spectral library.</p></dd>
 <code>ri</code> and <code>time</code> columns. Times are reference retention times in minutes.
 Compound locations follow this map and sample drift warps the map for
 each injection. Each sample returns its known calibration.</p></dd>
+
+
+<dt id="arg-background">background<a class="anchor" aria-label="anchor" href="#arg-background"></a></dt>
+<dd><p>Optional nonnegative baseline intensity per unit exposure:
+a scalar, one value per mass channel, or a reference-time-by-channel matrix.
+Matrix rows are interpolated across the reference chromatogram for each
+sample's scan grid. The default uses a random low-dimensional spline.</p></dd>
 
 </dl></div>
     <div class="section level2">

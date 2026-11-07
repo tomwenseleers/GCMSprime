@@ -56,62 +56,50 @@ experiment <- gcmsDeco("chromatograms", output_dir="beer_results",
 
 ## Sixteen simulated chromatograms
 
-The example uses 1,200 scans and 258 mass channels per sample. A shared
-library of 48 compounds supplies both spectra and retention indices.
-One compound has a broad acid-like shape; the others have exponentially
-modified Gaussian shapes. Concentration-dependent broadening extends the
-peaks towards later times, and a small drift shifts successive injections
-to the right. Compounds occur in about half the samples.
+The **16 chromatograms** share a library of **100 reference compounds**.
+Each spans a 20-minute retention window, with 1,200 scans and all 258 mass channels.
+Compounds are absent from about half the samples, giving **769 true occurrences**.
+Library retention indices determine their positions. One compound has a broad
+shark-fin-shaped acid profile; the remaining profiles are exponentially modified
+Gaussians. Higher concentrations extend peaks towards later times from
+approximately fixed leading edges, and a small positive drift shifts successive
+injections to the right.
 
-```r
-data(simulatedSpectra, package="L0glm")
-rt <- unname(attr(simulatedSpectra, "RT"))
-ri <- unname(attr(simulatedSpectra, "RI"))
-calibration <- data.frame(ri=ri,
-  time=.6+(rt-min(rt))/diff(range(rt))*18.8)
-sim <- simulateGCMSSamples(samples=16L, n=1200L, k=48L,
-  S=simulatedSpectra, retentionIndex=ri, retentionMap=calibration,
-  preset="time_area_acid", acid_fraction=1/48, presence=.5,
-  irregular=0, drift=.5, rt_area=0,
-  family="quasipoisson", dispersion=2, seed=9118)
-input <- tempfile("samples16_")
-dir.create(input)
-for (s in sim$samples) {
-  writeGCMSCDF(s$Y, file.path(input, paste0(s$sample_id, ".cdf")),
-    time=s$time, acquired_at=s$acquired_at)
-}
-rm(sim, s)
+The smooth B-spline background is derived from the experimental `gcmsData2`
+window and contributes 3.03% of the integrated compound signal. The simulation
+retains its native abundance scale and uses quasi-Poisson noise with
+**dispersion 783.18**, estimated from that window. GCMSprime estimates dispersion
+separately in each sample, with a **median estimate of 829.55**. The generating
+retention-index maps are used for scoring;
+the deconvolution receives neither the known areas nor the true profiles.
 
-experiment <- gcmsDeco(input, output_dir=paste0(input, "_results"),
-  family=quasipoisson("identity"), dispersion=2, correlation="none",
-  nwindows=2L, baseline_df=4L, precluster=32L, ncores=16L,
-  psf_control=list(maxiter=3L),
-  batch=list(coupling=list(cycles=2L, initial_cycles=1L, rounds=1L, q=32L)))
-experiment$seconds
-experiment$areas
-plot(experiment, type="areas")
-plot(experiment, sample=1L, type="profiles", which=1:6)
-```
+The reproducible recipe includes the empirical background and complete
+reference library:
 
-The fit recovered **372 of 380 true occurrences with just 2 false
-positives** (F1 = 0.987), including the acid-like compound in all seven
-samples where it was present. Median spectral cosine was **0.999992**,
-and the integrated areas achieved adjusted R² **0.993** on the log₁₀ scale.
-RI-constrained reciprocal spectral hits determine these scores.
+~~~r
+library(GCMSbenchmark)
+bench <- system.file("benchmarks", package="GCMSbenchmark", mustWork=TRUE)
+source(file.path(bench, "simulated-16.R"), encoding="UTF-8")
+source(file.path(bench, "plot-simulated-16.R"), encoding="UTF-8")
+fit <- runBenchmark16("samples16", method="GCMSprime", ncores=16L)
+plotBenchmark16("samples16")
+~~~
 
-The complete analysis took **70.48 s** with 16 sample workers on an HP
-ZBook Fury G8 with an Intel Core i9-11950H (8 physical cores, 16 logical
-threads), R 4.5.0 and OpenBLAS. Each worker used one native thread. The
-time includes automatic PSF estimation, deconvolution, alignment,
-coupled refinement and exports; CDF generation is separate.
+The analysis recovered **734 of 769 true occurrences**, with **90 false
+positives** (peak F1 **0.922**), including all seven acid occurrences.
+Robust adjusted log-area R² was **0.995** and mean spectral ion-support
+F1 was **0.938** at the shared 0.1% base-peak threshold.
 
-[![Estimated versus true integrated areas for seven workflows](../reference/figures/simulated-16-area-predictions.png)](benchmarks.html)
+The CDF-to-results analysis took **318.42 s** with 16 single-threaded sample
+workers on an HP ZBook Fury G8, Intel Core i9-11950H, eight physical cores,
+16 logical threads, Windows and R 4.5.0. CDF generation is separate.
 
-[![Acid-like peak recovery across samples](../reference/figures/simulated-16-acid-profiles.png)](benchmarks.html)
+[![Total-ion area accuracy with robust log–log fits](../reference/figures/simulated-16-area-predictions.png)](../reference/figures/simulated-16-area-predictions.png)
 
-The [benchmarks against other software](benchmarks.html) compare seven
-workflows, give the full matching rule and link to the reproducible
-simulation, engine settings and scoring tables in GCMSbenchmark.
+[![Acid profiles across all samples, truth dashed and estimates solid](../reference/figures/simulated-16-acid-profiles.png)](../reference/figures/simulated-16-acid-profiles.png)
+
+The [benchmarks against other software](benchmarks.html) give all seven
+workflows, matching rules, noise calibration, profile plots and tables.
 
 ## Outputs and memory use
 
@@ -119,7 +107,7 @@ The output directory contains:
 
 * `samples.csv`: acquisition order, group, calibration file and sample result paths.
 * `areas.csv`: integrated compound areas; undetected occurrences have `NA`.
-* `consensus.msp`: the common spectral library, with every positive fitted ion.
+* `consensus.msp`: the common spectral library, using the shared 0.1% base-peak cutoff.
 * `experiment.xlsx`: sample information, consensus compounds, packed spectra and areas.
 * `experiment.rds`: the experiment object.
 * `samples/<sample_id>/`: fitted sample RDS, NIST-compatible MSP and Excel results,
