@@ -47,10 +47,16 @@ gcmsDeco(
   search = list(),
   output_dir = NULL,
   coupled = TRUE,
-  batch = list()
+  batch = list(),
+  ion_threshold = 0.001
 )
 
-\method{coef}{GCMSdeco}(object, ..., normalize = c("none", "l1"))
+\method{coef}{GCMSdeco}(
+  object,
+  ...,
+  normalize = c("none", "l1"),
+  ion_threshold = GCMS_ion_threshold(object)
+)
 
 \method{fitted}{GCMSdeco}(object, ...)
 
@@ -218,6 +224,14 @@ named after the input folder with suffix \verb{_GCMSprime}.}
 
 \item{batch}{Named directory options; see \link{GCMSbatch}.}
 
+\item{ion_threshold}{Reported ion-intensity cutoff as a fraction of each
+spectrum's base peak, default \code{0.001} (0.1\%). Applied consistently to
+coefficient summaries, library queries, MSP and Excel spectra. Retained
+intensities are rescaled to preserve the fitted total ion pseudocount.
+Use zero to retain every positive ion. The fitted model, profiles, peak
+areas and information criteria are unaffected; raw factors remain in
+\code{model$S}.}
+
 \item{normalize}{Spectral coefficient normalization: \code{"none"} returns
 integrated channel intensities; \code{"l1"} gives a unit-sum spectrum per
 compound, with its magnitude carried by the compound area.}
@@ -250,11 +264,11 @@ retention-time interval is read directly from the point arrays.
 
 MSP entries are ordered by profile apex time, with a unique compound name,
 retention time and integrated ion intensity in the comments, followed by
-mass/intensity pairs. Exported spectra have base peak 999 and retain every
-positive fitted ion. \code{coef()} returns unnormalized fitted spectra.
-With \code{normalize="l1"}, \code{coef()} returns spectra summing to one.
-The MSP and R object retain every positive fitted ion. The spreadsheet's
-compact spectrum text is a rounded display alongside the integrated areas.
+mass/intensity pairs. Exported spectra have base peak 999 and use
+\code{ion_threshold}. \code{coef()} returns thresholded fitted ion totals;
+\code{normalize="l1"} returns unit-L1 spectra. The original factors remain
+available in \code{model$S}. The spreadsheet's compact spectrum text uses
+the same cutoff, followed by display rounding.
 Their compound profiles are \eqn{P_{ir}=H_{ir}\sum_j S_{rj}}, preserving
 \eqn{HS=PT}. The workbook reports \code{area}, equal to \eqn{\sum_j S_{rj}}, in
 intensity-scans, and \code{area_min}, the trapezoidal integral of

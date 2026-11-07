@@ -1,3 +1,18 @@
+GCMS_report_spectra <- function(S,ion_threshold=.001,normalize=FALSE) {
+  if(!is.numeric(ion_threshold)||length(ion_threshold)!=1L||
+      !is.finite(ion_threshold)||ion_threshold<0||ion_threshold>1)
+    stop("ion_threshold must be a base-peak fraction between 0 and 1.",call.=FALSE)
+  if(!nrow(S))return(S)
+  total<-rowSums(S)
+  S[S < ion_threshold*apply(S,1L,max)]<-0
+  retained<-rowSums(S)
+  S*ifelse(retained>0,if(normalize)1/retained else total/retained,0)
+}
+
+GCMS_ion_threshold <- function(object) {
+  if(is.null(object$ion_threshold)) .001 else object$ion_threshold
+}
+
 GCMS_xlsx_path <- function(path) {
   if(!is.character(path)||length(path)!=1L||is.na(path)||!nzchar(path)||
       !grepl("[.]xlsx$",path,ignore.case=TRUE)) stop("xlsx_file must end in .xlsx.",call.=FALSE)
@@ -5,7 +20,8 @@ GCMS_xlsx_path <- function(path) {
   invisible(path)
 }
 
-GCMS_spectrum_text <- function(S,mass) {
+GCMS_spectrum_text <- function(S,mass,ion_threshold=.001) {
+  S<-GCMS_report_spectra(S,ion_threshold)
   vapply(seq_len(nrow(S)),function(k) {
     s<-S[k,];intensity<-if(max(s)>0)as.integer(round(9999*s/max(s)))else integer(length(s))
     keep<-which(intensity>0);keep<-keep[order(-intensity[keep],mass[keep])]
@@ -13,23 +29,23 @@ GCMS_spectrum_text <- function(S,mass) {
   },"")
 }
 
-GCMS_write_xlsx <- function(model,time,mass,compounds,path,cdf_file,alkanes_file,seconds,matches=NULL,calibration=NULL,search_settings=NULL) {
+GCMS_write_xlsx <- function(model,time,mass,compounds,path,cdf_file,alkanes_file,seconds,matches=NULL,calibration=NULL,search_settings=NULL,ion_threshold=.001) {
   GCMS_xlsx_path(path)
   wb<-openxlsx::createWorkbook(creator="GCMSprime")
   header<-openxlsx::createStyle(fgFill="#102d4d",fontColour="#FFFFFF",textDecoration="bold",
     fontSize=11,wrapText=TRUE,valign="center")
-  compounds$Spectrum<-GCMS_spectrum_text(model$S[compounds$compound,,drop=FALSE],mass)
+  compounds$Spectrum<-GCMS_spectrum_text(model$S[compounds$compound,,drop=FALSE],mass,ion_threshold)
   if(any(nchar(compounds$Spectrum)>32767L))
     stop("A spectrum exceeds Excel's cell text limit; use the MSP or R spectra.",call.=FALSE)
   first<-c("compound","retention_time","area","Spectrum")
   compounds<-compounds[,c(first,setdiff(names(compounds),first)),drop=FALSE]
   metadata<-data.frame(field=c("sample","source CDF","calibration CDF","noise family",
     "dispersion","theta","scans","mass channels","compounds","retention time unit",
-      "area unit","area_min unit","spectral display","fitting seconds"),
+      "area unit","area_min unit","spectral display","ion threshold (base-peak fraction)","fitting seconds"),
     value=c(if(nrow(compounds)) compounds$sample[1L] else tools::file_path_sans_ext(basename(cdf_file)),
       cdf_file,if(is.null(alkanes_file)) "" else alkanes_file,model$spec$name,
       format(model$spec$dispersion),format(model$spec$theta),length(time),length(mass),nrow(compounds),
-      "minutes","intensity-scans","intensity-minutes","m/z (intensity), decreasing intensity; base peak 9999; rounded-zero fragments omitted. MSP and R retain all positive ions.",
+      "minutes","intensity-scans","intensity-minutes","m/z (intensity), decreasing intensity; base peak 9999; shared relative-ion cutoff followed by display rounding.",format(ion_threshold),
       if("total"%in%names(seconds)) seconds[["total"]] else sum(seconds)),
     stringsAsFactors=FALSE)
   if(!is.null(search_settings)) metadata<-rbind(metadata,data.frame(

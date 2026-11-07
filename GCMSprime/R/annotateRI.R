@@ -76,12 +76,13 @@ annotateRI <- function(x,calibration=NULL,phase=c("DB5","DB1","DBWAX"),
     (c$retention_coordinate<bounds[1L]|c$retention_coordinate>bounds[2L])
   x$compounds<-c;x$ri_calibration<-calibration
   if(!is.null(msp_file)) {
-    GCMS_write_msp(x$model,x$time,x$mass,msp_file,c)
+    GCMS_write_msp(x$model,x$time,x$mass,msp_file,c,GCMS_ion_threshold(x))
     x$msp_file<-normalizePath(msp_file,winslash='/')
   }
   if(!is.null(xlsx_file)) {
     GCMS_write_xlsx(x$model,x$time,x$mass,c,xlsx_file,x$cdf_file,x$alkanes_file,x$seconds,
-      matches=if(is.null(x$identification))NULL else x$identification$matches,calibration=calibration)
+      matches=if(is.null(x$identification))NULL else x$identification$matches,calibration=calibration,
+      ion_threshold=GCMS_ion_threshold(x))
     x$xlsx_file<-normalizePath(xlsx_file,winslash='/')
   }
   x$seconds['retentionIndices']<-proc.time()[['elapsed']]-begun

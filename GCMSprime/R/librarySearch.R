@@ -2,7 +2,8 @@ search_methods <- c("stein_scott","cosine","hellinger","jensen_shannon","multino
 
 search_queries <- function(x,calibration,ri,pseudocount,extrapolate,require_ri=TRUE) {
   fit<-inherits(x,"GCMSdeco")
-  S<-if(fit) as.matrix(x$model$S[x$compounds$compound,,drop=FALSE]) else as.matrix(x)
+  S<-if(fit) as.matrix(GCMS_report_spectra(x$model$S,GCMS_ion_threshold(x))[
+    x$compounds$compound,,drop=FALSE]) else as.matrix(x)
   mass<-if(fit) x$mass else suppressWarnings(as.numeric(colnames(S)))
   if(!is.numeric(S)||!ncol(S)||any(!is.finite(S)|S<0)||length(mass)!=ncol(S)||
       any(!is.finite(mass)|mass<=0)) stop("Use a nonnegative compound-by-mass matrix with numeric mass names.")

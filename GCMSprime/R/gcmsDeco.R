@@ -75,15 +75,17 @@ GCMS_compounds <- function(model,time,sample_name="L0glm") {
     area_min=integrated[order],n_ions=rowSums(model$S>0)[order],row.names=NULL)
 }
 
-GCMS_write_msp <- function(model,time,mass,msp_file,compounds=NULL) {
+GCMS_write_msp <- function(model,time,mass,msp_file,compounds=NULL,ion_threshold=.001) {
   if(nrow(model$H)!=length(time)||ncol(model$S)!=length(mass))
     stop("Profile, spectrum and scan/mass dimensions differ.",call.=FALSE)
   if(!is.character(msp_file)||length(msp_file)!=1L||is.na(msp_file)||!nzchar(msp_file)||
       !grepl("\\.msp$",msp_file,ignore.case=TRUE)) stop("msp_file must end in .msp.",call.=FALSE)
   if(is.null(compounds)) compounds <- GCMS_compounds(model,time)
+  spectra<-GCMS_report_spectra(model$S,ion_threshold)
+  compounds$n_ions<-rowSums(spectra>0)[compounds$compound]
   order <- compounds$compound;names <- compounds$name
   lines <- unlist(lapply(seq_along(order),function(index) {
-    k<-order[index];s<-model$S[k,];keep<-which(s>0)
+    k<-order[index];s<-spectra[k,];keep<-which(s>0)
     if(!length(keep)) stop("Cannot export an empty compound spectrum.",call.=FALSE)
     abundance<-999*s[keep]/max(s[keep])
     annotation<-character()
@@ -102,6 +104,7 @@ GCMS_write_msp <- function(model,time,mass,msp_file,compounds=NULL) {
       sprintf("; RI retention coordinate %.7g min (1%% onset plus half local narrow-peak width)",
         compounds$retention_coordinate[index])else ""
     c(paste0("Name: ",names[index]),annotation,sprintf("Pseudocount: %.15g",sum(s)),
+      sprintf("Ion_threshold: %.9g",ion_threshold),
       sprintf("Comments: Sample %s; apex retention time %.7g min; integrated ion intensity %.9g; logconNMF%s%s",
         compounds$sample[index],compounds$retention_time[index],sum(s),
         coordinate,
@@ -144,6 +147,13 @@ GCMS_write_msp <- function(model,time,mass,msp_file,compounds=NULL) {
 #' @param normalize Spectral coefficient normalization: \code{"none"} returns
 #'   integrated channel intensities; \code{"l1"} gives a unit-sum spectrum per
 #'   compound, with its magnitude carried by the compound area.
+#' @param ion_threshold Reported ion-intensity cutoff as a fraction of each
+#'   spectrum's base peak, default \code{0.001} (0.1%). Applied consistently to
+#'   coefficient summaries, library queries, MSP and Excel spectra. Retained
+#'   intensities are rescaled to preserve the fitted total ion pseudocount.
+#'   Use zero to retain every positive ion. The fitted model, profiles, peak
+#'   areas and information criteria are unaffected; raw factors remain in
+#'   \code{model$S}.
 #' @param family Identity-link noise model accepted by [logconNMF::logconNMF()].
 #'   The default \code{quasipoisson("identity")} estimates one pooled dispersion
 #'   across channels, suitable for overdispersed instrumental intensities.
@@ -200,11 +210,11 @@ GCMS_write_msp <- function(model,time,mass,msp_file,compounds=NULL) {
 #'
 #' MSP entries are ordered by profile apex time, with a unique compound name,
 #' retention time and integrated ion intensity in the comments, followed by
-#' mass/intensity pairs. Exported spectra have base peak 999 and retain every
-#' positive fitted ion. \code{coef()} returns unnormalized fitted spectra.
-#' With \code{normalize="l1"}, \code{coef()} returns spectra summing to one.
-#' The MSP and R object retain every positive fitted ion. The spreadsheet's
-#' compact spectrum text is a rounded display alongside the integrated areas.
+#' mass/intensity pairs. Exported spectra have base peak 999 and use
+#' \code{ion_threshold}. \code{coef()} returns thresholded fitted ion totals;
+#' \code{normalize="l1"} returns unit-L1 spectra. The original factors remain
+#' available in \code{model$S}. The spreadsheet's compact spectrum text uses
+#' the same cutoff, followed by display rounding.
 #' Their compound profiles are \eqn{P_{ir}=H_{ir}\sum_j S_{rj}}, preserving
 #' \eqn{HS=PT}. The workbook reports \code{area}, equal to \eqn{\sum_j S_{rj}}, in
 #' intensity-scans, and \code{area_min}, the trapezoidal integral of
@@ -299,7 +309,8 @@ gcmsDeco <- function(cdf_file,msp_file=NULL,family=quasipoisson("identity"),lamb
                      correlation=c("auto","none","lag1"),
                      ncores=NULL,control=list(),psf_control=list(),verbose=FALSE,
                      xlsx_file=NULL,sample_name=NULL,library=NULL,search=list(),
-                     output_dir=NULL,coupled=TRUE,batch=list()) {
+                     output_dir=NULL,coupled=TRUE,batch=list(),ion_threshold=.001) {
+  invisible(GCMS_report_spectra(matrix(numeric(),0L,0L),ion_threshold))
   if(length(cdf_file)==1L&&dir.exists(cdf_file)) {
     args<-as.list(environment())
     return(do.call(GCMSdeco_directory,args))
@@ -381,16 +392,17 @@ gcmsDeco <- function(cdf_file,msp_file=NULL,family=quasipoisson("identity"),lamb
     scans=raw$scans,psf_working_weight=working_weight,
     cdf_file=if(grepl("^https?://",cdf_file)) cdf_file else normalizePath(cdf_file,winslash="/"),
     alkanes_file=if(is.null(alkanes_file)) NULL else normalizePath(alkanes_file,winslash="/",mustWork=FALSE),
-    sample_name=sample_name,msp_file=msp_file,xlsx_file=xlsx_file,
+    sample_name=sample_name,msp_file=msp_file,xlsx_file=xlsx_file,ion_threshold=ion_threshold,
     seconds=c(seconds,total=proc.time()[["elapsed"]]-begun)),class="GCMSdeco")
   if(!is.null(library)) object<-timed("librarySearch",do.call(identifyCompounds,
     c(list(x=object,library=library),search)))
-  object$compounds<-timed("write_msp",GCMS_write_msp(model,raw$time,raw$mass,msp_file,object$compounds))
+  object$compounds<-timed("write_msp",GCMS_write_msp(model,raw$time,raw$mass,msp_file,object$compounds,ion_threshold))
   if(!is.null(xlsx_file)) timed("write_xlsx",GCMS_write_xlsx(model,raw$time,raw$mass,
     object$compounds,xlsx_file,cdf_file,alkanes_file,seconds,
     matches=if(is.null(object$identification)) NULL else object$identification$matches,
     calibration=if(is.null(object$identification)) NULL else object$identification$calibration,
-    search_settings=if(is.null(object$identification)) NULL else object$identification$settings))
+    search_settings=if(is.null(object$identification)) NULL else object$identification$settings,
+    ion_threshold=ion_threshold))
   object$msp_file<-normalizePath(msp_file,winslash="/")
   object$xlsx_file<-if(is.null(xlsx_file)) NULL else normalizePath(xlsx_file,winslash="/")
   seconds["total"]<-proc.time()[["elapsed"]]-begun;object$seconds<-seconds
@@ -399,10 +411,8 @@ gcmsDeco <- function(cdf_file,msp_file=NULL,family=quasipoisson("identity"),lamb
 
 #' @rdname gcmsDeco
 #' @export
-coef.GCMSdeco <- function(object,...,normalize=c("none","l1")) {
-  normalize<-match.arg(normalize);S<-stats::coef(object$model,...)
-  if(normalize=="l1"&&nrow(S)) S<-S/rowSums(S)
-  S
+coef.GCMSdeco <- function(object,...,normalize=c("none","l1"),ion_threshold=GCMS_ion_threshold(object)) {
+  GCMS_report_spectra(stats::coef(object$model,...),ion_threshold,match.arg(normalize)=="l1")
 }
 #' @rdname gcmsDeco
 #' @export

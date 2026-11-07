@@ -17,7 +17,13 @@
 \usage{
 \method{fitted}{GCMSbatch}(object, sample = 1L, ...)
 
-\method{coef}{GCMSbatch}(object, sample = NULL, normalize = c("none", "l1"), ...)
+\method{coef}{GCMSbatch}(
+  object,
+  sample = NULL,
+  normalize = c("none", "l1"),
+  ...,
+  ion_threshold = GCMS_ion_threshold(object)
+)
 
 \method{plot}{GCMSbatch}(x, sample = NULL, ...)
 

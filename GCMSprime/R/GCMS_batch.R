@@ -133,7 +133,7 @@ NULL
 GCMSdeco_directory <- function(cdf_file,msp_file=NULL,family,lambda,nwindows,
     alkanes_file,time_range,calibration_range,baseline_df,precluster,dispersion,theta,
     correlation,ncores,control,psf_control,verbose,xlsx_file,sample_name,library,search,
-    output_dir,coupled,batch) {
+    output_dir,coupled,batch,ion_threshold=.001) {
   begun<-proc.time()[["elapsed"]]
   if(!requireNamespace("ncdf4",quietly=TRUE)||!requireNamespace("openxlsx",quietly=TRUE))
     stop("Install ncdf4 and openxlsx for directory input and batch exports.")
@@ -158,7 +158,7 @@ GCMSdeco_directory <- function(cdf_file,msp_file=NULL,family,lambda,nwindows,
   common_args<-list(family=family,lambda=lambda,nwindows=nwindows,time_range=time_range,
     calibration_range=calibration_range,baseline_df=baseline_df,precluster=effective,
     dispersion=dispersion,theta=theta,correlation=correlation,ncores=threads,
-    control=control,psf_control=psf_control,verbose=verbose)
+    control=control,psf_control=psf_control,verbose=verbose,ion_threshold=ion_threshold)
   tasks<-lapply(seq_len(nrow(manifest)),function(s) {
     options<-batch
     if(is.list(batch$exposure))options$exposure<-batch$exposure[[s]]
@@ -198,15 +198,17 @@ GCMSdeco_directory <- function(cdf_file,msp_file=NULL,family,lambda,nwindows,
     }
   }
   for(s in seq_along(paths)) {
-    fit<-readRDS(paths[s]);d<-dirname(paths[s]);id<-manifest$sample_id[s]
+    fit<-readRDS(paths[s]);fit$ion_threshold<-ion_threshold
+    d<-dirname(paths[s]);id<-manifest$sample_id[s]
     fit$msp_file<-file.path(d,paste0(id,".msp"));fit$xlsx_file<-file.path(d,paste0(id,".xlsx"))
     if(!is.null(library))fit<-do.call(identifyCompounds,c(list(x=fit,library=library),search))
-    fit$compounds<-GCMS_write_msp(fit$model,fit$time,fit$mass,fit$msp_file,fit$compounds)
+    fit$compounds<-GCMS_write_msp(fit$model,fit$time,fit$mass,fit$msp_file,fit$compounds,ion_threshold)
     GCMS_write_xlsx(fit$model,fit$time,fit$mass,fit$compounds,fit$xlsx_file,
       fit$cdf_file,fit$alkanes_file,fit$seconds,
       matches=if(is.null(fit$identification))NULL else fit$identification$matches,
       calibration=if(is.null(fit$identification))NULL else fit$identification$calibration,
-      search_settings=if(is.null(fit$identification))NULL else fit$identification$settings)
+      search_settings=if(is.null(fit$identification))NULL else fit$identification$settings,
+      ion_threshold=ion_threshold)
     if(isTRUE(batch$plots)) {
       plot(fit,type="lines",file=file.path(d,paste0(id,"_traces.pdf")))
       plot(fit,type="heatmap",file=file.path(d,paste0(id,"_heatmaps.pdf")))
@@ -221,7 +223,7 @@ GCMSdeco_directory <- function(cdf_file,msp_file=NULL,family,lambda,nwindows,
   manifest$compounds<-vapply(paths,function(p)readRDS(p)$model$rank,0L)
   manifest$GIC<-vapply(paths,function(p)GIC(readRDS(p)),0)
   areas<-if(is.null(common))NULL else common$areas
-  object<-structure(list(samples=manifest,paths=paths,coupled=common,areas=areas,
+  object<-structure(list(samples=manifest,paths=paths,coupled=common,areas=areas,ion_threshold=ion_threshold,
     standards=found$standards,output_dir=output_dir,channel_groups=channel_map,
     parallel=list(ncores=ncores,workers=workers,threads=threads),
     seconds=c(clustering=clustering_time,initial=initial_time,coupled=coupled_time,
@@ -254,7 +256,7 @@ GCMS_batch_signature <- function(file,standard,args) {
 
 GCMS_batch_consensus <- function(object,msp_file=NULL,xlsx_file=NULL) {
   common<-object$coupled;G<-nrow(common$P)
-  spectra<-coef(common);axis<-as.numeric(common$mass)
+  spectra<-GCMS_report_spectra(coef(common),GCMS_ion_threshold(object));axis<-as.numeric(common$mass)
   if(is.null(msp_file))msp_file<-file.path(object$output_dir,"consensus.msp")
   if(is.null(xlsx_file))xlsx_file<-file.path(object$output_dir,"experiment.xlsx")
   occurrence<-common$compounds
@@ -265,9 +267,9 @@ GCMS_batch_consensus <- function(object,msp_file=NULL,xlsx_file=NULL) {
     at<-match(table$compound,object$retentionIndices$compound)
     for(field in c('retention_index','ri_phase','ri_extrapolated'))table[[field]]<-object$retentionIndices[[field]][at]
   }
-  GCMS_write_msp(list(H=Matrix::Diagonal(G),S=spectra),rt,axis,msp_file,table)
+  GCMS_write_msp(list(H=Matrix::Diagonal(G),S=spectra),rt,axis,msp_file,table,GCMS_ion_threshold(object))
   if(!requireNamespace("openxlsx",quietly=TRUE))stop("Install openxlsx for batch Excel output.")
-  table$Spectrum<-GCMS_spectrum_text(spectra,axis)
+  table$Spectrum<-GCMS_spectrum_text(spectra,axis,GCMS_ion_threshold(object))
   wb<-openxlsx::createWorkbook()
   sheets<-list(samples=object$samples,compounds=table,
     areas=cbind(sample_id=rownames(common$areas),as.data.frame(common$areas)))
@@ -292,13 +294,13 @@ GCMS_batch_sample <- function(x,sample) {
 fitted.GCMSbatch <- function(object,sample=1L,...)fitted(GCMS_batch_sample(object,sample),...)
 #' @rdname GCMSbatch
 #' @export
-coef.GCMSbatch <- function(object,sample=NULL,normalize=c("none","l1"),...) {
+coef.GCMSbatch <- function(object,sample=NULL,normalize=c("none","l1"),...,ion_threshold=GCMS_ion_threshold(object)) {
   normalize<-match.arg(normalize)
   if(is.null(sample)) {
     if(is.null(object$coupled))stop("Select a sample for independent fits.")
-    return(coef(object$coupled,normalize=normalize,...))
+    return(GCMS_report_spectra(coef(object$coupled,...),ion_threshold,normalize=="l1"))
   }
-  coef(GCMS_batch_sample(object,sample),normalize=normalize,...)
+  coef(GCMS_batch_sample(object,sample),normalize=normalize,ion_threshold=ion_threshold,...)
 }
 #' @rdname GCMSbatch
 #' @export
@@ -363,7 +365,7 @@ GCMS_initial_sample <- function(task) {
       nwindows=nwindows,alkanes_file=standard,time_range=time_range,calibration_range=calibration_range,
       baseline_df=baseline_df,precluster=precluster,dispersion=dispersion,theta=theta,
       correlation=correlation,ncores=ncores,control=control,psf_control=psf_control,verbose=verbose,
-      sample_name=id)
+      sample_name=id,ion_threshold=ion_threshold)
     signature<-GCMS_batch_signature(file,standard,args)
     saved<-if(isTRUE(batch$resume)&&file.exists(cache))readRDS(cache)else NULL
     cache_hit<-!is.null(saved)&&identical(saved$signature,signature)

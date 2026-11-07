@@ -44,6 +44,10 @@
 
 ## Output and diagnostics
 
+* A common 0.1% base-peak ion cutoff is used for reported spectra, library
+  queries and MSP/Excel output. Set ion_threshold=0 to retain all positive
+  ions; fitted peak areas, profiles and information criteria are preserved.
+
 * NIST-compatible MSP, Excel compound/area tables and consensus multisample
   libraries, with retained ion totals and ranked library matches.
 * Observed/fitted/Pearson-residual heatmaps, chromatogram traces, profiles and

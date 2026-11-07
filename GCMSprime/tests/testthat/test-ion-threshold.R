@@ -1,0 +1,32 @@
+test_that("reporting cutoff preserves fitted ion totals and the model", {
+  S<-rbind(c(100,1,.1,.099,0),c(0,2,200,.199,0))
+  dimnames(S)<-list(NULL,as.character(41:45))
+  H<-matrix(c(.25,.75,.8,.2),2L)
+  model<-list(S=S,H=H)
+  x<-structure(list(model=model,ion_threshold=.001,
+    compounds=data.frame(compound=1:2)),class="GCMSdeco")
+  z<-GCMS_report_spectra(S)
+  expect_equal(unname(z>0),rbind(c(TRUE,TRUE,TRUE,FALSE,FALSE),c(FALSE,TRUE,TRUE,FALSE,FALSE)))
+  expect_equal(rowSums(z),rowSums(S))
+  expect_equal(rowSums(GCMS_report_spectra(S,normalize=TRUE)),c(1,1))
+  expect_identical(GCMS_report_spectra(S,0),S)
+  expect_identical(x$model,model)
+  expect_error(GCMS_report_spectra(S,-.1),"ion_threshold")
+  expect_error(GCMS_report_spectra(S,NA_real_),"ion_threshold")
+})
+
+test_that("MSP, Excel text and coefficient summaries share the cutoff", {
+  S<-rbind(c(100,.1,.099,0),c(200,.2,.199,0))
+  colnames(S)<-as.character(41:44)
+  model<-list(S=S,H=diag(2))
+  table<-GCMS_compounds(model,1:2,"sample")
+  file<-tempfile(fileext=".msp")
+  on.exit(unlink(file))
+  exported<-GCMS_write_msp(model,1:2,41:44,file,table)
+  expect_equal(exported$n_ions,c(2,2))
+  expect_equal(sum(grepl("^43 ",readLines(file))),0)
+  expect_equal(sum(grepl("^42 ",readLines(file))),2)
+  expect_true(all(grepl("Ion_threshold: 0.001",readLines(file)[
+    grepl("^Ion_threshold:",readLines(file))],fixed=TRUE)))
+  expect_false(any(grepl("43 \\(",GCMS_spectrum_text(S,41:44))))
+})

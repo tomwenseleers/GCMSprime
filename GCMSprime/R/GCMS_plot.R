@@ -141,6 +141,7 @@ plot.GCMSdeco <- function(x,type=c("lines","heatmap","spectra","profiles"),file=
   }
   old<-graphics::par(no.readonly=TRUE);on.exit(graphics::par(old),add=TRUE,after=FALSE)
   S<-x$model$S;H<-x$model$H;B<-x$model$background;A<-x$model$alpha
+  if(type%in%c("spectra","profiles"))S<-GCMS_report_spectra(S,GCMS_ion_threshold(x))
   colour<-if(K) grDevices::hcl(h=(seq_len(K)*137.508)%%360,c=75,l=48) else character()
   trans<-switch(transform,sqrt=function(z) sign(z)*sqrt(abs(z)),identity=identity,
     log1p=function(z) sign(z)*log1p(abs(z)))
