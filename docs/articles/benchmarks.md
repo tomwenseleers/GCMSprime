@@ -92,8 +92,8 @@ points](../reference/figures/simulated-16-spectral-violin.png)](https://tomwense
 
 Each point is a reciprocal spectral hit. Crosses identify hits to
 compounds absent from that sample; the cosine axis uses logit spacing.
-Display valuesor above 0.999999 are shown at 1, while the statistics
-retain theirvalues. Angled, individually formatted tick labels keep the
+Display values at or above 0.999999 are shown at 1, while the statistics
+retain their original values. Compact horizontal tick labels keep the
 scale readable.
 
 ## Correctness of spectral ion support

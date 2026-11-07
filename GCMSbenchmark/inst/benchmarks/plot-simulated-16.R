@@ -145,7 +145,7 @@ benchmark16Similarity <- function(hits,metric,methods,labels,colour,fill,draw,
       plot.title=ggplot2::element_text(face="bold",colour="#14273b",size=18),
       plot.subtitle=ggplot2::element_text(colour="#526579",margin=ggplot2::margin(3,0,7,0)),
       plot.caption=ggplot2::element_text(hjust=0,colour="#526579"),
-      axis.text.x=ggplot2::element_text(angle=if(is.null(cap))0 else 35,hjust=if(is.null(cap)).5 else 1),
+      axis.text.x=ggplot2::element_text(angle=0,hjust=.5),
       axis.title.x=ggplot2::element_text(hjust=.5),
       plot.margin=ggplot2::margin(13,190,9,12))
   if(!is.null(cutoff))plot<-plot+ggplot2::geom_hline(yintercept=logit(cutoff),
