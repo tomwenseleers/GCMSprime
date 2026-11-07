@@ -174,7 +174,7 @@ recovery of large peaks visible alongside the conditional area regressions.
 
 | Method | Smallest quarter | Lower-middle | Upper-middle | Largest quarter |
 |:--|--:|--:|--:|--:|
-| GCMSprime | 405.97 | 734 | 90 | 95.4% | 0.922 | 0.938 |
+| GCMSprime | 91.2% | 95.3% | 96.4% | 99.0% |
 | MS-DIAL | 79.3% | 84.4% | 91.1% | 96.4% |
 | mzmine GC-EI | 70.5% | 79.2% | 82.3% | 91.7% |
 | eRah | 72.0% | 78.6% | 89.1% | 95.8% |
@@ -233,7 +233,7 @@ Their preprocessing noise estimates and selection rules are summarized below.
 
 | Workflow | How it deconvolves and where that can limit recovery | Access |
 |:--------|:----------------------------------|:-------------|
-| GCMSprime | 405.97 | 734 | 90 | 95.4% | 0.922 | 0.938 |
+| GCMSprime | Estimates a time-varying PSF and uses grouped L0 selection across ions to call peaks. A log-concave factor model fits compound-specific profiles, full spectra and smooth background, with GIC or quasi-GIC selecting the compound count. Samples can share spectra while retaining their own profiles. | Free, GPL open source. [Repository](https://github.com/tomwenseleers/GCMSprime) |
 | MS-DIAL | Extracts spectra from detected model peaks within each run, then aligns the features. Smoothing, detection thresholds and the deconvolution window affect which components are recovered. [GC–MS tutorial](https://github.com/systemsomicslab/mtbinfo.github.io/blob/master/MS-DIAL/tutorial.md) | Free, LGPL-3 source. Some vendor readers have separate terms. [MsdialWorkbench](https://github.com/systemsomicslab/MsdialWorkbench#source-code-license) |
 | mzmine / ADAP-GC | The benchmark’s GC-EI module groups resolved ions by retention time and shape similarity. Pseudospectra depend on upstream detection, the grouping thresholds and the minimum number of ions. Batch alignment follows extraction. [GC-EI guide](https://mzmine.github.io/mzmine_documentation/latest/module_docs/featdet_spectraldeconvolutiongc/spectraldeconvolutiongc.html) | Free Community licence for eligible academic users. Commercial use requires a paid plan. [Public source](https://github.com/mzmine/mzmine#license) · [Plans](https://mzio.io/plans/) |
 | xcms + CAMERA | Detects ion peaks first and then groups them into pseudospectra. Filter widths and grouping rules affect the coverage of weak and coeluting peaks. CAMERA was developed for LC–MS feature annotation. [Kuhl et al. (2012)](https://doi.org/10.1021/ac202450g) | Free, GPL open source. [xcms](https://bioconductor.org/packages/xcms) · [CAMERA](https://bioconductor.org/packages/CAMERA) |
