@@ -191,6 +191,11 @@ Workstation with an Intel Core i9-11950H at 2.60 GHz, eight physical
 cores and 16 logical threads, Windows and R 4.5.0. GCMSprime uses 16
 single-threaded sample workers, AMDIS runs serially, and xcms + CAMERA
 uses four workers. Input conversion is timed separately.</p>
+<p><code>ncores</code> can use any number of available cores. GCMSprime
+parallelizes deconvolution across sample workers; when enough samples
+are available, the independent fitting time can decrease approximately
+in proportion to the worker count. The complete analysis also includes
+coupled refinement and data transfers.</p>
 </div>
 <div class="section level2">
 <h2 id="reciprocal-spectral-matches-and-integrated-areas">Reciprocal spectral matches and integrated areas<a class="anchor" aria-label="anchor" href="#reciprocal-spectral-matches-and-integrated-areas"></a>

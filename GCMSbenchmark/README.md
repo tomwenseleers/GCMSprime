@@ -49,6 +49,12 @@ and 16 logical threads, Windows and R 4.5.0. GCMSprime uses 16
 single-threaded sample workers, AMDIS runs serially, and xcms + CAMERA uses
 four workers. Input conversion is timed separately.
 
+`ncores` can use any number of available cores. GCMSprime parallelizes
+deconvolution across sample workers; when enough samples are available,
+the independent fitting time can decrease approximately in proportion to
+the worker count. The complete analysis also includes coupled refinement
+and data transfers.
+
 [![Robust estimated-versus-true total-ion peak areas](../GCMSprime/man/figures/simulated-16-area-predictions.png)](../GCMSprime/man/figures/simulated-16-area-predictions.png)
 
 All panels use **total-ion count equivalents**. Spectra are normalized to
