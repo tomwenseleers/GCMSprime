@@ -126,23 +126,29 @@ used in the plotted comparison, so the table and figures below use the
 explicit Gaussian PSFs in `fit1` and `fit2` above. Automatic calibration
 is available through the calls in this section.
 
-The table reports median elapsed time across three fits on the
+The table reports elapsed time for each complete CDF-to-MSP fit on the
 [benchmark
-workstation](https://tomwenseleers.github.io/L0glm/articles/performance.html#reproduce-and-extend).
-Each run uses eight OpenMP threads and one BLAS thread. Timings include
-CDF reading, PSF initialization, factorization, original-channel
-completion and MSP export. All three runs return the same profiles and
-spectra.
+workstation](https://tomwenseleers.github.io/L0glm/articles/performance.html#reproduce-and-extend),
+using the default likelihood-checked local profile restarts, eight
+OpenMP threads and one BLAS thread. Timings include CDF reading, PSF
+initialization, factorization, original-channel completion and MSP
+export.
 
 | Dataset | Scans | Mass channels | Components | Seconds | Quasi-GIC | Adjusted weighted R² |
 |:---|---:|---:|---:|---:|---:|---:|
-| `gcmsData1` | 119 | 671 | 6 | 5.14 | 246,473 | 0.98999 |
-| `gcmsData2` | 1,764 | 518 | 38 | 68.46 | 1,467,419 | 0.99498 |
+| `gcmsData1` | 119 | 671 | 6 | 9.06 | 246,473 | 0.98999 |
+| `gcmsData2` | 1,764 | 518 | 38 | 706.36 | 1,467,432 | 0.99498 |
 
 Weighted R² uses weights `1/pmax(fitted_mean, 0.1)` and a separate
 weighted mean for each mass channel. Its adjustment is conditional on
 the fitted profiles, using the positive spectral and background
 coefficients as the parameter count.
+
+The pooled quasi-Poisson dispersion estimates are **15.64** and
+**783.18**, respectively. The local restart checks retain the fitted
+component sets in both windows. In the longer beer window, this final
+check takes **5.83 s**; the preceding profile, spectrum and
+rank-refinement stages account for most of the total fitting time.
 
 The default working-correlation adjustment is estimated from temporal
 differences and held fixed during final rank comparisons. Both windows
@@ -178,8 +184,10 @@ Download
 [heatmaps](https://tomwenseleers.github.io/GCMSprime/gcms/gcms-data1-heatmaps.pdf),
 [all profiles and
 spectra](https://tomwenseleers.github.io/GCMSprime/gcms/gcms-data1-profiles-spectra.pdf),
-or the [MSP
-library](https://tomwenseleers.github.io/GCMSprime/gcms/gcms-data1.msp).
+[MSP
+library](https://tomwenseleers.github.io/GCMSprime/gcms/gcms-data1.msp),
+or [Excel
+table](https://tomwenseleers.github.io/GCMSprime/gcms/gcms-data1.xlsx).
 
 ### Beer volatiles and a broad acid peak
 
@@ -210,8 +218,10 @@ Download
 [heatmaps](https://tomwenseleers.github.io/GCMSprime/gcms/gcms-data2-heatmaps.pdf),
 [all profiles and
 spectra](https://tomwenseleers.github.io/GCMSprime/gcms/gcms-data2-profiles-spectra.pdf),
-or the [MSP
-library](https://tomwenseleers.github.io/GCMSprime/gcms/gcms-data2.msp).
+[MSP
+library](https://tomwenseleers.github.io/GCMSprime/gcms/gcms-data2.msp),
+or [Excel
+table](https://tomwenseleers.github.io/GCMSprime/gcms/gcms-data2.xlsx).
 
 ## Plot and export the results
 

@@ -123,7 +123,7 @@ including the acid in all seven samples where it occurs.</p>
 <tbody>
 <tr class="odd">
 <td align="left">GCMSprime</td>
-<td align="right">318.42</td>
+<td align="right">405.97</td>
 <td align="right">734</td>
 <td align="right">90</td>
 <td align="right">95.4%</td>
@@ -229,8 +229,8 @@ distribution. Every observed point remains visible, and the dashed
 <strong>1:1 reference is drawn last in every panel</strong>. The
 headings report robust adjusted R²; ordinary least-squares statistics
 are retained in the downloadable tables. GCMSprime has robust adjusted
-R² <strong>0.995</strong> and a <strong>median absolute area error of
-2.05%</strong>. Area agreement is conditional on recovered true matches,
+R² <strong>0.996</strong> and a <strong>median absolute area error of
+2.01%</strong>. Area agreement is conditional on recovered true matches,
 so it is shown together with sensitivity and false-positive counts.</p>
 <p><a href="../reference/figures/simulated-16-spectral-violin.png"><img src="../reference/figures/simulated-16-spectral-violin.png" alt="Reciprocal spectral cosine similarity with individual points"></a></p>
 <p>Each point is a reciprocal spectral hit. Crosses identify hits to
@@ -292,7 +292,7 @@ scale.</p>
 <p>GCMSprime recovers these elution profiles most accurately for both
 the regular EMG and the shark-fin-shaped acid. Mean profile cosine,
 counting missed occurrences as zero, is <strong>0.999 for the regular
-compound</strong> and <strong>0.953 for the acid</strong>. Other
+compound</strong> and <strong>0.973 for the acid</strong>. Other
 configurations often truncate profiles, split their contributions or
 miss the acid. MS-DIAL also closely recovers the selected regular
 compound (mean cosine 0.998). CAMERA supplies a representative-ion trace
@@ -341,10 +341,10 @@ area regressions.</p>
 <tbody>
 <tr class="odd">
 <td align="left">GCMSprime</td>
-<td align="right">91.2%</td>
-<td align="right">95.3%</td>
-<td align="right">96.4%</td>
-<td align="right">99.0%</td>
+<td align="right">405.97</td>
+<td align="right">734</td>
+<td align="right">90</td>
+<td align="right">95.4%</td>
 </tr>
 <tr class="even">
 <td align="left">MS-DIAL</td>
@@ -451,13 +451,8 @@ recovery</th>
 <tbody>
 <tr class="odd">
 <td align="left">GCMSprime</td>
-<td align="left">Estimates a time-varying PSF and uses grouped L0
-selection across ions to call peaks. A log-concave factor model fits
-compound-specific profiles, full spectra and smooth background, with GIC
-or quasi-GIC selecting the compound count. Samples can share spectra
-while retaining their own profiles.</td>
-<td align="left">Free, GPL open source. <a href="https://github.com/tomwenseleers/GCMSprime" class="external-link">Repository</a>
-</td>
+<td align="left">405.97</td>
+<td align="left">734</td>
 </tr>
 <tr class="even">
 <td align="left">MS-DIAL</td>

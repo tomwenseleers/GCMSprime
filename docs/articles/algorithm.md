@@ -196,7 +196,20 @@ solver refines one log profile at a time and jointly refits the
 overlapping spectra. Fine refinement has no additional shrinkage toward
 zero or toward the starting peak shape. It normalizes each updated
 profile and transfers its scale to the spectrum, preserving the fitted
-contribution. The model belongs to the broader class of [deviance matrix
+contribution.
+
+Final refinement also checks broader starting profiles when component
+modes nearly coincide. Left, right and two-sided width expansions
+preserve log concavity and are followed by local profile/spectrum
+updates. Every trial uses the original mass channels, retaining rare-ion
+contrasts. A restart is accepted only when its complete criterion
+improves relative to both the current fit and a separately refined
+control, with background, noise settings and compound count fixed. The
+[logconNMF
+algorithm](https://tomwenseleers.github.io/logconNMF/articles/algorithm.html)
+gives the construction and mathematical pseudocode.
+
+The model belongs to the broader class of [deviance matrix
 factorization](https://doi.org/10.1214/23-EJS2174) and [generalized
 matrix factorization](https://www.jmlr.org/papers/v23/20-1104.html)
 models, with additional nonnegativity, log-concavity and rank selection.

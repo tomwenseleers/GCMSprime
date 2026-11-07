@@ -191,4 +191,17 @@ benchmark16Profiles <- function(fit,truth,sim,output_dir) {
     do.call(rbind,rows)
   }))
   utils::write.csv(areas,file.path(output_dir,"area-grid.csv"),row.names=FALSE)
+  known<-areas[areas$method=="Ground truth" &areas$present,,drop=FALSE]
+  breaks<-stats::quantile(known$area_true,seq(0,1,.25))
+  labels<-c("Smallest","Lower-middle","Upper-middle","Largest")
+  sensitivity<-do.call(rbind,lapply(names(fit$methods),function(method) {
+    z<-areas[areas$method==method &areas$present,,drop=FALSE]
+    q<-cut(z$area_true,breaks,include.lowest=TRUE,labels=labels)
+    do.call(rbind,lapply(labels,function(level) {
+      a<-z[q==level,,drop=FALSE]
+      data.frame(method,quartile=level,true=nrow(a),TP=sum(a$called),
+        sensitivity=mean(a$called),min_area=min(a$area_true),max_area=max(a$area_true))
+    }))
+  }))
+  utils::write.csv(sensitivity,file.path(output_dir,"sensitivity-by-area.csv"),row.names=FALSE)
 }

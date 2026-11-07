@@ -27,7 +27,7 @@ where it occurs.
 
 | Method        | Seconds |  TP |   FP | Sensitivity | Peak F1 | Ion F1 |
 |:--------------|--------:|----:|-----:|------------:|--------:|-------:|
-| GCMSprime     |  318.42 | 734 |   90 |       95.4% |   0.922 |  0.938 |
+| GCMSprime     |  405.97 | 734 |   90 |       95.4% |   0.922 |  0.938 |
 | MS-DIAL       |   17.61 | 675 |  641 |       87.8% |   0.647 |  0.858 |
 | mzmine GC-EI  |   38.47 | 622 |   70 |       80.9% |   0.851 |  0.860 |
 | eRah          |   17.07 | 645 | 1912 |       83.9% |   0.388 |  0.771 |
@@ -82,8 +82,8 @@ the main approximately Gaussian log-error distribution. Every observed
 point remains visible, and the dashed **1:1 reference is drawn last in
 every panel**. The headings report robust adjusted R²; ordinary
 least-squares statistics are retained in the downloadable tables.
-GCMSprime has robust adjusted R² **0.995** and a **median absolute area
-error of 2.05%**. Area agreement is conditional on recovered true
+GCMSprime has robust adjusted R² **0.996** and a **median absolute area
+error of 2.01%**. Area agreement is conditional on recovered true
 matches, so it is shown together with sensitivity and false-positive
 counts.
 
@@ -158,7 +158,7 @@ axis; profile amplitudes remain on their native total-ion scale.
 GCMSprime recovers these elution profiles most accurately for both the
 regular EMG and the shark-fin-shaped acid. Mean profile cosine, counting
 missed occurrences as zero, is **0.999 for the regular compound** and
-**0.953 for the acid**. Other configurations often truncate profiles,
+**0.973 for the acid**. Other configurations often truncate profiles,
 split their contributions or miss the acid. MS-DIAL also closely
 recovers the selected regular compound (mean cosine 0.998). CAMERA
 supplies a representative-ion trace scaled to the grouped total-ion
@@ -190,7 +190,7 @@ area regressions.
 
 | Method        | Smallest quarter | Lower-middle | Upper-middle | Largest quarter |
 |:--------------|-----------------:|-------------:|-------------:|----------------:|
-| GCMSprime     |            91.2% |        95.3% |        96.4% |           99.0% |
+| GCMSprime     |           405.97 |          734 |           90 |           95.4% |
 | MS-DIAL       |            79.3% |        84.4% |        91.1% |           96.4% |
 | mzmine GC-EI  |            70.5% |        79.2% |        82.3% |           91.7% |
 | eRah          |            72.0% |        78.6% |        89.1% |           95.8% |
@@ -256,7 +256,7 @@ basis](https://tomwenseleers.github.io/GCMSprime/articles/algorithm.md)
 
 | Workflow | How it deconvolves and where that can limit recovery | Access |
 |:---|:---|:---|
-| GCMSprime | Estimates a time-varying PSF and uses grouped L0 selection across ions to call peaks. A log-concave factor model fits compound-specific profiles, full spectra and smooth background, with GIC or quasi-GIC selecting the compound count. Samples can share spectra while retaining their own profiles. | Free, GPL open source. [Repository](https://github.com/tomwenseleers/GCMSprime) |
+| GCMSprime | 405.97 | 734 |
 | MS-DIAL | Extracts spectra from detected model peaks within each run, then aligns the features. Smoothing, detection thresholds and the deconvolution window affect which components are recovered. [GC–MS tutorial](https://github.com/systemsomicslab/mtbinfo.github.io/blob/master/MS-DIAL/tutorial.md) | Free, LGPL-3 source. Some vendor readers have separate terms. [MsdialWorkbench](https://github.com/systemsomicslab/MsdialWorkbench#source-code-license) |
 | mzmine / ADAP-GC | The benchmark’s GC-EI module groups resolved ions by retention time and shape similarity. Pseudospectra depend on upstream detection, the grouping thresholds and the minimum number of ions. Batch alignment follows extraction. [GC-EI guide](https://mzmine.github.io/mzmine_documentation/latest/module_docs/featdet_spectraldeconvolutiongc/spectraldeconvolutiongc.html) | Free Community licence for eligible academic users. Commercial use requires a paid plan. [Public source](https://github.com/mzmine/mzmine#license) · [Plans](https://mzio.io/plans/) |
 | xcms + CAMERA | Detects ion peaks first and then groups them into pseudospectra. Filter widths and grouping rules affect the coverage of weak and coeluting peaks. CAMERA was developed for LC–MS feature annotation. [Kuhl et al. (2012)](https://doi.org/10.1021/ac202450g) | Free, GPL open source. [xcms](https://bioconductor.org/packages/xcms) · [CAMERA](https://bioconductor.org/packages/CAMERA) |

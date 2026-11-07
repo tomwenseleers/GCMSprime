@@ -35,7 +35,7 @@ the deconvolution receives neither the known areas nor the true profiles.
 
 | Method | Seconds | TP | FP | Sensitivity | Peak F1 | Ion F1 |
 |:--|--:|--:|--:|--:|--:|--:|
-| GCMSprime | 318.42 | 734 | 90 | 95.4% | 0.922 | 0.938 |
+| GCMSprime | 405.97 | 734 | 90 | 95.4% | 0.922 | 0.938 |
 | MS-DIAL | 17.61 | 675 | 641 | 87.8% | 0.647 | 0.858 |
 | mzmine GC-EI | 38.47 | 622 | 70 | 80.9% | 0.851 | 0.860 |
 | eRah | 17.07 | 645 | 1912 | 83.9% | 0.388 | 0.771 |
@@ -76,7 +76,7 @@ covariance, describing the main approximately Gaussian log-error distribution.
 Every observed point remains visible, and the dashed **1:1 reference is drawn
 last in every panel**. The headings report robust adjusted R²; ordinary
 least-squares statistics are retained in the downloadable tables. GCMSprime
-has robust adjusted R² **0.995** and a **median absolute area error of 2.05%**.
+has robust adjusted R² **0.996** and a **median absolute area error of 2.01%**.
 Area agreement is conditional on recovered true matches, so it is shown
 together with sensitivity and false-positive counts.
 
@@ -125,7 +125,7 @@ horizontal axis; profile amplitudes remain on their native total-ion scale.
 GCMSprime recovers these elution profiles most accurately for both the
 regular EMG and the shark-fin-shaped acid. Mean profile cosine, counting
 missed occurrences as zero, is **0.999 for the regular compound** and
-**0.953 for the acid**. Other configurations often truncate profiles,
+**0.973 for the acid**. Other configurations often truncate profiles,
 split their contributions or miss the acid. MS-DIAL also closely recovers
 the selected regular compound (mean cosine 0.998). CAMERA supplies a
 representative-ion trace scaled to the grouped total-ion area. The mzmine

@@ -117,21 +117,27 @@ PSFs in `fit1` and `fit2` above. Automatic calibration is available through
 the calls in this section.
 
 <!-- BEGIN gcms-results -->
-The table reports median elapsed time across three fits on the
-[benchmark workstation](https://tomwenseleers.github.io/L0glm/articles/performance.html#reproduce-and-extend).
-Each run uses eight OpenMP threads and one BLAS thread. Timings include CDF
-reading, PSF initialization, factorization, original-channel completion and
-MSP export. All three runs return the same profiles and spectra.
+The table reports elapsed time for each complete CDF-to-MSP fit on the
+[benchmark workstation](https://tomwenseleers.github.io/L0glm/articles/performance.html#reproduce-and-extend),
+using the default likelihood-checked local profile restarts, eight OpenMP
+threads and one BLAS thread. Timings include CDF reading, PSF initialization,
+factorization, original-channel completion and MSP export.
 
 | Dataset | Scans | Mass channels | Components | Seconds | Quasi-GIC | Adjusted weighted R² |
 |:--|--:|--:|--:|--:|--:|--:|
-| `gcmsData1` | 119 | 671 | 6 | 5.14 | 246,473 | 0.98999 |
-| `gcmsData2` | 1,764 | 518 | 38 | 68.46 | 1,467,419 | 0.99498 |
+| `gcmsData1` | 119 | 671 | 6 | 9.06 | 246,473 | 0.98999 |
+| `gcmsData2` | 1,764 | 518 | 38 | 706.36 | 1,467,432 | 0.99498 |
 
 Weighted R² uses weights `1/pmax(fitted_mean, 0.1)` and a separate weighted
 mean for each mass channel. Its adjustment is conditional on the fitted
 profiles, using the positive spectral and background coefficients as the
 parameter count.
+
+The pooled quasi-Poisson dispersion estimates are **15.64** and **783.18**,
+respectively. The local restart checks retain the fitted component sets in
+both windows. In the longer beer window, this final check takes **5.83 s**;
+the preceding profile, spectrum and rank-refinement stages account for most
+of the total fitting time.
 
 The default working-correlation adjustment is estimated from temporal differences and held fixed during final rank comparisons. Both windows have an estimated information factor of 1.98. The permissive initialization retains candidates while their profiles are refined; final broad-fragment decisions compare merged and equally refined unmerged local models. The beer fit represents the extended acid contribution with one log-concave profile, retaining all 518 mass channels. Diagnostics are available in `fit2$model$contained_fusion` and `fit2$model$initialization`.
 
@@ -145,7 +151,7 @@ The default working-correlation adjustment is estimated from temporal difference
 
 The profile/spectrum panels show every recovered compound.
 
-Download [traces](../gcms/gcms-data1-traces.pdf), [heatmaps](../gcms/gcms-data1-heatmaps.pdf), [all profiles and spectra](../gcms/gcms-data1-profiles-spectra.pdf), or the [MSP library](../gcms/gcms-data1.msp).
+Download [traces](../gcms/gcms-data1-traces.pdf), [heatmaps](../gcms/gcms-data1-heatmaps.pdf), [all profiles and spectra](../gcms/gcms-data1-profiles-spectra.pdf), [MSP library](../gcms/gcms-data1.msp), or [Excel table](../gcms/gcms-data1.xlsx).
 
 ### Beer volatiles and a broad acid peak
 
@@ -157,7 +163,7 @@ Download [traces](../gcms/gcms-data1-traces.pdf), [heatmaps](../gcms/gcms-data1-
 
 The profile/spectrum preview includes the broadest component and five other large components, in temporal order. The PDF contains every recovered component. The broad acid contribution and neighbouring components are shown on the original ion channels. The final residual pass can retain additional small components when their likelihood gain exceeds the compound penalty.
 
-Download [traces](../gcms/gcms-data2-traces.pdf), [heatmaps](../gcms/gcms-data2-heatmaps.pdf), [all profiles and spectra](../gcms/gcms-data2-profiles-spectra.pdf), or the [MSP library](../gcms/gcms-data2.msp).
+Download [traces](../gcms/gcms-data2-traces.pdf), [heatmaps](../gcms/gcms-data2-heatmaps.pdf), [all profiles and spectra](../gcms/gcms-data2-profiles-spectra.pdf), [MSP library](../gcms/gcms-data2.msp), or [Excel table](../gcms/gcms-data2.xlsx).
 <!-- END gcms-results -->
 
 ## Plot and export the results

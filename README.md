@@ -114,7 +114,7 @@ Original scan grids are retained, and compounds absent from a sample stay
 unassigned in its area table.
 
 In the [16-sample benchmark](https://tomwenseleers.github.io/GCMSprime/articles/benchmarks.html), GCMSprime recovers
-**734 of 769 true occurrences in 318.42 s**, including the acid compound in
+**734 of 769 true occurrences in 405.97 s**, including the acid compound in
 all seven samples where it occurs. Each chromatogram has 100 candidate
 compounds, 1,200 scans and 258 mass channels, with drift, concentration-dependent
 broadening and a smooth background derived from experimental GC/MS data.
@@ -124,8 +124,8 @@ Initialization uses 32 ion groups and the final fit uses every original ion.
 
 On **16 chromatograms with 100 reference compounds**, GCMSprime recovers
 **734 of 769 true peak occurrences**, with **90 false positives**
-(peak F1 **0.922**). Its total-ion peak areas show **robust adjusted R² 0.995**
-and **median absolute area error 2.05%**.
+(peak F1 **0.922**). Its total-ion peak areas show **robust adjusted R² 0.996**
+and **median absolute area error 2.01%**.
 
 [![True and estimated total-ion peak areas with robust fits](GCMSprime/man/figures/simulated-16-area-predictions.png)](GCMSprime/man/figures/simulated-16-area-predictions.png)
 
