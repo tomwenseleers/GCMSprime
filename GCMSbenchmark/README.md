@@ -35,7 +35,7 @@ the deconvolution receives neither the known areas nor the true profiles.
 
 | Method | Seconds | TP | FP | Sensitivity | Peak F1 | Ion F1 |
 |:--|--:|--:|--:|--:|--:|--:|
-| GCMSprime | 292.38 | 735 | 89 | 95.6% | 0.923 | 0.938 |
+| GCMSprime | 157.69 | 733 | 90 | 95.3% | 0.921 | 0.939 |
 | MS-DIAL | 17.61 | 675 | 641 | 87.8% | 0.647 | 0.858 |
 | mzmine GC-EI | 38.47 | 622 | 70 | 80.9% | 0.851 | 0.860 |
 | eRah | 17.07 | 645 | 1912 | 83.9% | 0.388 | 0.771 |
@@ -76,7 +76,7 @@ covariance, describing the main approximately Gaussian log-error distribution.
 Every observed point remains visible, and the dashed **1:1 reference is drawn
 last in every panel**. The headings report robust adjusted R²; ordinary
 least-squares statistics are retained in the downloadable tables. GCMSprime
-has robust adjusted R² **0.996** and a **median absolute area error of 2.03%**.
+has robust adjusted R² **0.996** and a **median absolute area error of 2.00%**.
 Area agreement is conditional on recovered true matches, so it is shown
 together with sensitivity and false-positive counts.
 
@@ -97,7 +97,7 @@ Ion support uses a shared **0.1% of base-peak intensity cutoff**, applied
 independently to reference and recovered spectra for every method:
 $I_j>0$ and $I_j\geq0.001\max_l I_l$.
 Within-spectrum $F_1=2TP/(2TP+FP+FN)$ is averaged over correctly matched
-true spectra. GCMSprime achieves **mean ion F1 0.938**, compared with
+true spectra. GCMSprime achieves **mean ion F1 0.939**, compared with
 **0.860** for the strongest comparator. Individual points accompany the
 violins; the logit-spaced axis retains labels in the original F1 units.
 

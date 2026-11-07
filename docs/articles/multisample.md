@@ -87,12 +87,12 @@ fit <- runBenchmark16("samples16", method="GCMSprime", ncores=16L)
 plotBenchmark16("samples16")
 ```
 
-The analysis recovered **735 of 769 true occurrences**, with **89 false
-positives** (peak F1 **0.923**), including all seven acid occurrences.
+The analysis recovered **733 of 769 true occurrences**, with **90 false
+positives** (peak F1 **0.921**), including all seven acid occurrences.
 Robust adjusted log-area R² was **0.996** and mean spectral ion-support
-F1 was **0.938** at the shared 0.1% base-peak threshold.
+F1 was **0.939** at the shared 0.1% base-peak threshold.
 
-The CDF-to-results analysis took **292.38 s** with 16 single-threaded
+The CDF-to-results analysis took **157.69 s** with 16 single-threaded
 sample workers on an HP ZBook Fury G8, Intel Core i9-11950H, eight
 physical cores, 16 logical threads, Windows and R 4.5.0. CDF generation
 is separate.

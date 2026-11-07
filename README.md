@@ -114,7 +114,7 @@ Original scan grids are retained, and compounds absent from a sample stay
 unassigned in its area table.
 
 In the [16-sample benchmark](https://tomwenseleers.github.io/GCMSprime/articles/benchmarks.html), GCMSprime recovers
-**735 of 769 true occurrences in 292.38 s**, including the acid compound in
+**733 of 769 true occurrences in 157.69 s**, including the acid compound in
 all seven samples where it occurs. Each chromatogram has 100 candidate
 compounds, 1,200 scans and 258 mass channels, with drift, concentration-dependent
 broadening and a smooth background derived from experimental GC/MS data.
@@ -123,9 +123,9 @@ Initialization uses 32 ion groups and the final fit uses every original ion.
 ## Benchmarks against other software
 
 On **16 chromatograms with 100 reference compounds**, GCMSprime recovers
-**735 of 769 true peak occurrences**, with **89 false positives**
-(peak F1 **0.923**). Its total-ion peak areas show **robust adjusted R² 0.996**
-and **median absolute area error 2.03%**.
+**733 of 769 true peak occurrences**, with **90 false positives**
+(peak F1 **0.921**). Its total-ion peak areas show **robust adjusted R² 0.996**
+and **median absolute area error 2.00%**.
 
 [![True and estimated total-ion peak areas with robust fits](GCMSprime/man/figures/simulated-16-area-predictions.png)](GCMSprime/man/figures/simulated-16-area-predictions.png)
 
@@ -139,7 +139,7 @@ the dashed 1:1 reference above the other layers.
 [![Within-spectrum F1 using the shared 0.1% base-peak cutoff](GCMSprime/man/figures/simulated-16-spectral-support.png)](GCMSprime/man/figures/simulated-16-spectral-support.png)
 
 The shared **0.1% base-peak cutoff** gives GCMSprime **mean ion-support
-F1 0.938**, compared with **0.860** for the strongest comparator. This is
+F1 0.939**, compared with **0.860** for the strongest comparator. This is
 also the default cutoff for GCMSprime's reported spectra and spectral exports.
 Matching requires reciprocal best spectral hits within **30 RI units**.
 The reference includes compounds absent from individual samples.

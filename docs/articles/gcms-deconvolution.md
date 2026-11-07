@@ -136,8 +136,8 @@ completion and MSP export.
 
 | Dataset | Scans | Mass channels | Components | Seconds | Quasi-GIC | Adjusted weighted R² |
 |:---|---:|---:|---:|---:|---:|---:|
-| `gcmsData1` | 119 | 671 | 6 | 6.25 | 246,473 | 0.98999 |
-| `gcmsData2` | 1,764 | 518 | 38 | 85.37 | 1,467,419 | 0.99498 |
+| `gcmsData1` | 119 | 671 | 6 | 5.68 | 246,473 | 0.98999 |
+| `gcmsData2` | 1,764 | 518 | 38 | 39.75 | 1,467,393 | 0.99499 |
 
 Weighted R² uses weights `1/pmax(fitted_mean, 0.1)` and a separate
 weighted mean for each mass channel. Its adjustment is conditional on

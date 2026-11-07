@@ -21,13 +21,13 @@ window. GCMSprime estimates dispersion separately in each sample, with a
 used for scoring; the deconvolution receives neither the known areas nor
 the true profiles.
 
-GCMSprime recovers **735 of 769 occurrences**, with **89 false
-positives** (peak F1 **0.923**), including the acid in all seven samples
+GCMSprime recovers **733 of 769 occurrences**, with **90 false
+positives** (peak F1 **0.921**), including the acid in all seven samples
 where it occurs.
 
 | Method        | Seconds |  TP |   FP | Sensitivity | Peak F1 | Ion F1 |
 |:--------------|--------:|----:|-----:|------------:|--------:|-------:|
-| GCMSprime     |  292.38 | 735 |   89 |       95.6% |   0.923 |  0.938 |
+| GCMSprime     |  157.69 | 733 |   90 |       95.3% |   0.921 |  0.939 |
 | MS-DIAL       |   17.61 | 675 |  641 |       87.8% |   0.647 |  0.858 |
 | mzmine GC-EI  |   38.47 | 622 |   70 |       80.9% |   0.851 |  0.860 |
 | eRah          |   17.07 | 645 | 1912 |       83.9% |   0.388 |  0.771 |
@@ -83,7 +83,7 @@ point remains visible, and the dashed **1:1 reference is drawn last in
 every panel**. The headings report robust adjusted R²; ordinary
 least-squares statistics are retained in the downloadable tables.
 GCMSprime has robust adjusted R² **0.996** and a **median absolute area
-error of 2.03%**. Area agreement is conditional on recovered true
+error of 2.00%**. Area agreement is conditional on recovered true
 matches, so it is shown together with sensitivity and false-positive
 counts.
 
@@ -105,7 +105,7 @@ Ion support uses a shared **0.1% of base-peak intensity cutoff**,
 applied independently to reference and recovered spectra for every
 method: I_j\>0 and I_j\geq0.001\max_l I_l. Within-spectrum
 F_1=2TP/(2TP+FP+FN) is averaged over correctly matched true spectra.
-GCMSprime achieves **mean ion F1 0.938**, compared with **0.860** for
+GCMSprime achieves **mean ion F1 0.939**, compared with **0.860** for
 the strongest comparator. Individual points accompany the violins; the
 logit-spaced axis retains labels in the original F1 units.
 
@@ -190,7 +190,7 @@ area regressions.
 
 | Method        | Smallest quarter | Lower-middle | Upper-middle | Largest quarter |
 |:--------------|-----------------:|-------------:|-------------:|----------------:|
-| GCMSprime     |            91.2% |        95.3% |        96.9% |           99.0% |
+| GCMSprime     |            90.7% |        95.3% |        96.4% |           99.0% |
 | MS-DIAL       |            79.3% |        84.4% |        91.1% |           96.4% |
 | mzmine GC-EI  |            70.5% |        79.2% |        82.3% |           91.7% |
 | eRah          |            72.0% |        78.6% |        89.1% |           95.8% |

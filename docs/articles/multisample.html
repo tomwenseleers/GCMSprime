@@ -159,13 +159,13 @@ complete reference library:</p>
 <span><span class="kw"><a href="https://rdrr.io/r/base/source.html" class="external-link">source</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">bench</span>, <span class="st">"plot-simulated-16.R"</span><span class="op">)</span>, encoding<span class="op">=</span><span class="st">"UTF-8"</span><span class="op">)</span></span>
 <span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu">runBenchmark16</span><span class="op">(</span><span class="st">"samples16"</span>, method<span class="op">=</span><span class="st">"GCMSprime"</span>, ncores<span class="op">=</span><span class="fl">16L</span><span class="op">)</span></span>
 <span><span class="fu">plotBenchmark16</span><span class="op">(</span><span class="st">"samples16"</span><span class="op">)</span></span></code></pre></div>
-<p>The analysis recovered <strong>735 of 769 true occurrences</strong>,
-with <strong>89 false positives</strong> (peak F1
-<strong>0.923</strong>), including all seven acid occurrences. Robust
+<p>The analysis recovered <strong>733 of 769 true occurrences</strong>,
+with <strong>90 false positives</strong> (peak F1
+<strong>0.921</strong>), including all seven acid occurrences. Robust
 adjusted log-area R² was <strong>0.996</strong> and mean spectral
-ion-support F1 was <strong>0.938</strong> at the shared 0.1% base-peak
+ion-support F1 was <strong>0.939</strong> at the shared 0.1% base-peak
 threshold.</p>
-<p>The CDF-to-results analysis took <strong>292.38 s</strong> with 16
+<p>The CDF-to-results analysis took <strong>157.69 s</strong> with 16
 single-threaded sample workers on an HP ZBook Fury G8, Intel Core
 i9-11950H, eight physical cores, 16 logical threads, Windows and R
 4.5.0. CDF generation is separate.</p>
