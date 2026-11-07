@@ -53,6 +53,9 @@ of 2; the known RI maps are used only for scoring.
 Points are RI-constrained reciprocal true matches with positive areas.
 Each engine retains its native area units. The dashed 1:1 line applies
 to integrated counts. Prediction intervals come from the log–log regression.
+Model-ion areas depend on spectral response as well as integrated abundance.
+The result tables also report area errors across samples after removing
+each compound's native response factor.
 
 [![Reciprocal spectral cosine hits on a logit-spaced axis](../GCMSprime/man/figures/simulated-16-spectral-violin.png)](../GCMSprime/man/figures/simulated-16-spectral-violin.png)
 

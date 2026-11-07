@@ -48,9 +48,9 @@
     <li><a class="dropdown-item" href="../articles/multisample.html">GC/MS deconvolution for multiple samples</a></li>
     <li><a class="dropdown-item" href="../articles/spectral-libraries.html">Spectral library import</a></li>
     <li><a class="dropdown-item" href="../articles/library-search.html">Retention indices and library search</a></li>
-    <li><a class="dropdown-item" href="../articles/software-comparison.html">Comparison with other software</a></li>
   </ul>
 </li>
+<li class="nav-item"><a class="nav-link" href="../articles/benchmarks.html">Benchmarks</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-algorithm-theory" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Algorithm &amp; theory</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-algorithm-theory">
@@ -133,15 +133,23 @@ in the intended run order:</p>
 <div class="section level2">
 <h2 id="sixteen-simulated-chromatograms">Sixteen simulated chromatograms<a class="anchor" aria-label="anchor" href="#sixteen-simulated-chromatograms"></a>
 </h2>
-<p>This example fits 16 chromatograms with 1,200 scans and 258 mass
-channels each. The 48 possible compounds occur in roughly half the
-samples, with retention drift and concentration-dependent peak widths
-and tails. All original ions are retained in the exported spectra. Here
-the simulated quasipoisson dispersion is supplied at its known
-value.</p>
+<p>The example uses 1,200 scans and 258 mass channels per sample. A
+shared library of 48 compounds supplies both spectra and retention
+indices. One compound has a broad acid-like shape; the others have
+exponentially modified Gaussian shapes. Concentration-dependent
+broadening extends the peaks towards later times, and a small drift
+shifts successive injections to the right. Compounds occur in about half
+the samples.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">sim</span> <span class="op">&lt;-</span> <span class="fu">logconNMF</span><span class="fu">::</span><span class="fu"><a href="https://tomwenseleers.github.io/logconNMF/reference/simulateGCMSSamples.html" class="external-link">simulateGCMSSamples</a></span><span class="op">(</span>samples<span class="op">=</span><span class="fl">16L</span>, n<span class="op">=</span><span class="fl">1200L</span>, k<span class="op">=</span><span class="fl">48L</span>,</span>
-<span>  preset<span class="op">=</span><span class="st">"time_area"</span>, presence<span class="op">=</span><span class="fl">0.5</span>, irregular<span class="op">=</span><span class="fl">0</span>, drift<span class="op">=</span><span class="fl">2</span>,</span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">simulatedSpectra</span>, package<span class="op">=</span><span class="st">"L0glm"</span><span class="op">)</span></span>
+<span><span class="va">rt</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unname.html" class="external-link">unname</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">simulatedSpectra</span>, <span class="st">"RT"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">ri</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unname.html" class="external-link">unname</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">simulatedSpectra</span>, <span class="st">"RI"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">calibration</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>ri<span class="op">=</span><span class="va">ri</span>,</span>
+<span>  time<span class="op">=</span><span class="fl">.6</span><span class="op">+</span><span class="op">(</span><span class="va">rt</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">rt</span><span class="op">)</span><span class="op">)</span><span class="op">/</span><span class="fu"><a href="https://rdrr.io/r/base/diff.html" class="external-link">diff</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/range.html" class="external-link">range</a></span><span class="op">(</span><span class="va">rt</span><span class="op">)</span><span class="op">)</span><span class="op">*</span><span class="fl">18.8</span><span class="op">)</span></span>
+<span><span class="va">sim</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/simulateGCMSSamples.html">simulateGCMSSamples</a></span><span class="op">(</span>samples<span class="op">=</span><span class="fl">16L</span>, n<span class="op">=</span><span class="fl">1200L</span>, k<span class="op">=</span><span class="fl">48L</span>,</span>
+<span>  S<span class="op">=</span><span class="va">simulatedSpectra</span>, retentionIndex<span class="op">=</span><span class="va">ri</span>, retentionMap<span class="op">=</span><span class="va">calibration</span>,</span>
+<span>  preset<span class="op">=</span><span class="st">"time_area_acid"</span>, acid_fraction<span class="op">=</span><span class="fl">1</span><span class="op">/</span><span class="fl">48</span>, presence<span class="op">=</span><span class="fl">.5</span>,</span>
+<span>  irregular<span class="op">=</span><span class="fl">0</span>, drift<span class="op">=</span><span class="fl">.5</span>, rt_area<span class="op">=</span><span class="fl">0</span>,</span>
 <span>  family<span class="op">=</span><span class="st">"quasipoisson"</span>, dispersion<span class="op">=</span><span class="fl">2</span>, seed<span class="op">=</span><span class="fl">9118</span><span class="op">)</span></span>
 <span><span class="va">input</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="st">"samples16_"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/files2.html" class="external-link">dir.create</a></span><span class="op">(</span><span class="va">input</span><span class="op">)</span></span>
@@ -160,76 +168,24 @@ value.</p>
 <span><span class="va">experiment</span><span class="op">$</span><span class="va">areas</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">experiment</span>, type<span class="op">=</span><span class="st">"areas"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">experiment</span>, sample<span class="op">=</span><span class="fl">1L</span>, type<span class="op">=</span><span class="st">"profiles"</span>, which<span class="op">=</span><span class="fl">1</span><span class="op">:</span><span class="fl">6</span><span class="op">)</span></span></code></pre></div>
-<p>The fit recovered <strong>all 48 shared compounds and all 380 sample
-occurrences</strong>, with no false calls (F1 = 1, MCC = 1). The median
-cosine similarity to the true spectra was <strong>0.999994</strong>.
-Matching for this assessment used aligned apex times within 0.15 minutes
-and spectral cosine similarity of at least 0.9. The GIC was 9,832,385.06
-at all three core budgets, with equal spectra, areas and accepted fusion
-steps. Median adjusted weighted R² was 0.920.</p>
-<table style="width:100%;" class="table">
-<colgroup>
-<col width="16%">
-<col width="16%">
-<col width="16%">
-<col width="16%">
-<col width="16%">
-<col width="16%">
-</colgroup>
-<thead><tr class="header">
-<th align="right">Logical cores</th>
-<th align="right">Shared grouping</th>
-<th align="right">Independent fits</th>
-<th align="right">Coupled refinement</th>
-<th align="right">Exports and other work</th>
-<th align="right">Total</th>
-</tr></thead>
-<tbody>
-<tr class="odd">
-<td align="right">1</td>
-<td align="right">5.03 s</td>
-<td align="right">258.74 s</td>
-<td align="right">48.01 s</td>
-<td align="right">4.89 s</td>
-<td align="right">316.67 s</td>
-</tr>
-<tr class="even">
-<td align="right">8</td>
-<td align="right">1.42 s</td>
-<td align="right">49.00 s</td>
-<td align="right">17.47 s</td>
-<td align="right">4.06 s</td>
-<td align="right">71.95 s</td>
-</tr>
-<tr class="odd">
-<td align="right">16</td>
-<td align="right">1.38 s</td>
-<td align="right">40.11 s</td>
-<td align="right">18.07 s</td>
-<td align="right">4.35 s</td>
-<td align="right"><strong>63.91 s</strong></td>
-</tr>
-</tbody>
-</table>
-<p>The complete workflow ran <strong>5.0 times as fast</strong> with 16
-workers as with one. Timings include automatic PSF estimation,
-deconvolution, alignment, coupling and exports on an HP ZBook Fury G8
-with an Intel Core i9-11950H (8 physical cores, 16 logical cores), R
-4.5.0 and OpenBLAS. Each sample worker used one native thread. The <a href="https://github.com/tomwenseleers/GCMSprime/blob/master/benchmarks/16_samples_parallel.R" class="external-link">benchmark
-script</a> recreates the chromatograms and evaluates the recovered
-compounds.</p>
-<div class="float">
-<img src="figures/samples16-performance.png" alt="Total and stage timings, with true and recovered spectral proportions"><div class="figcaption">Total and stage timings, with true and recovered
-spectral proportions</div>
-</div>
-<div class="float">
-<img src="figures/samples16-areas.png" alt="Recovered integrated areas, with crosses marking absent occurrences"><div class="figcaption">Recovered integrated areas, with crosses marking
-absent occurrences</div>
-</div>
-<div class="float">
-<img src="figures/samples16-profiles.png" alt="Aligned peak profiles for three shared compounds across selected samples"><div class="figcaption">Aligned peak profiles for three shared compounds
-across selected samples</div>
-</div>
+<p>The fit recovered <strong>372 of 380 true occurrences with just 2
+false positives</strong> (F1 = 0.987), including the acid-like compound
+in all seven samples where it was present. Median spectral cosine was
+<strong>0.999992</strong>, and the integrated areas achieved adjusted R²
+<strong>0.993</strong> on the log₁₀ scale. RI-constrained reciprocal
+spectral hits determine these scores.</p>
+<p>The complete analysis took <strong>70.48 s</strong> with 16 sample
+workers on an HP ZBook Fury G8 with an Intel Core i9-11950H (8 physical
+cores, 16 logical threads), R 4.5.0 and OpenBLAS. Each worker used one
+native thread. The time includes automatic PSF estimation,
+deconvolution, alignment, coupled refinement and exports; CDF generation
+is separate.</p>
+<p><a href="benchmarks.html"><img src="../reference/figures/simulated-16-area-predictions.png" alt="Estimated versus true integrated areas for seven workflows"></a></p>
+<p><a href="benchmarks.html"><img src="../reference/figures/simulated-16-acid-profiles.png" alt="Acid-like peak recovery across samples"></a></p>
+<p>The <a href="benchmarks.html">benchmarks against other software</a>
+compare seven workflows, give the full matching rule and link to the
+reproducible simulation, engine settings and scoring tables in
+GCMSbenchmark.</p>
 </div>
 <div class="section level2">
 <h2 id="outputs-and-memory-use">Outputs and memory use<a class="anchor" aria-label="anchor" href="#outputs-and-memory-use"></a>

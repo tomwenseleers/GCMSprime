@@ -40,6 +40,11 @@
 - Stage timings, thread-allocation metadata and a sixteen-sample
   simulated example accompany serial/parallel result checks.
 
+- [`simulateGCMSSamples()`](https://tomwenseleers.github.io/GCMSprime/reference/simulateGCMSSamples.md)
+  provides RI-aware simulation with shared spectra,
+  concentration-dependent broadening, optional acid peaks and sample
+  drift.
+
 ### Spectral libraries and identification
 
 - Streaming MSP and GCMS-ID CSV import with sparse in-memory or SQLite

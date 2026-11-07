@@ -28,7 +28,7 @@ navbar:
   bg: dark
   type: dark
   structure:
-    left: [intro, tutorials, algorithm, reference, news]
+    left: [intro, tutorials, benchmarks, algorithm, reference, news]
     right: [search, github]
   components:
     intro:
@@ -45,8 +45,9 @@ navbar:
           href: articles/spectral-libraries.html
         - text: Retention indices and library search
           href: articles/library-search.html
-        - text: Comparison with other software
-          href: articles/software-comparison.html
+    benchmarks:
+      text: Benchmarks
+      href: articles/benchmarks.html
     algorithm:
       text: Algorithm & theory
       menu:
@@ -69,13 +70,18 @@ authors:
 articles:
   - title: Tutorials
     contents: [articles/gcms-deconvolution, articles/multisample, articles/spectral-libraries, articles/library-search]
-  - title: Software comparison
-    contents: [articles/software-comparison]
+  - title: Benchmarks
+    contents: [articles/benchmarks]
   - title: Algorithm and theory
     contents: [articles/algorithm, articles/identification-theory]
+redirects:
+  - ["articles/software-comparison.html", "articles/benchmarks.html"]
+  - ["articles/articles/software-comparison.html", "articles/benchmarks.html"]
 reference:
   - title: Deconvolution, quantification and reports
     contents: [gcmsDeco, GCMSbatch, plot.GCMSdeco, writeGCMSCDF]
+  - title: Simulate sample series
+    contents: [simulateGCMSSamples]
   - title: Import and inspect spectral libraries
     contents: [readMSP, readGCMSID, libraryMetadata, spectra, retentionIndices]
   - title: Calibrate retention indices and identify compounds

@@ -55,16 +55,24 @@ experiment <- gcmsDeco("chromatograms", output_dir="beer_results",
 
 ## Sixteen simulated chromatograms
 
-This example fits 16 chromatograms with 1,200 scans and 258 mass
-channels each. The 48 possible compounds occur in roughly half the
-samples, with retention drift and concentration-dependent peak widths
-and tails. All original ions are retained in the exported spectra. Here
-the simulated quasipoisson dispersion is supplied at its known value.
+The example uses 1,200 scans and 258 mass channels per sample. A shared
+library of 48 compounds supplies both spectra and retention indices. One
+compound has a broad acid-like shape; the others have exponentially
+modified Gaussian shapes. Concentration-dependent broadening extends the
+peaks towards later times, and a small drift shifts successive
+injections to the right. Compounds occur in about half the samples.
 
 ``` r
 
-sim <- logconNMF::simulateGCMSSamples(samples=16L, n=1200L, k=48L,
-  preset="time_area", presence=0.5, irregular=0, drift=2,
+data(simulatedSpectra, package="L0glm")
+rt <- unname(attr(simulatedSpectra, "RT"))
+ri <- unname(attr(simulatedSpectra, "RI"))
+calibration <- data.frame(ri=ri,
+  time=.6+(rt-min(rt))/diff(range(rt))*18.8)
+sim <- simulateGCMSSamples(samples=16L, n=1200L, k=48L,
+  S=simulatedSpectra, retentionIndex=ri, retentionMap=calibration,
+  preset="time_area_acid", acid_fraction=1/48, presence=.5,
+  irregular=0, drift=.5, rt_area=0,
   family="quasipoisson", dispersion=2, seed=9118)
 input <- tempfile("samples16_")
 dir.create(input)
@@ -85,42 +93,29 @@ plot(experiment, type="areas")
 plot(experiment, sample=1L, type="profiles", which=1:6)
 ```
 
-The fit recovered **all 48 shared compounds and all 380 sample
-occurrences**, with no false calls (F1 = 1, MCC = 1). The median cosine
-similarity to the true spectra was **0.999994**. Matching for this
-assessment used aligned apex times within 0.15 minutes and spectral
-cosine similarity of at least 0.9. The GIC was 9,832,385.06 at all three
-core budgets, with equal spectra, areas and accepted fusion steps.
-Median adjusted weighted R² was 0.920.
+The fit recovered **372 of 380 true occurrences with just 2 false
+positives** (F1 = 0.987), including the acid-like compound in all seven
+samples where it was present. Median spectral cosine was **0.999992**,
+and the integrated areas achieved adjusted R² **0.993** on the log₁₀
+scale. RI-constrained reciprocal spectral hits determine these scores.
 
-| Logical cores | Shared grouping | Independent fits | Coupled refinement | Exports and other work | Total |
-|---:|---:|---:|---:|---:|---:|
-| 1 | 5.03 s | 258.74 s | 48.01 s | 4.89 s | 316.67 s |
-| 8 | 1.42 s | 49.00 s | 17.47 s | 4.06 s | 71.95 s |
-| 16 | 1.38 s | 40.11 s | 18.07 s | 4.35 s | **63.91 s** |
+The complete analysis took **70.48 s** with 16 sample workers on an HP
+ZBook Fury G8 with an Intel Core i9-11950H (8 physical cores, 16 logical
+threads), R 4.5.0 and OpenBLAS. Each worker used one native thread. The
+time includes automatic PSF estimation, deconvolution, alignment,
+coupled refinement and exports; CDF generation is separate.
 
-The complete workflow ran **5.0 times as fast** with 16 workers as with
-one. Timings include automatic PSF estimation, deconvolution, alignment,
-coupling and exports on an HP ZBook Fury G8 with an Intel Core i9-11950H
-(8 physical cores, 16 logical cores), R 4.5.0 and OpenBLAS. Each sample
-worker used one native thread. The [benchmark
-script](https://github.com/tomwenseleers/GCMSprime/blob/master/benchmarks/16_samples_parallel.R)
-recreates the chromatograms and evaluates the recovered compounds.
+[![Estimated versus true integrated areas for seven
+workflows](../reference/figures/simulated-16-area-predictions.png)](https://tomwenseleers.github.io/GCMSprime/articles/benchmarks.md)
 
-![Total and stage timings, with true and recovered spectral
-proportions](figures/samples16-performance.png)
+[![Acid-like peak recovery across
+samples](../reference/figures/simulated-16-acid-profiles.png)](https://tomwenseleers.github.io/GCMSprime/articles/benchmarks.md)
 
-Total and stage timings, with true and recovered spectral proportions
-
-![Recovered integrated areas, with crosses marking absent
-occurrences](figures/samples16-areas.png)
-
-Recovered integrated areas, with crosses marking absent occurrences
-
-![Aligned peak profiles for three shared compounds across selected
-samples](figures/samples16-profiles.png)
-
-Aligned peak profiles for three shared compounds across selected samples
+The [benchmarks against other
+software](https://tomwenseleers.github.io/GCMSprime/articles/benchmarks.md)
+compare seven workflows, give the full matching rule and link to the
+reproducible simulation, engine settings and scoring tables in
+GCMSbenchmark.
 
 ## Outputs and memory use
 

@@ -22,8 +22,8 @@
     <li><a class="dropdown-item" href="../articles/multisample.html">GC/MS deconvolution for multiple samples</a></li>
     <li><a class="dropdown-item" href="../articles/spectral-libraries.html">Spectral library import</a></li>
     <li><a class="dropdown-item" href="../articles/library-search.html">Retention indices and library search</a></li>
-    <li><a class="dropdown-item" href="../articles/software-comparison.html">Comparison with other software</a></li>
   </ul></li>
+<li class="nav-item"><a class="nav-link" href="../articles/benchmarks.html">Benchmarks</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-algorithm-theory" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Algorithm &amp; theory</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-algorithm-theory"><li><a class="dropdown-item" href="../articles/algorithm.html">GC/MS deconvolution: mathematical basis</a></li>
@@ -61,6 +61,7 @@
 <li><p>Directory-based multisample analysis preserves acquisition order and group labels, selects alkane standards, aligns samples and estimates shared spectra with sample-specific areas and profiles.</p></li>
 <li><p><code>ncores</code> is a total logical-CPU budget for concurrent samples and native fitting. A shared reusable ion-group map and bounded coupled updates keep memory use controlled while retaining full spectra and sample-specific PSFs.</p></li>
 <li><p>Stage timings, thread-allocation metadata and a sixteen-sample simulated example accompany serial/parallel result checks.</p></li>
+<li><p><code><a href="../reference/simulateGCMSSamples.html">simulateGCMSSamples()</a></code> provides RI-aware simulation with shared spectra, concentration-dependent broadening, optional acid peaks and sample drift.</p></li>
 </ul></div>
 <div class="section level3">
 <h3 id="spectral-libraries-and-identification-0-1-0-9000">Spectral libraries and identification<a class="anchor" aria-label="anchor" href="#spectral-libraries-and-identification-0-1-0-9000"></a></h3>

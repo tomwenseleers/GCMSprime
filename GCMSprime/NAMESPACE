@@ -42,6 +42,7 @@ export(openLibrary)
 export(readGCMSID)
 export(readMSP)
 export(retentionIndices)
+export(simulateGCMSSamples)
 export(spectra)
 export(writeGCMSCDF)
 import(L0glm)
@@ -64,6 +65,7 @@ importFrom(Matrix,
   tail
 )
 importFrom(Rcpp,evalCpp)
+importFrom(logconNMF,simulateGCMSSamples)
 importFrom(stats,
   AIC,
   BIC,

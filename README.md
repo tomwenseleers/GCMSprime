@@ -112,14 +112,17 @@ by default. Shared spectra and matching summaries also remain in memory.
 Original scan grids are retained, and compounds absent from a sample stay
 unassigned in its area table.
 
-In the [16-sample benchmark](https://tomwenseleers.github.io/GCMSprime/articles/multisample.html#sixteen-simulated-chromatograms),
-GCMSprime recovers all 48 shared compounds and all 380 sample occurrences,
-with no false calls in **63.91 s** with 16 workers. The simulated chromatograms
-have 1,200 scans and 258 ions each. The same tutorial reports **29.2 min**
+In the [16-sample benchmark](https://tomwenseleers.github.io/GCMSprime/articles/benchmarks.html),
+GCMSprime recovers **372 of 380 compound occurrences with just 2 false
+positives in 70.48 s** using 16 workers. Each chromatogram has 1,200 scans
+and 258 ions, with retention drift, concentration-dependent broadening
+and one broad acid-like compound. Initialization and matching use 32
+groups, and the final fit uses every original ion. The
+[multisample tutorial](https://tomwenseleers.github.io/GCMSprime/articles/multisample.html) also reports **29.2 min**
 for the complete coupled workflow on two beer chromatograms with about
 15,000 scans and 518 ions each.
 
-The [software comparison](https://tomwenseleers.github.io/GCMSprime/articles/software-comparison.html)
+The [software comparison](https://tomwenseleers.github.io/GCMSprime/articles/benchmarks.html)
 shows peak-area accuracy and spectral recovery for seven workflows on these
 simulated chromatograms. [GCMSbenchmark](GCMSbenchmark#benchmark-on-16-simulated-chromatograms)
 includes the simulation, engine settings, scoring tables and plotting code.

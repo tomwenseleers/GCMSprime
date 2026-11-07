@@ -1,12 +1,12 @@
 <urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
 <url><loc>https://tomwenseleers.github.io/GCMSprime/404.html</loc></url>
 <url><loc>https://tomwenseleers.github.io/GCMSprime/articles/algorithm.html</loc></url>
+<url><loc>https://tomwenseleers.github.io/GCMSprime/articles/benchmarks.html</loc></url>
 <url><loc>https://tomwenseleers.github.io/GCMSprime/articles/gcms-deconvolution.html</loc></url>
 <url><loc>https://tomwenseleers.github.io/GCMSprime/articles/identification-theory.html</loc></url>
 <url><loc>https://tomwenseleers.github.io/GCMSprime/articles/index.html</loc></url>
 <url><loc>https://tomwenseleers.github.io/GCMSprime/articles/library-search.html</loc></url>
 <url><loc>https://tomwenseleers.github.io/GCMSprime/articles/multisample.html</loc></url>
-<url><loc>https://tomwenseleers.github.io/GCMSprime/articles/software-comparison.html</loc></url>
 <url><loc>https://tomwenseleers.github.io/GCMSprime/articles/spectral-libraries.html</loc></url>
 <url><loc>https://tomwenseleers.github.io/GCMSprime/authors.html</loc></url>
 <url><loc>https://tomwenseleers.github.io/GCMSprime/index.html</loc></url>
@@ -26,6 +26,7 @@
 <url><loc>https://tomwenseleers.github.io/GCMSprime/reference/readMSP.html</loc></url>
 <url><loc>https://tomwenseleers.github.io/GCMSprime/reference/reexports.html</loc></url>
 <url><loc>https://tomwenseleers.github.io/GCMSprime/reference/retentionIndices.html</loc></url>
+<url><loc>https://tomwenseleers.github.io/GCMSprime/reference/simulateGCMSSamples.html</loc></url>
 <url><loc>https://tomwenseleers.github.io/GCMSprime/reference/spectra.html</loc></url>
 <url><loc>https://tomwenseleers.github.io/GCMSprime/reference/writeGCMSCDF.html</loc></url>
 </urlset>

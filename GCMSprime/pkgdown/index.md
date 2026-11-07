@@ -3,7 +3,7 @@
 <div class="l0-hero">
 <div class="l0-hero-copy">
 <p class="l0-eyebrow">GC/MS DECONVOLUTION · QUANTIFICATION · IDENTIFICATION</p>
-<h1>More compounds.<br><span>Cleaner spectra.</span></h1>
+<h1>Accurate integration.<br><span>Cleaner spectra.</span></h1>
 <p class="l0-lead">Fast and scalable GC/MS deconvolution and quantification for single samples or large multisample experiments, with inbuilt spectral library search.</p>
 <div class="l0-actions"><a class="btn btn-primary" href="articles/gcms-deconvolution.html">Get started <span aria-hidden="true">↗</span></a><a class="btn btn-outline-light" href="articles/library-search.html">Search spectral libraries</a></div>
 <p class="l0-hero-note">R · Full mass spectra · CDF input · MSP &amp; Excel output</p>
@@ -28,7 +28,7 @@ An alkane ladder can calibrate peak shapes and retention indices. Supplying a
 spectral library adds ranked candidate matches, with the retention-index
 agreement and the reference source recorded alongside each score.
 
-See the [16-sample benchmark](#comparison-with-other-software) for peak-area
+See the [16-sample benchmark](#benchmarks-against-other-software) for peak-area
 and spectral recovery across seven workflows.
 
 ## Installation
@@ -129,35 +129,38 @@ depends on the number of shared compounds and how many peaks overlap.
 The blockwise disk-backed workflow keeps the full set of raw chromatograms
 out of RAM for large batches.
 
-In the [16-sample benchmark](articles/multisample.html#sixteen-simulated-chromatograms),
-GCMSprime recovers all 48 shared compounds and all 380 sample occurrences,
-with no false calls in **63.91 s** with 16 workers. Each chromatogram has
-1,200 scans and 258 ions. Initialization and matching use 32 groups, and the
-final fit uses every original ion. The same tutorial reports **29.2 min**
-for the complete coupled workflow on two beer chromatograms, each with
-about 15,000 scans and 518 ions, on the same 16-logical-core laptop.
+In the [16-sample benchmark](articles/benchmarks.html),
+GCMSprime recovers **372 of 380 compound occurrences with just 2 false
+positives in 70.48 s** using 16 workers. Each chromatogram has 1,200 scans
+and 258 ions, with retention drift, concentration-dependent broadening
+and one broad acid-like compound. Initialization and matching use 32
+groups, and the final fit uses every original ion. The
+[multisample tutorial](articles/multisample.html) also reports **29.2 min**
+for the complete coupled workflow on two beer chromatograms with about
+15,000 scans and 518 ions each.
 
-## Comparison with other software
+## Benchmarks against other software
 
-In a comparison of seven workflows on **16 simulated chromatograms**,
-GCMSprime recovered **all 380 true peak occurrences with zero false calls**.
-Its integrated areas agreed closely with the true areas, with an adjusted
-R² of **0.99997** on the log₁₀ scale.
+On **16 simulated chromatograms**, GCMSprime recovered **372 of 380 true
+peak occurrences with just 2 false positives**. Its integrated areas
+agreed closely with the true areas: adjusted R² **0.993** on the log₁₀ scale.
+
 
 [![Estimated versus true peak areas for seven GC–MS workflows](reference/figures/simulated-16-area-predictions.png)](reference/figures/simulated-16-area-predictions.png)
 
-Points show matched peak areas in each engine’s native units. The shaded
+Points show RI-constrained reciprocal matches and their peak areas in each engine’s native units. The shaded
 regions are 95% prediction intervals. The dashed 1:1 line applies to
 methods reporting integrated counts.
 
 [![Best spectral cosine hits by workflow, with individual points on a logit axis](reference/figures/simulated-16-spectral-violin.png)](reference/figures/simulated-16-spectral-violin.png)
 
-The right panel shows the best spectrum within ±7.2 seconds of each
-true peak. The labels give the median cosine and the number of true
-occurrences with a candidate.
+Each point is a reciprocal best spectral hit within **30 retention-index
+units**. The comparison includes all 48 reference compounds, including
+those absent from a sample. Crosses identify hits to absent compounds;
+the labels give the median cosine and the number of true occurrences recovered.
 
 [Reproduce the simulation, fits and figures with GCMSbenchmark](https://github.com/tomwenseleers/GCMSprime/tree/master/GCMSbenchmark#benchmark-on-16-simulated-chromatograms)
-or see the [software comparison](articles/software-comparison.html)
+or see the [benchmarks against other software](articles/benchmarks.html)
 for the methods and scoring details.
 
 ## Spectral library search

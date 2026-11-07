@@ -22,13 +22,13 @@
 - [Retention indices and library
   search](https://tomwenseleers.github.io/GCMSprime/articles/library-search.md):
 
-### Software comparison
+### Benchmarks
 
-- [Comparison with other
-  software](https://tomwenseleers.github.io/GCMSprime/articles/software-comparison.md):
+- [Benchmarks against other
+  software](https://tomwenseleers.github.io/GCMSprime/articles/benchmarks.md):
 
-  How GC–MS workflows resolve coelution, estimate component counts and
-  use multiple samples.
+  RI-constrained reciprocal spectral matching, peak areas and
+  acid-profile recovery in a reproducible 16-sample GC–MS comparison.
 
 ### Algorithm and theory
 

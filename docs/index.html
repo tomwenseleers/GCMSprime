@@ -48,9 +48,9 @@
     <li><a class="dropdown-item" href="articles/multisample.html">GC/MS deconvolution for multiple samples</a></li>
     <li><a class="dropdown-item" href="articles/spectral-libraries.html">Spectral library import</a></li>
     <li><a class="dropdown-item" href="articles/library-search.html">Retention indices and library search</a></li>
-    <li><a class="dropdown-item" href="articles/software-comparison.html">Comparison with other software</a></li>
   </ul>
 </li>
+<li class="nav-item"><a class="nav-link" href="articles/benchmarks.html">Benchmarks</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-algorithm-theory" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Algorithm &amp; theory</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-algorithm-theory">
@@ -81,7 +81,7 @@
 GC/MS DECONVOLUTION · QUANTIFICATION · IDENTIFICATION
 </p>
 <h1>
-More compounds.<br><span>Cleaner spectra.</span>
+Accurate integration.<br><span>Cleaner spectra.</span>
 </h1>
 <p class="l0-lead">
 Fast and scalable GC/MS deconvolution and quantification for single samples or large multisample experiments, with inbuilt spectral library search.
@@ -100,7 +100,7 @@ R · Full mass spectra · CDF input · MSP &amp; Excel output
 </div>
 <p>A GC–MS run records mixtures of ions whenever compounds overlap in time. GCMSprime separates these signals into elution profiles and full mass spectra, then integrates each resolved compound. It accepts ANDI-MS CDF files and writes an MSP library of the recovered spectra and an Excel quantification table when requested. For a sample series, it aligns retention times and shares spectra across related occurrences.</p>
 <p>An alkane ladder can calibrate peak shapes and retention indices. Supplying a spectral library adds ranked candidate matches, with the retention-index agreement and the reference source recorded alongside each score.</p>
-<p>See the <a href="#comparison-with-other-software">16-sample benchmark</a> for peak-area and spectral recovery across seven workflows.</p>
+<p>See the <a href="#benchmarks-against-other-software">16-sample benchmark</a> for peak-area and spectral recovery across seven workflows.</p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
@@ -156,17 +156,17 @@ R · Full mass spectra · CDF input · MSP &amp; Excel output
 <span><span class="va">experiment</span><span class="op">$</span><span class="va">areas</span></span></code></pre></div>
 <p>Samples can be fitted in parallel, with each active worker loading its sample into RAM for the independent fit. During coupled refinement, original observations and factor checkpoints are stored per sample on disk. The fit reads blocks of original mass channels to evaluate the likelihood and update spectra and backgrounds. With preclustering, grouped traces are cached in RAM by default. Shared spectra and matching summaries also remain in memory. Original scan grids are retained, and compounds absent from a sample stay unassigned in its area table.</p>
 <p>Independent fitting can be distributed across samples. At a fixed worker count and comparable chromatogram sizes, the work for this stage grows approximately linearly with the number of samples. Coupled refinement also depends on the number of shared compounds and how many peaks overlap. The blockwise disk-backed workflow keeps the full set of raw chromatograms out of RAM for large batches.</p>
-<p>In the <a href="articles/multisample.html#sixteen-simulated-chromatograms">16-sample benchmark</a>, GCMSprime recovers all 48 shared compounds and all 380 sample occurrences, with no false calls in <strong>63.91 s</strong> with 16 workers. Each chromatogram has 1,200 scans and 258 ions. Initialization and matching use 32 groups, and the final fit uses every original ion. The same tutorial reports <strong>29.2 min</strong> for the complete coupled workflow on two beer chromatograms, each with about 15,000 scans and 518 ions, on the same 16-logical-core laptop.</p>
+<p>In the <a href="articles/benchmarks.html">16-sample benchmark</a>, GCMSprime recovers <strong>372 of 380 compound occurrences with just 2 false positives in 70.48 s</strong> using 16 workers. Each chromatogram has 1,200 scans and 258 ions, with retention drift, concentration-dependent broadening and one broad acid-like compound. Initialization and matching use 32 groups, and the final fit uses every original ion. The <a href="articles/multisample.html">multisample tutorial</a> also reports <strong>29.2 min</strong> for the complete coupled workflow on two beer chromatograms with about 15,000 scans and 518 ions each.</p>
 </div>
 <div class="section level2">
-<h2 id="comparison-with-other-software">Comparison with other software<a class="anchor" aria-label="anchor" href="#comparison-with-other-software"></a>
+<h2 id="benchmarks-against-other-software">Benchmarks against other software<a class="anchor" aria-label="anchor" href="#benchmarks-against-other-software"></a>
 </h2>
-<p>In a comparison of seven workflows on <strong>16 simulated chromatograms</strong>, GCMSprime recovered <strong>all 380 true peak occurrences with zero false calls</strong>. Its integrated areas agreed closely with the true areas, with an adjusted R² of <strong>0.99997</strong> on the log₁₀ scale.</p>
+<p>On <strong>16 simulated chromatograms</strong>, GCMSprime recovered <strong>372 of 380 true peak occurrences with just 2 false positives</strong>. Its integrated areas agreed closely with the true areas: adjusted R² <strong>0.993</strong> on the log₁₀ scale.</p>
 <p><a href="reference/figures/simulated-16-area-predictions.png"><img src="reference/figures/simulated-16-area-predictions.png" alt="Estimated versus true peak areas for seven GC–MS workflows"></a></p>
-<p>Points show matched peak areas in each engine’s native units. The shaded regions are 95% prediction intervals. The dashed 1:1 line applies to methods reporting integrated counts.</p>
+<p>Points show RI-constrained reciprocal matches and their peak areas in each engine’s native units. The shaded regions are 95% prediction intervals. The dashed 1:1 line applies to methods reporting integrated counts.</p>
 <p><a href="reference/figures/simulated-16-spectral-violin.png"><img src="reference/figures/simulated-16-spectral-violin.png" alt="Best spectral cosine hits by workflow, with individual points on a logit axis"></a></p>
-<p>The right panel shows the best spectrum within ±7.2 seconds of each true peak. The labels give the median cosine and the number of true occurrences with a candidate.</p>
-<p><a href="https://github.com/tomwenseleers/GCMSprime/tree/master/GCMSbenchmark#benchmark-on-16-simulated-chromatograms" class="external-link">Reproduce the simulation, fits and figures with GCMSbenchmark</a> or see the <a href="articles/software-comparison.html">software comparison</a> for the methods and scoring details.</p>
+<p>Each point is a reciprocal best spectral hit within <strong>30 retention-index units</strong>. The comparison includes all 48 reference compounds, including those absent from a sample. Crosses identify hits to absent compounds; the labels give the median cosine and the number of true occurrences recovered.</p>
+<p><a href="https://github.com/tomwenseleers/GCMSprime/tree/master/GCMSbenchmark#benchmark-on-16-simulated-chromatograms" class="external-link">Reproduce the simulation, fits and figures with GCMSbenchmark</a> or see the <a href="articles/benchmarks.html">benchmarks against other software</a> for the methods and scoring details.</p>
 </div>
 <div class="section level2">
 <h2 id="spectral-library-search">Spectral library search<a class="anchor" aria-label="anchor" href="#spectral-library-search"></a>

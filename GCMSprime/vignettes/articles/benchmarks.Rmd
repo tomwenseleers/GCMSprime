@@ -1,0 +1,146 @@
+---
+title: "Benchmarks against other software"
+description: "RI-constrained reciprocal spectral matching, peak areas and acid-profile recovery in a reproducible 16-sample GC–MS comparison."
+output: rmarkdown::html_document
+---
+
+## Sixteen simulated chromatograms
+
+Each sample contains 1,200 scans and 258 mass channels. The 48 reference
+spectra retain the RI metadata supplied with <code>L0glm::simulatedSpectra</code>.
+A monotone retention-time–RI map places the compounds along the chromatogram.
+Their presence varies across samples, giving 380 true occurrences.
+
+One compound has a broad, acid-like profile. The remaining compounds have
+exponentially modified Gaussian profiles. Increasing concentration broadens
+both types towards later times while keeping the leading edge approximately
+fixed. A small positive drift shifts successive samples to the right.
+The signal also contains a smooth background and quasi-Poisson noise with
+dispersion 2.
+
+GCMSprime estimates its PSF from the chromatograms and uses the generating
+dispersion for this comparison. The simulation’s calibration maps are used
+to score the recovered spectra.
+
+| Method | Seconds | TP | FP | F1 |
+|:--|--:|--:|--:|--:|
+| GCMSprime | 70.48 | 372 | 2 | 0.987 |
+| MS-DIAL | 21.08 | 364 | 56 | 0.910 |
+| mzmine | 41.83 | 348 | 91 | 0.850 |
+| eRah | 10.73 | 347 | 258 | 0.705 |
+| AMDIS | 36.04 | 351 | 492 | 0.574 |
+| xcms + CAMERA | 26.97 | 349 | 34 | 0.915 |
+| MSHub | 14.56 | 331 | 422 | 0.584 |
+
+Times are wall-clock analysis times on an HP ZBook Fury G8 with an Intel
+Core i9-11950H, eight physical cores and 16 logical threads. AMDIS runs
+serially and xcms + CAMERA uses four sample workers. Input conversion time
+is recorded separately in the downloadable tables.
+
+## Reciprocal spectral matches and integrated areas
+
+Each recovered spectrum is compared with all 48 reference spectra,
+including compounds absent from that sample. Candidates must lie within
+30 RI units and have cosine similarity of at least 0.70. A pair is retained
+when the recovered and reference spectra select each other as their best
+eligible hit. Equal cosine scores are ordered by RI difference and then ID.
+
+A true positive is a reciprocal hit to a compound present in the sample.
+All other called components count as false positives, and each missed
+true occurrence counts as a false negative. The RI calibration follows
+the known generating map, including sample drift. MSHub's aligned outputs
+use the corresponding mean reference clock.
+
+[![Estimated versus true peak areas for reciprocal RI-constrained hits](../reference/figures/simulated-16-area-predictions.png)](../reference/figures/simulated-16-area-predictions.png)
+
+The area plots use the recorded area of each selected true match. Both axes
+are on the log10 scale. Each panel shows adjusted R², the number of contributing
+matches and a 95% prediction interval. Areas retain their engine's native units.
+The dashed 1:1 line applies to integrated counts.
+
+Model-ion areas also depend on the relative abundance of the chosen ion.
+Their global R² therefore combines integration accuracy with differences
+in spectral response across compounds. The full results also report area
+errors across samples after removing each compound's native response factor.
+
+[![Reciprocal spectral cosine hits with individual points on a logit axis](../reference/figures/simulated-16-spectral-violin.png)](../reference/figures/simulated-16-spectral-violin.png)
+
+The violin plot includes all reciprocal hits within the RI window. Crosses
+identify hits to compounds absent from that sample. The tick labels retain
+the original cosine units on the logit-spaced axis.
+
+### Additional AMDIS calls
+
+AMDIS returned **843 components**, of which **351** were reciprocal
+hits to true occurrences. **489 additional calls** shared their best eligible
+reference hit with another call in the same sample. Its area regression
+has adjusted R² **0.840**, conditional on the 351 selected true matches;
+these are the individual returned areas, without adding duplicate calls.
+
+Area agreement is calculated for selected true matches. Every additional
+call contributes to the false-positive count, including extra spectra whose
+best eligible library hit is the same compound. The saved identification
+table records these alternatives, so the area and spectral scores can be
+read alongside the number of components called.
+
+## One simulated chromatogram
+
+[![Observed and true mean signals for a simulated sample](../reference/figures/simulated-16-sample-heatmap.png)](../reference/figures/simulated-16-sample-heatmap.png)
+
+This is the first sample containing the acid-like compound. The two panels
+show observed counts and the true mean, including background, with the
+plotMat colour palette on a square-root intensity scale. Red lines mark
+the true apices. The display is interpolated onto a regular time grid.
+
+## Acid-like peak profiles across samples
+
+[![True and recovered acid-like profiles across samples](../reference/figures/simulated-16-acid-profiles.png)](../reference/figures/simulated-16-acid-profiles.png)
+
+Colours identify samples. Dashed curves show the true profiles, and solid
+curves show compatible returned components, each scaled to its own maximum.
+Thin curves are additional calls to the same reference compound.
+Retention indices place the profiles on a common axis while preserving
+concentration-dependent broadening. The panels use each engine's exported
+profile type. mzmine and MSHub export spectra and areas without per-component
+scan profiles in this workflow.
+
+## Reproduce the comparison
+
+[GCMSbenchmark](https://github.com/tomwenseleers/GCMSprime/tree/master/GCMSbenchmark)
+includes the seeded simulation, full reference library, engine settings,
+scoring tables and code to recreate the figures. Its
+[installation guide](https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/INSTALL.md)
+covers the R packages, external engines and platform requirements.
+
+Download the [summary table](https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst/benchmarks/results/benchmark.csv),
+[matched pairs](https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst/benchmarks/results/matches.csv)
+or [all component identifications](https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst/benchmarks/results/identifications.csv).
+
+## Comparison with other software
+
+GCMSprime combines a formally **estimated time-varying point-spread function
+(PSF)** with **compound-specific peak shapes**, **grouped peak selection
+across mass channels** and a **mathematically specified information
+criterion** for automatic compound-count selection.
+
+For its default quasi-Poisson model, the fitted mean and variance satisfy
+\(\operatorname{Var}(Y_{it})=\phi\mu_{it}\). The final quasi-GIC combines
+the corresponding fit criterion with a penalty for the number of compounds
+and their occurrences. Grouped L0 selection uses the mass channels jointly,
+and hard log-concavity constrains each component profile. This combination
+distinguishes GCMSprime from every evaluated configuration. The other
+workflows use peak detection, representative ion traces, correlations,
+local covariance, factorization of peak integrals or PARAFAC2 least squares.
+Their preprocessing noise estimates and selection rules are summarized below.
+[Mathematical basis](algorithm.html)
+
+| Workflow | How it deconvolves and where that can limit recovery | Access |
+|:--------|:----------------------------------|:-------------|
+| GCMSprime | Estimates a time-varying PSF and uses grouped L0 selection across ions to call peaks. A log-concave factor model fits compound-specific profiles, full spectra and smooth background, with GIC or quasi-GIC selecting the compound count. Samples can share spectra while retaining their own profiles. | Free, GPL open source. [Repository](https://github.com/tomwenseleers/GCMSprime) |
+| MS-DIAL | Extracts spectra from detected model peaks within each run, then aligns the features. Smoothing, detection thresholds and the deconvolution window affect which components are recovered. [GC–MS tutorial](https://github.com/systemsomicslab/mtbinfo.github.io/blob/master/MS-DIAL/tutorial.md) | Free, LGPL-3 source. Some vendor readers have separate terms. [MsdialWorkbench](https://github.com/systemsomicslab/MsdialWorkbench#source-code-license) |
+| mzmine / ADAP-GC | The benchmark’s GC-EI module groups resolved ions by retention time and shape similarity. Pseudospectra depend on upstream detection, the grouping thresholds and the minimum number of ions. Batch alignment follows extraction. [GC-EI guide](https://mzmine.github.io/mzmine_documentation/latest/module_docs/featdet_spectraldeconvolutiongc/spectraldeconvolutiongc.html) | Free Community licence for eligible academic users. Commercial use requires a paid plan. [Public source](https://github.com/mzmine/mzmine#license) · [Plans](https://mzio.io/plans/) |
+| xcms + CAMERA | Detects ion peaks first and then groups them into pseudospectra. Filter widths and grouping rules affect the coverage of weak and coeluting peaks. CAMERA was developed for LC–MS feature annotation. [Kuhl et al. (2012)](https://doi.org/10.1021/ac202450g) | Free, GPL open source. [xcms](https://bioconductor.org/packages/xcms) · [CAMERA](https://bioconductor.org/packages/CAMERA) |
+| eRah | Uses local covariance and orthogonal signal deconvolution after filtering and baseline removal. Recovery depends on width and signal thresholds. Cross-sample alignment follows per-sample deconvolution. [eRah manual](https://cran.r-project.org/web/packages/erah/vignettes/erah-manual.html) | Free, GPL open source. [CRAN](https://cran.r-project.org/package=erah) |
+| AMDIS | Uses representative ion traces as model peak shapes within each chromatogram. Component width, sensitivity and shape settings govern the calls and extracted spectra. [NIST guide](https://chemdata.nist.gov/mass-spc/amdis/docs/amdis.pdf) | Free standalone binary. [NIST distribution](https://chemdata.nist.gov/dokuwiki/doku.php?id=chemdata%3Aamdis) |
+| GNPS/MSHub | Requires a sample series for its NMF workflow. It factorizes aligned peak integrals, so the model resolves spectra and abundances from variation across samples and drops the scan-level profile information. [Aksenov et al. (2021)](https://doi.org/10.1038/s41587-020-0700-3) · [Workflow guide](https://ccms-ucsd.github.io/GNPSDocumentation/gc-ms-deconvolution/) | Free hosted workflow with a GNPS account. Public source under the repository’s nonprofit-use licence. [Source](https://github.com/CCMS-UCSD/GNPS_Workflows/tree/master/mshub-gc) · [Licence](https://github.com/CCMS-UCSD/GNPS_Workflows/blob/733ed89372c3754a4c4d132319da5b4313c47288/LICENSE) |
+| PARADISe | Fits PARAFAC2 within retention intervals. Intervals and ranks can require review, and the constant cross-product constraint restricts how peak overlap can change across samples. [Johnsen et al. (2017)](https://doi.org/10.1016/j.chroma.2017.04.052) · [Protocol](https://doi.org/10.21203/rs.3.pex-2143/v1) | Free Community and paid Professional editions. [Kromath](https://www.kromath.com/) |

@@ -33,6 +33,11 @@
 - [`writeGCMSCDF()`](https://tomwenseleers.github.io/GCMSprime/reference/writeGCMSCDF.md)
   : Write a chromatogram matrix as an ANDI-MS CDF file
 
+## Simulate sample series
+
+- [`simulateGCMSSamples()`](https://tomwenseleers.github.io/GCMSprime/reference/simulateGCMSSamples.md)
+  : Simulate related chromatograms with shared compound spectra
+
 ## Import and inspect spectral libraries
 
 - [`readMSP()`](https://tomwenseleers.github.io/GCMSprime/reference/readMSP.md)

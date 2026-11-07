@@ -28,6 +28,8 @@
   memory use controlled while retaining full spectra and sample-specific PSFs.
 * Stage timings, thread-allocation metadata and a sixteen-sample simulated
   example accompany serial/parallel result checks.
+* `simulateGCMSSamples()` provides RI-aware simulation with shared spectra,
+  concentration-dependent broadening, optional acid peaks and sample drift.
 
 ## Spectral libraries and identification
 
