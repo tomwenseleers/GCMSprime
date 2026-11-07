@@ -7,8 +7,8 @@ Cleaner spectra.
 ======================
 
 Fast and scalable GC/MS deconvolution and quantification for single
-samples or large multisample experiments, with inbuilt spectral library
-search.
+samples or large multisample experiments to separate overlapping peaks,
+with inbuilt spectral library search.
 
 [Get started
 ↗](https://tomwenseleers.github.io/GCMSprime/articles/gcms-deconvolution.md)[Search

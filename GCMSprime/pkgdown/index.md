@@ -4,7 +4,7 @@
 <div class="l0-hero-copy">
 <p class="l0-eyebrow">GC/MS DECONVOLUTION · QUANTIFICATION · IDENTIFICATION</p>
 <h1>Accurate integration.<br><span>Cleaner spectra.</span></h1>
-<p class="l0-lead">Fast and scalable GC/MS deconvolution and quantification for single samples or large multisample experiments, with inbuilt spectral library search.</p>
+<p class="l0-lead">Fast and scalable GC/MS deconvolution and quantification for single samples or large multisample experiments to separate overlapping peaks, with inbuilt spectral library search.</p>
 <div class="l0-actions"><a class="btn btn-primary" href="articles/gcms-deconvolution.html">Get started <span aria-hidden="true">↗</span></a><a class="btn btn-outline-light" href="articles/library-search.html">Search spectral libraries</a></div>
 <p class="l0-hero-note">R · Full mass spectra · CDF input · MSP &amp; Excel output</p>
 </div>
