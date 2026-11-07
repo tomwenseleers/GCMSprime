@@ -157,7 +157,7 @@ chromatograms out of RAM for large batches.
 
 In the [16-sample
 benchmark](https://tomwenseleers.github.io/GCMSprime/articles/benchmarks.md),
-GCMSprime recovers **734 of 769 true occurrences in 405.97 s**,
+GCMSprime recovers **735 of 769 true occurrences in 292.38 s**,
 including the acid compound in all seven samples where it occurs. Each
 chromatogram has 100 candidate compounds, 1,200 scans and 258 mass
 channels, with drift, concentration-dependent broadening and a smooth
@@ -167,9 +167,9 @@ ion groups and the final fit uses every original ion.
 ## Benchmarks against other software
 
 On **16 chromatograms with 100 reference compounds**, GCMSprime recovers
-**734 of 769 true peak occurrences**, with **90 false positives** (peak
-F1 **0.922**). Its total-ion peak areas show **robust adjusted R²
-0.996** and **median absolute area error 2.01%**.
+**735 of 769 true peak occurrences**, with **89 false positives** (peak
+F1 **0.923**). Its total-ion peak areas show **robust adjusted R²
+0.996** and **median absolute area error 2.03%**.
 
 [![True and estimated total-ion peak areas with robust
 fits](reference/figures/simulated-16-area-predictions.png)](https://tomwenseleers.github.io/GCMSprime/reference/figures/simulated-16-area-predictions.png)

@@ -119,14 +119,15 @@ the calls in this section.
 <!-- BEGIN gcms-results -->
 The table reports elapsed time for each complete CDF-to-MSP fit on the
 [benchmark workstation](https://tomwenseleers.github.io/L0glm/articles/performance.html#reproduce-and-extend),
-using the default likelihood-checked local profile restarts, eight OpenMP
+using a clean optimized source build, default likelihood-checked local profile
+restarts, eight OpenMP
 threads and one BLAS thread. Timings include CDF reading, PSF initialization,
 factorization, original-channel completion and MSP export.
 
 | Dataset | Scans | Mass channels | Components | Seconds | Quasi-GIC | Adjusted weighted R² |
 |:--|--:|--:|--:|--:|--:|--:|
-| `gcmsData1` | 119 | 671 | 6 | 9.06 | 246,473 | 0.98999 |
-| `gcmsData2` | 1,764 | 518 | 38 | 706.36 | 1,467,432 | 0.99498 |
+| `gcmsData1` | 119 | 671 | 6 | 6.25 | 246,473 | 0.98999 |
+| `gcmsData2` | 1,764 | 518 | 38 | 85.37 | 1,467,419 | 0.99498 |
 
 Weighted R² uses weights `1/pmax(fitted_mean, 0.1)` and a separate weighted
 mean for each mass channel. Its adjustment is conditional on the fitted
@@ -134,10 +135,9 @@ profiles, using the positive spectral and background coefficients as the
 parameter count.
 
 The pooled quasi-Poisson dispersion estimates are **15.64** and **783.18**,
-respectively. The local restart checks retain the fitted component sets in
-both windows. In the longer beer window, this final check takes **5.83 s**;
-the preceding profile, spectrum and rank-refinement stages account for most
-of the total fitting time.
+respectively. Default local restart checks retain the component sets in
+both windows. Each profile and spectrum refinement is checked against the
+complete original-channel criterion.
 
 The default working-correlation adjustment is estimated from temporal differences and held fixed during final rank comparisons. Both windows have an estimated information factor of 1.98. The permissive initialization retains candidates while their profiles are refined; final broad-fragment decisions compare merged and equally refined unmerged local models. The beer fit represents the extended acid contribution with one log-concave profile, retaining all 518 mass channels. Diagnostics are available in `fit2$model$contained_fusion` and `fit2$model$initialization`.
 

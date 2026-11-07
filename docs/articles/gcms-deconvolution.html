@@ -195,10 +195,10 @@ section.</p>
 <!-- BEGIN gcms-results -->
 <p>The table reports elapsed time for each complete CDF-to-MSP fit on
 the <a href="https://tomwenseleers.github.io/L0glm/articles/performance.html#reproduce-and-extend" class="external-link">benchmark
-workstation</a>, using the default likelihood-checked local profile
-restarts, eight OpenMP threads and one BLAS thread. Timings include CDF
-reading, PSF initialization, factorization, original-channel completion
-and MSP export.</p>
+workstation</a>, using a clean optimized source build, default
+likelihood-checked local profile restarts, eight OpenMP threads and one
+BLAS thread. Timings include CDF reading, PSF initialization,
+factorization, original-channel completion and MSP export.</p>
 <table style="width:100%;" class="table">
 <colgroup>
 <col width="14%">
@@ -224,7 +224,7 @@ and MSP export.</p>
 <td align="right">119</td>
 <td align="right">671</td>
 <td align="right">6</td>
-<td align="right">9.06</td>
+<td align="right">6.25</td>
 <td align="right">246,473</td>
 <td align="right">0.98999</td>
 </tr>
@@ -233,8 +233,8 @@ and MSP export.</p>
 <td align="right">1,764</td>
 <td align="right">518</td>
 <td align="right">38</td>
-<td align="right">706.36</td>
-<td align="right">1,467,432</td>
+<td align="right">85.37</td>
+<td align="right">1,467,419</td>
 <td align="right">0.99498</td>
 </tr>
 </tbody>
@@ -244,11 +244,10 @@ separate weighted mean for each mass channel. Its adjustment is
 conditional on the fitted profiles, using the positive spectral and
 background coefficients as the parameter count.</p>
 <p>The pooled quasi-Poisson dispersion estimates are
-<strong>15.64</strong> and <strong>783.18</strong>, respectively. The
-local restart checks retain the fitted component sets in both windows.
-In the longer beer window, this final check takes <strong>5.83
-s</strong>; the preceding profile, spectrum and rank-refinement stages
-account for most of the total fitting time.</p>
+<strong>15.64</strong> and <strong>783.18</strong>, respectively.
+Default local restart checks retain the component sets in both windows.
+Each profile and spectrum refinement is checked against the complete
+original-channel criterion.</p>
 <p>The default working-correlation adjustment is estimated from temporal
 differences and held fixed during final rank comparisons. Both windows
 have an estimated information factor of 1.98. The permissive
