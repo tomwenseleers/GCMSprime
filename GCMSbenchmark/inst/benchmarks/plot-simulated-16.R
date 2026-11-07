@@ -70,24 +70,21 @@ plotBenchmark16 <- function(results, output_dir = results) {
       1, outer = TRUE, line = 0.6, cex = 1.1)
   })
 
-  if (!any(is.finite(c(hits$best_cosine, hits$near_cosine))))
+  if (!any(is.finite(hits$spectral_cosine)))
     return(invisible(NULL))
-  plot_hits <- rbind(
-    data.frame(method = hits$method, window = "Best spectrum anywhere in the sample",
-      cosine = hits$best_cosine),
-    data.frame(method = hits$method, window = "Best spectrum within ±7.2 seconds",
-      cosine = hits$near_cosine))
+  plot_hits <- data.frame(method=hits$method,cosine=hits$spectral_cosine,
+    presence=factor(ifelse(hits$present,"Present","Absent"),levels=c("Present","Absent")))
   plot_hits$method <- factor(plot_hits$method, levels = rev(methods))
-  plot_hits$window <- factor(plot_hits$window, levels = unique(plot_hits$window))
-  stats <- do.call(rbind, lapply(split(plot_hits, plot_hits[c("method", "window")], drop = TRUE),
-    function(z) {
+  hit_stats <- do.call(rbind, lapply(methods,function(method) {
+      z<-plot_hits[plot_hits$method==method,]
       q <- stats::quantile(z$cosine, c(0.25, 0.5, 0.75), na.rm = TRUE, names = FALSE)
-      data.frame(method = z$method[1L], window = z$window[1L], q25 = q[1L],
-        median = q[2L], q75 = q[3L], compared = sum(is.finite(z$cosine)), total = nrow(z))
+      data.frame(method=method,q25=q[1L],median=q[2L],q75=q[3L],
+        compared=sum(is.finite(z$cosine)),true=sum(z$presence=="Present"),total=nrow(truth))
     }))
-  stats$label <- sprintf("%s · %d/%d", fmt(stats$median, 6), stats$compared, stats$total)
+  hit_stats$label <- sprintf("%s · %d/%d true",fmt(hit_stats$median,6),
+    hit_stats$true,hit_stats$total)
   plot_hits <- plot_hits[is.finite(plot_hits$cosine), ]
-  ticks <- c(0.01, 0.1, 0.5, 0.9, 0.99, 0.999, 0.9999, 0.99999, 0.999999)
+  ticks <- c(0.5,0.7,0.9,0.99,0.999,0.9999,0.99999,0.999999)
   span <- range(stats::qlogis(c(plot_hits$cosine, ticks)), finite = TRUE)
   logit <- function(x) {
     z <- stats::qlogis(x)
@@ -99,24 +96,25 @@ plotBenchmark16 <- function(results, output_dir = results) {
   ticks <- sort(unique(c(ticks, intersect(plot_hits$cosine, c(0, 1)))))
   plot_hits$position <- logit(plot_hits$cosine)
   limits <- range(c(plot_hits$position, logit(ticks)), finite = TRUE)
-  stats$label_position <- limits[2L] + 0.7
+  hit_stats$label_position <- limits[2L] + 0.7
   violin <- ggplot2::ggplot(plot_hits, ggplot2::aes(x = method, y = position)) +
     ggplot2::geom_violin(ggplot2::aes(fill = method, colour = method),
       scale = "width", width = 0.78, adjust = 0.75, linewidth = 0.45) +
-    ggplot2::geom_point(ggplot2::aes(colour = method), size = 0.84, alpha = 0.46,
+    ggplot2::geom_point(ggplot2::aes(colour=method,shape=presence),size=1.1,alpha=.5,
       position = ggplot2::position_jitter(width = 0.23, height = 0, seed = 23)) +
     ggplot2::geom_hline(yintercept = logit(0.70), linetype = "dotted",
       colour = "#607387", linewidth = 0.45) +
-    ggplot2::geom_linerange(data = stats[stats$compared > 0L, ],
+    ggplot2::geom_linerange(data = hit_stats[hit_stats$compared > 0L, ],
       ggplot2::aes(x = method, ymin = logit(q25), ymax = logit(q75), colour = method),
       inherit.aes = FALSE, linewidth = 0.85) +
-    ggplot2::geom_point(data = stats[stats$compared > 0L, ],
+    ggplot2::geom_point(data = hit_stats[hit_stats$compared > 0L, ],
       ggplot2::aes(x = method, y = logit(median), colour = method),
       inherit.aes = FALSE, shape = 21, fill = "white", stroke = 0.74, size = 2.6) +
-    ggplot2::geom_text(data = stats,
+    ggplot2::geom_text(data = hit_stats,
       ggplot2::aes(x = method, y = label_position, label = label),
       inherit.aes = FALSE, colour = "#526579", hjust = 0, size = 3.35) +
-    ggplot2::facet_wrap(~window, nrow = 1) +
+    ggplot2::scale_shape_manual(values=c(Present=16,Absent=4),
+      name="Reference compound in the sample") +
     ggplot2::scale_fill_manual(values = fill, guide = "none") +
     ggplot2::scale_colour_manual(values = colour, guide = "none") +
     ggplot2::scale_x_discrete(labels = labels) +
@@ -125,9 +123,9 @@ plotBenchmark16 <- function(results, output_dir = results) {
       limits = limits + c(-0.4, 6), expand = ggplot2::expansion(mult = 0)) +
     ggplot2::coord_flip() +
     ggplot2::labs(x = NULL, y = "Cosine similarity (logit scale)",
-      title = "Best spectral hits across the 16 simulations",
-      subtitle = "Small dots show individual best hits. The open dot and bar show the median and interquartile range.",
-      caption = "Labels show median cosine and candidate coverage. The dotted line marks the 0.70 cosine cutoff.") +
+      title="Reciprocal spectral hits across 16 simulations",
+      subtitle="RI window ±30 · open dot and bar show the median and interquartile range",
+      caption="Each point is a reciprocal library hit. Crosses identify compounds absent from the sample.") +
     ggplot2::theme_minimal(base_size = 13) +
     ggplot2::theme(panel.grid.minor = ggplot2::element_blank(),
       panel.grid.major.y = ggplot2::element_blank(), panel.spacing.x = grid::unit(1.4, "lines"),
@@ -135,8 +133,66 @@ plotBenchmark16 <- function(results, output_dir = results) {
         margin = ggplot2::margin(5, 0, 8, 0)),
       plot.title = ggplot2::element_text(face = "bold", colour = "#14273b", size = 18),
       plot.subtitle = ggplot2::element_text(colour = "#526579", margin = ggplot2::margin(3, 0, 7, 0)),
+      legend.position="bottom",
       plot.caption = ggplot2::element_text(hjust = 0, colour = "#526579"),
       plot.margin = ggplot2::margin(13, 18, 9, 12))
-  draw("simulated-16-spectral-violin.png", 2480, 1100, print(violin))
+  draw("simulated-16-spectral-violin.png",1800,1050,print(violin))
+  benchmark16Heatmap(results,output_dir,draw)
+  benchmark16AcidPlot(results,methods,labels,draw)
   invisible(list(area = models, spectral = violin))
+}
+
+benchmark16Heatmap <- function(results,output_dir,draw) {
+  file <- file.path(results,"sample-heatmap.rds")
+  if(!file.exists(file)) return(invisible(NULL))
+  x <- readRDS(file)
+  grid <- seq(min(x$time),max(x$time),length.out=length(x$time))
+  matrices <- lapply(list(x$observed,x$mean),function(z)
+    apply(z,2L,function(v)stats::approx(x$time,v,grid)$y))
+  palette <- grDevices::colorRampPalette(
+    c("black","black","blue","green","yellow","orange","red"))(1000L)
+  lim <- range(sqrt(unlist(matrices)))
+  draw("simulated-16-sample-heatmap.png",2200,1250,{
+    graphics::par(mfrow=c(2,1),mar=c(3.3,4.2,2.5,1),mgp=c(2.3,.7,0),las=1)
+    titles <- c("Observed counts","True mean, including smooth background")
+    for(i in 1:2) {
+      graphics::image(grid,x$mass,sqrt(matrices[[i]]),col=palette,zlim=lim,
+        useRaster=TRUE,xlab="Retention time (min)",ylab="Mass-to-charge ratio",
+        main=paste(x$sample,titles[i],sep=" · "))
+      graphics::abline(v=x$apex[x$present],col=grDevices::adjustcolor("red",.55),lwd=.7)
+      graphics::abline(v=x$apex[intersect(which(x$present),x$acid)],col="red",lwd=1.8)
+    }
+  })
+}
+
+benchmark16AcidPlot <- function(results,methods,labels,draw) {
+  file <- file.path(results,"acid-profiles.csv")
+  if(!file.exists(file)) return(invisible(NULL))
+  x <- utils::read.csv(file)
+  available <- intersect(methods,unique(x$method))
+  if(!length(available)) return(invisible(NULL))
+  known <- x[x$method=="Ground truth",]
+  truth <- do.call(rbind,lapply(available,function(m) { z<-known;z$method<-m;z }))
+  estimated <- x[x$method%in%available,]
+  estimated$kind <- "Recovered"
+  truth$kind <- "True"
+  z <- rbind(estimated,truth)
+  z$method <- factor(z$method,levels=available)
+  z$curve <- interaction(z$method,z$sample,z$component,z$kind,drop=TRUE)
+  z$emphasis <- ifelse(z$kind=="True"|z$reciprocal,.75,.35)
+  plot <- ggplot2::ggplot(z,ggplot2::aes(x=ri,y=intensity,colour=sample,
+    linetype=kind,group=curve,linewidth=emphasis)) +
+    ggplot2::geom_line(alpha=.8) +
+    ggplot2::scale_linewidth_identity() +
+    ggplot2::scale_linetype_manual(values=c(True="dashed",Recovered="solid"),name=NULL) +
+    ggplot2::facet_wrap(~method,ncol=2,labeller=ggplot2::as_labeller(labels)) +
+    ggplot2::labs(x="Retention index",y="Relative peak height",
+      title="One broad acid-like compound across samples",
+      subtitle="Dashed curves show truth. Solid curves show each compatible returned component.",
+      colour="Sample",
+      caption="Thin curves are additional calls to the same reference. Profiles use each engine's native export.") +
+    ggplot2::theme_minimal(base_size=13) +
+    ggplot2::theme(legend.position="bottom",strip.text=ggplot2::element_text(face="bold"),
+      panel.grid.minor=ggplot2::element_blank())
+  draw("simulated-16-acid-profiles.png",2100,1500,print(plot))
 }

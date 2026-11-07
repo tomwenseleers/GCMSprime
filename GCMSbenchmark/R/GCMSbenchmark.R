@@ -2,7 +2,9 @@ bench_methods <- c("GCMSprime","MS-DIAL","mzmine","eRah","AMDIS","xcms+CAMERA","
 
 GCMSbenchmark <- function(cdf_file, output_dir, method="GCMSprime", truth=NULL,
                           ncores=1L, control=list(), timeout=7200,
-                          rt_tolerance=.12, min_cosine=.70, ...) {
+                          rt_tolerance=.12, min_cosine=.70,
+                          matching=c("assignment","reciprocal"),ri_tolerance=30,reference=NULL, ...) {
+  matching <- match.arg(matching)
   files <- cdf_file
   if (length(cdf_file)==1L && dir.exists(cdf_file)) {
     files <- list.files(cdf_file,pattern="\\.cdf$",recursive=TRUE,ignore.case=TRUE)
@@ -12,6 +14,9 @@ GCMSbenchmark <- function(cdf_file, output_dir, method="GCMSprime", truth=NULL,
       anyDuplicated(sample_id(files)))
     stop("Supply CDF files with unique sample names or a directory containing them.",call.=FALSE)
   files <- normalizePath(files,winslash="/",mustWork=TRUE)
+  if (matching=="reciprocal")
+    invisible(scoreGCMSbenchmark(structure(list(methods=list(),files=files),class="GCMSbenchmark"),
+      truth,rt_tolerance,min_cosine,matching,ri_tolerance,reference))
   if (!is.numeric(ncores) || length(ncores)!=1L || !is.finite(ncores) ||
       ncores<1 || ncores!=floor(ncores) || ncores>.Machine$integer.max)
     stop("ncores must be a positive integer.",call.=FALSE)
@@ -20,8 +25,12 @@ GCMSbenchmark <- function(cdf_file, output_dir, method="GCMSprime", truth=NULL,
   if (!is.list(control) || (length(control) && (is.null(names(control)) ||
       any(!names(control)%in%bench_methods))))
     stop("Use named backend-specific lists in control.",call.=FALSE)
-  if (identical(tolower(method),"all")) method <- if(length(files)<10L)
-    setdiff(bench_methods,"MSHub") else bench_methods
+  all_methods <- identical(tolower(method),"all")
+  if (all_methods) {
+    method <- if(length(files)<10L) setdiff(bench_methods,"MSHub") else bench_methods
+    if (.Platform$OS.type!="windows" && is.null(control$AMDIS$elu))
+      method <- setdiff(method,"AMDIS")
+  }
   method <- bench_methods[match(tolower(method),tolower(bench_methods))]
   if (!length(method) || anyNA(method))
     stop("method must be one or more of ",paste(bench_methods,collapse=", "),".",call.=FALSE)
@@ -50,7 +59,7 @@ GCMSbenchmark <- function(cdf_file, output_dir, method="GCMSprime", truth=NULL,
   }),method)
   answer <- structure(list(methods=fits, files=files, directory=output_dir),
     class="GCMSbenchmark")
-  answer <- scoreGCMSbenchmark(answer,truth,rt_tolerance,min_cosine)
+  answer <- scoreGCMSbenchmark(answer,truth,rt_tolerance,min_cosine,matching,ri_tolerance,reference)
   utils::write.csv(answer$summary,file.path(output_dir,"benchmark.csv"),row.names=FALSE)
   if (nrow(answer$matches)) utils::write.csv(answer$matches,
     file.path(output_dir,"matches.csv"),row.names=FALSE)

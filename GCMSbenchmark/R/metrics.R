@@ -4,6 +4,20 @@ empty_matches <- function() data.frame(method=character(),sample=character(),
   spectral_cosine=numeric(),profile_cosine=numeric(),profile_width_ratio=numeric(),
   area_true=numeric(),area_estimated=numeric())
 
+empty_identifications <- function() data.frame(method=character(),sample=character(),
+  estimate_id=character(),peak_row=integer(),reference_id=character(),ri_estimated=numeric(),
+  ri_reference=numeric(),ri_error=numeric(),spectral_cosine=numeric(),
+  reciprocal=logical(),present=logical())
+
+ri_from_time <- function(time, calibration) {
+  if (!is.data.frame(calibration) || !all(c("time","ri")%in%names(calibration)) ||
+      nrow(calibration)<2L || !is.numeric(calibration$time) || !is.numeric(calibration$ri) ||
+      any(!is.finite(calibration$time)) || any(!is.finite(calibration$ri)) ||
+      is.unsorted(calibration$time,strictly=TRUE) || is.unsorted(calibration$ri,strictly=TRUE))
+    stop("RI scoring needs an increasing time/ri calibration for each sample.",call.=FALSE)
+  stats::splinefun(calibration$time,calibration$ri,method="monoH.FC")(time)
+}
+
 cosine <- function(a,b) {
   z <- sqrt(sum(a*a)*sum(b*b))
   if (z>0) min(1,sum(a*b)/z) else NA_real_
@@ -75,6 +89,54 @@ match_sample <- function(fit, ii, truth, sample, method, rt_tolerance, min_cosin
     area_true=truth$area[i],area_estimated=ids$area[j])
 }
 
+reciprocal_sample <- function(fit, ii, truth, reference, sample, method,
+                             ri_tolerance, min_cosine) {
+  if (!length(ii)) return(list(matches=empty_matches(),identifications=empty_identifications()))
+  peaks <- fit$peaks[ii,,drop=FALSE]
+  calibration <- if (identical(fit$rt_basis,"aligned")) truth$reference_ri_calibration else
+    truth$ri_calibration
+  estimated_ri <- ri_from_time(peaks$rt,calibration)
+  masses <- sort(unique(round(c(reference$mass,
+    unlist(lapply(fit$spectra[ii],function(s) if(length(s))s[,1L]))))))
+  known <- matrix(0,nrow(reference$P),length(masses))
+  known[,match(round(reference$mass),masses)] <- reference$P
+  similarity <- pmin(pmax(tcrossprod(norm_rows(known),
+    norm_rows(spectrum_matrix(fit$spectra[ii],masses))),0),1)
+  gap <- abs(outer(reference$ri,estimated_ri,"-"))
+  admissible <- is.finite(gap) & gap<=ri_tolerance & similarity>=min_cosine
+  best <- function(score,gap,eligible,label) {
+    i <- which(eligible)
+    if (!length(i)) return(NA_integer_)
+    i[order(-score[i],gap[i],as.character(label[i]))[1L]]
+  }
+  best_peak <- vapply(seq_len(nrow(similarity)),function(i)
+    best(similarity[i,],gap[i,],admissible[i,],peaks$id),1L)
+  best_reference <- vapply(seq_len(ncol(similarity)),function(j)
+    best(similarity[,j],gap[,j],admissible[,j],reference$id),1L)
+  j <- which(!is.na(best_reference))
+  reciprocal <- rep(FALSE,nrow(peaks))
+  reciprocal[j] <- best_peak[best_reference[j]]==j
+  present <- !is.na(best_reference) & reference$id[best_reference]%in%truth$id
+  identification <- data.frame(method=method,sample=sample,estimate_id=as.character(peaks$id),
+    peak_row=ii,reference_id=as.character(reference$id[best_reference]),ri_estimated=estimated_ri,
+    ri_reference=reference$ri[best_reference],ri_error=estimated_ri-reference$ri[best_reference],
+    spectral_cosine=similarity[cbind(best_reference,seq_len(nrow(peaks)))],
+    reciprocal=reciprocal,present=present)
+  j <- which(reciprocal & present)
+  if (!length(j)) return(list(matches=empty_matches(),identifications=identification))
+  i <- match(reference$id[best_reference[j]],truth$id)
+  profiles <- vapply(seq_along(i),function(k)
+    profile_quality(fit$profiles[[ii[j[k]]]],truth$time,truth$H[,i[k]]),c(0,0))
+  target_rt <- if(identical(fit$rt_basis,"aligned"))truth$reference_apex else truth$apex
+  pairs <- data.frame(method=method,sample=sample,truth_id=as.character(truth$id[i]),
+    estimate_id=as.character(peaks$id[j]),peak_row=ii[j],rt_true=target_rt[i],
+    rt_estimated=peaks$rt[j],rt_error_min=peaks$rt[j]-target_rt[i],
+    acid=as.logical(truth$acid[i]),spectral_cosine=identification$spectral_cosine[j],
+    profile_cosine=profiles[1L,],profile_width_ratio=profiles[2L,],
+    area_true=truth$area[i],area_estimated=peaks$area[j])
+  list(matches=pairs,identifications=identification)
+}
+
 metric_median <- function(x) {
   if (any(is.finite(x))) stats::median(x[is.finite(x)]) else NA_real_
 }
@@ -142,11 +204,29 @@ score_row <- function(method,fit,truth,pairs) {
     acid_area_error_factor=ac_ratio)
 }
 
-scoreGCMSbenchmark <- function(x,truth=NULL,rt_tolerance=.12,min_cosine=.70) {
+scoreGCMSbenchmark <- function(x,truth=NULL,rt_tolerance=.12,min_cosine=.70,
+                              matching=c("assignment","reciprocal"),ri_tolerance=30,
+                              reference=NULL) {
   if (!inherits(x,"GCMSbenchmark")) stop("x must be a GCMSbenchmark result.",call.=FALSE)
+  matching <- match.arg(matching)
+  if (is.null(reference)) reference <- x$reference
   if (length(rt_tolerance)!=1L || !is.finite(rt_tolerance) || rt_tolerance<=0 ||
       length(min_cosine)!=1L || !is.finite(min_cosine) || min_cosine<=0 || min_cosine>1)
     stop("Use a positive RT tolerance and 0 < min_cosine <= 1.",call.=FALSE)
+  if (matching=="reciprocal") {
+    if (is.null(truth) || !is.list(reference) ||
+        !all(c("id","P","mass","ri")%in%names(reference)) ||
+        length(dim(reference$P))!=2L ||
+        length(reference$id)!=nrow(reference$P) ||
+        length(reference$mass)!=ncol(reference$P) || length(reference$ri)!=length(reference$id) ||
+        anyDuplicated(reference$id) || anyDuplicated(round(reference$mass)) ||
+        anyNA(reference$id) || any(!is.finite(reference$ri)) ||
+        any(!is.finite(reference$mass)) || any(!is.finite(reference$P)) ||
+        any(reference$P<0) || any(rowSums(reference$P)<=0) ||
+        length(ri_tolerance)!=1L || !is.finite(ri_tolerance) || ri_tolerance<=0)
+      stop("Reciprocal scoring needs truth, a reference library (id/P/mass/ri), and a positive RI tolerance.",
+        call.=FALSE)
+  }
   if (!is.null(truth)) {
     fields <- c("id","time","H","P","area","apex","acid","mass")
     ids <- sample_id(x$files)
@@ -167,14 +247,31 @@ scoreGCMSbenchmark <- function(x,truth=NULL,rt_tolerance=.12,min_cosine=.70) {
     }
   }
   x$matches <- empty_matches()
+  x$identifications <- empty_identifications()
   rows <- lapply(names(x$methods),function(method) {
     fit <- x$methods[[method]]
-    pairs <- if (is.null(truth) || !identical(fit$status,"ok")) empty_matches() else
+    pairs <- if (is.null(truth) || !identical(fit$status,"ok")) empty_matches() else if(matching=="reciprocal") {
+      scored <- lapply(names(truth),function(id) reciprocal_sample(fit,
+        which(fit$peaks$sample==id),truth[[id]],reference,id,method,ri_tolerance,min_cosine))
+      x$identifications <<- rbind(x$identifications,do.call(rbind,lapply(scored,`[[`,"identifications")))
+      do.call(rbind,lapply(scored,`[[`,"matches"))
+    } else
       do.call(rbind,lapply(names(truth),function(id) match_sample(fit,
         which(fit$peaks$sample==id),truth[[id]],id,method,rt_tolerance,min_cosine)))
     x$matches <<- rbind(x$matches,pairs)
-    score_row(method,fit,truth,pairs)
+    row <- score_row(method,fit,truth,pairs)
+    if (matching=="reciprocal") {
+      hits <- x$identifications[x$identifications$method==method,]
+      groups <- table(interaction(hits$sample,hits$reference_id,drop=TRUE))
+      row$duplicate_calls <- sum(pmax(0,groups-1L))
+      row$false_library_hits <- sum(hits$reciprocal & !hits$present)
+      row$matching <- matching
+      row$ri_tolerance <- ri_tolerance
+    }
+    row
   })
   x$summary <- do.call(rbind,rows)
+  x$matching <- matching
+  x$reference <- reference
   x
 }

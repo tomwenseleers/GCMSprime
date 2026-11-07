@@ -1,61 +1,84 @@
 # GCMSbenchmark
 
-Run several GC/MS deconvolution workflows on the same ANDI-MS files. The
-benchmark collects component calls, spectra, elution profiles and native
-quantification where the backend exports them. Simulated truth is optional.
+Compare GC/MS deconvolution workflows on the same ANDI-MS files. The package
+collects timings, component calls, spectra, native peak areas and exported
+elution profiles. Simulated truth adds reproducible recovery metrics.
 
-Install the package from the directory that contains this README.
+## Installation
 
 ```r
-install.packages(".", repos = NULL, type = "source")
+remotes::install_github("tomwenseleers/GCMSprime", subdir = "GCMSbenchmark")
 library(GCMSbenchmark)
-
-b <- GCMSbenchmark(
-  cdf_file = "input/sample.cdf",
-  output_dir = "benchmark-run",
-  method = c("GCMSprime", "eRah"),
-  ncores = 8L
-)
+b <- GCMSbenchmark("sample.cdf", "benchmark-run",
+  method = c("GCMSprime", "eRah"), ncores = 8L)
 b
-b$methods$GCMSprime$peaks
 ```
 
-Use a fresh output directory for each run. The benchmark keeps native exports
-alongside the standardized data, summary CSV and any per-peak truth matches.
-It records a separate status and message for each backend.
+The [installation guide](INSTALL.md) covers R packages, MS-DIAL, mzmine,
+AMDIS, Python, MSHub and NetCDF. AMDIS execution requires Windows; ELU
+exports can be imported on other platforms. Use a fresh output directory.
+Each engine has a separate status and diagnostic message.
 
 ## Benchmark on 16 simulated chromatograms
 
-Each chromatogram has 1,200 scans and 258 mass channels. The 48 simulated
-compounds occur in different subsets of the samples, giving 380 true peak
-occurrences under retention-time drift, concentration-dependent peak
-shapes and overdispersed count noise.
-**GCMSprime recovered all 380 occurrences with zero false calls** and
-an adjusted R² of **0.99997** for integrated peak areas on the
-log₁₀ scale.
+Each sample has 1,200 scans and 258 mass channels. The 48 reference spectra
+retain their library retention indices. Compounds are absent from about
+half the samples, giving **380 true occurrences**. One compound has a broad
+acid-like profile; the others are exponentially modified Gaussian peaks.
+Higher concentrations broaden peaks towards later times from approximately
+fixed starts. Successive samples drift slightly to the right. A smooth
+background and quasi-Poisson noise with dispersion 2 complete the simulation.
 
-[![Estimated versus true log10 peak areas, with 95% prediction intervals](../GCMSprime/man/figures/simulated-16-area-predictions.png)](../GCMSprime/man/figures/simulated-16-area-predictions.png)
+GCMSprime recovered **372 of 380 occurrences with just 2 false positives**.
+Its peak areas achieved adjusted R² **0.993** on the log₁₀ scale.
 
-Each point is a positive, one-to-one matched area. The estimated areas
-use the units reported by each engine. The dashed 1:1 line marks direct
-agreement for integrated counts.
+| Method | Seconds | TP | FP | F1 |
+|:--|--:|--:|--:|--:|
+| GCMSprime | 70.48 | 372 | 2 | 0.987 |
+| MS-DIAL | 21.08 | 364 | 56 | 0.910 |
+| mzmine | 41.83 | 348 | 91 | 0.850 |
+| eRah | 10.73 | 347 | 258 | 0.705 |
+| AMDIS | 36.04 | 351 | 492 | 0.574 |
+| xcms + CAMERA | 26.97 | 349 | 34 | 0.915 |
+| MSHub | 14.56 | 331 | 422 | 0.584 |
 
-[![Individual best spectral cosine hits and their distributions on a logit axis](../GCMSprime/man/figures/simulated-16-spectral-violin.png)](../GCMSprime/man/figures/simulated-16-spectral-violin.png)
+Times are wall-clock analysis times on an HP ZBook Fury G8 with an Intel
+Core i9-11950H (8 physical cores, 16 logical threads), Windows and R 4.5.0.
+Input conversion times are recorded separately. AMDIS runs serially and
+xcms + CAMERA uses four workers. GCMSprime receives the generating dispersion
+of 2; the known RI maps are used only for scoring.
 
-Each point is a true occurrence’s best spectral match in the sample.
-The right panel requires a candidate within ±7.2 seconds. The axis is
-logit-spaced and labelled in cosine units.
+[![Estimated versus true log10 peak areas with 95% prediction intervals](../GCMSprime/man/figures/simulated-16-area-predictions.png)](../GCMSprime/man/figures/simulated-16-area-predictions.png)
 
-The [GCMSprime software comparison](https://tomwenseleers.github.io/GCMSprime/articles/software-comparison.html)
-describes the workflows and the criteria used to score them.
+Points are RI-constrained reciprocal true matches with positive areas.
+Each engine retains its native area units. The dashed 1:1 line applies
+to integrated counts. Prediction intervals come from the log–log regression.
 
-### Reproduce the figures or rerun the benchmark
+[![Reciprocal spectral cosine hits on a logit-spaced axis](../GCMSprime/man/figures/simulated-16-spectral-violin.png)](../GCMSprime/man/figures/simulated-16-spectral-violin.png)
 
-Install from this directory or run
-`remotes::install_github("tomwenseleers/GCMSprime", subdir = "GCMSbenchmark")`.
-The package includes the simulation recipe, engine settings, scoring tables
-and plotting code. To recreate the figures from the saved tables, install
-`ggplot2` and run the following.
+The library includes all 48 compounds, including those absent from a
+sample. A pair must be a reciprocal best spectral hit within 30 RI units
+and have cosine similarity of at least 0.70. Crosses identify hits to absent
+compounds. Every other call is a false positive. Equal cosine scores are
+ordered by RI difference and then ID.
+
+AMDIS returned **843 components**, of which **351** were reciprocal
+hits to true occurrences. **489 additional calls** shared their best eligible
+reference hit with another call in the same sample. Its area regression
+has adjusted R² **0.840**, conditional on the 351 selected true matches;
+these are the individual returned areas, without adding duplicate calls.
+
+[![Observed and true mean signal for one simulated sample](../GCMSprime/man/figures/simulated-16-sample-heatmap.png)](../GCMSprime/man/figures/simulated-16-sample-heatmap.png)
+
+[![True and returned acid profiles across samples](../GCMSprime/man/figures/simulated-16-acid-profiles.png)](../GCMSprime/man/figures/simulated-16-acid-profiles.png)
+
+The [benchmark article](https://tomwenseleers.github.io/GCMSprime/articles/benchmarks.html)
+explains the scoring, profile exports and workflow differences.
+
+### Reproduce the figures or rerun the comparison
+
+The package includes the seeded simulation, engine settings, scoring tables
+and plotting code. Recreate all four figures from the saved results with:
 
 ```r
 bench <- system.file("benchmarks", package = "GCMSbenchmark", mustWork = TRUE)
@@ -63,20 +86,16 @@ source(file.path(bench, "plot-simulated-16.R"), encoding = "UTF-8")
 plotBenchmark16(file.path(bench, "results"), "benchmark-figures")
 ```
 
-To regenerate the CDFs and fit the simulation, install GCMSprime, logconNMF
-and the selected engines. The following runs the two R workflows.
+To regenerate the CDFs and run the R workflows:
 
 ```r
 source(file.path(bench, "simulated-16.R"), encoding = "UTF-8")
 fit <- runBenchmark16("benchmark-16", method = c("GCMSprime", "xcms+CAMERA"),
   ncores = 4L)
-fit
 plotBenchmark16("benchmark-16")
 ```
 
-For all seven workflows, use `method = "all"` and point the runner to your
-local installations. The paths below are examples. To run a subset, pass
-its method names and any controls it needs.
+For all seven engines, supply their installed locations:
 
 ```r
 control <- list(
@@ -91,21 +110,19 @@ fit <- runBenchmark16("benchmark-16-all", method = "all", control = control,
 plotBenchmark16("benchmark-16-all")
 ```
 
-The benchmark used Windows and R 4.5.0, MS-DIAL 5.5.261105, mzmine 4.11.0,
-eRah 2.2.0, AMDIS 2.71, xcms 4.6.4, CAMERA 1.64.0, and standalone MSHub
-revision `59fe5d5d7ad5`. The MS-DIAL method file and mzmine batch are
-included. AMDIS uses its local deconvolution settings. The reported run
-used component width 16 scans and the `ONSITE.INI` settings
-`SENSIT=60`, `RESOLUTION=0` and `PEAKSHAPE=0`.
-The xcms + CAMERA filter and grouping settings were selected on the odd
-samples and evaluated separately on the even samples.
+The run uses seed 9118 and saves truth, the reference library, native engine
+exports, per-call identifications and per-pair area/profile metrics. The
+reference includes compounds absent from each sample. Their presence is
+checked after reciprocal matching. MSHub's aligned RTs use the generating
+mean reference clock for RI conversion.
 
-The runner regenerates the data with seed 9118, saves the true profiles and
-spectra, and keeps each engine’s native exports. The shared scoring rule
-requires a retention-time difference of at most 7.2 seconds and spectral
-cosine of at least 0.70. For MSHub, the true apices are evaluated on its mean
-alignment clock. The best-hit figure allows a recovered spectrum to be the
-best match for more than one true occurrence.
+The tested versions are MS-DIAL 5.5.261105, mzmine 4.11.0, eRah 2.2.0,
+AMDIS 2.71, xcms 4.6.4, CAMERA 1.64.0 and standalone MSHub revision
+`59fe5d5d7ad5`. The MS-DIAL method file and mzmine batch are included.
+AMDIS uses component width 16 scans and its local `ONSITE.INI` settings
+`SENSIT=60`, `RESOLUTION=0`, `PEAKSHAPE=0`. The xcms + CAMERA width and
+grouping settings were selected on odd samples of a regular-peak pilot
+simulation and retained for this acid-containing comparison.
 
 ## Engine setup
 
@@ -115,23 +132,27 @@ best match for more than one true occurrence.
 | `MS-DIAL` | Set `control[["MS-DIAL"]]` to a list with `exe` and optionally `powershell` (PowerShell 7 worked with the Windows console distribution), `method_file` or named `parameters`. The default input is mzML. For direct CDF use `format = "cdf"` and add the official NetCDF runtime through `netcdf` if needed. |
 | `mzmine` | Set `control$mzmine$exe` to `mzmine_console.exe` and `user_file` to the existing machine-bound `.mzuser4` file when the CLI requires it. The included mzmine 4.11 batch uses the ADAP-inspired GC-EI workflow and exports its quantification CSV and spectral MGF locally. Supply a different `.mzbatch` with `batch`. |
 | `eRah` | Install eRah and optionally future for multiple samples. Use `control$eRah$deconvolution` and `control$eRah$alignment` to set the arguments to `setDecPar()` and `setAlPar()`. |
-| `AMDIS` | Set `control$AMDIS$exe` to `AMDIS_32.exe`. The adapter stages mzXML and runs serially. To rescore existing files, supply one `.ELU` in `control$AMDIS$elu` for each CDF in the same order. |
+| `AMDIS` | On Windows, set `control$AMDIS$exe` to `AMDIS_32.exe`. The adapter stages mzXML and runs serially. To rescore existing files, supply one `.ELU` in `control$AMDIS$elu` for each CDF in the same order. |
 | `xcms+CAMERA` | Install both Bioconductor packages. xcms detects ion peaks with a matched filter and CAMERA groups them within each sample by coelution and EIC correlation. It returns summed ion integrals, pseudospectra, and representative-ion traces. Use `control[["xcms+CAMERA"]]` to set `detection` (for example `fwhm` in seconds or `snthresh`), `fwhm_grouping` (arguments to `CAMERA::groupFWHM()`), `grouping` (arguments to `CAMERA::groupCorr()`, or `FALSE` for FWHM grouping alone), or `min_ions` (default 3). |
 | `MSHub` | For a batch of at least 10 samples, set `control$MSHub$exe` to Python and `source` to the standalone [MSHub repository](https://bitbucket.org/iAnalytica/mshub_process/src/master/). The runtime needs NumPy, SciPy, h5py, scikit-learn and netCDF4. An optional `pythonpath` selects an isolated dependency directory. |
 
-Each truth record supplies an ID, an apex in minutes, an area in integrated
-counts and an acid indicator for each compound. Supply `H` with scans as
-rows, `P` with compounds as rows, and the original `time` and `mass` grids.
-Use a named list of these records, keyed by CDF basename without its
-extension. Optionally include `reference_apex` for methods whose outputs
-use aligned retention times.
+## Supply simulation truth
 
-The scorer maximises the number of one-to-one matches within the retention
-tolerance and above the spectral cosine cutoff, then maximises total
-spectral cosine. Profile cosine compares shapes on the original time
-grid. Areas in integrated counts can be compared directly. Other backend
-signals are compared after centring the log area ratios and, with repeated
-samples, after centring within each compound.
+Each truth record contains `id`, `apex` in minutes, `area` in integrated
+counts and a logical `acid` indicator. Supply `H` with scans as rows,
+`P` with compounds as rows, and the original `time` and `mass` grids.
+Key the records by input-file basename without its extension.
 
-The adjusted R² for peak areas uses a log–log regression on positive matched
-areas. The summary reports how many matches contribute to this regression.
+The default `matching="assignment"` maximizes the number of one-to-one
+matches within `rt_tolerance` and above `min_cosine`, then total cosine.
+For RI-constrained reciprocal scoring, use `matching="reciprocal"` and
+`ri_tolerance=30`. Supply a full `reference` library with `id`, `P`, `mass`
+and `ri`, plus an increasing `time`/`ri` calibration data frame as
+`ri_calibration` in each truth record. Aligned outputs also need
+`reference_ri_calibration`. The benchmark retains every call's best
+eligible library hit and reciprocal flag in `identifications`.
+
+Profile cosine compares shapes on the original time grid. Area adjusted
+R² comes from a log–log regression on positive true matches; `area_pairs`
+gives its sample size. Duplicate calls are not summed into a matched area.
+The summary reports their count alongside total false positives.

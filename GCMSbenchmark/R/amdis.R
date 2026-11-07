@@ -54,6 +54,9 @@ bench_amdis <- function(files,out,ncores,control,timeout,dots) {
     ans$analysis <- NA_real_
     return(ans)
   }
+  if (.Platform$OS.type!="windows")
+    stop("AMDIS execution requires Windows. Existing ELU exports can be imported on any platform.",
+      call.=FALSE)
   exe <- executable(control$exe,"AMDIS_32.exe")
   prep <- bench_time(stage_inputs(files,tempfile("input-",tmpdir=out),"mzXML"))
   started <- proc.time()[["elapsed"]]
