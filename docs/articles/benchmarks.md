@@ -78,14 +78,14 @@ A\_{\mathrm{TIC}}=A_q/p_q, after converting its integration-time units.
 The line is a robust log–log fit using
 `robustbase::lmrob(setting="KS2014")`. The shaded 95% prediction band
 uses its robust residual scale and coefficient covariance, describing
-the main approximately Gaussian log-error distribution. Every observed
-point remains visible, and the dashed **1:1 reference is drawn last in
-every panel**. The headings report robust adjusted R²; ordinary
-least-squares statistics are retained in the downloadable tables.
-GCMSprime has robust adjusted R² **0.996** and a **median absolute area
-error of 2.00%**. Area agreement is conditional on recovered true
-matches, so it is shown together with sensitivity and false-positive
-counts.
+the main approximately Gaussian log-error distribution. Every panel uses
+a light-grey band; the coloured observations are drawn last at alpha
+0.5, so superimposed points accumulate into darker concentrations. The
+headings report robust adjusted R²; ordinary least-squares statistics
+are retained in the downloadable tables. GCMSprime has robust adjusted
+R² **0.996** and a **median absolute area error of 2.00%**. Area
+agreement is conditional on recovered true matches, so it is shown
+together with sensitivity and false-positive counts.
 
 [![Reciprocal spectral cosine similarity with individual
 points](../reference/figures/simulated-16-spectral-violin.png)](https://tomwenseleers.github.io/GCMSprime/reference/figures/simulated-16-spectral-violin.png)

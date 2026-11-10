@@ -13,7 +13,8 @@ plotBenchmark16 <- function(results, output_dir = results) {
   units <- stats::setNames(rep("Total-ion counts",length(labels)),names(labels))
   colour <- stats::setNames(scales::hue_pal(l = 48, c = 82)(length(labels)), names(labels))
   fill <- stats::setNames(scales::hue_pal(l = 88, c = 42)(length(labels)), names(labels))
-  reference_colour <- "#26364b"
+  area_band_colour <- "#d9d9d9"
+  reference_colour <- "black"
   fmt <- function(x, digits) ifelse(is.na(x), "–", formatC(x, format = "f", digits = digits))
   draw <- function(name, width, height, expr) {
     grDevices::png(file.path(output_dir, name), width = width, height = height, res = 155)
@@ -44,13 +45,13 @@ plotBenchmark16 <- function(results, output_dir = results) {
       graphics::grid(col = "#e5ebee", lty = 1)
       if (!is.null(interval)) {
         graphics::polygon(c(grid, rev(grid)), c(interval[, "lwr"], rev(interval[, "upr"])),
-          col = fill[m], border = NA)
+          col = area_band_colour, border = NA)
       }
-      graphics::points(x, y, pch = 16, cex = 0.64,
-        col = grDevices::adjustcolor(colour[m], alpha.f = 0.66))
       if (!is.null(interval))
-        graphics::lines(grid, interval[, "fit"], col = colour[m], lwd = 2.3)
+        graphics::lines(grid, interval[, "fit"], col = "black", lwd = 2.3)
       graphics::abline(0, 1, col = reference_colour, lty = 2, lwd = 1.65)
+      graphics::points(x, y, pch = 16, cex = 0.78,
+        col = grDevices::adjustcolor(colour[m], alpha.f = 0.5))
       graphics::mtext(labels[m], 3, 2.05, font = 2)
       digits <- if (isTRUE(z$adjusted_R2 > 0.9995)) 5L else 3L
       graphics::mtext(bquote("Robust adjusted"~R^2==.(fmt(z$adjusted_R2, digits))~~
@@ -60,9 +61,10 @@ plotBenchmark16 <- function(results, output_dir = results) {
     graphics::legend("center", bty = "n", cex = 1.27, y.intersp = 1.45,
       legend = c("Matched peak area", "Robust log–log fit", "95% robust prediction band",
         "1:1 reference"),
-      col = c(colour[1L], colour[1L], fill[1L], reference_colour),
+      col = c(grDevices::adjustcolor(colour[1L], alpha.f = 0.5),
+        "black", area_band_colour, reference_colour),
       pch = c(16, NA, 15, NA), lty = c(NA, 1, NA, 2), lwd = c(NA, 2.3, NA, 1.65),
-      pt.cex = c(1.06, 1, 1.45, 1))
+      pt.cex = c(1.30, 1, 1.45, 1))
     graphics::mtext(expression(log[10]*"(True peak area, integrated counts)"),
       1, outer = TRUE, line = 0.6, cex = 1.1)
   })

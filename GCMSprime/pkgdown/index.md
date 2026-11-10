@@ -148,8 +148,9 @@ and **median absolute area error 2.00%**.
 
 All methods use total-ion count equivalents, accounting for native model-ion
 fractions and integration-time units. The robust log–log fit and prediction
-band show the main error distribution; every point remains visible, with
-the dashed 1:1 reference above the other layers.
+band show the main error distribution. Light-grey bands and points drawn last
+at alpha 0.5 make overlapping observations accumulate into darker coloured
+concentrations while retaining isolated observations.
 
 [![Reciprocal spectral cosine similarities for seven workflows](reference/figures/simulated-16-spectral-violin.png)](reference/figures/simulated-16-spectral-violin.png)
 
