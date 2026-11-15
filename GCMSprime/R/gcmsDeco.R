@@ -127,8 +127,9 @@ GCMS_write_msp <- function(model,time,mass,msp_file,compounds=NULL,ion_threshold
 #'
 #' @param output_dir Directory for batch results; defaults to a sibling directory
 #'   named after the input folder with suffix `_GCMSprime`.
-#' @param coupled Share spectra and refine sample-specific profiles with
-#'   [logconNMF::logconNMF()] for directory input.
+#' @param coupled Logical; for directory input, use simultaneous NMF to share
+#'   spectra while retaining sample-specific profiles and areas. Set to `FALSE`
+#'   to export only the independent sample fits.
 #' @param batch Named directory options; see [GCMSbatch].
 #' @param cdf_file A directory of sample subdirectories with a `standards`
 #'   subdirectory, or a local ANDI-MS \code{.cdf} path or HTTP(S) URL. The optional

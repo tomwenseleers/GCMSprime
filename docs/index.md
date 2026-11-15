@@ -95,13 +95,20 @@ then refined.
 data(gcmsData1, package="logconNMF")
 writeGCMSCDF(gcmsData1, "GCMS_data1.cdf")
 example_fit <- gcmsDeco("GCMS_data1.cdf", "GCMS_data1.msp",
-  nwindows=1L, baseline_df=1L, precluster=16L, correlation="auto", ncores=8L,
+  nwindows=1L, baseline_df=1L, precluster=7L, correlation="auto", ncores=8L,
+  control=list(initial_relaxed=FALSE, fusion_passes=0L),
   psf_control=list(kernel_est=logconNMF::convKernel("gaussian", 65L,
-    list(sigma=8)), maxiter=0L))
+    list(sigma=9)), maxiter=0L))
 ```
 
-[![Recovered elution profiles and spectra for six co-eluting
-hydrocarbons](reference/figures/gcms-data1-profiles-spectra.png)](https://tomwenseleers.github.io/GCMSprime/articles/gcms-deconvolution.html#cuticular-hydrocarbons)
+Among six-factor solutions with chemically plausible retention times, a
+sensitivity grid over PSF widths and precluster counts selected this fit
+for its combination of low GIC, accurate apex times, compact profiles
+and strong enrichment of the compounds’ diagnostic ions.
+
+[![Grey ion traces, six resolved profiles and matching spectra for six
+co-eluting
+hydrocarbons](reference/figures/gcms-data1-decomposition.png)](https://tomwenseleers.github.io/GCMSprime/articles/gcms-deconvolution.html#cuticular-hydrocarbons)
 
 ### Beer volatiles and a broad acid peak
 
@@ -128,8 +135,8 @@ component-specific shapes.
 
 Point to a directory containing sample-group folders and a `standards/`
 subdirectory with alkane calibrations. Acquisition timestamps determine
-run order. The coupled model aligns compounds and shares their spectra
-while retaining sample-specific profiles, backgrounds and areas.
+run order. The simultaneous model aligns compounds and shares their
+spectra while retaining sample-specific profiles, backgrounds and areas.
 
 ``` r
 
@@ -140,7 +147,7 @@ experiment$areas
 ```
 
 Samples can be fitted in parallel, with each active worker loading its
-sample into RAM for the independent fit. During coupled refinement,
+sample into RAM for the independent fit. During simultaneous refinement,
 original observations and factor checkpoints are stored per sample on
 disk. The fit reads blocks of original mass channels to evaluate the
 likelihood and update spectra and backgrounds. With preclustering,
@@ -150,14 +157,14 @@ compounds absent from a sample stay unassigned in its area table.
 
 Independent fitting can be distributed across samples. At a fixed worker
 count and comparable chromatogram sizes, the work for this stage grows
-approximately linearly with the number of samples. Coupled refinement
-also depends on the number of shared compounds and how many peaks
-overlap. The blockwise disk-backed workflow keeps the full set of raw
-chromatograms out of RAM for large batches.
+approximately linearly with the number of samples. Simultaneous
+refinement also depends on the number of shared compounds and how many
+peaks overlap. The blockwise disk-backed workflow keeps the full set of
+raw chromatograms out of RAM for large batches.
 
 In the [16-sample
 benchmark](https://tomwenseleers.github.io/GCMSprime/articles/benchmarks.md),
-GCMSprime recovers **733 of 769 true occurrences in 157.69 s**,
+GCMSprime recovers **752 of 769 true occurrences in 253.47 s**,
 including the acid compound in all seven samples where it occurs. Each
 chromatogram has 100 candidate compounds, 1,200 scans and 258 mass
 channels, with drift, concentration-dependent broadening and a smooth
@@ -167,9 +174,9 @@ ion groups and the final fit uses every original ion.
 ## Benchmarks against other software
 
 On **16 chromatograms with 100 reference compounds**, GCMSprime recovers
-**733 of 769 true peak occurrences**, with **90 false positives** (peak
-F1 **0.921**). Its total-ion peak areas show **robust adjusted R²
-0.996** and **median absolute area error 2.00%**.
+**752 of 769 true peak occurrences**, with **140 false positives** (peak
+F1 **0.905**). Its total-ion peak areas show **robust adjusted R²
+0.9992** and **median absolute area error 1.33%**.
 
 [![True and estimated total-ion peak areas with robust
 fits](reference/figures/simulated-16-area-predictions.png)](https://tomwenseleers.github.io/GCMSprime/reference/figures/simulated-16-area-predictions.png)
@@ -188,7 +195,7 @@ workflows](reference/figures/simulated-16-spectral-violin.png)](https://tomwense
 cutoff](reference/figures/simulated-16-spectral-support.png)](https://tomwenseleers.github.io/GCMSprime/reference/figures/simulated-16-spectral-support.png)
 
 The shared **0.1% base-peak cutoff** gives GCMSprime **mean ion-support
-F1 0.939**, compared with **0.860** for the strongest comparator. This
+F1 0.971**, compared with **0.860** for the strongest comparator. This
 is also the default cutoff for GCMSprime’s reported spectra and spectral
 exports. Matching requires reciprocal best spectral hits within **30 RI
 units**. The reference includes compounds absent from individual

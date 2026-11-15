@@ -48,7 +48,7 @@ records export time; acquisition metadata are left unspecified.
 \examples{
 \donttest{
 if (requireNamespace("ncdf4", quietly = TRUE)) {
-  data(gcmsData1)
+  data("gcmsData1", package = "logconNMF")
   cdf <- tempfile(fileext = ".cdf")
   writeGCMSCDF(gcmsData1, cdf)
   unlink(cdf)

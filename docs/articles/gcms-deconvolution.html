@@ -65,7 +65,7 @@
 <li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json">
 </form></li>
-<li class="nav-item"><a class="external-link nav-link" href="https://github.com/tomwenseleers/GCMSprime"><span class="fa fab fa-github"></span></a></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/tomwenseleers/GCMSprime" aria-label="GitHub repository"><span class="fa fab fa-github"></span></a></li>
       </ul>
 </div>
 
@@ -106,7 +106,7 @@ shark-fin-shaped peaks.</p>
 <h2 id="two-experimental-chromatograms">Two experimental chromatograms<a class="anchor" aria-label="anchor" href="#two-experimental-chromatograms"></a>
 </h2>
 <p>The package includes a cuticular-hydrocarbon window with six
-co-eluting compounds (<code>gcmsData1</code>, 119 scans × 671 mass
+co-eluting compounds (<code>gcmsData1</code>, 119 scans × 670 mass
 channels) and a beer-headspace window with a prominent broad acid peak
 (<code>gcmsData2</code>, 1,764 scans × 518 mass channels). Their row
 names give retention times in minutes; column names give nominal m/z.
@@ -128,15 +128,17 @@ same <code><a href="../reference/gcmsDeco.html">gcmsDeco()</a></code> call then 
 R or a chromatogram exported by instrument software:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gcmsDeco.html">gcmsDeco</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">out</span>, <span class="st">"GCMS_data1.cdf"</span><span class="op">)</span>,</span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">out</span>, <span class="st">"GCMS_data1.msp"</span><span class="op">)</span>, nwindows <span class="op">=</span> <span class="fl">1L</span>, precluster <span class="op">=</span> <span class="fl">16L</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">out</span>, <span class="st">"GCMS_data1.msp"</span><span class="op">)</span>, nwindows <span class="op">=</span> <span class="fl">1L</span>, precluster <span class="op">=</span> <span class="fl">7L</span>,</span>
 <span>  baseline_df <span class="op">=</span> <span class="fl">1L</span>,</span>
 <span>  correlation <span class="op">=</span> <span class="st">"auto"</span>, ncores <span class="op">=</span> <span class="fl">8L</span>,</span>
+<span>  control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>initial_relaxed <span class="op">=</span> <span class="cn">FALSE</span>, fusion_passes <span class="op">=</span> <span class="fl">0L</span><span class="op">)</span>,</span>
 <span>  psf_control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>kernel_est <span class="op">=</span> <span class="fu"><a href="https://tomwenseleers.github.io/logconNMF/reference/convKernel.html" class="external-link">convKernel</a></span><span class="op">(</span><span class="st">"gaussian"</span>, <span class="fl">65L</span>,</span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>sigma <span class="op">=</span> <span class="fl">8</span><span class="op">)</span><span class="op">)</span>, maxiter <span class="op">=</span> <span class="fl">0L</span><span class="op">)</span><span class="op">)</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>sigma <span class="op">=</span> <span class="fl">9</span><span class="op">)</span><span class="op">)</span>, maxiter <span class="op">=</span> <span class="fl">0L</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">fit2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gcmsDeco.html">gcmsDeco</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">out</span>, <span class="st">"GCMS_data2.cdf"</span><span class="op">)</span>,</span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">out</span>, <span class="st">"GCMS_data2.msp"</span><span class="op">)</span>, nwindows <span class="op">=</span> <span class="fl">1L</span>, precluster <span class="op">=</span> <span class="fl">32L</span>,</span>
 <span>  correlation <span class="op">=</span> <span class="st">"auto"</span>, ncores <span class="op">=</span> <span class="fl">8L</span>,</span>
+<span>  control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>initial_relaxed <span class="op">=</span> <span class="cn">TRUE</span>, fusion_passes <span class="op">=</span> <span class="fl">0L</span><span class="op">)</span>,</span>
 <span>  psf_control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>kernel_est <span class="op">=</span> <span class="fu"><a href="https://tomwenseleers.github.io/logconNMF/reference/convKernel.html" class="external-link">convKernel</a></span><span class="op">(</span><span class="st">"gaussian"</span>, <span class="fl">65L</span>,</span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>sigma <span class="op">=</span> <span class="fl">6</span><span class="op">)</span><span class="op">)</span>, maxiter <span class="op">=</span> <span class="fl">0L</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
@@ -151,8 +153,12 @@ For a full chromatogram, the default <code>nwindows=10L</code> with
 positive <code>maxiter</code> estimates a smoothly varying PSF. An
 alkane standard can supply its initial calibration through
 <code>alkanes_file="alkanes.cdf"</code>. The hydrocarbon window uses a
-constant background; the longer beer window uses the automatically
-chosen low-df cubic spline.</p>
+constant background. A sensitivity grid over Gaussian widths and
+precluster counts was restricted to six-factor solutions with chemically
+plausible apex times; the displayed width of 9 scans and seven
+preclusters combines low GIC, accurate apex times, compact profiles and
+strong diagnostic-ion enrichment. The longer beer window uses the
+automatically chosen low-df cubic spline.</p>
 <div class="section level3">
 <h3 id="estimate-the-psf-automatically">Estimate the PSF automatically<a class="anchor" aria-label="anchor" href="#estimate-the-psf-automatically"></a>
 </h3>
@@ -193,8 +199,8 @@ explicit Gaussian PSFs in <code>fit1</code> and <code>fit2</code> above.
 Automatic calibration is available through the calls in this
 section.</p>
 <!-- BEGIN gcms-results -->
-<p>The table reports elapsed time for each complete CDF-to-MSP fit on
-the <a href="https://tomwenseleers.github.io/L0glm/articles/performance.html#reproduce-and-extend" class="external-link">benchmark
+<p>The table reports the median elapsed time across three complete
+CDF-to-MSP fits on the <a href="https://tomwenseleers.github.io/L0glm/articles/performance.html#reproduce-and-extend" class="external-link">benchmark
 workstation</a>, using a clean optimized source build, default
 likelihood-checked local profile restarts, eight OpenMP threads and one
 BLAS thread. Timings include CDF reading, PSF initialization,
@@ -222,20 +228,20 @@ factorization, original-channel completion and MSP export.</p>
 <tr class="odd">
 <td align="left"><code>gcmsData1</code></td>
 <td align="right">119</td>
-<td align="right">671</td>
+<td align="right">670</td>
 <td align="right">6</td>
-<td align="right">5.68</td>
-<td align="right">246,473</td>
-<td align="right">0.98999</td>
+<td align="right">6.11</td>
+<td align="right">247,218</td>
+<td align="right">0.98983</td>
 </tr>
 <tr class="even">
 <td align="left"><code>gcmsData2</code></td>
 <td align="right">1,764</td>
 <td align="right">518</td>
 <td align="right">38</td>
-<td align="right">39.75</td>
+<td align="right">38.44</td>
 <td align="right">1,467,393</td>
-<td align="right">0.99499</td>
+<td align="right">0.99498</td>
 </tr>
 </tbody>
 </table>
@@ -250,18 +256,22 @@ Each profile and spectrum refinement is checked against the complete
 original-channel criterion.</p>
 <p>The default working-correlation adjustment is estimated from temporal
 differences and held fixed during final rank comparisons. Both windows
-have an estimated information factor of 1.98. The permissive
-initialization retains candidates while their profiles are refined;
-final broad-fragment decisions compare merged and equally refined
-unmerged local models. The beer fit represents the extended acid
-contribution with one log-concave profile, retaining all 518 mass
-channels. Diagnostics are available in
+have an estimated information factor of 1.98. The hydrocarbon fit uses
+the criterion-selected sparse start identified by the diagnostic-ion
+sensitivity grid. The beer fit uses a relaxed grouped-support refit so
+that the broad acid candidate is retained for profile refinement; it
+represents the extended acid contribution with one log-concave profile
+while retaining all 518 mass channels. Diagnostics are available in
 <code>fit2$model$contained_fusion</code> and
 <code>fit2$model$initialization</code>.</p>
 </div>
 <div class="section level3">
 <h3 id="cuticular-hydrocarbons">Cuticular hydrocarbons<a class="anchor" aria-label="anchor" href="#cuticular-hydrocarbons"></a>
 </h3>
+<div class="float">
+<img src="../reference/figures/gcms-data1-decomposition.png" alt="Grey ion traces, six base-peak-scaled profiles and matching spectra in consistent component colours"><div class="figcaption">Grey ion traces, six base-peak-scaled profiles
+and matching spectra in consistent component colours</div>
+</div>
 <div class="float">
 <img src="../reference/figures/gcms-data1-traces.png" alt="Background-corrected ion traces and fitted compounds in gcmsData1"><div class="figcaption">Background-corrected ion traces and fitted
 compounds in gcmsData1</div>
@@ -341,11 +351,12 @@ background basis are already available. This also gives direct control
 over the background for a short chromatographic window:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">Y</span> <span class="op">&lt;-</span> <span class="va">gcmsData1</span></span>
-<span><span class="va">X</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://tomwenseleers.github.io/logconNMF/reference/convMatrix.html" class="external-link">convMatrix</a></span><span class="op">(</span><span class="fu"><a href="https://tomwenseleers.github.io/logconNMF/reference/convKernel.html" class="external-link">convKernel</a></span><span class="op">(</span><span class="st">"gaussian"</span>, <span class="fl">65L</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>sigma <span class="op">=</span> <span class="fl">8</span><span class="op">)</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">Y</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">X</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://tomwenseleers.github.io/logconNMF/reference/convMatrix.html" class="external-link">convMatrix</a></span><span class="op">(</span><span class="fu"><a href="https://tomwenseleers.github.io/logconNMF/reference/convKernel.html" class="external-link">convKernel</a></span><span class="op">(</span><span class="st">"gaussian"</span>, <span class="fl">65L</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>sigma <span class="op">=</span> <span class="fl">9</span><span class="op">)</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">Y</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">B</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">Y</span><span class="op">)</span>, <span class="fl">1L</span><span class="op">)</span>          <span class="co"># constant background in this short window</span></span>
 <span><span class="va">nmf</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://tomwenseleers.github.io/logconNMF/reference/logconNMF.html" class="external-link">logconNMF</a></span><span class="op">(</span><span class="va">Y</span>, X <span class="op">=</span> <span class="va">X</span>, background <span class="op">=</span> <span class="va">B</span>,</span>
-<span>  family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">quasipoisson</a></span><span class="op">(</span><span class="st">"identity"</span><span class="op">)</span>, precluster <span class="op">=</span> <span class="fl">16L</span>,</span>
-<span>  correlation <span class="op">=</span> <span class="st">"auto"</span>, ncores <span class="op">=</span> <span class="fl">8L</span><span class="op">)</span></span>
+<span>  family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">quasipoisson</a></span><span class="op">(</span><span class="st">"identity"</span><span class="op">)</span>, precluster <span class="op">=</span> <span class="fl">7L</span>,</span>
+<span>  correlation <span class="op">=</span> <span class="st">"auto"</span>, ncores <span class="op">=</span> <span class="fl">8L</span>,</span>
+<span>  control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>initial_relaxed <span class="op">=</span> <span class="cn">FALSE</span>, fusion_passes <span class="op">=</span> <span class="fl">0L</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">nmf</span><span class="op">$</span><span class="va">rank</span></span>
 <span><span class="va">nmf</span><span class="op">$</span><span class="va">H</span>                              <span class="co"># unit-sum, log-concave profiles</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">nmf</span><span class="op">)</span>                          <span class="co"># full-channel integrated intensities</span></span>

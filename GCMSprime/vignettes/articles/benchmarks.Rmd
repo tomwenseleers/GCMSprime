@@ -23,12 +23,12 @@ separately in each sample, with a **median estimate of 829.55**. The generating
 retention-index maps are used for scoring;
 the deconvolution receives neither the known areas nor the true profiles.
 
-GCMSprime recovers **733 of 769 occurrences**, with **90 false positives**
-(peak F1 **0.921**), including the acid in all seven samples where it occurs.
+GCMSprime recovers **752 of 769 occurrences**, with **140 false positives**
+(peak F1 **0.905**), including the acid in all seven samples where it occurs.
 
 | Method | Seconds | TP | FP | Sensitivity | Peak F1 | Ion F1 |
 |:--|--:|--:|--:|--:|--:|--:|
-| GCMSprime | 157.69 | 733 | 90 | 95.3% | 0.921 | 0.939 |
+| GCMSprime | 253.47 | 752 | 140 | 97.8% | 0.905 | 0.971 |
 | MS-DIAL | 17.61 | 675 | 641 | 87.8% | 0.647 | 0.858 |
 | mzmine GC-EI | 38.47 | 622 | 70 | 80.9% | 0.851 | 0.860 |
 | eRah | 17.07 | 645 | 1912 | 83.9% | 0.388 | 0.771 |
@@ -45,7 +45,7 @@ four workers. Input conversion is timed separately.
 `ncores` can use any number of available cores. GCMSprime parallelizes
 deconvolution across sample workers; when enough samples are available,
 the independent fitting time can decrease approximately in proportion to
-the worker count. The complete analysis also includes coupled refinement
+the worker count. The complete analysis also includes simultaneous refinement
 and data transfers.
 
 ## Reciprocal spectral matches and integrated areas
@@ -81,7 +81,7 @@ Every panel uses a light-grey band; the coloured observations are drawn last
 at alpha 0.5, so superimposed points accumulate into darker concentrations.
 The headings report robust adjusted R²; ordinary
 least-squares statistics are retained in the downloadable tables. GCMSprime
-has robust adjusted R² **0.996** and a **median absolute area error of 2.00%**.
+has robust adjusted R² **0.9992** and a **median absolute area error of 1.33%**.
 Area agreement is conditional on recovered true matches, so it is shown
 together with sensitivity and false-positive counts.
 
@@ -100,7 +100,7 @@ Ion support uses a shared **0.1% of base-peak intensity cutoff**, applied
 independently to reference and recovered spectra for every method:
 \(I_j>0\) and \(I_j\geq0.001\max_l I_l\).
 Within-spectrum \(F_1=2TP/(2TP+FP+FN)\) is averaged over correctly matched
-true spectra. GCMSprime achieves **mean ion F1 0.939**, compared with
+true spectra. GCMSprime achieves **mean ion F1 0.971**, compared with
 **0.860** for the strongest comparator. Individual points accompany the
 violins; the logit-spaced axis retains labels in the original F1 units.
 
@@ -142,12 +142,14 @@ true signal. Compatible fragments remain separate curves so splitting stays
 visible. The generating retention-index calibration supplies the common
 horizontal axis; profile amplitudes remain on their native total-ion scale.
 
-GCMSprime recovers these elution profiles most accurately for both the
-regular EMG and the shark-fin-shaped acid. Mean profile cosine, counting
-missed occurrences as zero, is **0.999 for the regular compound** and
-**0.973 for the acid**. Other configurations often truncate profiles,
-split their contributions or miss the acid. MS-DIAL also closely recovers
-the selected regular compound (mean cosine 0.998). CAMERA supplies a
+GCMSprime recovers all occurrences of both the regular EMG and the
+shark-fin-shaped acid. Mean profile cosine, counting missed occurrences as
+zero, is **0.982 for the regular compound** and **0.964 for the acid**;
+median cosine among matched occurrences is **0.9999** and **0.9958**,
+respectively. Other configurations often truncate profiles, split their
+contributions or miss the acid. MS-DIAL slightly exceeds GCMSprime for the
+regular compound (mean cosine 0.998), but recovers only five of the seven acid
+occurrences and has acid mean cosine 0.449. CAMERA supplies a
 representative-ion trace scaled to the grouped total-ion area. The mzmine
 export here contains spectra and areas without component scan profiles.
 MSHub factorizes aligned ion-peak integrals across samples. Its model has
@@ -175,7 +177,7 @@ recovery of large peaks visible alongside the conditional area regressions.
 
 | Method | Smallest quarter | Lower-middle | Upper-middle | Largest quarter |
 |:--|--:|--:|--:|--:|
-| GCMSprime | 90.7% | 95.3% | 96.4% | 99.0% |
+| GCMSprime | 96.4% | 97.9% | 97.4% | 99.5% |
 | MS-DIAL | 79.3% | 84.4% | 91.1% | 96.4% |
 | mzmine GC-EI | 70.5% | 79.2% | 82.3% | 91.7% |
 | eRah | 72.0% | 78.6% | 89.1% | 95.8% |

@@ -65,9 +65,12 @@ GCMS_batch_files <- function(directory,output_dir,sample_order=NULL,alkanes_file
 #' @name GCMSbatch
 #' @param x,object A multisample result returned by [gcmsDeco()].
 #' @param sample One sample index or identifier. `NULL` in `coef()` returns the
-#'   common spectral library. `NULL` in `plot()` plots the coupled area table.
+#'   common spectral library. `NULL` in `plot()` plots the simultaneous-fit area table.
 #' @param normalize Spectrum normalization: unnormalized or unit L1.
-#' @param ... Arguments passed to the corresponding sample or coupled method.
+#' @param ion_threshold Reported ion-intensity cutoff as a fraction of each
+#'   spectrum's base-peak intensity. The default is 0.001; zero retains every
+#'   positive fitted ion.
+#' @param ... Arguments passed to the corresponding sample or simultaneous method.
 #' @details
 #' Directory layout can be `experiment/standards/alkanes.cdf`,
 #' `experiment/beer1/sample001.cdf`, and `experiment/beer2/sample002.cdf`.
@@ -80,7 +83,7 @@ GCMS_batch_files <- function(directory,output_dir,sample_order=NULL,alkanes_file
 #' `coupling=list()` for [logconNMF::logconNMF()] controls, `sample_order=NULL`,
 #' `exposure=NULL`, `resume=FALSE`, `plots=FALSE`, `workers=NULL` and `cache=TRUE`.
 #' `workers` limits concurrent samples within the total `ncores` budget.
-#' `cache` controls the aggregated-observation RAM cache during coupled fitting.
+#' `cache` controls the aggregated-observation RAM cache during simultaneous fitting.
 #' `exposure` may be a positive
 #' scalar, a list with one scan-wise vector per acquisition-ordered sample, or
 #' a function of a sample's metadata and time vector. The default preserves
@@ -91,10 +94,14 @@ GCMS_batch_files <- function(directory,output_dir,sample_order=NULL,alkanes_file
 #' of exported channels is applied.
 #'
 #' Samples run concurrently with their own sparse PSF and smooth background. A
+#' simultaneous multisample fit uses criterion-checked sparse initial spectra
+#' for these per-sample fits; set `control=list(initial_relaxed=TRUE)` to request the
+#' relaxed grouped-support start used by standalone single-sample fits.
+#' A
 #' common channel map is learned from summed, time-binned chromatograms; pass a
 #' saved [logconNMF::channelGroups()] map as `precluster` to reuse reference groups.
 #' Matching uses the shared aggregate space. Original-channel
-#' means and the likelihood are used for coupled updates. Shared spectra are
+#' means and the likelihood are used for simultaneous updates. Shared spectra are
 #' exported on the union of recorded mass ranges; unmeasured channels receive
 #' zero likelihood weight. Missing compounds retain `NA` areas. No gap filling
 #' is performed. `coupled=FALSE` keeps the independently fitted results.
@@ -112,7 +119,7 @@ GCMS_batch_files <- function(directory,output_dir,sample_order=NULL,alkanes_file
 #' or 2.56 GB for 1,000 samples, in addition to worker and factor memory.
 #' Keep the output directory with the saved object. Explicit `resume=TRUE`
 #' reuses independent fits only when the file metadata and fitting arguments
-#' match; coupled refinement is recomputed.
+#' match; simultaneous refinement is recomputed.
 #'
 #' @return A `GCMSbatch` object with `samples`, optional `coupled` fit, sample
 #'   RDS `paths`, consensus `areas`, reusable `channel_groups`, the `parallel`
@@ -155,6 +162,7 @@ GCMSdeco_directory <- function(cdf_file,msp_file=NULL,family,lambda,nwindows,
   effective<-if(is.null(channel_map))precluster else channel_map
   workers<-if(is.null(batch$workers))min(nrow(manifest),ncores)else min(nrow(manifest),ncores,GCMS_threads(batch$workers))
   threads<-ncores%/%workers
+  if(coupled&&is.null(control$initial_relaxed))control$initial_relaxed<-FALSE
   common_args<-list(family=family,lambda=lambda,nwindows=nwindows,time_range=time_range,
     calibration_range=calibration_range,baseline_df=baseline_df,precluster=effective,
     dispersion=dispersion,theta=theta,correlation=correlation,ncores=threads,
@@ -356,23 +364,25 @@ print.GCMSbatch <- function(x,...) {
 
 GCMS_initial_sample <- function(task) {
     s<-1L;manifest<-task$manifest;output_dir<-task$output_dir
-    metadata<-task$metadata;batch<-task$batch
-    for(nm in names(task$args))assign(nm,task$args[[nm]])
+    metadata<-task$metadata;batch<-task$batch;fit_args<-task$args
     id<-manifest$sample_id[s];d<-file.path(output_dir,"samples",id);dir.create(d,showWarnings=FALSE)
     cache<-file.path(d,"initial.rds");file<-manifest$cdf_file[s]
     standard<-manifest$alkanes_file[s];if(is.na(standard))standard<-NULL
-    args<-list(cdf_file=file,msp_file=file.path(d,"initial.msp"),family=family,lambda=lambda,
-      nwindows=nwindows,alkanes_file=standard,time_range=time_range,calibration_range=calibration_range,
-      baseline_df=baseline_df,precluster=precluster,dispersion=dispersion,theta=theta,
-      correlation=correlation,ncores=ncores,control=control,psf_control=psf_control,verbose=verbose,
-      sample_name=id,ion_threshold=ion_threshold)
+    args<-list(cdf_file=file,msp_file=file.path(d,"initial.msp"),family=fit_args$family,
+      lambda=fit_args$lambda,nwindows=fit_args$nwindows,alkanes_file=standard,
+      time_range=fit_args$time_range,calibration_range=fit_args$calibration_range,
+      baseline_df=fit_args$baseline_df,precluster=fit_args$precluster,
+      dispersion=fit_args$dispersion,theta=fit_args$theta,
+      correlation=fit_args$correlation,ncores=fit_args$ncores,control=fit_args$control,
+      psf_control=fit_args$psf_control,verbose=fit_args$verbose,
+      sample_name=id,ion_threshold=fit_args$ion_threshold)
     signature<-GCMS_batch_signature(file,standard,args)
     saved<-if(isTRUE(batch$resume)&&file.exists(cache))readRDS(cache)else NULL
     cache_hit<-!is.null(saved)&&identical(saved$signature,signature)
     fit<-if(cache_hit)saved$fit else do.call(gcmsDeco,args)
     saveRDS(list(signature=signature,fit=fit),cache)
     path<-file.path(d,"fit.rds");saveRDS(fit,path)
-    raw<-GCMS_read_cdf(file,time_range);yfile<-file.path(d,"observed.rds");saveRDS(raw$Y,yfile,compress=FALSE)
+    raw<-GCMS_read_cdf(file,fit_args$time_range);yfile<-file.path(d,"observed.rds");saveRDS(raw$Y,yfile,compress=FALSE)
     initfile<-file.path(d,"initial_model.rds");saveRDS(fit$model,initfile,compress=FALSE)
     scan_meta<-metadata[[s]]
     for(key in c("scan_duration","mass_min","mass_max"))
@@ -383,7 +393,7 @@ GCMS_initial_sample <- function(task) {
     small<-fit$psf_width_scans*sqrt(log(100)/log(2))*median(diff(fit$time))
     descriptor<-list(y=yfile,time=fit$time,fit=initfile,exposure=exposure,
       sample_id=id,group=manifest$group[s],small_width=small)
-    if(verbose)cat("Initialized",id,":",fit$model$rank,"compounds\n")
+    if(fit_args$verbose)cat("Initialized",id,":",fit$model$rank,"compounds\n")
     list(path=path,descriptor=descriptor,mass=fit$mass,cache_hit=cache_hit)
 }
 

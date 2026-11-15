@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>GCMSprime: Scalable and Automated GC–MS Deconvolution, Quantification, and Spectral Library Search in R</title>
+<title>GCMSprime: Scalable and Automated GC–MS Deconvolution, Quantification, and Spectral Library Search in R • GCMSprime</title>
 <!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="favicon-96x96.png">
 <link rel="icon" type="”image/svg+xml”" href="favicon.svg">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
@@ -65,7 +65,7 @@
 <li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="search.json">
 </form></li>
-<li class="nav-item"><a class="external-link nav-link" href="https://github.com/tomwenseleers/GCMSprime"><span class="fa fab fa-github"></span></a></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/tomwenseleers/GCMSprime" aria-label="GitHub repository"><span class="fa fab fa-github"></span></a></li>
       </ul>
 </div>
 
@@ -74,7 +74,10 @@
 </nav><div class="container template-home">
 <div class="row">
   <main id="main" class="col-md-9"><div class="section level1">
-
+<div class="page-header">
+<img src="logo.png" class="logo" alt=""><h1 id="gcmsprime">GCMSprime<a class="anchor" aria-label="anchor" href="#gcmsprime"></a>
+</h1>
+</div>
 <div class="l0-hero">
 <div class="l0-hero-copy">
 <p class="l0-eyebrow">
@@ -133,10 +136,12 @@ R · Full mass spectra · CDF input · MSP &amp; Excel output
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">gcmsData1</span>, package<span class="op">=</span><span class="st">"logconNMF"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="reference/writeGCMSCDF.html">writeGCMSCDF</a></span><span class="op">(</span><span class="va">gcmsData1</span>, <span class="st">"GCMS_data1.cdf"</span><span class="op">)</span></span>
 <span><span class="va">example_fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/gcmsDeco.html">gcmsDeco</a></span><span class="op">(</span><span class="st">"GCMS_data1.cdf"</span>, <span class="st">"GCMS_data1.msp"</span>,</span>
-<span>  nwindows<span class="op">=</span><span class="fl">1L</span>, baseline_df<span class="op">=</span><span class="fl">1L</span>, precluster<span class="op">=</span><span class="fl">16L</span>, correlation<span class="op">=</span><span class="st">"auto"</span>, ncores<span class="op">=</span><span class="fl">8L</span>,</span>
+<span>  nwindows<span class="op">=</span><span class="fl">1L</span>, baseline_df<span class="op">=</span><span class="fl">1L</span>, precluster<span class="op">=</span><span class="fl">7L</span>, correlation<span class="op">=</span><span class="st">"auto"</span>, ncores<span class="op">=</span><span class="fl">8L</span>,</span>
+<span>  control<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>initial_relaxed<span class="op">=</span><span class="cn">FALSE</span>, fusion_passes<span class="op">=</span><span class="fl">0L</span><span class="op">)</span>,</span>
 <span>  psf_control<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>kernel_est<span class="op">=</span><span class="fu">logconNMF</span><span class="fu">::</span><span class="fu"><a href="https://tomwenseleers.github.io/logconNMF/reference/convKernel.html" class="external-link">convKernel</a></span><span class="op">(</span><span class="st">"gaussian"</span>, <span class="fl">65L</span>,</span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>sigma<span class="op">=</span><span class="fl">8</span><span class="op">)</span><span class="op">)</span>, maxiter<span class="op">=</span><span class="fl">0L</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p><a href="articles/gcms-deconvolution.html#cuticular-hydrocarbons"><img src="reference/figures/gcms-data1-profiles-spectra.png" alt="Recovered elution profiles and spectra for six co-eluting hydrocarbons"></a></p>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>sigma<span class="op">=</span><span class="fl">9</span><span class="op">)</span><span class="op">)</span>, maxiter<span class="op">=</span><span class="fl">0L</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p>Among six-factor solutions with chemically plausible retention times, a sensitivity grid over PSF widths and precluster counts selected this fit for its combination of low GIC, accurate apex times, compact profiles and strong enrichment of the compounds’ diagnostic ions.</p>
+<p><a href="articles/gcms-deconvolution.html#cuticular-hydrocarbons"><img src="reference/figures/gcms-data1-decomposition.png" alt="Grey ion traces, six resolved profiles and matching spectra for six co-eluting hydrocarbons"></a></p>
 </div>
 <div class="section level3">
 <h3 id="beer-volatiles-and-a-broad-acid-peak">Beer volatiles and a broad acid peak<a class="anchor" aria-label="anchor" href="#beer-volatiles-and-a-broad-acid-peak"></a>
@@ -149,25 +154,25 @@ R · Full mass spectra · CDF input · MSP &amp; Excel output
 <div class="section level2">
 <h2 id="automatic-deconvolution-for-multiple-samples">Automatic deconvolution for multiple samples<a class="anchor" aria-label="anchor" href="#automatic-deconvolution-for-multiple-samples"></a>
 </h2>
-<p>Point to a directory containing sample-group folders and a <code>standards/</code> subdirectory with alkane calibrations. Acquisition timestamps determine run order. The coupled model aligns compounds and shares their spectra while retaining sample-specific profiles, backgrounds and areas.</p>
+<p>Point to a directory containing sample-group folders and a <code>standards/</code> subdirectory with alkane calibrations. Acquisition timestamps determine run order. The simultaneous model aligns compounds and shares their spectra while retaining sample-specific profiles, backgrounds and areas.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">experiment</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/gcmsDeco.html">gcmsDeco</a></span><span class="op">(</span><span class="st">"chromatograms"</span>, output_dir<span class="op">=</span><span class="st">"experiment_results"</span>,</span>
 <span>  precluster<span class="op">=</span><span class="fl">32L</span>, batch<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>plots<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">experiment</span><span class="op">$</span><span class="va">samples</span></span>
 <span><span class="va">experiment</span><span class="op">$</span><span class="va">areas</span></span></code></pre></div>
-<p>Samples can be fitted in parallel, with each active worker loading its sample into RAM for the independent fit. During coupled refinement, original observations and factor checkpoints are stored per sample on disk. The fit reads blocks of original mass channels to evaluate the likelihood and update spectra and backgrounds. With preclustering, grouped traces are cached in RAM by default. Shared spectra and matching summaries also remain in memory. Original scan grids are retained, and compounds absent from a sample stay unassigned in its area table.</p>
-<p>Independent fitting can be distributed across samples. At a fixed worker count and comparable chromatogram sizes, the work for this stage grows approximately linearly with the number of samples. Coupled refinement also depends on the number of shared compounds and how many peaks overlap. The blockwise disk-backed workflow keeps the full set of raw chromatograms out of RAM for large batches.</p>
-<p>In the <a href="articles/benchmarks.html">16-sample benchmark</a>, GCMSprime recovers <strong>733 of 769 true occurrences in 157.69 s</strong>, including the acid compound in all seven samples where it occurs. Each chromatogram has 100 candidate compounds, 1,200 scans and 258 mass channels, with drift, concentration-dependent broadening and a smooth background derived from experimental GC/MS data. Initialization uses 32 ion groups and the final fit uses every original ion.</p>
+<p>Samples can be fitted in parallel, with each active worker loading its sample into RAM for the independent fit. During simultaneous refinement, original observations and factor checkpoints are stored per sample on disk. The fit reads blocks of original mass channels to evaluate the likelihood and update spectra and backgrounds. With preclustering, grouped traces are cached in RAM by default. Shared spectra and matching summaries also remain in memory. Original scan grids are retained, and compounds absent from a sample stay unassigned in its area table.</p>
+<p>Independent fitting can be distributed across samples. At a fixed worker count and comparable chromatogram sizes, the work for this stage grows approximately linearly with the number of samples. Simultaneous refinement also depends on the number of shared compounds and how many peaks overlap. The blockwise disk-backed workflow keeps the full set of raw chromatograms out of RAM for large batches.</p>
+<p>In the <a href="articles/benchmarks.html">16-sample benchmark</a>, GCMSprime recovers <strong>752 of 769 true occurrences in 253.47 s</strong>, including the acid compound in all seven samples where it occurs. Each chromatogram has 100 candidate compounds, 1,200 scans and 258 mass channels, with drift, concentration-dependent broadening and a smooth background derived from experimental GC/MS data. Initialization uses 32 ion groups and the final fit uses every original ion.</p>
 </div>
 <div class="section level2">
 <h2 id="benchmarks-against-other-software">Benchmarks against other software<a class="anchor" aria-label="anchor" href="#benchmarks-against-other-software"></a>
 </h2>
-<p>On <strong>16 chromatograms with 100 reference compounds</strong>, GCMSprime recovers <strong>733 of 769 true peak occurrences</strong>, with <strong>90 false positives</strong> (peak F1 <strong>0.921</strong>). Its total-ion peak areas show <strong>robust adjusted R² 0.996</strong> and <strong>median absolute area error 2.00%</strong>.</p>
+<p>On <strong>16 chromatograms with 100 reference compounds</strong>, GCMSprime recovers <strong>752 of 769 true peak occurrences</strong>, with <strong>140 false positives</strong> (peak F1 <strong>0.905</strong>). Its total-ion peak areas show <strong>robust adjusted R² 0.9992</strong> and <strong>median absolute area error 1.33%</strong>.</p>
 <p><a href="reference/figures/simulated-16-area-predictions.png"><img src="reference/figures/simulated-16-area-predictions.png" alt="True and estimated total-ion peak areas with robust fits"></a></p>
 <p>All methods use total-ion count equivalents, accounting for native model-ion fractions and integration-time units. The robust log–log fit and prediction band show the main error distribution. Light-grey bands and points drawn last at alpha 0.5 make overlapping observations accumulate into darker coloured concentrations while retaining isolated observations.</p>
 <p><a href="reference/figures/simulated-16-spectral-violin.png"><img src="reference/figures/simulated-16-spectral-violin.png" alt="Reciprocal spectral cosine similarities for seven workflows"></a></p>
 <p><a href="reference/figures/simulated-16-spectral-support.png"><img src="reference/figures/simulated-16-spectral-support.png" alt="Within-spectrum F1 using the shared 0.1% base-peak cutoff"></a></p>
-<p>The shared <strong>0.1% base-peak cutoff</strong> gives GCMSprime <strong>mean ion-support F1 0.939</strong>, compared with <strong>0.860</strong> for the strongest comparator. This is also the default cutoff for GCMSprime’s reported spectra and spectral exports. Matching requires reciprocal best spectral hits within <strong>30 RI units</strong>. The reference includes compounds absent from individual samples.</p>
+<p>The shared <strong>0.1% base-peak cutoff</strong> gives GCMSprime <strong>mean ion-support F1 0.971</strong>, compared with <strong>0.860</strong> for the strongest comparator. This is also the default cutoff for GCMSprime’s reported spectra and spectral exports. Matching requires reciprocal best spectral hits within <strong>30 RI units</strong>. The reference includes compounds absent from individual samples.</p>
 <p>See <a href="articles/benchmarks.html">benchmarks against other software</a> for timings, TP/FP counts, square-root signal heatmaps, recovered compound areas and regular/acid elution profiles. The <a href="https://github.com/tomwenseleers/GCMSprime/tree/master/GCMSbenchmark" class="external-link">GCMSbenchmark package</a> provides the seeded simulation and reproducible comparison.</p>
 </div>
 <div class="section level2">

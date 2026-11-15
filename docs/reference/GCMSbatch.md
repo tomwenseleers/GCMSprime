@@ -59,15 +59,21 @@ print(x, ...)
   [`coef()`](https://rdrr.io/r/stats/coef.html) returns the common
   spectral library. `NULL` in
   [`plot()`](https://rdrr.io/r/graphics/plot.default.html) plots the
-  coupled area table.
+  simultaneous-fit area table.
 
 - ...:
 
-  Arguments passed to the corresponding sample or coupled method.
+  Arguments passed to the corresponding sample or simultaneous method.
 
 - normalize:
 
   Spectrum normalization: unnormalized or unit L1.
+
+- ion_threshold:
+
+  Reported ion-intensity cutoff as a fraction of each spectrum's
+  base-peak intensity. The default is 0.001; zero retains every positive
+  fitted ion.
 
 - x, object:
 
@@ -102,9 +108,9 @@ paths in `batch=list(sample_order=...)`.
 controls, `sample_order=NULL`, `exposure=NULL`, `resume=FALSE`,
 `plots=FALSE`, `workers=NULL` and `cache=TRUE`. `workers` limits
 concurrent samples within the total `ncores` budget. `cache` controls
-the aggregated-observation RAM cache during coupled fitting. `exposure`
-may be a positive scalar, a list with one scan-wise vector per
-acquisition-ordered sample, or a function of a sample's metadata and
+the aggregated-observation RAM cache during simultaneous fitting.
+`exposure` may be a positive scalar, a list with one scan-wise vector
+per acquisition-ordered sample, or a function of a sample's metadata and
 time vector. The default preserves vendor intensities. Known integration
 durations are appropriate when the data are integrated ion counts.
 Sequential full-scan mass spectrometers allocate acquisition time over
@@ -113,15 +119,19 @@ per-mass dwell time. No automatic division by the number of exported
 channels is applied.
 
 Samples run concurrently with their own sparse PSF and smooth
-background. A common channel map is learned from summed, time-binned
-chromatograms; pass a saved
+background. A simultaneous multisample fit uses criterion-checked sparse
+initial spectra for these per-sample fits; set
+`control=list(initial_relaxed=TRUE)` to request the relaxed
+grouped-support start used by standalone single-sample fits. A common
+channel map is learned from summed, time-binned chromatograms; pass a
+saved
 [`logconNMF::channelGroups()`](https://tomwenseleers.github.io/logconNMF/reference/channelGroups.html)
 map as `precluster` to reuse reference groups. Matching uses the shared
 aggregate space. Original-channel means and the likelihood are used for
-coupled updates. Shared spectra are exported on the union of recorded
-mass ranges; unmeasured channels receive zero likelihood weight. Missing
-compounds retain `NA` areas. No gap filling is performed.
-`coupled=FALSE` keeps the independently fitted results.
+simultaneous updates. Shared spectra are exported on the union of
+recorded mass ranges; unmeasured channels receive zero likelihood
+weight. Missing compounds retain `NA` areas. No gap filling is
+performed. `coupled=FALSE` keeps the independently fitted results.
 
 The output directory contains per-sample MSP, Excel and fitted RDS
 files, an acquisition-ordered `samples.csv`, `areas.csv`, a consensus
@@ -137,7 +147,7 @@ assigned sample. A 10,000-by-32 cache needs 2.56 MB per sample, or 2.56
 GB for 1,000 samples, in addition to worker and factor memory. Keep the
 output directory with the saved object. Explicit `resume=TRUE` reuses
 independent fits only when the file metadata and fitting arguments
-match; coupled refinement is recomputed.
+match; simultaneous refinement is recomputed.
 
 ## See also
 

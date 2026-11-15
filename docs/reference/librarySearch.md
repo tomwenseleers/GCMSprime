@@ -196,4 +196,36 @@ lib <- readMSP(f)
 q <- matrix(c(500,400,100,0),1,dimnames=list(NULL,c(43,57,71,91)))
 hit <- librarySearch(q,lib,ri=1005,phase="DB5",method="all",ncores=1)
 as.data.frame(hit)
+#>   query library_id              method     distance library_RI library_total
+#> 1     1          1         stein_scott 0.000000e+00       1000           200
+#> 2     1          1              cosine 4.440892e-16       1000           200
+#> 3     1          1           hellinger 0.000000e+00       1000           200
+#> 4     1          1      jensen_shannon 0.000000e+00       1000           200
+#> 5     1          1         multinomial 0.000000e+00       1000           200
+#> 6     1          1             angular 2.107342e-08       1000           200
+#> 7     1          1 stein_scott_angular 0.000000e+00       1000           200
+#>   reference_total reference_count library_mass_coverage query_RI delta_RI rank
+#> 1            1000           query                     1     1005       -5    1
+#> 2            1000           query                     1     1005       -5    1
+#> 3            1000           query                     1     1005       -5    1
+#> 4            1000           query                     1     1005       -5    1
+#> 5            1000           query                     1     1005       -5    1
+#> 6            1000           query                     1     1005       -5    1
+#> 7            1000           query                     1     1005       -5    1
+#>         name  cas inchikey               source source_id  origin ri_phase
+#> 1 compound A <NA>     <NA> file8b483994505d.msp      <NA> unknown      DB5
+#> 2 compound A <NA>     <NA> file8b483994505d.msp      <NA> unknown      DB5
+#> 3 compound A <NA>     <NA> file8b483994505d.msp      <NA> unknown      DB5
+#> 4 compound A <NA>     <NA> file8b483994505d.msp      <NA> unknown      DB5
+#> 5 compound A <NA>     <NA> file8b483994505d.msp      <NA> unknown      DB5
+#> 6 compound A <NA>     <NA> file8b483994505d.msp      <NA> unknown      DB5
+#> 7 compound A <NA>     <NA> file8b483994505d.msp      <NA> unknown      DB5
+#>   ri_assumed ri_origin            ri_source query_total compound score
+#> 1      FALSE   unknown file8b483994505d.msp        1000        1  1000
+#> 2      FALSE   unknown file8b483994505d.msp        1000        1  1000
+#> 3      FALSE   unknown file8b483994505d.msp        1000        1  1000
+#> 4      FALSE   unknown file8b483994505d.msp        1000        1  1000
+#> 5      FALSE   unknown file8b483994505d.msp        1000        1  1000
+#> 6      FALSE   unknown file8b483994505d.msp        1000        1  1000
+#> 7      FALSE   unknown file8b483994505d.msp        1000        1  1000
 ```

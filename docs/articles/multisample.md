@@ -3,8 +3,8 @@
 [`gcmsDeco()`](https://tomwenseleers.github.io/GCMSprime/reference/gcmsDeco.md)
 accepts an experiment directory and analyzes its chromatograms together.
 Each sample gets its own time-varying PSF, smooth background and
-log-concave compound profiles. Coupled factorization shares mass spectra
-across samples and returns one consensus compound library with a
+log-concave compound profiles. Simultaneous factorisation shares mass
+spectra across samples and returns one consensus compound library with a
 sample-by-compound area table.
 
 ## Organize and fit an experiment
@@ -87,12 +87,13 @@ fit <- runBenchmark16("samples16", method="GCMSprime", ncores=16L)
 plotBenchmark16("samples16")
 ```
 
-The analysis recovered **733 of 769 true occurrences**, with **90 false
-positives** (peak F1 **0.921**), including all seven acid occurrences.
-Robust adjusted log-area R² was **0.996** and mean spectral ion-support
-F1 was **0.939** at the shared 0.1% base-peak threshold.
+The analysis recovered **752 of 769 true occurrences**, with **140 false
+positives** (peak F1 **0.905**), including all seven acid occurrences.
+Robust adjusted log-area R² was **0.9992**, the median absolute
+peak-area error was **1.33%**, and mean spectral ion-support F1 was
+**0.971** at the shared 0.1% base-peak threshold.
 
-The CDF-to-results analysis took **157.69 s** with 16 single-threaded
+The CDF-to-results analysis took **253.47 s** with 16 single-threaded
 sample workers on an HP ZBook Fury G8, Intel Core i9-11950H, eight
 physical cores, 16 logical threads, Windows and R 4.5.0. CDF generation
 is separate.
@@ -126,7 +127,7 @@ The output directory contains:
 
 Spectral text cells are unwrapped and list fragments by decreasing
 intensity. Sample objects retain factor matrices and CDF paths. Plots
-reload the required observations. Coupled fitting stores original
+reload the required observations. Simultaneous fitting stores original
 observations and large weight/offset arrays on disk. It caches the
 common aggregate channels in RAM and streams bounded blocks of original
 channels for likelihood and spectral updates. At 10,000 scans and 32
@@ -151,8 +152,8 @@ plot(sample1, type="profiles", file="sample1_profiles_spectra.pdf")
 fitted(experiment, sample=1L)
 ```
 
-The [coupled NMF
-tutorial](https://tomwenseleers.github.io/logconNMF/articles/coupled-nmf.html)
+The [simultaneous NMF
+tutorial](https://tomwenseleers.github.io/logconNMF/articles/simultaneous-nmf.html)
 gives the mathematical model, alignment, spectral grouping, local
 updates and simulation results. Its validation includes three samples
 with all 258 mass channels, differing scan grids,
@@ -252,13 +253,14 @@ The shared TIC calibration took 1.58 s, and constructing each sample’s
 sparse PSF took about 1.6 s. The two independent fits ran concurrently
 with eight native threads per worker. The directory workflow took
 1,754.67 s (29.2 minutes), including 1,291.91 s for independent fits and
-449.35 s for coupled refinement. The joint GIC is 31,335,633; it counts
-common spectra once and amplitudes separately for each detected
-occurrence. Sample GIC values in the table are evaluated after coupling
-and count the spectra separately for each sample. RI annotation uses all
-17 alkanes from C7 to C23, with the fitted curve passing through every
-anchor. The directory workflow plus RI annotation took 1,759.58 s. These
-figures exclude separately generated diagnostic plots.
+449.35 s for simultaneous refinement. The joint GIC is 31,335,633; it
+counts common spectra once and amplitudes separately for each detected
+occurrence. Sample GIC values in the table are evaluated after
+simultaneous refinement and count the spectra separately for each
+sample. RI annotation uses all 17 alkanes from C7 to C23, with the
+fitted curve passing through every anchor. The directory workflow plus
+RI annotation took 1,759.58 s. These figures exclude separately
+generated diagnostic plots.
 
 The fitted components can be inspected sample by sample, and common
 spectra can be searched against a library with each sample’s
@@ -269,7 +271,7 @@ exports.
 
 Set `coupled=FALSE` to export independent fits. Set
 `batch=list(resume=TRUE)` to reuse independently fitted samples whose
-source-file metadata and fitting settings match the cache. Coupled
+source-file metadata and fitting settings match the cache. Simultaneous
 refinement is then computed from those fits.
 
 See

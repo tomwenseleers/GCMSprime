@@ -157,6 +157,7 @@ For a single chromatogram, this sets its native OpenMP thread count.}
 \code{final_polishes=1L}, \code{native_sweeps=6L}, \code{block_sweeps=6L},
 \code{psf_width=NULL}, \code{screen_factor=1}, \code{censor=0.5}, \code{linkage="ward"},
 \code{joint_trials=NULL}, \code{profile_cycles=4L}, \code{fusion_passes=0L},
+\code{initial_relaxed=TRUE},
 \code{profile_fusion=TRUE}, \code{profile_restarts=TRUE}. \code{joint_trials} uses direct Poisson fusion for Poisson data
 and joint local refinement for the other families. \code{psf_width} supplies
 the typical FWHM in scans. When omitted, local updates use the middle design
@@ -221,8 +222,9 @@ groups, per-sample exports and a consensus area table and spectral library.}
 \item{output_dir}{Directory for batch results; defaults to a sibling directory
 named after the input folder with suffix \verb{_GCMSprime}.}
 
-\item{coupled}{Share spectra and refine sample-specific profiles with
-\code{\link[logconNMF:logconNMF]{logconNMF::logconNMF()}} for directory input.}
+\item{coupled}{Logical; for directory input, use simultaneous NMF to share
+spectra while retaining sample-specific profiles and areas. Set to \code{FALSE}
+to export only the independent sample fits.}
 
 \item{batch}{Named directory options; see \link{GCMSbatch}.}
 
@@ -341,22 +343,24 @@ information criteria and all plot types, alongside the algorithm.
 library(logconNMF)
 \dontrun{
 library(L0glm)
-data(gcmsData1)
-data(gcmsData2)
+data("gcmsData1", package = "logconNMF")
+data("gcmsData2", package = "logconNMF")
 out <- file.path(tempdir(), "L0glm-GCMS")
 dir.create(out, showWarnings = FALSE)
 writeGCMSCDF(gcmsData1, file.path(out, "GCMS_data1.cdf"))
 writeGCMSCDF(gcmsData2, file.path(out, "GCMS_data2.cdf"))
 
 fit1 <- gcmsDeco(file.path(out, "GCMS_data1.cdf"),
-  file.path(out, "GCMS_data1.msp"), nwindows = 1L, precluster = 16L,
+  file.path(out, "GCMS_data1.msp"), nwindows = 1L, precluster = 7L,
   baseline_df = 1L,
   correlation = "auto", ncores = 8L,
+  control = list(initial_relaxed = FALSE, fusion_passes = 0L),
   psf_control = list(kernel_est = convKernel("gaussian", 65L,
-    list(sigma = 8)), maxiter = 0L))
+    list(sigma = 9)), maxiter = 0L))
 fit2 <- gcmsDeco(file.path(out, "GCMS_data2.cdf"),
   file.path(out, "GCMS_data2.msp"), nwindows = 1L, precluster = 32L,
   correlation = "auto", ncores = 8L,
+  control = list(initial_relaxed = TRUE, fusion_passes = 0L),
   psf_control = list(kernel_est = convKernel("gaussian", 65L,
     list(sigma = 6)), maxiter = 0L))
 fit1$compounds

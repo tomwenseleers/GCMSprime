@@ -45,11 +45,15 @@
 }
 \arguments{
 \item{sample}{One sample index or identifier. \code{NULL} in \code{coef()} returns the
-common spectral library. \code{NULL} in \code{plot()} plots the coupled area table.}
+common spectral library. \code{NULL} in \code{plot()} plots the simultaneous-fit area table.}
 
-\item{...}{Arguments passed to the corresponding sample or coupled method.}
+\item{...}{Arguments passed to the corresponding sample or simultaneous method.}
 
 \item{normalize}{Spectrum normalization: unnormalized or unit L1.}
+
+\item{ion_threshold}{Reported ion-intensity cutoff as a fraction of each
+spectrum's base-peak intensity. The default is 0.001; zero retains every
+positive fitted ion.}
 
 \item{x, object}{A multisample result returned by \code{\link[=gcmsDeco]{gcmsDeco()}}.}
 
@@ -79,7 +83,7 @@ If acquisition dates are absent, pass explicit relative sample paths in
 \code{coupling=list()} for \code{\link[logconNMF:logconNMF]{logconNMF::logconNMF()}} controls, \code{sample_order=NULL},
 \code{exposure=NULL}, \code{resume=FALSE}, \code{plots=FALSE}, \code{workers=NULL} and \code{cache=TRUE}.
 \code{workers} limits concurrent samples within the total \code{ncores} budget.
-\code{cache} controls the aggregated-observation RAM cache during coupled fitting.
+\code{cache} controls the aggregated-observation RAM cache during simultaneous fitting.
 \code{exposure} may be a positive
 scalar, a list with one scan-wise vector per acquisition-ordered sample, or
 a function of a sample's metadata and time vector. The default preserves
@@ -90,10 +94,14 @@ do not identify the per-mass dwell time. No automatic division by the number
 of exported channels is applied.
 
 Samples run concurrently with their own sparse PSF and smooth background. A
+simultaneous multisample fit uses criterion-checked sparse initial spectra
+for these per-sample fits; set \code{control=list(initial_relaxed=TRUE)} to request the
+relaxed grouped-support start used by standalone single-sample fits.
+A
 common channel map is learned from summed, time-binned chromatograms; pass a
 saved \code{\link[logconNMF:channelGroups]{logconNMF::channelGroups()}} map as \code{precluster} to reuse reference groups.
 Matching uses the shared aggregate space. Original-channel
-means and the likelihood are used for coupled updates. Shared spectra are
+means and the likelihood are used for simultaneous updates. Shared spectra are
 exported on the union of recorded mass ranges; unmeasured channels receive
 zero likelihood weight. Missing compounds retain \code{NA} areas. No gap filling
 is performed. \code{coupled=FALSE} keeps the independently fitted results.
@@ -111,7 +119,7 @@ before the next assigned sample. A 10,000-by-32 cache needs 2.56 MB per sample,
 or 2.56 GB for 1,000 samples, in addition to worker and factor memory.
 Keep the output directory with the saved object. Explicit \code{resume=TRUE}
 reuses independent fits only when the file metadata and fitting arguments
-match; coupled refinement is recomputed.
+match; simultaneous refinement is recomputed.
 }
 \examples{
 \dontrun{

@@ -1,7 +1,7 @@
-Name: gcms-data2_0001_RT19.29809
+Name: gcmsData2_0001_RT19.29809
 Pseudocount: 123918427.783142
 Ion_threshold: 0.001
-Comments: Sample gcms-data2; apex retention time 19.29809 min; integrated ion intensity 123918428; logconNMF
+Comments: Sample gcmsData2; apex retention time 19.29809 min; integrated ion intensity 123918428; logconNMF
 Num Peaks: 143
 35 1.021175;
 36 6.707699;
@@ -147,10 +147,10 @@ Num Peaks: 143
 358 3.1468051;
 359 1.8449317;
 
-Name: gcms-data2_0002_RT19.40693
+Name: gcmsData2_0002_RT19.40693
 Pseudocount: 99901722.3964905
 Ion_threshold: 0.001
-Comments: Sample gcms-data2; apex retention time 19.40693 min; integrated ion intensity 99901722.4; logconNMF
+Comments: Sample gcmsData2; apex retention time 19.40693 min; integrated ion intensity 99901722.4; logconNMF
 Num Peaks: 78
 37 3.2234883;
 38 9.2582888;
@@ -231,10 +231,10 @@ Num Peaks: 78
 252 1.6446633;
 279 4.1347704;
 
-Name: gcms-data2_0003_RT19.47155
+Name: gcmsData2_0003_RT19.47155
 Pseudocount: 241386227.688499
 Ion_threshold: 0.001
-Comments: Sample gcms-data2; apex retention time 19.47155 min; integrated ion intensity 241386228; logconNMF
+Comments: Sample gcmsData2; apex retention time 19.47155 min; integrated ion intensity 241386228; logconNMF
 Num Peaks: 88
 37 3.4352968;
 38 11.244275;
@@ -325,10 +325,10 @@ Num Peaks: 88
 279 1.9895976;
 281 2.6104332;
 
-Name: gcms-data2_0004_RT19.65861
+Name: gcmsData2_0004_RT19.65861
 Pseudocount: 18103833.9668327
 Ion_threshold: 0.001
-Comments: Sample gcms-data2; apex retention time 19.65861 min; integrated ion intensity 18103834; logconNMF
+Comments: Sample gcmsData2; apex retention time 19.65861 min; integrated ion intensity 18103834; logconNMF
 Num Peaks: 94
 37 3.8336422;
 38 3.3004083;
@@ -425,10 +425,10 @@ Num Peaks: 94
 356 3.340405;
 373 2.1186412;
 
-Name: gcms-data2_0005_RT19.91030
+Name: gcmsData2_0005_RT19.91030
 Pseudocount: 48110067.3415893
 Ion_threshold: 0.001
-Comments: Sample gcms-data2; apex retention time 19.9103 min; integrated ion intensity 48110067.3; logconNMF
+Comments: Sample gcmsData2; apex retention time 19.9103 min; integrated ion intensity 48110067.3; logconNMF
 Num Peaks: 89
 34 1.4952363;
 37 1.6147349;
@@ -520,10 +520,10 @@ Num Peaks: 89
 267 5.919343;
 269 1.1264923;
 
-Name: gcms-data2_0006_RT19.95791
+Name: gcmsData2_0006_RT19.95791
 Pseudocount: 323297865.208587
 Ion_threshold: 0.001
-Comments: Sample gcms-data2; apex retention time 19.95791 min; integrated ion intensity 323297865; logconNMF
+Comments: Sample gcmsData2; apex retention time 19.95791 min; integrated ion intensity 323297865; logconNMF
 Num Peaks: 62
 38 2.7625295;
 39 65.67403;
@@ -588,10 +588,10 @@ Num Peaks: 62
 130 1.030553;
 170 1.6861565;
 
-Name: gcms-data2_0007_RT20.16878
+Name: gcmsData2_0007_RT20.16878
 Pseudocount: 111093797.459291
 Ion_threshold: 0.001
-Comments: Sample gcms-data2; apex retention time 20.16878 min; integrated ion intensity 111093797; logconNMF
+Comments: Sample gcmsData2; apex retention time 20.16878 min; integrated ion intensity 111093797; logconNMF
 Num Peaks: 123
 36 2.2569013;
 37 16.877268;
@@ -717,10 +717,10 @@ Num Peaks: 123
 372 2.6636161;
 373 1.1206133;
 
-Name: gcms-data2_0008_RT20.44768
+Name: gcmsData2_0008_RT20.44768
 Pseudocount: 226352150.882798
 Ion_threshold: 0.001
-Comments: Sample gcms-data2; apex retention time 20.44768 min; integrated ion intensity 226352151; logconNMF
+Comments: Sample gcmsData2; apex retention time 20.44768 min; integrated ion intensity 226352151; logconNMF
 Num Peaks: 100
 37 2.6659878;
 38 7.8554708;
@@ -823,10 +823,10 @@ Num Peaks: 100
 281 1.0337215;
 355 1.094153;
 
-Name: gcms-data2_0009_RT20.57012
+Name: gcmsData2_0009_RT20.57012
 Pseudocount: 230406716.018655
 Ion_threshold: 0.001
-Comments: Sample gcms-data2; apex retention time 20.57012 min; integrated ion intensity 230406716; logconNMF
+Comments: Sample gcmsData2; apex retention time 20.57012 min; integrated ion intensity 230406716; logconNMF
 Num Peaks: 101
 37 2.5662996;
 38 6.164412;
@@ -930,10 +930,10 @@ Num Peaks: 101
 327 4.4984483;
 328 1.3061876;
 
-Name: gcms-data2_0010_RT20.70616
+Name: gcmsData2_0010_RT20.70616
 Pseudocount: 3733015457.57943
 Ion_threshold: 0.001
-Comments: Sample gcms-data2; apex retention time 20.70616 min; integrated ion intensity 3.73301546e+09; logconNMF
+Comments: Sample gcmsData2; apex retention time 20.70616 min; integrated ion intensity 3.73301546e+09; logconNMF
 Num Peaks: 92
 37 1.7151762;
 38 9.5858538;
@@ -1028,10 +1028,10 @@ Num Peaks: 92
 172 21.579008;
 173 2.9020717;
 
-Name: gcms-data2_0011_RT20.76739
+Name: gcmsData2_0011_RT20.76739
 Pseudocount: 23848611965.7355
 Ion_threshold: 0.001
-Comments: Sample gcms-data2; apex retention time 20.76739 min; integrated ion intensity 2.3848612e+10; logconNMF
+Comments: Sample gcmsData2; apex retention time 20.76739 min; integrated ion intensity 2.3848612e+10; logconNMF
 Num Peaks: 69
 38 1.4352626;
 39 69.416091;
@@ -1103,10 +1103,10 @@ Num Peaks: 69
 143 8.7666862;
 145 3.199684;
 
-Name: gcms-data2_0012_RT20.85921
+Name: gcmsData2_0012_RT20.85921
 Pseudocount: 38603728.721139
 Ion_threshold: 0.001
-Comments: Sample gcms-data2; apex retention time 20.85921 min; integrated ion intensity 38603728.7; logconNMF
+Comments: Sample gcmsData2; apex retention time 20.85921 min; integrated ion intensity 38603728.7; logconNMF
 Num Peaks: 105
 33 2.3108388;
 35 4.9593992;
@@ -1214,10 +1214,10 @@ Num Peaks: 105
 357 3.0354125;
 359 1.1758929;
 
-Name: gcms-data2_0013_RT21.11090
+Name: gcmsData2_0013_RT21.11090
 Pseudocount: 148256466.783818
 Ion_threshold: 0.001
-Comments: Sample gcms-data2; apex retention time 21.1109 min; integrated ion intensity 148256467; logconNMF
+Comments: Sample gcmsData2; apex retention time 21.1109 min; integrated ion intensity 148256467; logconNMF
 Num Peaks: 58
 39 302.39124;
 40 37.965615;
@@ -1278,10 +1278,10 @@ Num Peaks: 58
 143 1.2745834;
 355 2.0647188;
 
-Name: gcms-data2_0014_RT21.42040
+Name: gcmsData2_0014_RT21.42040
 Pseudocount: 177713123.788552
 Ion_threshold: 0.001
-Comments: Sample gcms-data2; apex retention time 21.4204 min; integrated ion intensity 177713124; logconNMF
+Comments: Sample gcmsData2; apex retention time 21.4204 min; integrated ion intensity 177713124; logconNMF
 Num Peaks: 97
 36 1.0061265;
 37 2.2027822;
@@ -1381,10 +1381,10 @@ Num Peaks: 97
 342 1.1679558;
 373 1.3419227;
 
-Name: gcms-data2_0015_RT21.66529
+Name: gcmsData2_0015_RT21.66529
 Pseudocount: 266216536.630598
 Ion_threshold: 0.001
-Comments: Sample gcms-data2; apex retention time 21.66529 min; integrated ion intensity 266216537; logconNMF
+Comments: Sample gcmsData2; apex retention time 21.66529 min; integrated ion intensity 266216537; logconNMF
 Num Peaks: 79
 37 7.6515931;
 38 14.380416;
@@ -1466,10 +1466,10 @@ Num Peaks: 79
 152 14.328868;
 153 1.1246915;
 
-Name: gcms-data2_0016_RT22.14485
+Name: gcmsData2_0016_RT22.14485
 Pseudocount: 1404586178.69683
 Ion_threshold: 0.001
-Comments: Sample gcms-data2; apex retention time 22.14485 min; integrated ion intensity 1.40458618e+09; logconNMF
+Comments: Sample gcmsData2; apex retention time 22.14485 min; integrated ion intensity 1.40458618e+09; logconNMF
 Num Peaks: 80
 37 2.9380716;
 38 5.2861668;
@@ -1552,10 +1552,10 @@ Num Peaks: 80
 325 0.99960197;
 341 1.9309802;
 
-Name: gcms-data2_0017_RT22.26389
+Name: gcmsData2_0017_RT22.26389
 Pseudocount: 74294679583.0367
 Ion_threshold: 0.001
-Comments: Sample gcms-data2; apex retention time 22.26389 min; integrated ion intensity 7.42946796e+10; logconNMF
+Comments: Sample gcmsData2; apex retention time 22.26389 min; integrated ion intensity 7.42946796e+10; logconNMF
 Num Peaks: 62
 37 1.2920695;
 38 5.3126397;
@@ -1620,10 +1620,10 @@ Num Peaks: 62
 129 5.295943;
 144 2.2435558;
 
-Name: gcms-data2_0018_RT22.35912
+Name: gcmsData2_0018_RT22.35912
 Pseudocount: 977106301.802837
 Ion_threshold: 0.001
-Comments: Sample gcms-data2; apex retention time 22.35912 min; integrated ion intensity 977106302; logconNMF
+Comments: Sample gcmsData2; apex retention time 22.35912 min; integrated ion intensity 977106302; logconNMF
 Num Peaks: 82
 37 2.7230167;
 38 8.3766207;
@@ -1708,10 +1708,10 @@ Num Peaks: 82
 153 15.269761;
 154 2.2843022;
 
-Name: gcms-data2_0019_RT22.38633
+Name: gcmsData2_0019_RT22.38633
 Pseudocount: 290902735.983696
 Ion_threshold: 0.001
-Comments: Sample gcms-data2; apex retention time 22.38633 min; integrated ion intensity 290902736; logconNMF
+Comments: Sample gcmsData2; apex retention time 22.38633 min; integrated ion intensity 290902736; logconNMF
 Num Peaks: 89
 38 6.8945136;
 39 300.87159;
@@ -1803,10 +1803,10 @@ Num Peaks: 89
 372 2.2994607;
 373 1.2177671;
 
-Name: gcms-data2_0020_RT22.59380
+Name: gcmsData2_0020_RT22.59380
 Pseudocount: 824931858.849901
 Ion_threshold: 0.001
-Comments: Sample gcms-data2; apex retention time 22.5938 min; integrated ion intensity 824931859; logconNMF
+Comments: Sample gcmsData2; apex retention time 22.5938 min; integrated ion intensity 824931859; logconNMF
 Num Peaks: 74
 34 3.5971953;
 35 1.2499257;
@@ -1883,10 +1883,10 @@ Num Peaks: 74
 139 3.4257513;
 165 1.1798228;
 
-Name: gcms-data2_0021_RT22.78086
+Name: gcmsData2_0021_RT22.78086
 Pseudocount: 53299284.0461532
 Ion_threshold: 0.001
-Comments: Sample gcms-data2; apex retention time 22.78086 min; integrated ion intensity 53299284; logconNMF
+Comments: Sample gcmsData2; apex retention time 22.78086 min; integrated ion intensity 53299284; logconNMF
 Num Peaks: 128
 34 4.0130412;
 37 53.880631;
@@ -2017,10 +2017,10 @@ Num Peaks: 128
 403 6.3634728;
 404 2.8759005;
 
-Name: gcms-data2_0022_RT22.85229
+Name: gcmsData2_0022_RT22.85229
 Pseudocount: 171363341.564822
 Ion_threshold: 0.001
-Comments: Sample gcms-data2; apex retention time 22.85229 min; integrated ion intensity 171363342; logconNMF
+Comments: Sample gcmsData2; apex retention time 22.85229 min; integrated ion intensity 171363342; logconNMF
 Num Peaks: 88
 33 1.1955963;
 36 1.578178;
@@ -2111,10 +2111,10 @@ Num Peaks: 88
 329 1.9541957;
 387 1.2703749;
 
-Name: gcms-data2_0023_RT23.18560
+Name: gcmsData2_0023_RT23.18560
 Pseudocount: 195957569.929553
 Ion_threshold: 0.001
-Comments: Sample gcms-data2; apex retention time 23.1856 min; integrated ion intensity 195957570; logconNMF
+Comments: Sample gcmsData2; apex retention time 23.1856 min; integrated ion intensity 195957570; logconNMF
 Num Peaks: 60
 37 2.1695495;
 38 7.7742234;
@@ -2177,10 +2177,10 @@ Num Peaks: 60
 164 54.826148;
 165 5.7485706;
 
-Name: gcms-data2_0024_RT23.36926
+Name: gcmsData2_0024_RT23.36926
 Pseudocount: 158776466.990863
 Ion_threshold: 0.001
-Comments: Sample gcms-data2; apex retention time 23.36926 min; integrated ion intensity 158776467; logconNMF
+Comments: Sample gcmsData2; apex retention time 23.36926 min; integrated ion intensity 158776467; logconNMF
 Num Peaks: 127
 33 1.0119223;
 36 1.2662831;
@@ -2310,10 +2310,10 @@ Num Peaks: 127
 371 6.2913067;
 372 1.189552;
 
-Name: gcms-data2_0025_RT23.46790
+Name: gcmsData2_0025_RT23.46790
 Pseudocount: 49310656.2419614
 Ion_threshold: 0.001
-Comments: Sample gcms-data2; apex retention time 23.4679 min; integrated ion intensity 49310656.2; logconNMF
+Comments: Sample gcmsData2; apex retention time 23.4679 min; integrated ion intensity 49310656.2; logconNMF
 Num Peaks: 102
 39 80.561409;
 40 28.351571;
@@ -2418,10 +2418,10 @@ Num Peaks: 102
 402 2.5927422;
 403 1.865475;
 
-Name: gcms-data2_0026_RT23.61755
+Name: gcmsData2_0026_RT23.61755
 Pseudocount: 52155407.6699641
 Ion_threshold: 0.001
-Comments: Sample gcms-data2; apex retention time 23.61755 min; integrated ion intensity 52155407.7; logconNMF
+Comments: Sample gcmsData2; apex retention time 23.61755 min; integrated ion intensity 52155407.7; logconNMF
 Num Peaks: 124
 36 1.454819;
 39 37.016019;
@@ -2548,10 +2548,10 @@ Num Peaks: 124
 417 7.5362148;
 418 2.2482673;
 
-Name: gcms-data2_0027_RT23.87263
+Name: gcmsData2_0027_RT23.87263
 Pseudocount: 185679704.902943
 Ion_threshold: 0.001
-Comments: Sample gcms-data2; apex retention time 23.87263 min; integrated ion intensity 185679705; logconNMF
+Comments: Sample gcmsData2; apex retention time 23.87263 min; integrated ion intensity 185679705; logconNMF
 Num Peaks: 178
 36 1.20801;
 37 30.356562;
@@ -2732,10 +2732,10 @@ Num Peaks: 178
 358 6.5689883;
 359 4.111071;
 
-Name: gcms-data2_0028_RT23.92025
+Name: gcmsData2_0028_RT23.92025
 Pseudocount: 819685049.75835
 Ion_threshold: 0.001
-Comments: Sample gcms-data2; apex retention time 23.92025 min; integrated ion intensity 819685050; logconNMF
+Comments: Sample gcmsData2; apex retention time 23.92025 min; integrated ion intensity 819685050; logconNMF
 Num Peaks: 82
 37 1.0212878;
 38 6.9864138;
@@ -2820,10 +2820,10 @@ Num Peaks: 82
 342 3.0205014;
 343 2.2038844;
 
-Name: gcms-data2_0029_RT24.00868
+Name: gcmsData2_0029_RT24.00868
 Pseudocount: 14525792612.7404
 Ion_threshold: 0.001
-Comments: Sample gcms-data2; apex retention time 24.00868 min; integrated ion intensity 1.45257926e+10; logconNMF
+Comments: Sample gcmsData2; apex retention time 24.00868 min; integrated ion intensity 1.45257926e+10; logconNMF
 Num Peaks: 38
 38 3.2131495;
 39 33.064645;
@@ -2864,10 +2864,10 @@ Num Peaks: 38
 106 7.423744;
 121 1.2071948;
 
-Name: gcms-data2_0030_RT24.01208
+Name: gcmsData2_0030_RT24.01208
 Pseudocount: 23180598738.4372
 Ion_threshold: 0.001
-Comments: Sample gcms-data2; apex retention time 24.01208 min; integrated ion intensity 2.31805987e+10; logconNMF
+Comments: Sample gcmsData2; apex retention time 24.01208 min; integrated ion intensity 2.31805987e+10; logconNMF
 Num Peaks: 43
 37 1.9320883;
 38 8.5038634;
@@ -2913,10 +2913,10 @@ Num Peaks: 43
 106 3.9176032;
 121 1.5214588;
 
-Name: gcms-data2_0031_RT24.04269
+Name: gcmsData2_0031_RT24.04269
 Pseudocount: 65780758.0443453
 Ion_threshold: 0.001
-Comments: Sample gcms-data2; apex retention time 24.04269 min; integrated ion intensity 65780758; logconNMF
+Comments: Sample gcmsData2; apex retention time 24.04269 min; integrated ion intensity 65780758; logconNMF
 Num Peaks: 108
 37 7.0131172;
 38 16.017022;
@@ -3027,10 +3027,10 @@ Num Peaks: 108
 345 1.1627088;
 357 1.942966;
 
-Name: gcms-data2_0032_RT24.09031
+Name: gcmsData2_0032_RT24.09031
 Pseudocount: 107755872.274851
 Ion_threshold: 0.001
-Comments: Sample gcms-data2; apex retention time 24.09031 min; integrated ion intensity 107755872; logconNMF
+Comments: Sample gcmsData2; apex retention time 24.09031 min; integrated ion intensity 107755872; logconNMF
 Num Peaks: 144
 36 2.8314525;
 37 18.431275;
@@ -3177,10 +3177,10 @@ Num Peaks: 144
 404 2.2183356;
 405 1.0423657;
 
-Name: gcms-data2_0033_RT24.34539
+Name: gcmsData2_0033_RT24.34539
 Pseudocount: 61631650.5257479
 Ion_threshold: 0.001
-Comments: Sample gcms-data2; apex retention time 24.34539 min; integrated ion intensity 61631650.5; logconNMF
+Comments: Sample gcmsData2; apex retention time 24.34539 min; integrated ion intensity 61631650.5; logconNMF
 Num Peaks: 139
 37 4.9271159;
 38 14.263388;
@@ -3322,10 +3322,10 @@ Num Peaks: 139
 402 1.1257007;
 403 1.36683;
 
-Name: gcms-data2_0034_RT24.45083
+Name: gcmsData2_0034_RT24.45083
 Pseudocount: 69928319.5531151
 Ion_threshold: 0.001
-Comments: Sample gcms-data2; apex retention time 24.45083 min; integrated ion intensity 69928319.6; logconNMF
+Comments: Sample gcmsData2; apex retention time 24.45083 min; integrated ion intensity 69928319.6; logconNMF
 Num Peaks: 173
 34 1.228667;
 36 1.3339843;
@@ -3501,10 +3501,10 @@ Num Peaks: 173
 386 1.3582977;
 387 1.7916151;
 
-Name: gcms-data2_0035_RT24.60048
+Name: gcmsData2_0035_RT24.60048
 Pseudocount: 75269393.0170615
 Ion_threshold: 0.001
-Comments: Sample gcms-data2; apex retention time 24.60048 min; integrated ion intensity 75269393; logconNMF
+Comments: Sample gcmsData2; apex retention time 24.60048 min; integrated ion intensity 75269393; logconNMF
 Num Peaks: 153
 36 2.1411719;
 37 10.104251;
@@ -3660,10 +3660,10 @@ Num Peaks: 153
 357 1.1781339;
 371 1.4559892;
 
-Name: gcms-data2_0036_RT24.72972
+Name: gcmsData2_0036_RT24.72972
 Pseudocount: 1199497967.65047
 Ion_threshold: 0.001
-Comments: Sample gcms-data2; apex retention time 24.72972 min; integrated ion intensity 1.19949797e+09; logconNMF
+Comments: Sample gcmsData2; apex retention time 24.72972 min; integrated ion intensity 1.19949797e+09; logconNMF
 Num Peaks: 75
 37 1.8032704;
 38 5.3023608;
@@ -3741,10 +3741,10 @@ Num Peaks: 75
 416 1.2294594;
 417 1.0716793;
 
-Name: gcms-data2_0037_RT24.87257
+Name: gcmsData2_0037_RT24.87257
 Pseudocount: 153903051.1148
 Ion_threshold: 0.001
-Comments: Sample gcms-data2; apex retention time 24.87257 min; integrated ion intensity 153903051; logconNMF
+Comments: Sample gcmsData2; apex retention time 24.87257 min; integrated ion intensity 153903051; logconNMF
 Num Peaks: 141
 33 2.3798073;
 34 3.7382293;
@@ -3888,10 +3888,10 @@ Num Peaks: 141
 416 10.388803;
 417 7.0249337;
 
-Name: gcms-data2_0038_RT24.95420
+Name: gcmsData2_0038_RT24.95420
 Pseudocount: 82892028.280209
 Ion_threshold: 0.001
-Comments: Sample gcms-data2; apex retention time 24.9542 min; integrated ion intensity 82892028.3; logconNMF
+Comments: Sample gcmsData2; apex retention time 24.9542 min; integrated ion intensity 82892028.3; logconNMF
 Num Peaks: 142
 34 2.1070801;
 36 1.1390744;

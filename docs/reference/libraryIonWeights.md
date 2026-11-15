@@ -79,4 +79,17 @@ writeLines(c("Name: A", "Num Peaks: 2", "43 100;57 20;",
 lib <- readMSP(f)
 w <- libraryIonWeights(lib, mass=c(43,57,91), ncores=1)
 w
+#>        43        57        91
+#> 0.7872094 1.1063953 1.1063953
+#> attr(,"frequency")
+#> 43 57 91
+#>  2  1  1
+#> attr(,"spectra")
+#> [1] 2
+#> attr(,"min_relative")
+#> [1] 0.01
+#> attr(,"power")
+#> [1] 1
+#> attr(,"seconds")
+#> [1] 0
 ```

@@ -116,7 +116,19 @@ writeLines(c("Name: example", "Formula: C2H6O", "RI_DB5: 560",
              "Num Peaks: 3", "31 100; 45 60; 46 20;"), f)
 lib <- readMSP(f)
 lib
+#> 1 spectra; memory library
 libraryMetadata(lib)
+#>   id    name formula  cas inchi inchikey smiles license               source
+#> 1  1 example   C2H6O <NA>  <NA>     <NA>   <NA>    <NA> file8b481ff471dc.msp
+#>   source_id  origin source_line npeaks pseudocount
+#> 1      <NA> unknown           1      3          NA
 retentionIndices(lib)
+#>   id value phase_class column convention  origin               source raw
+#> 1  1   560         DB5 RI_DB5    unknown unknown file8b481ff471dc.msp 560
 spectra(lib)
+#> 3 x 1 sparse Matrix of class "dgCMatrix"
+#>      1
+#> 31 100
+#> 45  60
+#> 46  20
 ```

@@ -128,5 +128,7 @@ doi:10.1016/S0021-9673(01)80947-X.
 a <- data.frame(carbon=8:15, retention_time=c(3,4,5.2,6.7,8.5,10.6,13,15.7))
 cal <- calibrateRI(anchors=a)
 predict(cal, c(5,10))
+#> [1]  984.8493 1272.8362
 cal
+#> 8 alkane anchors; C8--C15; calibration RMSE 0 RI units
 ```

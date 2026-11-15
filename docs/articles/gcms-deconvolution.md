@@ -21,7 +21,7 @@ overloaded or shark-fin-shaped peaks.
 ## Two experimental chromatograms
 
 The package includes a cuticular-hydrocarbon window with six co-eluting
-compounds (`gcmsData1`, 119 scans × 671 mass channels) and a
+compounds (`gcmsData1`, 119 scans × 670 mass channels) and a
 beer-headspace window with a prominent broad acid peak (`gcmsData2`,
 1,764 scans × 518 mass channels). Their row names give retention times
 in minutes; column names give nominal m/z. Both examples keep all mass
@@ -51,15 +51,17 @@ by instrument software:
 ``` r
 
 fit1 <- gcmsDeco(file.path(out, "GCMS_data1.cdf"),
-  file.path(out, "GCMS_data1.msp"), nwindows = 1L, precluster = 16L,
+  file.path(out, "GCMS_data1.msp"), nwindows = 1L, precluster = 7L,
   baseline_df = 1L,
   correlation = "auto", ncores = 8L,
+  control = list(initial_relaxed = FALSE, fusion_passes = 0L),
   psf_control = list(kernel_est = convKernel("gaussian", 65L,
-    list(sigma = 8)), maxiter = 0L))
+    list(sigma = 9)), maxiter = 0L))
 
 fit2 <- gcmsDeco(file.path(out, "GCMS_data2.cdf"),
   file.path(out, "GCMS_data2.msp"), nwindows = 1L, precluster = 32L,
   correlation = "auto", ncores = 8L,
+  control = list(initial_relaxed = TRUE, fusion_passes = 0L),
   psf_control = list(kernel_est = convKernel("gaussian", 65L,
     list(sigma = 6)), maxiter = 0L))
 
@@ -76,8 +78,12 @@ then refines the individual compound profiles. For a full chromatogram,
 the default `nwindows=10L` with positive `maxiter` estimates a smoothly
 varying PSF. An alkane standard can supply its initial calibration
 through `alkanes_file="alkanes.cdf"`. The hydrocarbon window uses a
-constant background; the longer beer window uses the automatically
-chosen low-df cubic spline.
+constant background. A sensitivity grid over Gaussian widths and
+precluster counts was restricted to six-factor solutions with chemically
+plausible apex times; the displayed width of 9 scans and seven
+preclusters combines low GIC, accurate apex times, compact profiles and
+strong diagnostic-ion enrichment. The longer beer window uses the
+automatically chosen low-df cubic spline.
 
 ### Estimate the PSF automatically
 
@@ -126,8 +132,8 @@ used in the plotted comparison, so the table and figures below use the
 explicit Gaussian PSFs in `fit1` and `fit2` above. Automatic calibration
 is available through the calls in this section.
 
-The table reports elapsed time for each complete CDF-to-MSP fit on the
-[benchmark
+The table reports the median elapsed time across three complete
+CDF-to-MSP fits on the [benchmark
 workstation](https://tomwenseleers.github.io/L0glm/articles/performance.html#reproduce-and-extend),
 using a clean optimized source build, default likelihood-checked local
 profile restarts, eight OpenMP threads and one BLAS thread. Timings
@@ -136,8 +142,8 @@ completion and MSP export.
 
 | Dataset | Scans | Mass channels | Components | Seconds | Quasi-GIC | Adjusted weighted R² |
 |:---|---:|---:|---:|---:|---:|---:|
-| `gcmsData1` | 119 | 671 | 6 | 5.68 | 246,473 | 0.98999 |
-| `gcmsData2` | 1,764 | 518 | 38 | 39.75 | 1,467,393 | 0.99499 |
+| `gcmsData1` | 119 | 670 | 6 | 6.11 | 247,218 | 0.98983 |
+| `gcmsData2` | 1,764 | 518 | 38 | 38.44 | 1,467,393 | 0.99498 |
 
 Weighted R² uses weights `1/pmax(fitted_mean, 0.1)` and a separate
 weighted mean for each mass channel. Its adjustment is conditional on
@@ -151,15 +157,22 @@ checked against the complete original-channel criterion.
 
 The default working-correlation adjustment is estimated from temporal
 differences and held fixed during final rank comparisons. Both windows
-have an estimated information factor of 1.98. The permissive
-initialization retains candidates while their profiles are refined;
-final broad-fragment decisions compare merged and equally refined
-unmerged local models. The beer fit represents the extended acid
-contribution with one log-concave profile, retaining all 518 mass
-channels. Diagnostics are available in `fit2$model$contained_fusion` and
-`fit2$model$initialization`.
+have an estimated information factor of 1.98. The hydrocarbon fit uses
+the criterion-selected sparse start identified by the diagnostic-ion
+sensitivity grid. The beer fit uses a relaxed grouped-support refit so
+that the broad acid candidate is retained for profile refinement; it
+represents the extended acid contribution with one log-concave profile
+while retaining all 518 mass channels. Diagnostics are available in
+`fit2$model$contained_fusion` and `fit2$model$initialization`.
 
 ### Cuticular hydrocarbons
+
+![Grey ion traces, six base-peak-scaled profiles and matching spectra in
+consistent component
+colours](../reference/figures/gcms-data1-decomposition.png)
+
+Grey ion traces, six base-peak-scaled profiles and matching spectra in
+consistent component colours
 
 ![Background-corrected ion traces and fitted compounds in
 gcmsData1](../reference/figures/gcms-data1-traces.png)
@@ -265,11 +278,12 @@ chromatographic window:
 ``` r
 
 Y <- gcmsData1
-X <- convMatrix(convKernel("gaussian", 65L, list(sigma = 8)), nrow(Y))
+X <- convMatrix(convKernel("gaussian", 65L, list(sigma = 9)), nrow(Y))
 B <- matrix(1, nrow(Y), 1L)          # constant background in this short window
 nmf <- logconNMF(Y, X = X, background = B,
-  family = quasipoisson("identity"), precluster = 16L,
-  correlation = "auto", ncores = 8L)
+  family = quasipoisson("identity"), precluster = 7L,
+  correlation = "auto", ncores = 8L,
+  control = list(initial_relaxed = FALSE, fusion_passes = 0L))
 nmf$rank
 nmf$H                              # unit-sum, log-concave profiles
 coef(nmf)                          # full-channel integrated intensities

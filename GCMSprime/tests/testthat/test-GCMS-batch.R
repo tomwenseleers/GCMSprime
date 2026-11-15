@@ -56,6 +56,8 @@ test_that("sample workers preserve acquisition order, shared maps and full spect
   expect_equal(dim(fitted(two,sample=1L)),c(n,m))
   expect_null(two$coupled$store$cache)
   expect_true(all(file.exists(two$paths)))
+  cached<-readRDS(file.path(outputs[2],"samples",two$samples$sample_id[1L],"initial.rds"))
+  expect_false(cached$signature$args$control$initial_relaxed)
   args$batch$resume<-TRUE
   resumed<-do.call(gcmsDeco,c(args,list(output_dir=outputs[2],ncores=1L)))
   expect_true(all(resumed$samples$cache_hit))

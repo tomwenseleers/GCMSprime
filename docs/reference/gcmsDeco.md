@@ -210,7 +210,8 @@ print(x, ...)
   `native_sweeps=6L`, `block_sweeps=6L`, `psf_width=NULL`,
   `screen_factor=1`, `censor=0.5`, `linkage="ward"`,
   `joint_trials=NULL`, `profile_cycles=4L`, `fusion_passes=0L`,
-  `profile_fusion=TRUE`. `joint_trials` uses direct Poisson fusion for
+  `initial_relaxed=TRUE`, `profile_fusion=TRUE`,
+  `profile_restarts=TRUE`. `joint_trials` uses direct Poisson fusion for
   Poisson data and joint local refinement for the other families.
   `psf_width` supplies the typical FWHM in scans. When omitted, local
   updates use the middle design column and broad-profile fusion uses the
@@ -223,17 +224,19 @@ print(x, ...)
   `"ward"` or `"bregman"`. `joint_trials` allows overlapping compounds
   to adjust together during local fusion refinement. `profile_cycles`
   bounds the smooth shape/background initialization; positive values
-  also enable fine native profile/spectrum refinement. Zero skips these
-  shape-polishing cycles. `fusion_passes` optionally adds broad-anchor
-  and compatible-tail searches during initialization. `profile_fusion`
-  enables algebraic profile fusion, retained contained-fragment
-  proposals and a final broad-fragment pass on every original channel.
-  Broad fusions are compared with an equally refined unmerged local
-  model. The entire support of every updated component is included in
-  the local fit, with the remaining components and background held in an
-  offset. `original_cleanup=TRUE` enables a final original-channel
-  deletion, local fusion and residual-discovery pass. Set it to `FALSE`
-  to skip that pass.
+  also enable the final likelihood-checked local restarts.
+  `profile_restarts=FALSE` disables those alternative starting profiles.
+  positive values also enable fine native profile/spectrum refinement.
+  Zero skips these shape-polishing cycles. `fusion_passes` optionally
+  adds broad-anchor and compatible-tail searches during initialization.
+  `profile_fusion` enables algebraic profile fusion, retained
+  contained-fragment proposals and a final broad-fragment pass on every
+  original channel. Broad fusions are compared with an equally refined
+  unmerged local model. The entire support of every updated component is
+  included in the local fit, with the remaining components and
+  background held in an offset. `original_cleanup=TRUE` enables a final
+  original-channel deletion, local fusion and residual-discovery pass.
+  Set it to `FALSE` to skip that pass.
 
 - psf_control:
 
@@ -296,9 +299,9 @@ print(x, ...)
 
 - coupled:
 
-  Share spectra and refine sample-specific profiles with
-  [`logconNMF::logconNMF()`](https://tomwenseleers.github.io/logconNMF/reference/logconNMF.html)
-  for directory input.
+  Logical; for directory input, use simultaneous NMF to share spectra
+  while retaining sample-specific profiles and areas. Set to `FALSE` to
+  export only the independent sample fits.
 
 - batch:
 
@@ -452,22 +455,24 @@ NIST MS Search user manual, section on NIST text format:
 library(logconNMF)
 if (FALSE) { # \dontrun{
 library(L0glm)
-data(gcmsData1)
-data(gcmsData2)
+data("gcmsData1", package = "logconNMF")
+data("gcmsData2", package = "logconNMF")
 out <- file.path(tempdir(), "L0glm-GCMS")
 dir.create(out, showWarnings = FALSE)
 writeGCMSCDF(gcmsData1, file.path(out, "GCMS_data1.cdf"))
 writeGCMSCDF(gcmsData2, file.path(out, "GCMS_data2.cdf"))
 
 fit1 <- gcmsDeco(file.path(out, "GCMS_data1.cdf"),
-  file.path(out, "GCMS_data1.msp"), nwindows = 1L, precluster = 16L,
+  file.path(out, "GCMS_data1.msp"), nwindows = 1L, precluster = 7L,
   baseline_df = 1L,
   correlation = "auto", ncores = 8L,
+  control = list(initial_relaxed = FALSE, fusion_passes = 0L),
   psf_control = list(kernel_est = convKernel("gaussian", 65L,
-    list(sigma = 8)), maxiter = 0L))
+    list(sigma = 9)), maxiter = 0L))
 fit2 <- gcmsDeco(file.path(out, "GCMS_data2.cdf"),
   file.path(out, "GCMS_data2.msp"), nwindows = 1L, precluster = 32L,
   correlation = "auto", ncores = 8L,
+  control = list(initial_relaxed = TRUE, fusion_passes = 0L),
   psf_control = list(kernel_est = convKernel("gaussian", 65L,
     list(sigma = 6)), maxiter = 0L))
 fit1$compounds

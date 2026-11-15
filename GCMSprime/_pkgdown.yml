@@ -57,6 +57,7 @@ navbar:
           href: articles/identification-theory.html
     github:
       icon: fab fa-github
+      aria-label: GitHub repository
       href: https://github.com/tomwenseleers/GCMSprime
 home:
   strip_header: false

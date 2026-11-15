@@ -155,4 +155,13 @@ profile it is placed in the middle of the chromatogram.
 sim <- simulateGCMSSamples(samples=3L,n=c(180L,190L,200L),k=8L,
   presence=0.5,seed=3)
 sim$present
+#>       [,1]  [,2]  [,3]
+#> [1,] FALSE FALSE FALSE
+#> [2,] FALSE  TRUE  TRUE
+#> [3,] FALSE  TRUE  TRUE
+#> [4,]  TRUE FALSE  TRUE
+#> [5,]  TRUE FALSE FALSE
+#> [6,] FALSE  TRUE FALSE
+#> [7,] FALSE  TRUE  TRUE
+#> [8,] FALSE FALSE  TRUE
 ```

@@ -65,7 +65,7 @@
 <li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json">
 </form></li>
-<li class="nav-item"><a class="external-link nav-link" href="https://github.com/tomwenseleers/GCMSprime"><span class="fa fab fa-github"></span></a></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/tomwenseleers/GCMSprime" aria-label="GitHub repository"><span class="fa fab fa-github"></span></a></li>
       </ul>
 </div>
 
@@ -476,8 +476,8 @@ the CDF workflow and MSP, Excel and PDF outputs.</p>
 <h2 id="analyze-samples-together">7. Analyze samples together<a class="anchor" aria-label="anchor" href="#analyze-samples-together"></a>
 </h2>
 <p>Across samples, retention times drift and a compound can vary in
-width, tailing and abundance or be entirely absent. Coupled
-factorization starts from individual-sample fits and estimates a shared
+width, tailing and abundance or be entirely absent. Simultaneous
+factorisation starts from individual-sample fits and estimates a shared
 spectrum for matched occurrences while retaining sample-specific
 profiles, areas and backgrounds.</p>
 <p>High-confidence spectral matches supply alignment anchors. Each
@@ -488,7 +488,7 @@ concentration-related anchor motion accounted for separately.</p>
 <p>Candidate matches must agree in spectral shape and aligned time.
 Comparing their profiles in area order checks compatibility with a
 coherent log-concave ridge across samples. Shared spectra are refined
-using pooled evidence from their occurrences. The coupled criterion
+using pooled evidence from their occurrences. The simultaneous criterion
 counts a shared spectrum once and each detected occurrence’s amplitude
 separately.</p>
 <p>For <span class="math inline">G</span> shared spectra and <span class="math inline">L</span> detected sample–compound occurrences over
@@ -510,15 +510,16 @@ coordinates and bin widths transform with an area-preserving Jacobian.
 Known exposure can be supplied for integrated-count measurements; the
 default unit exposure preserves vendor intensity units.</p>
 <p>Observations and factor checkpoints are stored per sample on disk
-during coupled refinement. Workers can update samples concurrently while
-shared spectra and compact matching summaries remain in memory. Local
-retention-time comparisons avoid an all-pairs occurrence-distance
+during simultaneous refinement. Workers can update samples concurrently
+while shared spectra and compact matching summaries remain in memory.
+Local retention-time comparisons avoid an all-pairs occurrence-distance
 matrix. Samples retain acquisition order and group labels; alkane
 standards are selected by acquisition time. Missing occurrences are
 reported as <code>NA</code>.</p>
 <p>See <a href="multisample.html">multiple-sample deconvolution</a> for
-the directory workflow and <a href="https://tomwenseleers.github.io/logconNMF/articles/algorithm.html#coupled-model" class="external-link">logconNMF’s
-coupled model</a> for its objective and mathematical specification.</p>
+the directory workflow and <a href="https://tomwenseleers.github.io/logconNMF/articles/algorithm.html#simultaneous-model" class="external-link">logconNMF’s
+simultaneous model</a> for its objective and mathematical
+specification.</p>
 </div>
 <div class="section level2">
 <h2 id="identify-the-recovered-compounds">8. Identify the recovered compounds<a class="anchor" aria-label="anchor" href="#identify-the-recovered-compounds"></a>
@@ -548,12 +549,12 @@ calibration.</p>
 time bins. Matching and Poisson/quasipoisson profile proposals use these
 ion groups; proposal acceptance and spectral estimation use the original
 mass channels. The common grid is used only to learn the groups. Each
-worker loads its sample into RAM for the independent fit. During coupled
-refinement, the fit reads bounded blocks of original observations from
-disk to evaluate the likelihood and update spectra and backgrounds. With
-preclustering, aggregate matrices are cached in RAM by default. Profile
-updates that work directly on the original channels and noise updates
-can load a full sample into RAM.</p>
+worker loads its sample into RAM for the independent fit. During
+simultaneous refinement, the fit reads bounded blocks of original
+observations from disk to evaluate the likelihood and update spectra and
+backgrounds. With preclustering, aggregate matrices are cached in RAM by
+default. Profile updates that work directly on the original channels and
+noise updates can load a full sample into RAM.</p>
 <p>With shared spectra fixed, profiles and backgrounds can be updated
 independently across samples. Spectral contributions are then pooled in
 acquisition order. The spectral fusion queue retains unaffected

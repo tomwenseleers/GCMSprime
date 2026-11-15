@@ -1,22 +1,24 @@
 library(logconNMF)
 \dontrun{
 library(L0glm)
-data(gcmsData1)
-data(gcmsData2)
+data("gcmsData1", package = "logconNMF")
+data("gcmsData2", package = "logconNMF")
 out <- file.path(tempdir(), "L0glm-GCMS")
 dir.create(out, showWarnings = FALSE)
 writeGCMSCDF(gcmsData1, file.path(out, "GCMS_data1.cdf"))
 writeGCMSCDF(gcmsData2, file.path(out, "GCMS_data2.cdf"))
 
 fit1 <- gcmsDeco(file.path(out, "GCMS_data1.cdf"),
-  file.path(out, "GCMS_data1.msp"), nwindows = 1L, precluster = 16L,
+  file.path(out, "GCMS_data1.msp"), nwindows = 1L, precluster = 7L,
   baseline_df = 1L,
   correlation = "auto", ncores = 8L,
+  control = list(initial_relaxed = FALSE, fusion_passes = 0L),
   psf_control = list(kernel_est = convKernel("gaussian", 65L,
-    list(sigma = 8)), maxiter = 0L))
+    list(sigma = 9)), maxiter = 0L))
 fit2 <- gcmsDeco(file.path(out, "GCMS_data2.cdf"),
   file.path(out, "GCMS_data2.msp"), nwindows = 1L, precluster = 32L,
   correlation = "auto", ncores = 8L,
+  control = list(initial_relaxed = TRUE, fusion_passes = 0L),
   psf_control = list(kernel_est = convKernel("gaussian", 65L,
     list(sigma = 6)), maxiter = 0L))
 fit1$compounds

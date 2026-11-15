@@ -356,7 +356,7 @@ demonstrates the CDF workflow and MSP, Excel and PDF outputs.
 ## 7. Analyze samples together
 
 Across samples, retention times drift and a compound can vary in width,
-tailing and abundance or be entirely absent. Coupled factorization
+tailing and abundance or be entirely absent. Simultaneous factorisation
 starts from individual-sample fits and estimates a shared spectrum for
 matched occurrences while retaining sample-specific profiles, areas and
 backgrounds.
@@ -370,7 +370,7 @@ anchor motion accounted for separately.
 Candidate matches must agree in spectral shape and aligned time.
 Comparing their profiles in area order checks compatibility with a
 coherent log-concave ridge across samples. Shared spectra are refined
-using pooled evidence from their occurrences. The coupled criterion
+using pooled evidence from their occurrences. The simultaneous criterion
 counts a shared spectrum once and each detected occurrence’s amplitude
 separately.
 
@@ -392,8 +392,8 @@ exposure can be supplied for integrated-count measurements; the default
 unit exposure preserves vendor intensity units.
 
 Observations and factor checkpoints are stored per sample on disk during
-coupled refinement. Workers can update samples concurrently while shared
-spectra and compact matching summaries remain in memory. Local
+simultaneous refinement. Workers can update samples concurrently while
+shared spectra and compact matching summaries remain in memory. Local
 retention-time comparisons avoid an all-pairs occurrence-distance
 matrix. Samples retain acquisition order and group labels; alkane
 standards are selected by acquisition time. Missing occurrences are
@@ -401,8 +401,8 @@ reported as `NA`.
 
 See [multiple-sample
 deconvolution](https://tomwenseleers.github.io/GCMSprime/articles/multisample.md)
-for the directory workflow and [logconNMF’s coupled
-model](https://tomwenseleers.github.io/logconNMF/articles/algorithm.html#coupled-model)
+for the directory workflow and [logconNMF’s simultaneous
+model](https://tomwenseleers.github.io/logconNMF/articles/algorithm.html#simultaneous-model)
 for its objective and mathematical specification.
 
 ## 8. Identify the recovered compounds
@@ -432,12 +432,12 @@ A shared aggregation is learned from summed chromatograms in common time
 bins. Matching and Poisson/quasipoisson profile proposals use these ion
 groups; proposal acceptance and spectral estimation use the original
 mass channels. The common grid is used only to learn the groups. Each
-worker loads its sample into RAM for the independent fit. During coupled
-refinement, the fit reads bounded blocks of original observations from
-disk to evaluate the likelihood and update spectra and backgrounds. With
-preclustering, aggregate matrices are cached in RAM by default. Profile
-updates that work directly on the original channels and noise updates
-can load a full sample into RAM.
+worker loads its sample into RAM for the independent fit. During
+simultaneous refinement, the fit reads bounded blocks of original
+observations from disk to evaluate the likelihood and update spectra and
+backgrounds. With preclustering, aggregate matrices are cached in RAM by
+default. Profile updates that work directly on the original channels and
+noise updates can load a full sample into RAM.
 
 With shared spectra fixed, profiles and backgrounds can be updated
 independently across samples. Spectral contributions are then pooled in

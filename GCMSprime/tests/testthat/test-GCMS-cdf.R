@@ -33,13 +33,16 @@ test_that("short CDF windows can use a constant unpenalized background", {
   X <- convMatrix(kernel,n)
   mean <- as.matrix(X[,c(20L,48L)]%*%matrix(c(80,40,20,100,50,10),2L,3L))+2
   Y <- matrix(rpois(length(mean),mean),n,3L)
+  dimnames(Y) <- list(as.character(seq_len(n)/60),as.character(40:42))
   cdf <- tempfile(fileext=".cdf");msp <- tempfile(fileext=".msp")
-  on.exit(unlink(c(cdf,msp)))
+  msp_repeat <- tempfile(fileext=".msp")
+  on.exit(unlink(c(cdf,msp,msp_repeat)))
   writeGCMSCDF(Y,cdf,time=seq_len(n)/60,mass=40:42)
+  fit_control <- list(profile_cycles=0L,profile_fusion=FALSE)
   f <- gcmsDeco(cdf,msp,nwindows=1L,baseline_df=1L,precluster=2L,
     family=poisson("identity"),correlation="none",ncores=1L,
     psf_control=list(kernel_est=kernel,maxiter=0L),
-    control=list(profile_cycles=0L,profile_fusion=FALSE))
+    control=fit_control)
   expect_equal(f$background_df,1L)
   expect_equal(f$model$background,matrix(1,n,1L))
   expect_equal(ncol(coef(f)),3L)
@@ -49,6 +52,29 @@ test_that("short CDF windows can use a constant unpenalized background", {
   expect_equal(f$psf$g_hat,kernel/sum(kernel),tolerance=1e-12)
   expect_identical(f$psf$method,"fixed")
   expect_equal(dim(f$psf$X),c(n,n))
+
+  # A repeated wrapper fit and the equivalent direct logconNMF fit must take
+  # exactly the same numerical path.  estimatePSF() is the canonical PSF
+  # constructor: it projects the raw convolution matrix at the boundaries.
+  repeat_fit <- gcmsDeco(cdf,msp_repeat,nwindows=1L,baseline_df=1L,
+    precluster=2L,family=poisson("identity"),correlation="none",ncores=1L,
+    psf_control=list(kernel_est=kernel,maxiter=0L),control=fit_control)
+  canonical_psf <- estimatePSF(Y,family=poisson("identity"),
+    time=seq_len(n)/60,standard=NULL,nwindows=1L,precluster=1L,
+    dispersion=1,ncores=1L,
+    control=list(kernel_est=kernel,maxiter=0L,censor=.5,
+      fit=list(IC="gic")))
+  direct <- logconNMF(Y,X=canonical_psf$X,background=matrix(1,n,1L),
+    family=poisson("identity"),precluster=2L,dispersion=1,
+    correlation="none",ncores=1L,control=fit_control)
+  for(component in c("H","S","alpha")) {
+    expect_identical(f$model[[component]],repeat_fit$model[[component]])
+    expect_identical(f$model[[component]],direct[[component]])
+  }
+  expect_identical(f$psf$X,canonical_psf$X)
+  expect_identical(GIC(f$model),GIC(repeat_fit$model))
+  expect_identical(GIC(f$model),GIC(direct))
+
   expect_error(l0glmBlindDeco(rowSums(Y),maxiter=0L,plot=FALSE),"kernel_est")
   windows <- l0glmBlindDeco(rowSums(Y),kernel_est=kernel,nwindows=2L,
     maxiter=0L,plot=FALSE,baseline="bspline",nknots=4L)

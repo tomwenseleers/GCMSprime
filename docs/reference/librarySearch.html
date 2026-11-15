@@ -35,7 +35,7 @@ column-specific retention-index filtering. Fitted ion totals are preserved."><me
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
-<li class="nav-item"><a class="external-link nav-link" href="https://github.com/tomwenseleers/GCMSprime"><span class="fa fab fa-github"></span></a></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/tomwenseleers/GCMSprime" aria-label="GitHub repository"><span class="fa fab fa-github"></span></a></li>
       </ul></div>
 
 
@@ -222,14 +222,47 @@ libraryIonWeights() estimates reusable inverse-frequency weights.</p></dd>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="va">f</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span>fileext<span class="op">=</span><span class="st">".msp"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/writeLines.html" class="external-link">writeLines</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Name: compound A"</span>, <span class="st">"RI_DB5: 1000"</span>, <span class="st">"Num Peaks: 3"</span>,</span>
-<span>             <span class="st">"43 100; 57 80; 71 20;"</span>, <span class="st">"Name: compound B"</span>, <span class="st">"RI_DB5: 1200"</span>,</span>
-<span>             <span class="st">"Num Peaks: 2"</span>, <span class="st">"43 20; 91 100;"</span><span class="op">)</span>, <span class="va">f</span><span class="op">)</span></span>
-<span><span class="va">lib</span> <span class="op">&lt;-</span> <span class="fu"><a href="readMSP.html">readMSP</a></span><span class="op">(</span><span class="va">f</span><span class="op">)</span></span>
-<span><span class="va">q</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">500</span>,<span class="fl">400</span>,<span class="fl">100</span>,<span class="fl">0</span><span class="op">)</span>,<span class="fl">1</span>,dimnames<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="cn">NULL</span>,<span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">43</span>,<span class="fl">57</span>,<span class="fl">71</span>,<span class="fl">91</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">hit</span> <span class="op">&lt;-</span> <span class="fu">librarySearch</span><span class="op">(</span><span class="va">q</span>,<span class="va">lib</span>,ri<span class="op">=</span><span class="fl">1005</span>,phase<span class="op">=</span><span class="st">"DB5"</span>,method<span class="op">=</span><span class="st">"all"</span>,ncores<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">hit</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">f</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span>fileext<span class="op">=</span><span class="st">".msp"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/writeLines.html" class="external-link">writeLines</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Name: compound A"</span>, <span class="st">"RI_DB5: 1000"</span>, <span class="st">"Num Peaks: 3"</span>,</span></span>
+<span class="r-in"><span>             <span class="st">"43 100; 57 80; 71 20;"</span>, <span class="st">"Name: compound B"</span>, <span class="st">"RI_DB5: 1200"</span>,</span></span>
+<span class="r-in"><span>             <span class="st">"Num Peaks: 2"</span>, <span class="st">"43 20; 91 100;"</span><span class="op">)</span>, <span class="va">f</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">lib</span> <span class="op">&lt;-</span> <span class="fu"><a href="readMSP.html">readMSP</a></span><span class="op">(</span><span class="va">f</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">q</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">500</span>,<span class="fl">400</span>,<span class="fl">100</span>,<span class="fl">0</span><span class="op">)</span>,<span class="fl">1</span>,dimnames<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="cn">NULL</span>,<span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">43</span>,<span class="fl">57</span>,<span class="fl">71</span>,<span class="fl">91</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">hit</span> <span class="op">&lt;-</span> <span class="fu">librarySearch</span><span class="op">(</span><span class="va">q</span>,<span class="va">lib</span>,ri<span class="op">=</span><span class="fl">1005</span>,phase<span class="op">=</span><span class="st">"DB5"</span>,method<span class="op">=</span><span class="st">"all"</span>,ncores<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">hit</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   query library_id              method     distance library_RI library_total</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1     1          1         stein_scott 0.000000e+00       1000           200</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2     1          1              cosine 4.440892e-16       1000           200</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3     1          1           hellinger 0.000000e+00       1000           200</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4     1          1      jensen_shannon 0.000000e+00       1000           200</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5     1          1         multinomial 0.000000e+00       1000           200</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6     1          1             angular 2.107342e-08       1000           200</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7     1          1 stein_scott_angular 0.000000e+00       1000           200</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   reference_total reference_count library_mass_coverage query_RI delta_RI rank</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1            1000           query                     1     1005       -5    1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2            1000           query                     1     1005       -5    1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3            1000           query                     1     1005       -5    1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4            1000           query                     1     1005       -5    1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5            1000           query                     1     1005       -5    1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6            1000           query                     1     1005       -5    1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7            1000           query                     1     1005       -5    1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         name  cas inchikey               source source_id  origin ri_phase</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 compound A &lt;NA&gt;     &lt;NA&gt; file8b483994505d.msp      &lt;NA&gt; unknown      DB5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 compound A &lt;NA&gt;     &lt;NA&gt; file8b483994505d.msp      &lt;NA&gt; unknown      DB5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3 compound A &lt;NA&gt;     &lt;NA&gt; file8b483994505d.msp      &lt;NA&gt; unknown      DB5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4 compound A &lt;NA&gt;     &lt;NA&gt; file8b483994505d.msp      &lt;NA&gt; unknown      DB5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5 compound A &lt;NA&gt;     &lt;NA&gt; file8b483994505d.msp      &lt;NA&gt; unknown      DB5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6 compound A &lt;NA&gt;     &lt;NA&gt; file8b483994505d.msp      &lt;NA&gt; unknown      DB5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7 compound A &lt;NA&gt;     &lt;NA&gt; file8b483994505d.msp      &lt;NA&gt; unknown      DB5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ri_assumed ri_origin            ri_source query_total compound score</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1      FALSE   unknown file8b483994505d.msp        1000        1  1000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2      FALSE   unknown file8b483994505d.msp        1000        1  1000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3      FALSE   unknown file8b483994505d.msp        1000        1  1000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4      FALSE   unknown file8b483994505d.msp        1000        1  1000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5      FALSE   unknown file8b483994505d.msp        1000        1  1000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6      FALSE   unknown file8b483994505d.msp        1000        1  1000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7      FALSE   unknown file8b483994505d.msp        1000        1  1000</span>
+</code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
