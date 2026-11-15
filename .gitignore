@@ -5,6 +5,5 @@ codex_sandbox/
 *.o
 *.dll
 *.so
-*.tar.gz
 *.Rcheck/
 .Rproj.user
