@@ -18,7 +18,9 @@
 * Single-sample sparse log-concave NMF resolves overlapping compounds,
   flexible profiles and full mass spectra with automatic best rank tuning.
 * Optional aggregation to a small number of ion groups accelerates
-  initialization; original-channel likelihood refinement completes the fit.
+  initialization and compatible Poisson/quasi-Poisson restart screens.
+  Original-channel candidate/control refinement and likelihood checks complete
+  the fit, retaining the full spectra and fixed nuisance model.
 * Directory-based multisample analysis preserves acquisition order and group
   labels, selects alkane standards, aligns samples and estimates shared spectra
   with sample-specific areas and profiles.
@@ -54,3 +56,6 @@
   spectra in temporal order, and compact objects that reload observations.
 * Reproducible caching, experiment manifests and an integrated workflow from
   sample files to quantified and annotated compounds.
+
+* Nested stage timing avoids forced garbage collection between local fits;
+  ordinary R memory management remains active.

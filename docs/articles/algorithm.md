@@ -201,11 +201,17 @@ contribution.
 Final refinement also checks broader starting profiles when component
 modes nearly coincide. Left, right and two-sided width expansions
 preserve log concavity and are followed by local profile/spectrum
-updates. Every trial uses the original mass channels, retaining rare-ion
-contrasts. A restart is accepted only when its complete criterion
-improves relative to both the current fit and a separately refined
-control, with background, noise settings and compound count fixed. The
-[logconNMF
+updates. With channel aggregation enabled, compatible
+Poisson/quasi-Poisson fits screen these proposals in the existing ion
+groups. Promising spectra are expanded using their current within-group
+ion proportions. Both the candidate and a matched control are then
+refined on **every original mass channel**. A restart is accepted only
+when its complete original-data criterion improves relative to both the
+current fit and the separately refined control, with background, noise
+settings and compound count fixed. Cached control scores are discarded
+after any accepted move. Other families, channel-specific scales,
+nonscalar weights or nonzero offsets retain the original-channel
+proposal screen. The [logconNMF
 algorithm](https://tomwenseleers.github.io/logconNMF/articles/algorithm.html)
 gives the construction and mathematical pseudocode.
 

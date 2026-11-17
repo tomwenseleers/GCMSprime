@@ -21,13 +21,13 @@ window. GCMSprime estimates dispersion separately in each sample, with a
 used for scoring; the deconvolution receives neither the known areas nor
 the true profiles.
 
-GCMSprime recovers **752 of 769 occurrences**, with **140 false
-positives** (peak F1 **0.905**), including the acid in all seven samples
+GCMSprime recovers **750 of 769 occurrences**, with **142 false
+positives** (peak F1 **0.903**), including the acid in all seven samples
 where it occurs.
 
 | Method        | Seconds |  TP |   FP | Sensitivity | Peak F1 | Ion F1 |
 |:--------------|--------:|----:|-----:|------------:|--------:|-------:|
-| GCMSprime     |  253.47 | 752 |  140 |       97.8% |   0.905 |  0.971 |
+| GCMSprime     |  154.14 | 750 |  142 |       97.5% |   0.903 |  0.972 |
 | MS-DIAL       |   17.61 | 675 |  641 |       87.8% |   0.647 |  0.858 |
 | mzmine GC-EI  |   38.47 | 622 |   70 |       80.9% |   0.851 |  0.860 |
 | eRah          |   17.07 | 645 | 1912 |       83.9% |   0.388 |  0.771 |
@@ -40,6 +40,13 @@ Workstation with an Intel Core i9-11950H at 2.60 GHz, eight physical
 cores and 16 logical threads, Windows and R 4.5.0. GCMSprime uses 16
 single-threaded sample workers, AMDIS runs serially, and xcms + CAMERA
 uses four workers. Input conversion is timed separately.
+
+GCMSprime screens alternative local profile starts in the common channel
+aggregation, then checks promising starts against matched local
+refinements on the original mass channels. Its final spectra and
+reported criterion use the original data. The coupled quasi-GIC is
+**8,069,415**. Timers include automatic memory collection during the
+work without forcing a separate collection before each internal stage.
 
 `ncores` can use any number of available cores. GCMSprime parallelizes
 deconvolution across sample workers; when enough samples are available,
@@ -83,7 +90,7 @@ a light-grey band; the coloured observations are drawn last at alpha
 0.5, so superimposed points accumulate into darker concentrations. The
 headings report robust adjusted R²; ordinary least-squares statistics
 are retained in the downloadable tables. GCMSprime has robust adjusted
-R² **0.9992** and a **median absolute area error of 1.33%**. Area
+R² **0.9992** and a **median absolute area error of 1.38%**. Area
 agreement is conditional on recovered true matches, so it is shown
 together with sensitivity and false-positive counts.
 
@@ -105,7 +112,7 @@ Ion support uses a shared **0.1% of base-peak intensity cutoff**,
 applied independently to reference and recovered spectra for every
 method: I_j\>0 and I_j\geq0.001\max_l I_l. Within-spectrum
 F_1=2TP/(2TP+FP+FN) is averaged over correctly matched true spectra.
-GCMSprime achieves **mean ion F1 0.971**, compared with **0.860** for
+GCMSprime achieves **mean ion F1 0.972**, compared with **0.860** for
 the strongest comparator. Individual points accompany the violins; the
 logit-spaced axis retains labels in the original F1 units.
 
@@ -157,9 +164,9 @@ axis; profile amplitudes remain on their native total-ion scale.
 
 GCMSprime recovers all occurrences of both the regular EMG and the
 shark-fin-shaped acid. Mean profile cosine, counting missed occurrences
-as zero, is **0.982 for the regular compound** and **0.964 for the
+as zero, is **0.983 for the regular compound** and **0.963 for the
 acid**; median cosine among matched occurrences is **0.9999** and
-**0.9958**, respectively. Other configurations often truncate profiles,
+**0.9959**, respectively. Other configurations often truncate profiles,
 split their contributions or miss the acid. MS-DIAL slightly exceeds
 GCMSprime for the regular compound (mean cosine 0.998), but recovers
 only five of the seven acid occurrences and has acid mean cosine 0.449.
@@ -192,7 +199,7 @@ area regressions.
 
 | Method        | Smallest quarter | Lower-middle | Upper-middle | Largest quarter |
 |:--------------|-----------------:|-------------:|-------------:|----------------:|
-| GCMSprime     |            96.4% |        97.9% |        97.4% |           99.5% |
+| GCMSprime     |            95.9% |        96.9% |        97.9% |           99.5% |
 | MS-DIAL       |            79.3% |        84.4% |        91.1% |           96.4% |
 | mzmine GC-EI  |            70.5% |        79.2% |        82.3% |           91.7% |
 | eRah          |            72.0% |        78.6% |        89.1% |           95.8% |
@@ -234,6 +241,10 @@ table](https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst
 pairs](https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst/benchmarks/results/matches.csv),
 [all component
 identifications](https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst/benchmarks/results/identifications.csv)
+[stage timings and coupled
+GIC](https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst/benchmarks/results/native-timings.csv),
+[restart
+diagnostics](https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst/benchmarks/results/restart-diagnostics.csv)
 and [xcms tuning
 results](https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst/benchmarks/results/xcms-training-results.csv).
 

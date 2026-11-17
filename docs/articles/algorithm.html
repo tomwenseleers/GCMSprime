@@ -291,11 +291,17 @@ spectrum, preserving the fitted contribution.</p>
 <p>Final refinement also checks broader starting profiles when component
 modes nearly coincide. Left, right and two-sided width expansions
 preserve log concavity and are followed by local profile/spectrum
-updates. Every trial uses the original mass channels, retaining rare-ion
-contrasts. A restart is accepted only when its complete criterion
-improves relative to both the current fit and a separately refined
-control, with background, noise settings and compound count fixed. The
-<a href="https://tomwenseleers.github.io/logconNMF/articles/algorithm.html" class="external-link">logconNMF
+updates. With channel aggregation enabled, compatible
+Poisson/quasi-Poisson fits screen these proposals in the existing ion
+groups. Promising spectra are expanded using their current within-group
+ion proportions. Both the candidate and a matched control are then
+refined on <strong>every original mass channel</strong>. A restart is
+accepted only when its complete original-data criterion improves
+relative to both the current fit and the separately refined control,
+with background, noise settings and compound count fixed. Cached control
+scores are discarded after any accepted move. Other families,
+channel-specific scales, nonscalar weights or nonzero offsets retain the
+original-channel proposal screen. The <a href="https://tomwenseleers.github.io/logconNMF/articles/algorithm.html" class="external-link">logconNMF
 algorithm</a> gives the construction and mathematical pseudocode.</p>
 <p>The model belongs to the broader class of <a href="https://doi.org/10.1214/23-EJS2174" class="external-link">deviance matrix
 factorization</a> and <a href="https://www.jmlr.org/papers/v23/20-1104.html" class="external-link">generalized matrix

@@ -135,15 +135,15 @@ is available through the calls in this section.
 The table reports the median elapsed time across three complete
 CDF-to-MSP fits on the [benchmark
 workstation](https://tomwenseleers.github.io/L0glm/articles/performance.html#reproduce-and-extend),
-using a clean optimized source build, default likelihood-checked local
-profile restarts, eight OpenMP threads and one BLAS thread. Timings
-include CDF reading, PSF initialization, factorization, original-channel
-completion and MSP export.
+using a clean optimized source build, default aggregate-screened,
+original-data-checked local profile restarts, eight OpenMP threads and
+one BLAS thread. Timings include CDF reading, PSF initialization,
+factorization, original-channel completion and MSP export.
 
 | Dataset | Scans | Mass channels | Components | Seconds | Quasi-GIC | Adjusted weighted R² |
 |:---|---:|---:|---:|---:|---:|---:|
-| `gcmsData1` | 119 | 670 | 6 | 6.11 | 247,218 | 0.98983 |
-| `gcmsData2` | 1,764 | 518 | 38 | 38.44 | 1,467,393 | 0.99498 |
+| `gcmsData1` | 119 | 670 | 6 | 1.67 | 247,218 | 0.98983 |
+| `gcmsData2` | 1,764 | 518 | 38 | 32.10 | 1,467,393 | 0.99498 |
 
 Weighted R² uses weights `1/pmax(fitted_mean, 0.1)` and a separate
 weighted mean for each mass channel. Its adjustment is conditional on

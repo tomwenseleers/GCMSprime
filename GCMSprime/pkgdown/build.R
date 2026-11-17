@@ -4,7 +4,7 @@ assets <- file.path(package, "pkgdown/assets")
 dir.create(assets, recursive = TRUE, showWarnings = FALSE)
 logos <- c("logo.png", "logo-dark.svg", "logo-light.svg", "logo-dark.png", "logo-light.png")
 stopifnot(all(file.copy(file.path(package, "man/figures", logos), assets, overwrite = TRUE)))
-pkgdown::build_site(package, examples = FALSE, install = FALSE,
+pkgdown::build_site(package, examples = TRUE, install = FALSE,
   new_process = FALSE, preview = FALSE)
 
 site <- pkgdown::as_pkgdown(package)

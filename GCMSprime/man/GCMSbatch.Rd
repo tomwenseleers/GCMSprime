@@ -100,6 +100,9 @@ relaxed grouped-support start used by standalone single-sample fits.
 A
 common channel map is learned from summed, time-binned chromatograms; pass a
 saved \code{\link[logconNMF:channelGroups]{logconNMF::channelGroups()}} map as \code{precluster} to reuse reference groups.
+Compatible Poisson/quasipoisson initial fits also reuse these groups for
+restart proposal screening; completed candidates and controls are checked
+on every original channel before acceptance.
 Matching uses the shared aggregate space. Original-channel
 means and the likelihood are used for simultaneous updates. Shared spectra are
 exported on the union of recorded mass ranges; unmeasured channels receive

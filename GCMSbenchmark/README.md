@@ -33,12 +33,12 @@ separately in each sample, with a **median estimate of 829.55**. The generating
 retention-index maps are used for scoring;
 the deconvolution receives neither the known areas nor the true profiles.
 
-GCMSprime recovers **752 of 769 occurrences**, with **140 false positives**
-(peak F1 **0.905**), including the acid in all seven samples where it occurs.
+GCMSprime recovers **750 of 769 occurrences**, with **142 false positives**
+(peak F1 **0.903**), including the acid in all seven samples where it occurs.
 
 | Method | Seconds | TP | FP | Sensitivity | Peak F1 | Ion F1 |
 |:--|--:|--:|--:|--:|--:|--:|
-| GCMSprime | 253.47 | 752 | 140 | 97.8% | 0.905 | 0.971 |
+| GCMSprime | 154.14 | 750 | 142 | 97.5% | 0.903 | 0.972 |
 | MS-DIAL | 17.61 | 675 | 641 | 87.8% | 0.647 | 0.858 |
 | mzmine GC-EI | 38.47 | 622 | 70 | 80.9% | 0.851 | 0.860 |
 | eRah | 17.07 | 645 | 1912 | 83.9% | 0.388 | 0.771 |
@@ -80,7 +80,7 @@ Every panel uses a light-grey band; the coloured observations are drawn last
 at alpha 0.5, so superimposed points accumulate into darker concentrations.
 The headings report robust adjusted R²; ordinary
 least-squares statistics are retained in the downloadable tables. GCMSprime
-has robust adjusted R² **0.9992** and a **median absolute area error of 1.33%**.
+has robust adjusted R² **0.9992** and a **median absolute area error of 1.38%**.
 Area agreement is conditional on recovered true matches, so it is shown
 together with sensitivity and false-positive counts.
 
@@ -101,7 +101,7 @@ Ion support uses a shared **0.1% of base-peak intensity cutoff**, applied
 independently to reference and recovered spectra for every method:
 $I_j>0$ and $I_j\geq0.001\max_l I_l$.
 Within-spectrum $F_1=2TP/(2TP+FP+FN)$ is averaged over correctly matched
-true spectra. GCMSprime achieves **mean ion F1 0.971**, compared with
+true spectra. GCMSprime achieves **mean ion F1 0.972**, compared with
 **0.860** for the strongest comparator. Individual points accompany the
 violins; the logit-spaced axis retains labels in the original F1 units.
 
@@ -128,8 +128,8 @@ horizontal axis; profile amplitudes remain on their native total-ion scale.
 
 GCMSprime recovers all occurrences of both the regular EMG and the
 shark-fin-shaped acid. Mean profile cosine, counting missed occurrences as
-zero, is **0.982 for the regular compound** and **0.964 for the acid**;
-median cosine among matched occurrences is **0.9999** and **0.9958**,
+zero, is **0.983 for the regular compound** and **0.963 for the acid**;
+median cosine among matched occurrences is **0.9999** and **0.9959**,
 respectively. Other configurations often truncate profiles, split their
 contributions or miss the acid. MS-DIAL slightly exceeds GCMSprime for the
 regular compound (mean cosine 0.998), but recovers only five of the seven acid

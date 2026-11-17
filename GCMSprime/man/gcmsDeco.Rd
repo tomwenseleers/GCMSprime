@@ -316,6 +316,11 @@ working-correlation adjustment. Small fragments contained in a broad peak
 are assessed against equally refined unmerged local fits on every original
 ion channel. Trial diagnostics are in \code{model$contained_fusion}; the
 initialization criterion and history are in \code{model$initialization}.
+Compatible Poisson/quasipoisson fits reuse the ion groups to screen local
+width restarts. Promising candidates and matched controls are refined and
+accepted using all original channels, with background and noise settings
+fixed. Other cases retain original-channel screening. Screening channel
+counts, accepted changes and cache diagnostics are in \code{model$profile_starts}.
 The
 spreadsheet and returned coefficient rows use increasing apex retention time. Rank selection,
 hard log concavity, censored Gamma intensities and compound-count information
@@ -377,8 +382,10 @@ plot(fit2, type = "heatmap", file = file.path(out, "GCMS_data2_heatmaps.pdf"))
 plot(fit2, type = "profiles", file = file.path(out, "GCMS_data2_profiles_and_spectra.pdf"))
 
 # For a full chromatogram with a separate calibration standard:
-beer <- gcmsDeco("beer.cdf", "beer.msp", alkanes_file = "alkanes.cdf",
-  xlsx_file = "beer.xlsx", nwindows = 10L, precluster = 32L)
+if (file.exists("beer.cdf") && file.exists("alkanes.cdf")) {
+  beer <- gcmsDeco("beer.cdf", "beer.msp", alkanes_file = "alkanes.cdf",
+    xlsx_file = "beer.xlsx", nwindows = 10L, precluster = 32L)
+}
 
 # Automatic PSF estimation from a bundled window and its named alkane TIC.
 psf <- estimatePSF(gcmsData2, nwindows = 3L)

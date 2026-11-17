@@ -126,7 +126,10 @@ grouped-support start used by standalone single-sample fits. A common
 channel map is learned from summed, time-binned chromatograms; pass a
 saved
 [`logconNMF::channelGroups()`](https://tomwenseleers.github.io/logconNMF/reference/channelGroups.html)
-map as `precluster` to reuse reference groups. Matching uses the shared
+map as `precluster` to reuse reference groups. Compatible
+Poisson/quasipoisson initial fits also reuse these groups for restart
+proposal screening; completed candidates and controls are checked on
+every original channel before acceptance. Matching uses the shared
 aggregate space. Original-channel means and the likelihood are used for
 simultaneous updates. Shared spectra are exported on the union of
 recorded mass ranges; unmeasured channels receive zero likelihood

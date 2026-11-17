@@ -12,8 +12,8 @@ Source:
 [`DESCRIPTION`](https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSprime/DESCRIPTION)
 
 Wenseleers T, Vanderaa C (2026). *GCMSprime: Scalable and Automated
-GC\<U+2013\>MS Deconvolution, Quantification, and Spectral Library
-Search in R*. R package version 0.1.0.9000,
+GC–MS Deconvolution, Quantification, and Spectral Library Search in R*.
+R package version 0.1.0.9000,
 <https://tomwenseleers.github.io/GCMSprime/>.
 
     @Manual{,

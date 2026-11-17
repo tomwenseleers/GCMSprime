@@ -107,8 +107,8 @@ estimated from that window. GCMSprime estimates dispersion separately in
 each sample, with a <strong>median estimate of 829.55</strong>. The
 generating retention-index maps are used for scoring; the deconvolution
 receives neither the known areas nor the true profiles.</p>
-<p>GCMSprime recovers <strong>752 of 769 occurrences</strong>, with
-<strong>140 false positives</strong> (peak F1 <strong>0.905</strong>),
+<p>GCMSprime recovers <strong>750 of 769 occurrences</strong>, with
+<strong>142 false positives</strong> (peak F1 <strong>0.903</strong>),
 including the acid in all seven samples where it occurs.</p>
 <table class="table">
 <thead><tr class="header">
@@ -123,12 +123,12 @@ including the acid in all seven samples where it occurs.</p>
 <tbody>
 <tr class="odd">
 <td align="left">GCMSprime</td>
-<td align="right">253.47</td>
-<td align="right">752</td>
-<td align="right">140</td>
-<td align="right">97.8%</td>
-<td align="right">0.905</td>
-<td align="right">0.971</td>
+<td align="right">154.14</td>
+<td align="right">750</td>
+<td align="right">142</td>
+<td align="right">97.5%</td>
+<td align="right">0.903</td>
+<td align="right">0.972</td>
 </tr>
 <tr class="even">
 <td align="left">MS-DIAL</td>
@@ -191,6 +191,13 @@ Workstation with an Intel Core i9-11950H at 2.60 GHz, eight physical
 cores and 16 logical threads, Windows and R 4.5.0. GCMSprime uses 16
 single-threaded sample workers, AMDIS runs serially, and xcms + CAMERA
 uses four workers. Input conversion is timed separately.</p>
+<p>GCMSprime screens alternative local profile starts in the common
+channel aggregation, then checks promising starts against matched local
+refinements on the original mass channels. Its final spectra and
+reported criterion use the original data. The coupled quasi-GIC is
+<strong>8,069,415</strong>. Timers include automatic memory collection
+during the work without forcing a separate collection before each
+internal stage.</p>
 <p><code>ncores</code> can use any number of available cores. GCMSprime
 parallelizes deconvolution across sample workers; when enough samples
 are available, the independent fitting time can decrease approximately
@@ -231,7 +238,7 @@ accumulate into darker concentrations. The headings report robust
 adjusted R²; ordinary least-squares statistics are retained in the
 downloadable tables. GCMSprime has robust adjusted R²
 <strong>0.9992</strong> and a <strong>median absolute area error of
-1.33%</strong>. Area agreement is conditional on recovered true matches,
+1.38%</strong>. Area agreement is conditional on recovered true matches,
 so it is shown together with sensitivity and false-positive counts.</p>
 <p><a href="../reference/figures/simulated-16-spectral-violin.png"><img src="../reference/figures/simulated-16-spectral-violin.png" alt="Reciprocal spectral cosine similarity with individual points"></a></p>
 <p>Each point is a reciprocal spectral hit. Crosses identify hits to
@@ -250,7 +257,7 @@ spectra for every method: <span class="math inline">I_j&gt;0</span> and
 <span class="math inline">I_j\geq0.001\max_l I_l</span>. Within-spectrum
 <span class="math inline">F_1=2TP/(2TP+FP+FN)</span> is averaged over
 correctly matched true spectra. GCMSprime achieves <strong>mean ion F1
-0.971</strong>, compared with <strong>0.860</strong> for the strongest
+0.972</strong>, compared with <strong>0.860</strong> for the strongest
 comparator. Individual points accompany the violins; the logit-spaced
 axis retains labels in the original F1 units.</p>
 <p>This is also GCMSprime’s default spectral reporting cutoff for
@@ -292,9 +299,9 @@ horizontal axis; profile amplitudes remain on their native total-ion
 scale.</p>
 <p>GCMSprime recovers all occurrences of both the regular EMG and the
 shark-fin-shaped acid. Mean profile cosine, counting missed occurrences
-as zero, is <strong>0.982 for the regular compound</strong> and
-<strong>0.964 for the acid</strong>; median cosine among matched
-occurrences is <strong>0.9999</strong> and <strong>0.9958</strong>,
+as zero, is <strong>0.983 for the regular compound</strong> and
+<strong>0.963 for the acid</strong>; median cosine among matched
+occurrences is <strong>0.9999</strong> and <strong>0.9959</strong>,
 respectively. Other configurations often truncate profiles, split their
 contributions or miss the acid. MS-DIAL slightly exceeds GCMSprime for
 the regular compound (mean cosine 0.998), but recovers only five of the
@@ -345,9 +352,9 @@ area regressions.</p>
 <tbody>
 <tr class="odd">
 <td align="left">GCMSprime</td>
-<td align="right">96.4%</td>
+<td align="right">95.9%</td>
+<td align="right">96.9%</td>
 <td align="right">97.9%</td>
-<td align="right">97.4%</td>
 <td align="right">99.5%</td>
 </tr>
 <tr class="even">
@@ -418,7 +425,9 @@ resolution 0 and peak-shape setting 0.</p>
 <p>Download the <a href="https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst/benchmarks/results/benchmark.csv" class="external-link">summary
 table</a>, <a href="https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst/benchmarks/results/matches.csv" class="external-link">matched
 pairs</a>, <a href="https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst/benchmarks/results/identifications.csv" class="external-link">all
-component identifications</a> and <a href="https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst/benchmarks/results/xcms-training-results.csv" class="external-link">xcms
+component identifications</a> <a href="https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst/benchmarks/results/native-timings.csv" class="external-link">stage
+timings and coupled GIC</a>, <a href="https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst/benchmarks/results/restart-diagnostics.csv" class="external-link">restart
+diagnostics</a> and <a href="https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst/benchmarks/results/xcms-training-results.csv" class="external-link">xcms
 tuning results</a>.</p>
 </div>
 </div>

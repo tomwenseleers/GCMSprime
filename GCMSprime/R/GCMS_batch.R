@@ -100,6 +100,9 @@ GCMS_batch_files <- function(directory,output_dir,sample_order=NULL,alkanes_file
 #' A
 #' common channel map is learned from summed, time-binned chromatograms; pass a
 #' saved [logconNMF::channelGroups()] map as `precluster` to reuse reference groups.
+#' Compatible Poisson/quasipoisson initial fits also reuse these groups for
+#' restart proposal screening; completed candidates and controls are checked
+#' on every original channel before acceptance.
 #' Matching uses the shared aggregate space. Original-channel
 #' means and the likelihood are used for simultaneous updates. Shared spectra are
 #' exported on the union of recorded mass ranges; unmeasured channels receive
@@ -158,7 +161,7 @@ GCMSdeco_directory <- function(cdf_file,msp_file=NULL,family,lambda,nwindows,
   manifest<-found$manifest;metadata<-found$metadata
   dir.create(output_dir,recursive=TRUE,showWarnings=FALSE);output_dir<-normalizePath(output_dir,winslash="/")
   dir.create(file.path(output_dir,"samples"),showWarnings=FALSE)
-  clustering_time<-system.time(channel_map<-GCMS_batch_groups(manifest,metadata,precluster,time_range,ncores))[["elapsed"]]
+  clustering_time<-GCMS_time(channel_map<-GCMS_batch_groups(manifest,metadata,precluster,time_range,ncores))[["elapsed"]]
   effective<-if(is.null(channel_map))precluster else channel_map
   workers<-if(is.null(batch$workers))min(nrow(manifest),ncores)else min(nrow(manifest),ncores,GCMS_threads(batch$workers))
   threads<-ncores%/%workers
@@ -173,7 +176,7 @@ GCMSdeco_directory <- function(cdf_file,msp_file=NULL,family,lambda,nwindows,
     list(s=s,manifest=manifest[s,,drop=FALSE],output_dir=output_dir,
       metadata=list(metadata[[s]]),batch=options,args=common_args)
   })
-  initial_time<-system.time(results<-GCMS_batch_apply(tasks,workers,threads))[["elapsed"]]
+  initial_time<-GCMS_time(results<-GCMS_batch_apply(tasks,workers,threads))[["elapsed"]]
   descriptors<-lapply(results,`[[`,"descriptor");paths<-vapply(results,`[[`,"","path")
   mass_axes<-lapply(results,`[[`,"mass");cache_hit<-vapply(results,`[[`,FALSE,"cache_hit")
   axis<-sort(unique(unlist(mass_axes)));common<-NULL;coupled_time<-0
@@ -193,7 +196,7 @@ GCMSdeco_directory <- function(cdf_file,msp_file=NULL,family,lambda,nwindows,
       descriptors[[s]]<-x
     }
     coupling<-utils::modifyList(list(cache=batch$cache,workers=batch$workers),batch$coupling,keep.null=TRUE)
-    coupled_time<-system.time(common<-logconNMF::logconNMF(descriptors,family=family,lambda=lambda,
+    coupled_time<-GCMS_time(common<-logconNMF::logconNMF(descriptors,family=family,lambda=lambda,
       path=tempfile("coupled_",tmpdir=output_dir),precluster=effective,
       method=batch$method,align=batch$align,ncores=ncores,control=coupling,verbose=verbose))[["elapsed"]]
     for(s in seq_along(paths)) {

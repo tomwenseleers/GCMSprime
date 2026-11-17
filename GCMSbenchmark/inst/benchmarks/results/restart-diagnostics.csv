@@ -1,0 +1,17 @@
+"sample","channels","screen_channels","aggregated","polish_cycles","cache_hits","cache_misses","seconds"
+"input.sample_001",258,31,TRUE,8,0,14,5.39
+"input.sample_002",258,31,TRUE,8,7,11,4.75
+"input.sample_003",258,31,TRUE,8,1,11,5.08999999999999
+"input.sample_004",258,31,TRUE,8,3,16,8.89
+"input.sample_005",258,31,TRUE,8,3,14,7.83
+"input.sample_006",258,31,TRUE,8,7,17,5.97999999999999
+"input.sample_007",258,31,TRUE,8,3,5,2.57000000000001
+"input.sample_008",258,31,TRUE,8,2,20,6.48
+"input.sample_009",258,31,TRUE,8,5,12,4.72
+"input.sample_010",258,31,TRUE,8,4,10,15.48
+"input.sample_011",258,31,TRUE,8,4,11,14.67
+"input.sample_012",258,31,TRUE,8,0,13,2.58
+"input.sample_013",258,31,TRUE,8,3,9,5.49000000000001
+"input.sample_014",258,31,TRUE,8,2,13,3.3
+"input.sample_015",258,31,TRUE,8,13,23,16.94
+"input.sample_016",258,31,TRUE,8,4,18,15.05

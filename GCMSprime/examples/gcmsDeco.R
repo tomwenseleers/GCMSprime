@@ -35,8 +35,10 @@ plot(fit2, type = "heatmap", file = file.path(out, "GCMS_data2_heatmaps.pdf"))
 plot(fit2, type = "profiles", file = file.path(out, "GCMS_data2_profiles_and_spectra.pdf"))
 
 # For a full chromatogram with a separate calibration standard:
-beer <- gcmsDeco("beer.cdf", "beer.msp", alkanes_file = "alkanes.cdf",
-  xlsx_file = "beer.xlsx", nwindows = 10L, precluster = 32L)
+if (file.exists("beer.cdf") && file.exists("alkanes.cdf")) {
+  beer <- gcmsDeco("beer.cdf", "beer.msp", alkanes_file = "alkanes.cdf",
+    xlsx_file = "beer.xlsx", nwindows = 10L, precluster = 32L)
+}
 
 # Automatic PSF estimation from a bundled window and its named alkane TIC.
 psf <- estimatePSF(gcmsData2, nwindows = 3L)

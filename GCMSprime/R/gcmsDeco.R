@@ -259,6 +259,11 @@ GCMS_write_msp <- function(model,time,mass,msp_file,compounds=NULL,ion_threshold
 #' are assessed against equally refined unmerged local fits on every original
 #' ion channel. Trial diagnostics are in `model$contained_fusion`; the
 #' initialization criterion and history are in `model$initialization`.
+#' Compatible Poisson/quasipoisson fits reuse the ion groups to screen local
+#' width restarts. Promising candidates and matched controls are refined and
+#' accepted using all original channels, with background and noise settings
+#' fixed. Other cases retain original-channel screening. Screening channel
+#' counts, accepted changes and cache diagnostics are in `model$profile_starts`.
 #' The
 #' spreadsheet and returned coefficient rows use increasing apex retention time. Rank selection,
 #' hard log concavity, censored Gamma intensities and compound-count information
@@ -335,7 +340,7 @@ gcmsDeco <- function(cdf_file,msp_file=NULL,family=quasipoisson("identity"),lamb
       any(!nzchar(names(psf_control)))||anyDuplicated(names(psf_control)))) stop("Use a named psf_control list.",call.=FALSE)
   if(any(c("y","nwindows") %in% names(psf_control))) stop("Pass data and nwindows as gcmsDeco arguments.",call.=FALSE)
   timed<-function(label,expression) {
-    seconds[label]<<-system.time(value<-force(expression))[["elapsed"]]
+    seconds[label]<<-GCMS_time(value<-force(expression))[["elapsed"]]
     if(verbose){cat(label,": ",round(seconds[label],2)," s\n",sep="");flush.console()}
     value
   }
