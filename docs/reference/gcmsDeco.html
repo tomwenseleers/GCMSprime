@@ -13,7 +13,7 @@ are retained in the final spectra."><meta property="og:image" content="https://t
 
     <a class="navbar-brand me-2" href="../index.html">GCMSprime</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9002</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -242,8 +242,9 @@ a number between zero and 0.49 supplies the lag-one correlation.</p></dd>
 
 
 <dt id="arg-ncores">ncores<a class="anchor" aria-label="anchor" href="#arg-ncores"></a></dt>
-<dd><p>Total logical-CPU budget. <code>NULL</code> uses physical cores.
-Directory analyses run up to <code>min(samples,ncores)</code> sample workers,
+<dd><p>Total logical-CPU budget. <code>NULL</code> uses physical cores for
+one chromatogram and logical cores for directory input. Directory analyses
+run up to <code>min(samples,ncores)</code> sample workers,
 dividing the native thread budget between them. With at least 16 samples,
 <code>ncores=16L</code> uses 16 workers with one native thread each. BLAS threads
 are limited during batch fitting and caller settings are restored.
@@ -403,7 +404,10 @@ Original channels, outcome groups and the total-ion signal are supported.
 Interpolated columns are projected to log concavity on their local support
 and normalized to unit sum. Their typical full width at half maximum,
 \(w\), sets the background dimension to
-$$q=\max\{4,\min[40,3+\lceil n/(200w)\rceil]\}.$$
+$$q=\max\{4,\min[40,3+\lceil n/(50w)\rceil]\}.$$
+This places knots about 50 narrow-peak FWHMs apart. Each background
+basis coefficient has a channel-specific spectrum, allowing slow spectral
+drift across the chromatogram. Rank selection is conditional on this basis.
 Background coefficients are nonnegative and unpenalized. This keeps the
 baseline much smoother than an individual elution peak.
 The calibrated median PSF width also sets the guard for the final
@@ -437,7 +441,14 @@ counts, accepted changes and cache diagnostics are in <code>model$profile_starts
 The
 spreadsheet and returned coefficient rows use increasing apex retention time. Rank selection,
 hard log concavity, censored Gamma intensities and compound-count information
-criteria follow <code><a href="https://tomwenseleers.github.io/logconNMF/reference/logconNMF.html" class="external-link">logconNMF::logconNMF()</a></code>.</p>
+criteria follow <code><a href="https://tomwenseleers.github.io/logconNMF/reference/logconNMF.html" class="external-link">logconNMF::logconNMF()</a></code>.
+During coupled refinement, aggregate observations are shared in memory.
+Eligible count workers can retain one original matrix up to 64 MiB plus
+an equally sized likelihood-normalizer cache; larger chromatograms retain
+local disk reads. The caches are scoped to the fit and released on exit.
+Set <code>batch=list(cache=FALSE)</code> to disable persistent input caches. Likelihood
+reuse and stationary-background checks preserve the criterion, convergence
+tolerance and original-channel acceptance checks.</p>
     </div>
     <div class="section level2">
     <h2 id="experimental-gc-ms-examples">Experimental GC/MS examples<a class="anchor" aria-label="anchor" href="#experimental-gc-ms-examples"></a></h2>

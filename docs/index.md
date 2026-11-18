@@ -47,7 +47,11 @@ peak-area and spectral recovery across seven workflows.
 ``` r
 
 install.packages("remotes")
-remotes::install_github("tomwenseleers/GCMSprime/GCMSprime")
+remotes::install_github(c(
+  "tomwenseleers/L0glm/L0glm",
+  "tomwenseleers/logconNMF/logconNMF",
+  "tomwenseleers/GCMSprime/GCMSprime"
+))
 ```
 
 ## Automatic deconvolution for single samples
@@ -152,8 +156,23 @@ original observations and factor checkpoints are stored per sample on
 disk. The fit reads blocks of original mass channels to evaluate the
 likelihood and update spectra and backgrounds. With preclustering,
 grouped traces are cached in RAM by default. Shared spectra and matching
-summaries also remain in memory. Original scan grids are retained, and
-compounds absent from a sample stay unassigned in its area table.
+summaries also remain in memory. Directory input uses the available
+logical cores by default, with one sample worker per core when enough
+samples are supplied. A single chromatogram uses physical cores. Sixteen
+10,000-scan samples aggregated to 32 groups need 40.96 MB for the common
+observation cache, plus factors, matching structures and active-worker
+buffers. During coupled count-model refinement, each worker can retain
+one original matrix up to 64 MiB plus an equally sized
+likelihood-normalizer cache. Larger samples use local disk reads. The
+[multisample
+tutorial](https://tomwenseleers.github.io/GCMSprime/articles/multisample.html)
+reports measured memory and timings on full-sized chromatograms. A
+full-size validation with 16 samples, 10,000 scans and 550 recorded
+channels per sample recovers 7,864 of 7,917 true occurrences (F1 0.988),
+with a measured peak private memory of 22.78 GiB. The linked tutorial
+gives the complete timing boundaries, recovery results and reproducible
+code. Original scan grids are retained, and compounds absent from a
+sample stay unassigned in its area table.
 
 Independent fitting can be distributed across samples. At a fixed worker
 count and comparable chromatogram sizes, the work for this stage grows
@@ -164,7 +183,7 @@ raw chromatograms out of RAM for large batches.
 
 In the [16-sample
 benchmark](https://tomwenseleers.github.io/GCMSprime/articles/benchmarks.md),
-GCMSprime recovers **750 of 769 true occurrences in 154.14 s**,
+GCMSprime recovers **750 of 769 true occurrences in 146.50 s**,
 including the acid compound in all seven samples where it occurs. Each
 chromatogram has 100 candidate compounds, 1,200 scans and 258 mass
 channels, with drift, concentration-dependent broadening and a smooth

@@ -288,6 +288,15 @@ can follow slow baseline drift, while short windows can use a constant
 background. A lower-quantile background estimate initializes calibration
 peak detection.
 
+For automatic background construction, let w denote the median PSF full
+width at half maximum in scans. The cubic basis dimension is
+q=\max\\4,\min(40,3+\lceil n/(50w)\rceil)\\, placing knots approximately
+50 narrow-peak FWHMs apart. Each basis coefficient has its own
+nonnegative mass spectrum, so background composition can change
+gradually with time. Rank selection is conditional on this chosen
+background basis; background flexibility is not itself charged by the
+compound-rank penalty.
+
 EI mass-spectrometric intensities commonly exhibit overdispersed
 counting variation. Ion arrivals are approximately Poisson, while the
 stochastic gain of the electron multiplier adds variation to the
@@ -442,8 +451,19 @@ worker loads its sample into RAM for the independent fit. During
 simultaneous refinement, the fit reads bounded blocks of original
 observations from disk to evaluate the likelihood and update spectra and
 backgrounds. With preclustering, aggregate matrices are cached in RAM by
-default. Profile updates that work directly on the original channels and
-noise updates can load a full sample into RAM.
+default. Count-family workers can also retain one original matrix up to
+64 MiB and its equally sized likelihood-normalizer cache; larger samples
+keep streaming blocks. Buffers belong to the active fit and are released
+on return or error. `batch=list(cache=FALSE)` disables persistent input
+caches. Profile updates that work directly on the original channels and
+enabled noise updates can load a full assigned sample into RAM.
+
+Likelihood values already obtained during spectral scoring are reused
+rather than recomputed. Data-only likelihood constants remain in
+absolute GIC scores; they cancel algebraically in local acceptance
+checks. Background fits that already satisfy the existing convergence
+criterion need no additional solve. These changes preserve the noise
+model, iteration budgets, grouping rules and original-channel checks.
 
 With shared spectra fixed, profiles and backgrounds can be updated
 independently across samples. Spectral contributions are then pooled in

@@ -31,7 +31,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">GCMSprime</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9002</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -166,7 +166,7 @@ adjusted log-area R² was <strong>0.9992</strong>, the median absolute
 peak-area error was <strong>1.38%</strong>, and mean spectral
 ion-support F1 was <strong>0.972</strong> at the shared 0.1% base-peak
 threshold.</p>
-<p>The CDF-to-results analysis took <strong>149.31 s</strong> with 16
+<p>The CDF-to-results analysis took <strong>146.50 s</strong> with 16
 single-threaded sample workers on an HP ZBook Fury G8, Intel Core
 i9-11950H, eight physical cores, 16 logical threads, Windows and R
 4.5.0. CDF generation is separate.</p>
@@ -258,36 +258,34 @@ above.</p>
 <tbody>
 <tr class="odd">
 <td align="left">Common ion grouping</td>
-<td align="right">18.72</td>
+<td align="right">18.94</td>
 </tr>
 <tr class="even">
 <td align="left">Parallel independent fits, including sample PSFs</td>
-<td align="right">928.45</td>
+<td align="right">933.45</td>
 </tr>
 <tr class="odd">
 <td align="left">Alignment, grouping and simultaneous refinement</td>
-<td align="right">2059.51</td>
+<td align="right">1530.20</td>
 </tr>
 <tr class="even">
 <td align="left">Result construction and exports</td>
-<td align="right">45.60</td>
+<td align="right">51.55</td>
 </tr>
 <tr class="odd">
-<td align="left">Package-reported workflow total</td>
-<td align="right">3052.28</td>
+<td align="left">Complete workflow</td>
+<td align="right">2534.14</td>
 </tr>
 </tbody>
 </table>
 <p>The workstation is an HP ZBook Fury G8 with an Intel Core i9-11950H
 at 2.60 GHz, eight physical cores, 16 logical threads and 64 GB RAM,
 running Windows and R 4.5.0. Sampled peak combined private memory is
-<strong>22.86 GiB</strong>, and peak summed working set is <strong>18.61
-GiB</strong>; at least <strong>23.59 GiB</strong> of physical memory
+<strong>22.78 GiB</strong>, and peak summed working set is <strong>18.53
+GiB</strong>; at least <strong>26.07 GiB</strong> of physical memory
 remains available. These measurements include active workers and fitting
 workspaces, not just the 40.96 MB aggregate observation cache. Mean CPU
-use over the complete run is 11.67 logical-core equivalents. The
-independent process-tree monitor records 3,054.88 s, including R startup
-and the final saved result.</p>
+use over the complete run is 10.83 logical-core equivalents.</p>
 <div class="float">
 <img src="../reference/figures/fullsize-16-resources.png" alt="Measured process-tree memory and CPU use for sixteen full-sized chromatograms"><div class="figcaption">Measured process-tree memory and CPU use for
 sixteen full-sized chromatograms</div>
@@ -348,10 +346,11 @@ observations and large weight/offset arrays on disk. It caches the
 common aggregate channels in RAM and streams bounded blocks of original
 channels for likelihood and spectral updates. At 10,000 scans and 32
 groups, the aggregate cache occupies 2.56 MB per sample, or 2.56 GB for
-1,000 samples. Factors and active workers need additional memory.
-Compatible profile checks can additionally buffer one original
-chromatogram up to 64 MiB per active worker, adding at most 1 GiB across
-16 workers. Larger samples retain local reads. Set
+1,000 samples. Factors and active workers need additional memory. Each
+coupled count-model worker can retain one original chromatogram up to 64
+MiB plus an equally sized likelihood-normalizer cache, adding at most 2
+GiB across 16 workers. Larger samples retain local reads. These
+transient buffers are released when fitting ends. Set
 <code>batch=list(cache=FALSE)</code> to read the aggregate data from
 disk as needed. Use <code>batch=list(workers=4L)</code> to cap the
 number of concurrent samples within the <code>ncores</code> budget. For

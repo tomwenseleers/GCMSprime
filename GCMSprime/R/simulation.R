@@ -7,4 +7,4 @@
 #' @seealso [gcmsDeco()], [logconNMF::simulateGCMSSamples()]
 #' @importFrom logconNMF simulateGCMSSamples
 #' @export
-logconNMF::simulateGCMSSamples
+simulateGCMSSamples <- logconNMF::simulateGCMSSamples

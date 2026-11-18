@@ -1,6 +1,6 @@
 # Changelog
 
-## GCMSprime 0.1.0.9000
+## GCMSprime 0.1.0.9002
 
 ### Chromatograms and calibration
 
@@ -9,6 +9,9 @@
 
 - Standard-assisted or blind constant/time-varying PSF estimation,
   pooled noise calibration and smooth background initialization.
+  Automatic background knots follow the narrow-peak PSF scale and allow
+  slowly changing spectra. Algorithm-versioned cache keys prevent reuse
+  of obsolete initial fits.
 
 - Reusable TIC-based standard calibration preserves physical scan times
   and builds each sample’s sparse PSF without repeatedly fitting the
@@ -33,10 +36,17 @@
   group labels, selects alkane standards, aligns samples and estimates
   shared spectra with sample-specific areas and profiles.
 
+- Coupled refinement reuses likelihoods and bounded
+  count-data/normalizer caches, using the optimized logconNMF backend.
+  Caches are released on return and can be disabled with
+  `batch=list(cache=FALSE)`. The original-channel criterion, iteration
+  budgets, grouping rules and shape constraints are retained.
+
 - `ncores` is a total logical-CPU budget for concurrent samples and
-  native fitting. A shared reusable ion-group map and bounded coupled
-  updates keep memory use controlled while retaining full spectra and
-  sample-specific PSFs.
+  native fitting. Automatic directory budgets use logical cores; single
+  chromatograms use physical cores. A shared reusable ion-group map and
+  bounded coupled updates keep memory use controlled while retaining
+  full spectra and sample-specific PSFs.
 
 - Stage timings, thread-allocation metadata and a sixteen-sample
   simulated example accompany serial/parallel result checks.

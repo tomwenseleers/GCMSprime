@@ -197,12 +197,13 @@ print(x, ...)
 
 - ncores:
 
-  Total logical-CPU budget. `NULL` uses physical cores. Directory
-  analyses run up to `min(samples,ncores)` sample workers, dividing the
-  native thread budget between them. With at least 16 samples,
-  `ncores=16L` uses 16 workers with one native thread each. BLAS threads
-  are limited during batch fitting and caller settings are restored. For
-  a single chromatogram, this sets its native OpenMP thread count.
+  Total logical-CPU budget. `NULL` uses physical cores for one
+  chromatogram and logical cores for directory input. Directory analyses
+  run up to `min(samples,ncores)` sample workers, dividing the native
+  thread budget between them. With at least 16 samples, `ncores=16L`
+  uses 16 workers with one native thread each. BLAS threads are limited
+  during batch fitting and caller settings are restored. For a single
+  chromatogram, this sets its native OpenMP thread count.
 
 - control:
 
@@ -376,10 +377,13 @@ groups and the total-ion signal are supported. Interpolated columns are
 projected to log concavity on their local support and normalized to unit
 sum. Their typical full width at half maximum, \\w\\, sets the
 background dimension to \$\$q=\max\\4,\min\[40,3+\lceil
-n/(200w)\rceil\]\\.\$\$ Background coefficients are nonnegative and
-unpenalized. This keeps the baseline much smoother than an individual
-elution peak. The calibrated median PSF width also sets the guard for
-the final broad-profile fusion pass in
+n/(50w)\rceil\]\\.\$\$ This places knots about 50 narrow-peak FWHMs
+apart. Each background basis coefficient has a channel-specific
+spectrum, allowing slow spectral drift across the chromatogram. Rank
+selection is conditional on this basis. Background coefficients are
+nonnegative and unpenalized. This keeps the baseline much smoother than
+an individual elution peak. The calibrated median PSF width also sets
+the guard for the final broad-profile fusion pass in
 [`logconNMF::logconNMF()`](https://tomwenseleers.github.io/logconNMF/reference/logconNMF.html).
 Set `control=list(profile_fusion=FALSE)` to disable that pass.
 
@@ -418,6 +422,13 @@ use increasing apex retention time. Rank selection, hard log concavity,
 censored Gamma intensities and compound-count information criteria
 follow
 [`logconNMF::logconNMF()`](https://tomwenseleers.github.io/logconNMF/reference/logconNMF.html).
+During coupled refinement, aggregate observations are shared in memory.
+Eligible count workers can retain one original matrix up to 64 MiB plus
+an equally sized likelihood-normalizer cache; larger chromatograms
+retain local disk reads. The caches are scoped to the fit and released
+on exit. Set `batch=list(cache=FALSE)` to disable persistent input
+caches. Likelihood reuse and stationary-background checks preserve the
+criterion, convergence tolerance and original-channel acceptance checks.
 
 ## Experimental GC/MS examples
 

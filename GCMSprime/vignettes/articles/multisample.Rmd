@@ -91,7 +91,7 @@ Robust adjusted log-area R² was **0.9992**, the median absolute peak-area error
 was **1.38%**, and mean spectral ion-support F1 was **0.972** at the shared
 0.1% base-peak threshold.
 
-The CDF-to-results analysis took **149.31 s** with 16 single-threaded sample
+The CDF-to-results analysis took **146.50 s** with 16 single-threaded sample
 workers on an HP ZBook Fury G8, Intel Core i9-11950H, eight physical cores,
 16 logical threads, Windows and R 4.5.0. CDF generation is separate.
 
@@ -143,21 +143,20 @@ seven-workflow comparison above.
 
 | Workflow stage | Seconds |
 |:--|--:|
-| Common ion grouping | 18.72 |
-| Parallel independent fits, including sample PSFs | 928.45 |
-| Alignment, grouping and simultaneous refinement | 2059.51 |
-| Result construction and exports | 45.60 |
-| Package-reported workflow total | 3052.28 |
+| Common ion grouping | 18.94 |
+| Parallel independent fits, including sample PSFs | 933.45 |
+| Alignment, grouping and simultaneous refinement | 1530.20 |
+| Result construction and exports | 51.55 |
+| Complete workflow | 2534.14 |
 
 The workstation is an HP ZBook Fury G8 with an Intel Core i9-11950H at 2.60 GHz,
 eight physical cores, 16 logical threads and 64 GB RAM, running Windows and
-R 4.5.0. Sampled peak combined private memory is **22.86
-GiB**, and peak summed working set is **18.61 GiB**;
-at least **23.59 GiB** of physical memory remains
+R 4.5.0. Sampled peak combined private memory is **22.78
+GiB**, and peak summed working set is **18.53 GiB**;
+at least **26.07 GiB** of physical memory remains
 available. These measurements include active workers and fitting workspaces,
 not just the 40.96 MB aggregate observation cache. Mean CPU use over the complete
-run is 11.67 logical-core equivalents. The independent process-tree monitor
-records 3,054.88 s, including R startup and the final saved result.
+run is 10.83 logical-core equivalents.
 
 ![Measured process-tree memory and CPU use for sixteen full-sized chromatograms](../reference/figures/fullsize-16-resources.png)
 
@@ -202,9 +201,10 @@ weight/offset arrays on disk. It caches the common aggregate channels in RAM
 and streams bounded blocks of original channels for likelihood and spectral
 updates. At 10,000 scans and 32 groups, the aggregate cache occupies 2.56 MB
 per sample, or 2.56 GB for 1,000 samples. Factors and active workers need
-additional memory. Compatible profile checks can additionally buffer one
-original chromatogram up to 64 MiB per active worker, adding at most 1 GiB
-across 16 workers. Larger samples retain local reads. Set
+additional memory. Each coupled count-model worker can retain one original
+chromatogram up to 64 MiB plus an equally sized likelihood-normalizer
+cache, adding at most 2 GiB across 16 workers. Larger samples retain
+local reads. These transient buffers are released when fitting ends. Set
 `batch=list(cache=FALSE)` to read the aggregate data
 from disk as needed. Use `batch=list(workers=4L)` to cap the number of
 concurrent samples within the `ncores` budget. For directory input,

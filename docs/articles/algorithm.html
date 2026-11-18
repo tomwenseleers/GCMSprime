@@ -31,7 +31,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">GCMSprime</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9002</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -566,8 +566,20 @@ worker loads its sample into RAM for the independent fit. During
 simultaneous refinement, the fit reads bounded blocks of original
 observations from disk to evaluate the likelihood and update spectra and
 backgrounds. With preclustering, aggregate matrices are cached in RAM by
-default. Profile updates that work directly on the original channels and
-noise updates can load a full sample into RAM.</p>
+default. Count-family workers can also retain one original matrix up to
+64 MiB and its equally sized likelihood-normalizer cache; larger samples
+keep streaming blocks. Buffers belong to the active fit and are released
+on return or error. <code>batch=list(cache=FALSE)</code> disables
+persistent input caches. Profile updates that work directly on the
+original channels and enabled noise updates can load a full assigned
+sample into RAM.</p>
+<p>Likelihood values already obtained during spectral scoring are reused
+rather than recomputed. Data-only likelihood constants remain in
+absolute GIC scores; they cancel algebraically in local acceptance
+checks. Background fits that already satisfy the existing convergence
+criterion need no additional solve. These changes preserve the noise
+model, iteration budgets, grouping rules and original-channel
+checks.</p>
 <p>With shared spectra fixed, profiles and backgrounds can be updated
 independently across samples. Spectral contributions are then pooled in
 acquisition order. The spectral fusion queue retains unaffected

@@ -142,15 +142,15 @@ factorization, original-channel completion and MSP export.
 
 | Dataset | Scans | Mass channels | Components | Seconds | Quasi-GIC | Adjusted weighted R² |
 |:---|---:|---:|---:|---:|---:|---:|
-| `gcmsData1` | 119 | 670 | 6 | 1.67 | 247,218 | 0.98983 |
-| `gcmsData2` | 1,764 | 518 | 38 | 32.10 | 1,467,393 | 0.99498 |
+| `gcmsData1` | 119 | 670 | 6 | 1.92 | 247,218 | 0.98983 |
+| `gcmsData2` | 1,764 | 518 | 36 | 30.80 | 1,466,359 | 0.99479 |
 
 Weighted R² uses weights `1/pmax(fitted_mean, 0.1)` and a separate
 weighted mean for each mass channel. Its adjustment is conditional on
 the fitted profiles, using the positive spectral and background
 coefficients as the parameter count.
 
-The pooled quasi-Poisson dispersion estimates are **15.64** and
+The pooled quasi-Poisson dispersion estimates are **15.63** and
 **783.18**, respectively. Default local restart checks retain the
 component sets in both windows. Each profile and spectrum refinement is
 checked against the complete original-channel criterion.
