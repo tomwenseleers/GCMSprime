@@ -38,7 +38,7 @@ GCMSprime recovers **750 of 769 occurrences**, with **142 false positives**
 
 | Method | Seconds | TP | FP | Sensitivity | Peak F1 | Ion F1 |
 |:--|--:|--:|--:|--:|--:|--:|
-| GCMSprime | 154.14 | 750 | 142 | 97.5% | 0.903 | 0.972 |
+| GCMSprime | 149.31 | 750 | 142 | 97.5% | 0.903 | 0.972 |
 | MS-DIAL | 17.61 | 675 | 641 | 87.8% | 0.647 | 0.858 |
 | mzmine GC-EI | 38.47 | 622 | 70 | 80.9% | 0.851 | 0.860 |
 | eRah | 17.07 | 645 | 1912 | 83.9% | 0.388 | 0.771 |

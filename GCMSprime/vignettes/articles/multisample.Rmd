@@ -91,7 +91,7 @@ Robust adjusted log-area R² was **0.9992**, the median absolute peak-area error
 was **1.38%**, and mean spectral ion-support F1 was **0.972** at the shared
 0.1% base-peak threshold.
 
-The CDF-to-results analysis took **154.14 s** with 16 single-threaded sample
+The CDF-to-results analysis took **149.31 s** with 16 single-threaded sample
 workers on an HP ZBook Fury G8, Intel Core i9-11950H, eight physical cores,
 16 logical threads, Windows and R 4.5.0. CDF generation is separate.
 
@@ -101,6 +101,87 @@ workers on an HP ZBook Fury G8, Intel Core i9-11950H, eight physical cores,
 
 The [benchmarks against other software](benchmarks.html) give all seven
 workflows, matching rules, noise calibration, profile plots and tables.
+
+
+## Full-sized chromatograms and memory
+
+A separate resource validation uses **16 chromatograms with 10,000 scans and
+550 recorded mass bins each**. There are 1,000 reference compounds, present
+independently in half the samples on average: the realized data contain
+7,917 true occurrences, roughly 500 per sample. Library
+compound ions occupy 258 of the recorded bins; the other bins retain background
+observations. The simulator includes concentration-dependent EMG widths and
+tails, retention drift, irregular scan intervals, a smooth experimental-window
+background and one acid-like compound, present in eight samples. The generating
+quasi-Poisson dispersion is 783.18.
+
+This CDF workflow uses the package defaults, a calibrated narrow-peak standard,
+time-varying sample PSFs and at most 32 common ion groups. `ncores=NULL` selects
+**16 single-threaded workers** on the test machine. Original channels enter
+the likelihood checks and final spectra. Input simulation and the separate
+standard calibration are outside the workflow timing.
+
+| Quantity | Measured result |
+|:--|--:|
+| True peak occurrences recovered | 7,864 / 7,917 |
+| False positives / false negatives | 131 / 53 |
+| Occurrence F1 | 0.9884 |
+| Estimated shared components | 1,129 |
+| Joint quasi-GIC | 86,522,402 |
+| Median spectral cosine | 0.9999977 |
+| Mean within-spectrum ion F1 | 0.978 |
+| Mean profile cosine | 0.9994 |
+| Median absolute area error | 0.239% |
+| Acid occurrences recovered | 8 / 8 |
+
+Scoring uses maximum-cardinality one-to-one matching within 0.25 minutes and
+spectral cosine at least 0.9; ion-support F1 uses the shared 0.1% base-peak
+threshold. Area, spectrum and profile summaries condition on correct matches.
+All acid occurrences are detected; one difficult overlap still gives a distorted
+acid profile. This resource test is separate from the RI-aware reciprocal-hit
+seven-workflow comparison above.
+
+| Workflow stage | Seconds |
+|:--|--:|
+| Common ion grouping | 18.72 |
+| Parallel independent fits, including sample PSFs | 928.45 |
+| Alignment, grouping and simultaneous refinement | 2059.51 |
+| Result construction and exports | 45.60 |
+| Package-reported workflow total | 3052.28 |
+
+The workstation is an HP ZBook Fury G8 with an Intel Core i9-11950H at 2.60 GHz,
+eight physical cores, 16 logical threads and 64 GB RAM, running Windows and
+R 4.5.0. Sampled peak combined private memory is **22.86
+GiB**, and peak summed working set is **18.61 GiB**;
+at least **23.59 GiB** of physical memory remains
+available. These measurements include active workers and fitting workspaces,
+not just the 40.96 MB aggregate observation cache. Mean CPU use over the complete
+run is 11.67 logical-core equivalents. The independent process-tree monitor
+records 3,054.88 s, including R startup and the final saved result.
+
+![Measured process-tree memory and CPU use for sixteen full-sized chromatograms](../reference/figures/fullsize-16-resources.png)
+
+![Occurrence recovery and total-ion peak-area accuracy across sixteen full-sized samples](../reference/figures/fullsize-16-recovery.png)
+
+![Acid profiles: inferred solid and true dashed, blue for smaller areas and red for larger areas](../reference/figures/fullsize-16-acid.png)
+
+The acid display subtracts each true 1%-height onset to compare shapes. Fitting
+uses the original scan grid. Curves retain their original count amplitudes;
+they are not normalized to unit height or area.
+
+The [complete reproducible script](https://github.com/tomwenseleers/GCMSprime/blob/master/benchmarks/benchmark_fullsize_16.R)
+and [compact measured results](https://github.com/tomwenseleers/GCMSprime/tree/master/benchmarks/results/fullsize16)
+are supplied with the source. From the GCMSprime repository root:
+
+```r
+source("benchmarks/benchmark_fullsize_16.R")
+benchmarkFullsize16(stage="prepare")
+benchmarkFullsize16(stage="fit")
+benchmarkFullsize16(stage="score")
+```
+
+The generated CDF files and persistent fitted store are written to
+`codex_sandbox/fullsize16` by default. Use `directory=` to select another location.
 
 ## Outputs and memory use
 
@@ -121,9 +202,15 @@ weight/offset arrays on disk. It caches the common aggregate channels in RAM
 and streams bounded blocks of original channels for likelihood and spectral
 updates. At 10,000 scans and 32 groups, the aggregate cache occupies 2.56 MB
 per sample, or 2.56 GB for 1,000 samples. Factors and active workers need
-additional memory. Set `batch=list(cache=FALSE)` to read the aggregate data
+additional memory. Compatible profile checks can additionally buffer one
+original chromatogram up to 64 MiB per active worker, adding at most 1 GiB
+across 16 workers. Larger samples retain local reads. Set
+`batch=list(cache=FALSE)` to read the aggregate data
 from disk as needed. Use `batch=list(workers=4L)` to cap the number of
-concurrent samples within the `ncores` budget.
+concurrent samples within the `ncores` budget. For directory input,
+`ncores=NULL` uses the detected logical core count. Thus 16 samples on a
+16-logical-core machine use 16 single-threaded workers by default; a single
+CDF uses the physical core count.
 
 The same ion groups are used across samples for matching. They are learned
 from a pooled, time-binned chromatogram or supplied through `precluster` as
@@ -173,69 +260,79 @@ into profile and background design values during fitting.
 
 ## Calibrated beer example
 
-An alkane ladder can supply the peak shapes for every sample in the batch.
-Use its total-ion chromatogram (TIC) after the solvent peak, and reuse that
-calibration on each sample's own scan grid. The full ladder spectra provide
-the diagnostic ions for RI calibration. The two calibrations serve different
-purposes: the TIC describes narrow peak shapes, while the fragment and
-molecular ions identify the retention-index anchors.
+An alkane standard supplies narrow peak shapes for both full chromatograms.
+The default standard-assisted blind fit then adjusts a time-varying PSF to each
+sample. In this example, `calibration_range=c(6, Inf)` excludes the solvent and
+early contaminated region from PSF calibration; the analytical samples retain
+their full time range and all 518 measured mass channels.
 
 ```r
-# Read the standard's TIC and ANDI-MS scan times (seconds in these files).
 standard <- "chromatograms/standards/alkanes.cdf"
-nc <- ncdf4::nc_open(standard)
-tic <- ncdf4::ncvar_get(nc, "total_intensity")
-time <- ncdf4::ncvar_get(nc, "scan_acquisition_time") / 60
-ncdf4::nc_close(nc)
-keep <- time >= 3
-psf <- estimatePSF(tic[keep], time=time[keep], method="standard", nwindows=10L)
-
 experiment <- gcmsDeco("chromatograms", output_dir="beer_results",
-  alkanes_file=standard, precluster=32L, ncores=16L,
-  psf_control=list(standard=psf, method="standard"))
-cal <- calibrateRI(standard, carbon=7:23, psf=psf)
+  alkanes_file=standard, calibration_range=c(6, Inf), precluster=32L)
+
+# Use the calibrated narrow-peak width for onset-based RI coordinates.
+reference <- readRDS(experiment$paths[
+  grepl("54040014_a", experiment$paths)][[1L]])
+cal <- calibrateRI(standard, carbon=7:23, psf=reference$psf_standard)
 experiment <- annotateRI(experiment, cal, phase="DB5",
-  msp_file="beer_results/consensus.msp", xlsx_file="beer_results/experiment.xlsx")
+  msp_file="beer_results/consensus.msp",
+  xlsx_file="beer_results/experiment.xlsx")
 ```
 
-The retention coordinate is the 1%-height onset plus half the local
-narrow-peak width measured at the same height. The natural cubic RI spline
-passes through the alkane anchors exactly. The sample MSPs contain
-phase-labelled indices, and the consensus MSP contains their medians.
+`ncores=NULL` detects 16 logical cores on the benchmark workstation: the two
+independent fits run concurrently with eight native threads per sample and one
+BLAS thread. The background uses channel-specific nonnegative spline
+coefficients, so its spectrum can change smoothly along the chromatogram.
 
-A separate run on the 4.5–6 minute window uses two PSF windows, 32 outcome
-groups, all 518 original channels and eight logical cores. It links
-**31 detected occurrences into 29 consensus compounds**.
-Adjusted weighted R² is **0.995** and
-**0.996** for the two samples. The directory run
-reports **42.14 s** including its exports.
+The complete fit links **707 occurrences into 574 shared compounds**:
 
-![Aligned beer chromatograms with sample-specific profiles and shared compound spectra](figures/multisample-beer-traces.png)
+| Sample | Occurrences | Background basis columns | Independent stage (s) | Sample quasi-GIC after joint refinement | Adjusted weighted R² |
+|:--|--:|--:|--:|--:|--:|
+| 502131900304_a | 362 | 26 | 816.35 | 16,331,563 | 0.98846 |
+| 54040014_a | 345 | 28 | 532.82 | 16,580,715 | 0.98824 |
 
-With the solvent-trimmed ladder TIC supplying the time-varying PSF, the complete
-chromatograms retain all 518 mass channels and link **746 detected occurrences
-into 614 consensus compounds**:
+Independent fits have adjusted weighted R² of
+0.98968 and
+0.98935, respectively. Sharing
+spectra trades some per-sample fit for a more compact common library. The
+**joint quasi-GIC is 31,297,190**, counting each shared spectrum once
+and one amplitude per occurrence. The sample GIC entries above count full
+spectra within each sample and must not be summed as the joint criterion.
 
-| Sample | Detected occurrences | Adjusted weighted R² | Sample GIC | Independent fit |
-|:--|--:|--:|--:|--:|
-| 502131900304_a | 388 | 0.9895 | 16,338,999 | 1,287.35 s |
-| 54040014_a | 358 | 0.9885 | 16,495,671 | 848.43 s |
+Common ion grouping takes 5.56 s, concurrent independent
+fits 820.78 s, and alignment plus simultaneous refinement
+266.91 s. Measured deconvolution wall time, including result
+exports, is **1,099.70 s**. The separately
+measured standard RI calibration takes 4.50 s
+and RI annotation plus refreshed MSP/Excel exports
+4.36 s: the sum of these measured stages is
+**1,108.56 s**. Diagnostic plot generation is
+separate. These figures use the workstation described above.
 
-The shared TIC calibration took 1.58 s, and constructing each sample's sparse
-PSF took about 1.6 s. The two independent fits ran concurrently with eight
-native threads per worker. The directory workflow took 1,754.67 s (29.2 minutes), including
-1,291.91 s for independent fits and 449.35 s for simultaneous refinement. The joint
-GIC is 31,335,633; it counts common spectra once and amplitudes separately for
-each detected occurrence. Sample GIC values in the table are evaluated after
-simultaneous refinement and count the spectra separately for each sample. RI annotation uses
-all 17 alkanes from C7 to C23, with the fitted curve passing through every
-anchor. The directory workflow plus RI annotation took 1,759.58 s.
-These figures exclude separately generated diagnostic plots.
+Diagnostic ions identify all 17 alkanes from C7 to C23. The retention coordinate
+is the 1%-height onset plus half the local narrow-peak width at that height.
+The natural cubic RI curve passes through all accepted alkane anchors exactly.
+MSP files contain phase-labelled DB5 indices; the consensus library uses their
+medians. Values outside the accepted calibration range remain unassigned.
+
+The full beer fits still contain residual fragmentation and occasional overly
+broad profiles in difficult overlapping regions. Component counts are estimates
+under the fitted model, rather than a verified inventory of chemical compounds.
+
+The following panels zoom into the 4.5–6 minute region of these full-chromatogram
+fits. They are not separately fitted cropped windows. Grey lines show observed
+ions after subtracting the jointly modelled background; coloured lines are
+the fitted compounds.
+
+![Local full-fit profiles for beer sample 502131900304_a](../reference/figures/beer-502131900304_a-local.png)
+
+![Local full-fit profiles for beer sample 54040014_a](../reference/figures/beer-54040014_a-local.png)
 
 The fitted components can be inspected sample by sample, and common spectra
 can be searched against a library with each sample's alkane-derived retention
 indices. Pass `library=` and `search=` to `gcmsDeco()` to include those
-identifications in the per-sample MSP and Excel exports.
+identifications in per-sample MSP and Excel exports.
 
 Set `coupled=FALSE` to export independent fits. Set `batch=list(resume=TRUE)`
 to reuse independently fitted samples whose source-file metadata and fitting

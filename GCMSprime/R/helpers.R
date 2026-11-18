@@ -1,5 +1,5 @@
-GCMS_threads <- function(nthreads) {
-  if (is.null(nthreads)) nthreads <- parallel::detectCores(logical=FALSE)
+GCMS_threads <- function(nthreads, logical=FALSE) {
+  if (is.null(nthreads)) nthreads <- parallel::detectCores(logical=logical)
   if (length(nthreads)==1L && is.na(nthreads)) nthreads <- 1L
   if (!is.numeric(nthreads)||length(nthreads)!=1L||!is.finite(nthreads)||
       nthreads<1||nthreads!=floor(nthreads)||nthreads>.Machine$integer.max)

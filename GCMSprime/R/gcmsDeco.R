@@ -163,8 +163,9 @@ GCMS_write_msp <- function(model,time,mass,msp_file,compounds=NULL,ion_threshold
 #'   per compound. The directory workflow uses this charge in each
 #'   initial fit. Its joint refinement uses the numeric value per selection
 #'   degree of freedom. Both charges precede any temporal adjustment.
-#' @param ncores Total logical-CPU budget. \code{NULL} uses physical cores.
-#'   Directory analyses run up to \code{min(samples,ncores)} sample workers,
+#' @param ncores Total logical-CPU budget. \code{NULL} uses physical cores for
+#'   one chromatogram and logical cores for directory input. Directory analyses
+#'   run up to \code{min(samples,ncores)} sample workers,
 #'   dividing the native thread budget between them. With at least 16 samples,
 #'   \code{ncores=16L} uses 16 workers with one native thread each. BLAS threads
 #'   are limited during batch fitting and caller settings are restored.
@@ -231,7 +232,10 @@ GCMS_write_msp <- function(model,time,mass,msp_file,compounds=NULL,ion_threshold
 #' Interpolated columns are projected to log concavity on their local support
 #' and normalized to unit sum. Their typical full width at half maximum,
 #' \eqn{w}, sets the background dimension to
-#' \deqn{q=\max\{4,\min[40,3+\lceil n/(200w)\rceil]\}.}
+#' \deqn{q=\max\{4,\min[40,3+\lceil n/(50w)\rceil]\}.}
+#' This places knots about 50 narrow-peak FWHMs apart. Each background
+#' basis coefficient has a channel-specific spectrum, allowing slow spectral
+#' drift across the chromatogram. Rank selection is conditional on this basis.
 #' Background coefficients are nonnegative and unpenalized. This keeps the
 #' baseline much smoother than an individual elution peak.
 #' The calibrated median PSF width also sets the guard for the final
@@ -268,6 +272,9 @@ GCMS_write_msp <- function(model,time,mass,msp_file,compounds=NULL,ion_threshold
 #' spreadsheet and returned coefficient rows use increasing apex retention time. Rank selection,
 #' hard log concavity, censored Gamma intensities and compound-count information
 #' criteria follow [logconNMF::logconNMF()].
+#' During coupled refinement, aggregate observations are shared in memory.
+#' Original-channel profile checks can use a buffer up to 64 MiB per active
+#' worker; larger chromatograms retain local disk reads.
 #'
 #' @section Experimental GC/MS examples:
 #' The [GC/MS deconvolution tutorial](../articles/gcms-deconvolution.html)
@@ -374,7 +381,7 @@ gcmsDeco <- function(cdf_file,msp_file=NULL,family=quasipoisson("identity"),lamb
   calibration <- blind$calibration
   X <- blind$X
   width <- max(1, blind$width_scans)
-  if(is.null(baseline_df)) baseline_df<-max(4L,min(40L,3L+ceiling(n/(200*width))))
+  if(is.null(baseline_df)) baseline_df<-max(4L,min(40L,3L+ceiling(n/(50*width))))
   if(length(baseline_df)!=1L||!is.finite(baseline_df)||baseline_df<1||baseline_df!=floor(baseline_df)) stop("Use a positive integer baseline_df.")
   if(baseline_df %in% c(2L,3L)) stop("Use baseline_df=1 for a constant or at least 4 for a cubic spline.",call.=FALSE)
   if(baseline_df>n) stop("baseline_df exceeds the number of scans.",call.=FALSE)

@@ -62,6 +62,13 @@ test_that("sample workers preserve acquisition order, shared maps and full spect
   resumed<-do.call(gcmsDeco,c(args,list(output_dir=outputs[2],ncores=1L)))
   expect_true(all(resumed$samples$cache_hit))
   expect_equal(resumed$areas,two$areas,tolerance=1e-9)
+  stale_path<-file.path(outputs[2],"samples",two$samples$sample_id[1L],"initial.rds")
+  stale<-readRDS(stale_path);stale$signature$engine<-NULL;saveRDS(stale,stale_path)
+  refreshed<-do.call(gcmsDeco,c(args,list(output_dir=outputs[2],ncores=1L)))
+  expect_false(refreshed$samples$cache_hit[1L])
+  expect_true(refreshed$samples$cache_hit[2L])
+  expect_equal(refreshed$areas,two$areas,tolerance=1e-9)
+
   cal<-calibrateRI(anchors=data.frame(carbon=8:12,retention_time=c(.2,.5,.8,1.1,1.4),narrow_width=.08))
   annotated<-annotateRI(two,cal,msp_file=file.path(outputs[2],'consensus.msp'),
     xlsx_file=file.path(outputs[2],'experiment.xlsx'))

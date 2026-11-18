@@ -78,7 +78,7 @@ fit1_runs <- lapply(seq_len(repetitions), fit_hydrocarbon)
 fit2_runs <- lapply(seq_len(repetitions), fit_beer)
 fit1 <- fit1_runs[[1L]]
 fit2 <- fit2_runs[[1L]]
-stopifnot(ncol(fit1$model$H) == 6L, ncol(fit2$model$H) == 38L)
+stopifnot(ncol(fit1$model$H) == 6L, ncol(fit2$model$H) == 36L)
 
 weighted_fit <- function(Y, fit) {
   model <- fit$model

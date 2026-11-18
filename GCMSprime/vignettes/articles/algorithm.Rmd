@@ -309,6 +309,14 @@ much smoother than an individual peak: full chromatograms can follow slow
 baseline drift, while short windows can use a constant background. A
 lower-quantile background estimate initializes calibration peak detection.
 
+For automatic background construction, let $w$ denote the median PSF full width
+at half maximum in scans. The cubic basis dimension is
+$q=\max\{4,\min(40,3+\lceil n/(50w)\rceil)\}$, placing knots approximately
+50 narrow-peak FWHMs apart. Each basis coefficient has its own nonnegative
+mass spectrum, so background composition can change gradually with time.
+Rank selection is conditional on this chosen background basis; background
+flexibility is not itself charged by the compound-rank penalty.
+
 EI mass-spectrometric intensities commonly exhibit overdispersed counting
 variation. Ion arrivals are approximately Poisson, while the stochastic gain
 of the electron multiplier adds variation to the recorded intensity. In a

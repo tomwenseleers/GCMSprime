@@ -50,7 +50,7 @@
 <div class="section level3">
 <h3 id="chromatograms-and-calibration-0-1-0-9000">Chromatograms and calibration<a class="anchor" aria-label="anchor" href="#chromatograms-and-calibration-0-1-0-9000"></a></h3>
 <ul><li><p>ANDI-MS CDF import and export preserve scan timing, acquired mass channels and sample metadata.</p></li>
-<li><p>Standard-assisted or blind constant/time-varying PSF estimation, pooled noise calibration and smooth background initialization.</p></li>
+<li><p>Standard-assisted or blind constant/time-varying PSF estimation, pooled noise calibration and smooth background initialization. Automatic background knots follow the narrow-peak PSF scale and allow slowly changing spectra. Algorithm-versioned cache keys prevent reuse of obsolete initial fits.</p></li>
 <li><p>Reusable TIC-based standard calibration preserves physical scan times and builds each sample’s sparse PSF without repeatedly fitting the standard.</p></li>
 <li><p>Contained broad-peak fragments use native local refinement and matched unmerged controls, with permissive initialization and correlation-aware rank selection on every original ion channel.</p></li>
 </ul></div>
@@ -59,7 +59,8 @@
 <ul><li><p>Single-sample sparse log-concave NMF resolves overlapping compounds, flexible profiles and full mass spectra with automatic best rank tuning.</p></li>
 <li><p>Optional aggregation to a small number of ion groups accelerates initialization and compatible Poisson/quasi-Poisson restart screens. Original-channel candidate/control refinement and likelihood checks complete the fit, retaining the full spectra and fixed nuisance model.</p></li>
 <li><p>Directory-based multisample analysis preserves acquisition order and group labels, selects alkane standards, aligns samples and estimates shared spectra with sample-specific areas and profiles.</p></li>
-<li><p><code>ncores</code> is a total logical-CPU budget for concurrent samples and native fitting. A shared reusable ion-group map and bounded coupled updates keep memory use controlled while retaining full spectra and sample-specific PSFs.</p></li>
+<li><p>Coupled original-channel profile checks reuse bounded per-worker read buffers, avoiding repeated reads without changing the acceptance criterion.</p></li>
+<li><p><code>ncores</code> is a total logical-CPU budget for concurrent samples and native fitting. Automatic directory budgets use logical cores; single chromatograms use physical cores. A shared reusable ion-group map and bounded coupled updates keep memory use controlled while retaining full spectra and sample-specific PSFs.</p></li>
 <li><p>Stage timings, thread-allocation metadata and a sixteen-sample simulated example accompany serial/parallel result checks.</p></li>
 <li><p><code><a href="../reference/simulateGCMSSamples.html">simulateGCMSSamples()</a></code> provides RI-aware simulation with shared spectra, concentration-dependent broadening, optional acid peaks and sample drift.</p></li>
 </ul></div>

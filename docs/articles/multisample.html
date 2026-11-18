@@ -166,7 +166,7 @@ adjusted log-area R² was <strong>0.9992</strong>, the median absolute
 peak-area error was <strong>1.38%</strong>, and mean spectral
 ion-support F1 was <strong>0.972</strong> at the shared 0.1% base-peak
 threshold.</p>
-<p>The CDF-to-results analysis took <strong>154.14 s</strong> with 16
+<p>The CDF-to-results analysis took <strong>149.31 s</strong> with 16
 single-threaded sample workers on an HP ZBook Fury G8, Intel Core
 i9-11950H, eight physical cores, 16 logical threads, Windows and R
 4.5.0. CDF generation is separate.</p>
@@ -175,6 +175,147 @@ i9-11950H, eight physical cores, 16 logical threads, Windows and R
 <p>The <a href="benchmarks.html">benchmarks against other software</a>
 give all seven workflows, matching rules, noise calibration, profile
 plots and tables.</p>
+</div>
+<div class="section level2">
+<h2 id="full-sized-chromatograms-and-memory">Full-sized chromatograms and memory<a class="anchor" aria-label="anchor" href="#full-sized-chromatograms-and-memory"></a>
+</h2>
+<p>A separate resource validation uses <strong>16 chromatograms with
+10,000 scans and 550 recorded mass bins each</strong>. There are 1,000
+reference compounds, present independently in half the samples on
+average: the realized data contain 7,917 true occurrences, roughly 500
+per sample. Library compound ions occupy 258 of the recorded bins; the
+other bins retain background observations. The simulator includes
+concentration-dependent EMG widths and tails, retention drift, irregular
+scan intervals, a smooth experimental-window background and one
+acid-like compound, present in eight samples. The generating
+quasi-Poisson dispersion is 783.18.</p>
+<p>This CDF workflow uses the package defaults, a calibrated narrow-peak
+standard, time-varying sample PSFs and at most 32 common ion groups.
+<code>ncores=NULL</code> selects <strong>16 single-threaded
+workers</strong> on the test machine. Original channels enter the
+likelihood checks and final spectra. Input simulation and the separate
+standard calibration are outside the workflow timing.</p>
+<table class="table">
+<thead><tr class="header">
+<th align="left">Quantity</th>
+<th align="right">Measured result</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left">True peak occurrences recovered</td>
+<td align="right">7,864 / 7,917</td>
+</tr>
+<tr class="even">
+<td align="left">False positives / false negatives</td>
+<td align="right">131 / 53</td>
+</tr>
+<tr class="odd">
+<td align="left">Occurrence F1</td>
+<td align="right">0.9884</td>
+</tr>
+<tr class="even">
+<td align="left">Estimated shared components</td>
+<td align="right">1,129</td>
+</tr>
+<tr class="odd">
+<td align="left">Joint quasi-GIC</td>
+<td align="right">86,522,402</td>
+</tr>
+<tr class="even">
+<td align="left">Median spectral cosine</td>
+<td align="right">0.9999977</td>
+</tr>
+<tr class="odd">
+<td align="left">Mean within-spectrum ion F1</td>
+<td align="right">0.978</td>
+</tr>
+<tr class="even">
+<td align="left">Mean profile cosine</td>
+<td align="right">0.9994</td>
+</tr>
+<tr class="odd">
+<td align="left">Median absolute area error</td>
+<td align="right">0.239%</td>
+</tr>
+<tr class="even">
+<td align="left">Acid occurrences recovered</td>
+<td align="right">8 / 8</td>
+</tr>
+</tbody>
+</table>
+<p>Scoring uses maximum-cardinality one-to-one matching within 0.25
+minutes and spectral cosine at least 0.9; ion-support F1 uses the shared
+0.1% base-peak threshold. Area, spectrum and profile summaries condition
+on correct matches. All acid occurrences are detected; one difficult
+overlap still gives a distorted acid profile. This resource test is
+separate from the RI-aware reciprocal-hit seven-workflow comparison
+above.</p>
+<table class="table">
+<thead><tr class="header">
+<th align="left">Workflow stage</th>
+<th align="right">Seconds</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left">Common ion grouping</td>
+<td align="right">18.72</td>
+</tr>
+<tr class="even">
+<td align="left">Parallel independent fits, including sample PSFs</td>
+<td align="right">928.45</td>
+</tr>
+<tr class="odd">
+<td align="left">Alignment, grouping and simultaneous refinement</td>
+<td align="right">2059.51</td>
+</tr>
+<tr class="even">
+<td align="left">Result construction and exports</td>
+<td align="right">45.60</td>
+</tr>
+<tr class="odd">
+<td align="left">Package-reported workflow total</td>
+<td align="right">3052.28</td>
+</tr>
+</tbody>
+</table>
+<p>The workstation is an HP ZBook Fury G8 with an Intel Core i9-11950H
+at 2.60 GHz, eight physical cores, 16 logical threads and 64 GB RAM,
+running Windows and R 4.5.0. Sampled peak combined private memory is
+<strong>22.86 GiB</strong>, and peak summed working set is <strong>18.61
+GiB</strong>; at least <strong>23.59 GiB</strong> of physical memory
+remains available. These measurements include active workers and fitting
+workspaces, not just the 40.96 MB aggregate observation cache. Mean CPU
+use over the complete run is 11.67 logical-core equivalents. The
+independent process-tree monitor records 3,054.88 s, including R startup
+and the final saved result.</p>
+<div class="float">
+<img src="../reference/figures/fullsize-16-resources.png" alt="Measured process-tree memory and CPU use for sixteen full-sized chromatograms"><div class="figcaption">Measured process-tree memory and CPU use for
+sixteen full-sized chromatograms</div>
+</div>
+<div class="float">
+<img src="../reference/figures/fullsize-16-recovery.png" alt="Occurrence recovery and total-ion peak-area accuracy across sixteen full-sized samples"><div class="figcaption">Occurrence recovery and total-ion peak-area
+accuracy across sixteen full-sized samples</div>
+</div>
+<div class="float">
+<img src="../reference/figures/fullsize-16-acid.png" alt="Acid profiles: inferred solid and true dashed, blue for smaller areas and red for larger areas"><div class="figcaption">Acid profiles: inferred solid and true dashed,
+blue for smaller areas and red for larger areas</div>
+</div>
+<p>The acid display subtracts each true 1%-height onset to compare
+shapes. Fitting uses the original scan grid. Curves retain their
+original count amplitudes; they are not normalized to unit height or
+area.</p>
+<p>The <a href="https://github.com/tomwenseleers/GCMSprime/blob/master/benchmarks/benchmark_fullsize_16.R" class="external-link">complete
+reproducible script</a> and <a href="https://github.com/tomwenseleers/GCMSprime/tree/master/benchmarks/results/fullsize16" class="external-link">compact
+measured results</a> are supplied with the source. From the GCMSprime
+repository root:</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/source.html" class="external-link">source</a></span><span class="op">(</span><span class="st">"benchmarks/benchmark_fullsize_16.R"</span><span class="op">)</span></span>
+<span><span class="fu">benchmarkFullsize16</span><span class="op">(</span>stage<span class="op">=</span><span class="st">"prepare"</span><span class="op">)</span></span>
+<span><span class="fu">benchmarkFullsize16</span><span class="op">(</span>stage<span class="op">=</span><span class="st">"fit"</span><span class="op">)</span></span>
+<span><span class="fu">benchmarkFullsize16</span><span class="op">(</span>stage<span class="op">=</span><span class="st">"score"</span><span class="op">)</span></span></code></pre></div>
+<p>The generated CDF files and persistent fitted store are written to
+<code>codex_sandbox/fullsize16</code> by default. Use
+<code>directory=</code> to select another location.</p>
 </div>
 <div class="section level2">
 <h2 id="outputs-and-memory-use">Outputs and memory use<a class="anchor" aria-label="anchor" href="#outputs-and-memory-use"></a>
@@ -207,16 +348,23 @@ observations and large weight/offset arrays on disk. It caches the
 common aggregate channels in RAM and streams bounded blocks of original
 channels for likelihood and spectral updates. At 10,000 scans and 32
 groups, the aggregate cache occupies 2.56 MB per sample, or 2.56 GB for
-1,000 samples. Factors and active workers need additional memory. Set
+1,000 samples. Factors and active workers need additional memory.
+Compatible profile checks can additionally buffer one original
+chromatogram up to 64 MiB per active worker, adding at most 1 GiB across
+16 workers. Larger samples retain local reads. Set
 <code>batch=list(cache=FALSE)</code> to read the aggregate data from
 disk as needed. Use <code>batch=list(workers=4L)</code> to cap the
-number of concurrent samples within the <code>ncores</code> budget.</p>
+number of concurrent samples within the <code>ncores</code> budget. For
+directory input, <code>ncores=NULL</code> uses the detected logical core
+count. Thus 16 samples on a 16-logical-core machine use 16
+single-threaded workers by default; a single CDF uses the physical core
+count.</p>
 <p>The same ion groups are used across samples for matching. They are
 learned from a pooled, time-binned chromatogram or supplied through
 <code>precluster</code> as a saved <a href="https://tomwenseleers.github.io/logconNMF/reference/channelGroups.html" class="external-link">channel
 map</a>, for example one trained on reference spectra. Each sample’s PSF
 and scan grid remain separate.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sample1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="va">experiment</span><span class="op">$</span><span class="va">paths</span><span class="op">[</span><span class="fl">1L</span><span class="op">]</span><span class="op">)</span></span>
 <span><span class="va">sample1</span><span class="op">$</span><span class="va">compounds</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">sample1</span>, type<span class="op">=</span><span class="st">"profiles"</span>, file<span class="op">=</span><span class="st">"sample1_profiles_spectra.pdf"</span><span class="op">)</span></span>
@@ -244,7 +392,7 @@ units, so scan duration and the number of exported mass peaks alone do
 not identify physical count exposure.</p>
 <p>If integrated counts and their durations are known, supply exposure
 explicitly:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">experiment</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gcmsDeco.html">gcmsDeco</a></span><span class="op">(</span><span class="st">"chromatograms"</span>, output_dir<span class="op">=</span><span class="st">"count_results"</span>,</span>
 <span>  family<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">poisson</a></span><span class="op">(</span><span class="st">"identity"</span><span class="op">)</span>,</span>
 <span>  batch<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>exposure<span class="op">=</span><span class="kw">function</span><span class="op">(</span><span class="va">metadata</span>, <span class="va">time</span><span class="op">)</span> <span class="va">metadata</span><span class="op">$</span><span class="va">scan_duration</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
@@ -258,97 +406,109 @@ background design values during fitting.</p>
 <div class="section level2">
 <h2 id="calibrated-beer-example">Calibrated beer example<a class="anchor" aria-label="anchor" href="#calibrated-beer-example"></a>
 </h2>
-<p>An alkane ladder can supply the peak shapes for every sample in the
-batch. Use its total-ion chromatogram (TIC) after the solvent peak, and
-reuse that calibration on each sample’s own scan grid. The full ladder
-spectra provide the diagnostic ions for RI calibration. The two
-calibrations serve different purposes: the TIC describes narrow peak
-shapes, while the fragment and molecular ions identify the
-retention-index anchors.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Read the standard's TIC and ANDI-MS scan times (seconds in these files).</span></span>
-<span><span class="va">standard</span> <span class="op">&lt;-</span> <span class="st">"chromatograms/standards/alkanes.cdf"</span></span>
-<span><span class="va">nc</span> <span class="op">&lt;-</span> <span class="fu">ncdf4</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ncdf4/man/nc_open.html" class="external-link">nc_open</a></span><span class="op">(</span><span class="va">standard</span><span class="op">)</span></span>
-<span><span class="va">tic</span> <span class="op">&lt;-</span> <span class="fu">ncdf4</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ncdf4/man/ncvar_get.html" class="external-link">ncvar_get</a></span><span class="op">(</span><span class="va">nc</span>, <span class="st">"total_intensity"</span><span class="op">)</span></span>
-<span><span class="va">time</span> <span class="op">&lt;-</span> <span class="fu">ncdf4</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ncdf4/man/ncvar_get.html" class="external-link">ncvar_get</a></span><span class="op">(</span><span class="va">nc</span>, <span class="st">"scan_acquisition_time"</span><span class="op">)</span> <span class="op">/</span> <span class="fl">60</span></span>
-<span><span class="fu">ncdf4</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ncdf4/man/nc_close.html" class="external-link">nc_close</a></span><span class="op">(</span><span class="va">nc</span><span class="op">)</span></span>
-<span><span class="va">keep</span> <span class="op">&lt;-</span> <span class="va">time</span> <span class="op">&gt;=</span> <span class="fl">3</span></span>
-<span><span class="va">psf</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://tomwenseleers.github.io/logconNMF/reference/estimatePSF.html" class="external-link">estimatePSF</a></span><span class="op">(</span><span class="va">tic</span><span class="op">[</span><span class="va">keep</span><span class="op">]</span>, time<span class="op">=</span><span class="va">time</span><span class="op">[</span><span class="va">keep</span><span class="op">]</span>, method<span class="op">=</span><span class="st">"standard"</span>, nwindows<span class="op">=</span><span class="fl">10L</span><span class="op">)</span></span>
-<span></span>
+<p>An alkane standard supplies narrow peak shapes for both full
+chromatograms. The default standard-assisted blind fit then adjusts a
+time-varying PSF to each sample. In this example,
+<code>calibration_range=c(6, Inf)</code> excludes the solvent and early
+contaminated region from PSF calibration; the analytical samples retain
+their full time range and all 518 measured mass channels.</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">standard</span> <span class="op">&lt;-</span> <span class="st">"chromatograms/standards/alkanes.cdf"</span></span>
 <span><span class="va">experiment</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gcmsDeco.html">gcmsDeco</a></span><span class="op">(</span><span class="st">"chromatograms"</span>, output_dir<span class="op">=</span><span class="st">"beer_results"</span>,</span>
-<span>  alkanes_file<span class="op">=</span><span class="va">standard</span>, precluster<span class="op">=</span><span class="fl">32L</span>, ncores<span class="op">=</span><span class="fl">16L</span>,</span>
-<span>  psf_control<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>standard<span class="op">=</span><span class="va">psf</span>, method<span class="op">=</span><span class="st">"standard"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">cal</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/calibrateRI.html">calibrateRI</a></span><span class="op">(</span><span class="va">standard</span>, carbon<span class="op">=</span><span class="fl">7</span><span class="op">:</span><span class="fl">23</span>, psf<span class="op">=</span><span class="va">psf</span><span class="op">)</span></span>
+<span>  alkanes_file<span class="op">=</span><span class="va">standard</span>, calibration_range<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">6</span>, <span class="cn">Inf</span><span class="op">)</span>, precluster<span class="op">=</span><span class="fl">32L</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Use the calibrated narrow-peak width for onset-based RI coordinates.</span></span>
+<span><span class="va">reference</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="va">experiment</span><span class="op">$</span><span class="va">paths</span><span class="op">[</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grepl</a></span><span class="op">(</span><span class="st">"54040014_a"</span>, <span class="va">experiment</span><span class="op">$</span><span class="va">paths</span><span class="op">)</span><span class="op">]</span><span class="op">[[</span><span class="fl">1L</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="va">cal</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/calibrateRI.html">calibrateRI</a></span><span class="op">(</span><span class="va">standard</span>, carbon<span class="op">=</span><span class="fl">7</span><span class="op">:</span><span class="fl">23</span>, psf<span class="op">=</span><span class="va">reference</span><span class="op">$</span><span class="va">psf_standard</span><span class="op">)</span></span>
 <span><span class="va">experiment</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/annotateRI.html">annotateRI</a></span><span class="op">(</span><span class="va">experiment</span>, <span class="va">cal</span>, phase<span class="op">=</span><span class="st">"DB5"</span>,</span>
-<span>  msp_file<span class="op">=</span><span class="st">"beer_results/consensus.msp"</span>, xlsx_file<span class="op">=</span><span class="st">"beer_results/experiment.xlsx"</span><span class="op">)</span></span></code></pre></div>
-<p>The retention coordinate is the 1%-height onset plus half the local
-narrow-peak width measured at the same height. The natural cubic RI
-spline passes through the alkane anchors exactly. The sample MSPs
-contain phase-labelled indices, and the consensus MSP contains their
-medians.</p>
-<p>A separate run on the 4.5–6 minute window uses two PSF windows, 32
-outcome groups, all 518 original channels and eight logical cores. It
-links <strong>31 detected occurrences into 29 consensus
-compounds</strong>. Adjusted weighted R² is <strong>0.995</strong> and
-<strong>0.996</strong> for the two samples. The directory run reports
-<strong>42.14 s</strong> including its exports.</p>
-<div class="float">
-<img src="figures/multisample-beer-traces.png" alt="Aligned beer chromatograms with sample-specific profiles and shared compound spectra"><div class="figcaption">Aligned beer chromatograms with sample-specific
-profiles and shared compound spectra</div>
-</div>
-<p>With the solvent-trimmed ladder TIC supplying the time-varying PSF,
-the complete chromatograms retain all 518 mass channels and link
-<strong>746 detected occurrences into 614 consensus
+<span>  msp_file<span class="op">=</span><span class="st">"beer_results/consensus.msp"</span>,</span>
+<span>  xlsx_file<span class="op">=</span><span class="st">"beer_results/experiment.xlsx"</span><span class="op">)</span></span></code></pre></div>
+<p><code>ncores=NULL</code> detects 16 logical cores on the benchmark
+workstation: the two independent fits run concurrently with eight native
+threads per sample and one BLAS thread. The background uses
+channel-specific nonnegative spline coefficients, so its spectrum can
+change smoothly along the chromatogram.</p>
+<p>The complete fit links <strong>707 occurrences into 574 shared
 compounds</strong>:</p>
-<table class="table">
+<table style="width:100%;" class="table">
 <colgroup>
-<col width="20%">
-<col width="20%">
-<col width="20%">
-<col width="20%">
-<col width="20%">
+<col width="16%">
+<col width="16%">
+<col width="16%">
+<col width="16%">
+<col width="16%">
+<col width="16%">
 </colgroup>
 <thead><tr class="header">
 <th align="left">Sample</th>
-<th align="right">Detected occurrences</th>
+<th align="right">Occurrences</th>
+<th align="right">Background basis columns</th>
+<th align="right">Independent stage (s)</th>
+<th align="right">Sample quasi-GIC after joint refinement</th>
 <th align="right">Adjusted weighted R²</th>
-<th align="right">Sample GIC</th>
-<th align="right">Independent fit</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
 <td align="left">502131900304_a</td>
-<td align="right">388</td>
-<td align="right">0.9895</td>
-<td align="right">16,338,999</td>
-<td align="right">1,287.35 s</td>
+<td align="right">362</td>
+<td align="right">26</td>
+<td align="right">816.35</td>
+<td align="right">16,331,563</td>
+<td align="right">0.98846</td>
 </tr>
 <tr class="even">
 <td align="left">54040014_a</td>
-<td align="right">358</td>
-<td align="right">0.9885</td>
-<td align="right">16,495,671</td>
-<td align="right">848.43 s</td>
+<td align="right">345</td>
+<td align="right">28</td>
+<td align="right">532.82</td>
+<td align="right">16,580,715</td>
+<td align="right">0.98824</td>
 </tr>
 </tbody>
 </table>
-<p>The shared TIC calibration took 1.58 s, and constructing each
-sample’s sparse PSF took about 1.6 s. The two independent fits ran
-concurrently with eight native threads per worker. The directory
-workflow took 1,754.67 s (29.2 minutes), including 1,291.91 s for
-independent fits and 449.35 s for simultaneous refinement. The joint GIC
-is 31,335,633; it counts common spectra once and amplitudes separately
-for each detected occurrence. Sample GIC values in the table are
-evaluated after simultaneous refinement and count the spectra separately
-for each sample. RI annotation uses all 17 alkanes from C7 to C23, with
-the fitted curve passing through every anchor. The directory workflow
-plus RI annotation took 1,759.58 s. These figures exclude separately
-generated diagnostic plots.</p>
+<p>Independent fits have adjusted weighted R² of 0.98968 and 0.98935,
+respectively. Sharing spectra trades some per-sample fit for a more
+compact common library. The <strong>joint quasi-GIC is
+31,297,190</strong>, counting each shared spectrum once and one
+amplitude per occurrence. The sample GIC entries above count full
+spectra within each sample and must not be summed as the joint
+criterion.</p>
+<p>Common ion grouping takes 5.56 s, concurrent independent fits 820.78
+s, and alignment plus simultaneous refinement 266.91 s. Measured
+deconvolution wall time, including result exports, is <strong>1,099.70
+s</strong>. The separately measured standard RI calibration takes 4.50 s
+and RI annotation plus refreshed MSP/Excel exports 4.36 s: the sum of
+these measured stages is <strong>1,108.56 s</strong>. Diagnostic plot
+generation is separate. These figures use the workstation described
+above.</p>
+<p>Diagnostic ions identify all 17 alkanes from C7 to C23. The retention
+coordinate is the 1%-height onset plus half the local narrow-peak width
+at that height. The natural cubic RI curve passes through all accepted
+alkane anchors exactly. MSP files contain phase-labelled DB5 indices;
+the consensus library uses their medians. Values outside the accepted
+calibration range remain unassigned.</p>
+<p>The full beer fits still contain residual fragmentation and
+occasional overly broad profiles in difficult overlapping regions.
+Component counts are estimates under the fitted model, rather than a
+verified inventory of chemical compounds.</p>
+<p>The following panels zoom into the 4.5–6 minute region of these
+full-chromatogram fits. They are not separately fitted cropped windows.
+Grey lines show observed ions after subtracting the jointly modelled
+background; coloured lines are the fitted compounds.</p>
+<div class="float">
+<img src="../reference/figures/beer-502131900304_a-local.png" alt="Local full-fit profiles for beer sample 502131900304_a"><div class="figcaption">Local full-fit profiles for beer sample
+502131900304_a</div>
+</div>
+<div class="float">
+<img src="../reference/figures/beer-54040014_a-local.png" alt="Local full-fit profiles for beer sample 54040014_a"><div class="figcaption">Local full-fit profiles for beer sample
+54040014_a</div>
+</div>
 <p>The fitted components can be inspected sample by sample, and common
 spectra can be searched against a library with each sample’s
 alkane-derived retention indices. Pass <code>library=</code> and
 <code>search=</code> to <code><a href="../reference/gcmsDeco.html">gcmsDeco()</a></code> to include those
-identifications in the per-sample MSP and Excel exports.</p>
+identifications in per-sample MSP and Excel exports.</p>
 <p>Set <code>coupled=FALSE</code> to export independent fits. Set
 <code>batch=list(resume=TRUE)</code> to reuse independently fitted
 samples whose source-file metadata and fitting settings match the cache.

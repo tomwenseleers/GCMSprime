@@ -154,7 +154,7 @@ GCMSdeco_directory <- function(cdf_file,msp_file=NULL,family,lambda,nwindows,
     exposure=NULL,resume=FALSE,plots=FALSE,workers=NULL,cache=TRUE)
   if(!is.list(batch)||length(batch)&&(is.null(names(batch))||anyDuplicated(names(batch))||
       length(setdiff(names(batch),names(defaults)))))stop("Use named batch options; see ?GCMSbatch.")
-  batch<-utils::modifyList(defaults,batch,keep.null=TRUE);ncores<-GCMS_threads(ncores)
+  batch<-utils::modifyList(defaults,batch,keep.null=TRUE);ncores<-GCMS_threads(ncores,logical=TRUE)
   if(!is.logical(coupled)||length(coupled)!=1L||is.na(coupled))stop("coupled must be TRUE or FALSE.")
   if(is.null(output_dir))output_dir<-paste0(normalizePath(cdf_file,winslash="/",mustWork=TRUE),"_GCMSprime")
   found<-GCMS_batch_files(cdf_file,output_dir,batch$sample_order,alkanes_file)
@@ -259,7 +259,7 @@ GCMS_batch_signature <- function(file,standard,args) {
   if(is.list(f))args$family<-list(family=f$family,link=f$link,scalar=f$scalar,
     theta=if(is.function(f$getTheta))f$getTheta(TRUE)else NULL,n.theta=f$n.theta)
   info<-file.info(file)
-  list(size=info$size,mtime=as.numeric(info$mtime),args=args,
+  list(engine=2L,size=info$size,mtime=as.numeric(info$mtime),args=args,
     standard=if(is.null(standard))NULL else list(size=file.info(standard)$size,
       mtime=as.numeric(file.info(standard)$mtime)),
     package=as.character(utils::packageVersion("GCMSprime")))

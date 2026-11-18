@@ -146,8 +146,9 @@ updates. A fixed shape in the supplied NB family is respected.}
 adjustment to the selection penalty. \code{"none"} uses independent observations;
 a number between zero and 0.49 supplies the lag-one correlation.}
 
-\item{ncores}{Total logical-CPU budget. \code{NULL} uses physical cores.
-Directory analyses run up to \code{min(samples,ncores)} sample workers,
+\item{ncores}{Total logical-CPU budget. \code{NULL} uses physical cores for
+one chromatogram and logical cores for directory input. Directory analyses
+run up to \code{min(samples,ncores)} sample workers,
 dividing the native thread budget between them. With at least 16 samples,
 \code{ncores=16L} uses 16 workers with one native thread each. BLAS threads
 are limited during batch fitting and caller settings are restored.
@@ -288,7 +289,10 @@ Original channels, outcome groups and the total-ion signal are supported.
 Interpolated columns are projected to log concavity on their local support
 and normalized to unit sum. Their typical full width at half maximum,
 \eqn{w}, sets the background dimension to
-\deqn{q=\max\{4,\min[40,3+\lceil n/(200w)\rceil]\}.}
+\deqn{q=\max\{4,\min[40,3+\lceil n/(50w)\rceil]\}.}
+This places knots about 50 narrow-peak FWHMs apart. Each background
+basis coefficient has a channel-specific spectrum, allowing slow spectral
+drift across the chromatogram. Rank selection is conditional on this basis.
 Background coefficients are nonnegative and unpenalized. This keeps the
 baseline much smoother than an individual elution peak.
 The calibrated median PSF width also sets the guard for the final
@@ -325,6 +329,9 @@ The
 spreadsheet and returned coefficient rows use increasing apex retention time. Rank selection,
 hard log concavity, censored Gamma intensities and compound-count information
 criteria follow \code{\link[logconNMF:logconNMF]{logconNMF::logconNMF()}}.
+During coupled refinement, aggregate observations are shared in memory.
+Original-channel profile checks can use a buffer up to 64 MiB per active
+worker; larger chromatograms retain local disk reads.
 }
 \section{Experimental GC/MS examples}{
 
