@@ -54,7 +54,46 @@ experiment <- gcmsDeco("chromatograms", output_dir="beer_results",
                             "beer2/injection003.cdf")))
 ```
 
-## Sixteen simulated chromatograms
+## Two distinct 16-sample benchmarks {#benchmark-scales}
+
+The small-scale software comparison and the large-scale resource validation
+are **different simulations and fits**. Both use 16 single-threaded sample
+workers, up to 32 common ion groups and original-channel likelihood checks and
+spectral updates. Their data sizes, PSF initialization and refinement budgets
+differ:
+
+| Setting or wall time | Small-scale software comparison | Large-scale resource validation |
+|:--|--:|--:|
+| Samples | 16 | 16 |
+| Scans per sample | 1,200 | 10,000 |
+| Recorded mass channels | 258 | 550 |
+| Reference compounds | 100 | 1,000 |
+| True sample-compound occurrences | 769 | 7,917 |
+| Samples containing the acid | 7 / 16 | 8 / 16 |
+| PSF initialization | Blind, 2 windows | Standard-assisted blind, 10 windows |
+| Coupled refinement budget | 1 initial + 1 round of 2 cycles | 5 initial + 3 rounds of 10 cycles |
+| Common ion grouping (s) | 1.29 | 18.94 |
+| Parallel independent fits, including sample PSFs (s) | 118.63 | 933.45 |
+| Alignment, grouping and simultaneous refinement (s) | 22.87 | 1530.20 |
+| Result construction and exports (s) | 3.46 | 51.55 |
+| Complete analysis wall time | **146.50 s (2.44 min)** | **2534.14 s (42.24 min)** |
+
+These are elapsed times for the whole 16-sample batch, not per-sample times.
+Input simulation/CDF generation and the large benchmark's separate standard
+calibration are excluded. Small-case internal stages sum to 146.25 s; its
+enclosing comparison call adds 0.25 s. The large case uses the package's full
+default refinement budget; the small comparison explicitly uses a shorter
+budget. The contrast is therefore not a controlled scaling experiment, and
+profile-quality differences cannot be attributed to refinement alone.
+
+## Small-scale 16-sample software comparison {#sixteen-simulated-chromatograms}
+
+This is the **small-scale** software-comparison fit (seed `9118`), with an
+explicit fast configuration: two blind-PSF windows, at most three PSF iterations,
+and three coupled cycles (one initial cycle plus one round of two), with
+`q=32`. It does not use the full default refinement budget. Its profile figures
+use the same saved profile table as the logconNMF homepage and the
+GCMSprime seven-workflow comparison.
 
 The **16 chromatograms** share a library of **100 reference compounds**.
 Each spans a 20-minute retention window, with 1,200 scans and all 258 mass channels.
@@ -80,9 +119,11 @@ reference library:
 library(GCMSbenchmark)
 bench <- system.file("benchmarks", package="GCMSbenchmark", mustWork=TRUE)
 source(file.path(bench, "simulated-16.R"), encoding="UTF-8")
+small <- runBenchmark16("benchmark-small", method="GCMSprime", ncores=16L)
+small$summary[c("analysis_s", "TP", "FP", "FN", "F1")]
+# Optional figures from the saved results:
 source(file.path(bench, "plot-simulated-16.R"), encoding="UTF-8")
-fit <- runBenchmark16("samples16", method="GCMSprime", ncores=16L)
-plotBenchmark16("samples16")
+plotBenchmark16("benchmark-small")
 ~~~
 
 The analysis recovered **750 of 769 true occurrences**, with **142 false
@@ -103,7 +144,13 @@ The [benchmarks against other software](benchmarks.html) give all seven
 workflows, matching rules, noise calibration, profile plots and tables.
 
 
-## Full-sized chromatograms and memory
+## Large-scale 16-sample resource benchmark {#full-sized-chromatograms-and-memory}
+
+This **large-scale** fit uses seed `171117` and a separate simulated
+narrow-peak calibration standard. Its default coupled budget is 35 cycles
+(five initial cycles plus three rounds of ten), with `q=64`. The higher scan
+resolution, different simulated abundances and PSF calibration also distinguish
+it from the small software comparison.
 
 A separate resource validation uses **16 chromatograms with 10,000 scans and
 550 recorded mass bins each**. There are 1,000 reference compounds, present
@@ -164,23 +211,32 @@ run is 10.83 logical-core equivalents.
 
 ![Acid profiles: inferred solid and true dashed, blue for smaller areas and red for larger areas](../reference/figures/fullsize-16-acid.png)
 
-The acid display subtracts each true 1%-height onset to compare shapes. Fitting
-uses the original scan grid. Curves retain their original count amplitudes;
-they are not normalized to unit height or area.
+The acid panel displays the **eight correctly matched acid-positive samples
+from this separate 16-sample large-scale simulation**. The acid is absent from
+the other eight samples, which are omitted from this positive-case shape
+comparison; this panel does not assess false acid assignments in absent samples.
+Colours rank the eight displayed true areas from blue to red. The x-axis is
+seconds relative to each true 1%-height onset. In contrast, the small-scale
+figures include all 16 samples (seven acid-positive, nine with zero true acid
+signal), rank colours over all 16 areas, and use retention index. Both displays
+retain original count amplitudes without unit-height or unit-area normalization.
+Fitting uses each sample's original scan grid.
 
 The [complete reproducible script](https://github.com/tomwenseleers/GCMSprime/blob/master/benchmarks/benchmark_fullsize_16.R)
 and [compact measured results](https://github.com/tomwenseleers/GCMSprime/tree/master/benchmarks/results/fullsize16)
 are supplied with the source. From the GCMSprime repository root:
 
 ```r
+# Run from a GCMSprime repository checkout; use a fresh output directory.
 source("benchmarks/benchmark_fullsize_16.R")
-benchmarkFullsize16(stage="prepare")
-benchmarkFullsize16(stage="fit")
-benchmarkFullsize16(stage="score")
+benchmarkFullsize16("benchmark-large", stage="all", ncores=16L)
+plotFullsize16Acid("benchmark-large")
 ```
 
-The generated CDF files and persistent fitted store are written to
-`codex_sandbox/fullsize16` by default. Use `directory=` to select another location.
+This writes inputs, fitted results (including timings), scoring tables and the
+acid PNG to `benchmark-large`. Separate `stage="prepare"`, `"fit"` and `"score"`
+calls are available when restarting a stage. The default directory, when omitted,
+is `codex_sandbox/fullsize16`.
 
 ## Outputs and memory use
 

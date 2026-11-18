@@ -228,11 +228,13 @@ benchmark16ProfilePlots <- function(results,methods,labels,draw) {
         if(nrow(q))graphics::mtext(sprintf("Profile cosine %.3f · %d/%d true calls",
           q$mean_profile_cosine,q$recovered,q$present),3,line=.2,cex=.75)
       }
-      graphics::mtext(if(kind=="Regular")"Highest-abundance regular compound"else
-        "Shark-fin-shaped acid compound",3,outer=TRUE,line=.9,font=2,cex=1.3)
+      graphics::mtext(paste("Small-scale 16-sample benchmark |",
+        if(kind=="Regular")"Highest-abundance regular compound"else
+          "Shark-fin-shaped acid compound"),3,outer=TRUE,line=.9,font=2,cex=1.15)
       graphics::mtext("Solid: inferred profiles · Dashed: ground truth · All 16 samples, blue (smallest area) to red (largest area)",
         1,outer=TRUE,line=1.1,cex=.95)
-      graphics::mtext("Original total-ion amplitudes retained. Zero-area samples are included; no unit-area or peak-height normalization.",
+      present<-length(unique(known$sample[known$true_area>0]))
+      graphics::mtext(sprintf("100 reference compounds; 1,200 scans. Present in %d/16 samples; absent true profiles lie at zero. Original amplitudes retained.",present),
         1,outer=TRUE,line=.05,cex=.9)
     })
   }

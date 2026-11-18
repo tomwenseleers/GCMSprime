@@ -88,8 +88,15 @@
     
     
 <div class="section level2">
-<h2 id="sixteen-simulated-chromatograms">Sixteen simulated chromatograms<a class="anchor" aria-label="anchor" href="#sixteen-simulated-chromatograms"></a>
+<h2 id="sixteen-simulated-chromatograms">Small-scale 16-sample software comparison<a class="anchor" aria-label="anchor" href="#sixteen-simulated-chromatograms"></a>
 </h2>
+<p>This page reports the <strong>small-scale</strong> seven-workflow
+comparison. It is distinct from the <a href="multisample.html#benchmark-scales">large-scale 16-sample resource
+benchmark</a> with 10,000 scans and 1,000 reference compounds per
+sample. The linked overview reports both timings, settings and short
+reproduction recipes. Here GCMSprime uses a shorter explicit budget: two
+blind-PSF windows (at most three PSF iterations) and three coupled
+cycles, with <code>q=32</code>.</p>
 <p>The <strong>16 chromatograms</strong> share a library of <strong>100
 reference compounds</strong>. Each spans a 20-minute retention window,
 with 1,200 scans and all 258 mass channels. Compounds are absent from
@@ -287,16 +294,18 @@ PDF</a> shows every acquisition.</p>
 <p><a href="../reference/figures/simulated-16-regular-profiles.png"><img src="../reference/figures/simulated-16-regular-profiles.png" alt="Solid inferred and dashed true regular-compound profiles, blue to red by true area"></a></p>
 <p><a href="../reference/figures/simulated-16-acid-profiles.png"><img src="../reference/figures/simulated-16-acid-profiles.png" alt="Solid inferred and dashed true acid-compound profiles, blue to red by true area"></a></p>
 <p>The first panel set shows the regular compound with the largest total
-true area across samples; the second shows the acid compound. All 16
-samples are included and ordered by true abundance, from <strong>blue
-for the smallest area to red for the largest</strong>. <strong>Dashed
-curves are ground truth; solid curves are returned profiles.</strong>
-Intensities retain their original total-ion scale, without unit-area or
-peak-height normalization. Absent compounds have zero true signal.
-Compatible fragments remain separate curves so splitting stays visible.
-The generating retention-index calibration supplies the common
-horizontal axis; profile amplitudes remain on their native total-ion
-scale.</p>
+true area across samples (present in <strong>11 of 16 samples</strong>);
+the second shows the acid compound (present in <strong>7 of
+16</strong>). These are the same saved profiles shown on the logconNMF
+homepage. All 16 samples are included and ordered by true abundance,
+from <strong>blue for the smallest area to red for the largest</strong>.
+<strong>Dashed curves are ground truth; solid curves are returned
+profiles.</strong> Intensities retain their original total-ion scale,
+without unit-area or peak-height normalization. Absent compounds have
+zero true signal. Compatible fragments remain separate curves so
+splitting stays visible. The generating retention-index calibration
+supplies the common horizontal axis; profile amplitudes remain on their
+native total-ion scale.</p>
 <p>GCMSprime recovers all occurrences of both the regular EMG and the
 shark-fin-shaped acid. Mean profile cosine, counting missed occurrences
 as zero, is <strong>0.983 for the regular compound</strong> and

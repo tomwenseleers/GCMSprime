@@ -127,20 +127,25 @@ matching structures and active-worker buffers. During coupled count-model
 refinement, each worker can retain one original matrix up to 64 MiB plus an
 equally sized likelihood-normalizer cache. Larger samples use local disk reads. The
 [multisample tutorial](https://tomwenseleers.github.io/GCMSprime/articles/multisample.html)
-reports measured memory and timings on full-sized chromatograms. A full-size validation with 16 samples, 10,000 scans and 550 recorded
+reports measured memory and timings on full-sized chromatograms. A separate large-scale validation with 16 samples, 10,000 scans and 550 recorded
 channels per sample recovers 7,864 of 7,917 true
 occurrences (F1 0.988), with a measured peak private memory of
-22.78 GiB. The linked tutorial gives the complete
-timing boundaries, recovery results and reproducible code.
+22.78 GiB and total wall time **2534.14 s (42.24 min)**, including
+**1530.20 s (25.50 min)** of alignment and simultaneous refinement.
+The linked tutorial compares this run with the small-scale benchmark below
+and gives the distinct settings, timing boundaries and reproduction code.
 Original scan grids are retained, and compounds absent from a sample stay
 unassigned in its area table.
 
-In the [16-sample benchmark](https://tomwenseleers.github.io/GCMSprime/articles/benchmarks.html), GCMSprime recovers
+In the [small-scale 16-sample software comparison](https://tomwenseleers.github.io/GCMSprime/articles/benchmarks.html), GCMSprime recovers
 **750 of 769 true occurrences in 146.50 s**, including the acid compound in
 all seven samples where it occurs. Each chromatogram has 100 candidate
 compounds, 1,200 scans and 258 mass channels, with drift, concentration-dependent
 broadening and a smooth background derived from experimental GC/MS data.
 Initialization uses 32 ion groups and the final fit uses every original ion.
+This smaller simulation uses an explicit three-cycle coupled refinement budget;
+its 146.50 s total includes **22.87 s** of alignment and simultaneous refinement.
+The large-scale run uses the full 35-cycle default budget.
 
 ## Benchmarks against other software
 

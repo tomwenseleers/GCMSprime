@@ -4,7 +4,14 @@ description: "Peak-area accuracy, spectral ion support and elution-profile recov
 output: rmarkdown::html_document
 ---
 
-## Sixteen simulated chromatograms
+## Small-scale 16-sample software comparison {#sixteen-simulated-chromatograms}
+
+This page reports the **small-scale** seven-workflow comparison. It is distinct
+from the [large-scale 16-sample resource benchmark](multisample.html#benchmark-scales)
+with 10,000 scans and 1,000 reference compounds per sample. The linked overview
+reports both timings, settings and short reproduction recipes. Here GCMSprime
+uses a shorter explicit budget: two blind-PSF windows (at most three PSF
+iterations) and three coupled cycles, with `q=32`.
 
 The **16 chromatograms** share a library of **100 reference compounds**.
 Each spans a 20-minute retention window, with 1,200 scans and all 258 mass channels.
@@ -140,7 +147,9 @@ shows every acquisition.
 [![Solid inferred and dashed true acid-compound profiles, blue to red by true area](../reference/figures/simulated-16-acid-profiles.png)](../reference/figures/simulated-16-acid-profiles.png)
 
 The first panel set shows the regular compound with the largest total
-true area across samples; the second shows the acid compound. All 16 samples
+true area across samples (present in **11 of 16 samples**); the second shows
+the acid compound (present in **7 of 16**). These are the same saved profiles
+shown on the logconNMF homepage. All 16 samples
 are included and ordered by true abundance, from **blue for the smallest
 area to red for the largest**. **Dashed curves are ground truth; solid curves
 are returned profiles.** Intensities retain their original total-ion scale,

@@ -117,6 +117,54 @@ benchmarkFullsize16 <- function(directory="codex_sandbox/fullsize16",
   invisible(root)
 }
 
+# Recreate the large-benchmark positive-case acid display without refitting.
+# All matched acid-positive samples are shown; acid-negative samples are omitted.
+plotFullsize16Acid <- function(directory="codex_sandbox/fullsize16", file=NULL) {
+  object <- readRDS(file.path(directory,"analysis.rds"))
+  truth <- readRDS(file.path(directory,"truth.rds"))
+  names(truth) <- vapply(truth,`[[`,"","sample")
+  pairs <- utils::read.csv(file.path(directory,"matches.csv"))
+  acid <- pairs[pairs$acid,,drop=FALSE]
+  acid <- acid[order(acid$area_true),,drop=FALSE]
+  if(!nrow(acid)) stop("No matched acid occurrences to plot.")
+  positive <- sum(vapply(truth,function(x)sum(x$acid),0L))
+  curves <- lapply(seq_len(nrow(acid)),function(i) {
+    row <- acid[i,]
+    t <- truth[[sub("^samples[.]","",row$sample)]]
+    o <- readRDS(object$paths[match(row$sample,object$samples$sample_id)])
+    k <- match(as.integer(row$truth_id),t$id)
+    h <- as.numeric(t$H[,k])*t$area[k]
+    inferred <- as.numeric(o$model$H[,row$estimate_id])*sum(o$model$S[row$estimate_id,])
+    onset <- t$time[which(h>=max(h)*.01)[1L]]
+    keep <- which(pmax(h,inferred)>max(h,inferred)*1e-5)
+    list(time=(t$time-onset)*60,true=h,estimate=inferred,keep=keep)
+  })
+  if(is.null(file)) file <- file.path(directory,"fullsize-16-acid.png")
+  grDevices::png(file,width=1900,height=1000,res=180)
+  on.exit(grDevices::dev.off(),add=TRUE)
+  graphics::par(mar=c(5,5,4,1))
+  xr <- range(unlist(lapply(curves,function(z)z$time[z$keep])))
+  yr <- max(unlist(lapply(curves,function(z)c(z$true,z$estimate))))
+  graphics::plot(xr,c(0,yr*1.05),type="n",
+    xlab="Seconds relative to the true 1%-height onset",
+    ylab="Total-ion intensity per scan",
+    main=sprintf("Large-scale %d-sample benchmark | acid-positive profiles",length(truth)))
+  graphics::mtext(sprintf("10,000 scans; 1,000 reference compounds | %d matched / %d positive samples; %d acid-negative samples omitted",
+    nrow(acid),positive,length(truth)-positive),3,line=.6,cex=.8)
+  colours <- grDevices::colorRampPalette(c("blue2","red2"))(length(curves))
+  for(i in seq_along(curves)) {
+    z <- curves[[i]];at <- z$keep
+    graphics::lines(z$time[at],z$true[at],lty=2,col=colours[i],lwd=1)
+    graphics::lines(z$time[at],z$estimate[at],col=colours[i],lwd=1.5)
+  }
+  graphics::legend("topleft",c("Inferred","Ground truth"),
+    lty=c(1,2),lwd=c(1.5,1),bty="n")
+  graphics::mtext("Original amplitudes | blue to red: increasing true area among the displayed positive samples",
+    1,line=3.8,cex=.8)
+  invisible(file)
+}
+
+
 # Command-line stages use the same function as the interactive recipe.
 if(sys.nframe()==0L && !interactive()) {
   args <- commandArgs(TRUE)
