@@ -330,8 +330,12 @@ spreadsheet and returned coefficient rows use increasing apex retention time. Ra
 hard log concavity, censored Gamma intensities and compound-count information
 criteria follow \code{\link[logconNMF:logconNMF]{logconNMF::logconNMF()}}.
 During coupled refinement, aggregate observations are shared in memory.
-Original-channel profile checks can use a buffer up to 64 MiB per active
-worker; larger chromatograms retain local disk reads.
+Eligible count workers can retain one original matrix up to 64 MiB plus
+an equally sized likelihood-normalizer cache; larger chromatograms retain
+local disk reads. The caches are scoped to the fit and released on exit.
+Set \code{batch=list(cache=FALSE)} to disable persistent input caches. Likelihood
+reuse and stationary-background checks preserve the criterion, convergence
+tolerance and original-channel acceptance checks.
 }
 \section{Experimental GC/MS examples}{
 

@@ -1,4 +1,4 @@
-# GCMSprime 0.1.0.9000
+# GCMSprime 0.1.0.9001
 
 ## Chromatograms and calibration
 
@@ -27,8 +27,10 @@
   labels, selects alkane standards, aligns samples and estimates shared spectra
   with sample-specific areas and profiles.
 
-* Coupled original-channel profile checks reuse bounded per-worker read
-  buffers, avoiding repeated reads without changing the acceptance criterion.
+* Coupled refinement reuses likelihoods and bounded count-data/normalizer
+  caches, using the optimized logconNMF backend. Caches are released on return
+  and can be disabled with `batch=list(cache=FALSE)`. The original-channel
+  criterion, iteration budgets, grouping rules and shape constraints are retained.
 * `ncores` is a total logical-CPU budget for concurrent samples and native
   fitting. Automatic directory budgets use logical cores; single chromatograms
   use physical cores. A shared reusable ion-group map and bounded coupled updates keep

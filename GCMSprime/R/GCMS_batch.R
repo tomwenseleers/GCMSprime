@@ -83,7 +83,10 @@ GCMS_batch_files <- function(directory,output_dir,sample_order=NULL,alkanes_file
 #' `coupling=list()` for [logconNMF::logconNMF()] controls, `sample_order=NULL`,
 #' `exposure=NULL`, `resume=FALSE`, `plots=FALSE`, `workers=NULL` and `cache=TRUE`.
 #' `workers` limits concurrent samples within the total `ncores` budget.
-#' `cache` controls the aggregated-observation RAM cache during simultaneous fitting.
+#' `cache` controls aggregate observations and bounded original count-data
+#' caches during simultaneous fitting. Each eligible worker retains at most
+#' 64 MiB of observations plus their likelihood normalizers; buffers are
+#' released when the fit returns. `cache=FALSE` disables persistent input caches.
 #' `exposure` may be a positive
 #' scalar, a list with one scan-wise vector per acquisition-ordered sample, or
 #' a function of a sample's metadata and time vector. The default preserves

@@ -83,7 +83,10 @@ If acquisition dates are absent, pass explicit relative sample paths in
 \code{coupling=list()} for \code{\link[logconNMF:logconNMF]{logconNMF::logconNMF()}} controls, \code{sample_order=NULL},
 \code{exposure=NULL}, \code{resume=FALSE}, \code{plots=FALSE}, \code{workers=NULL} and \code{cache=TRUE}.
 \code{workers} limits concurrent samples within the total \code{ncores} budget.
-\code{cache} controls the aggregated-observation RAM cache during simultaneous fitting.
+\code{cache} controls aggregate observations and bounded original count-data
+caches during simultaneous fitting. Each eligible worker retains at most
+64 MiB of observations plus their likelihood normalizers; buffers are
+released when the fit returns. \code{cache=FALSE} disables persistent input caches.
 \code{exposure} may be a positive
 scalar, a list with one scan-wise vector per acquisition-ordered sample, or
 a function of a sample's metadata and time vector. The default preserves

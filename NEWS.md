@@ -1,4 +1,4 @@
-# GCMSprime 0.1.0.9000
+# GCMSprime 0.1.0.9001
 
 ## Chromatograms and calibration
 
@@ -59,3 +59,8 @@
 
 * Nested stage timing avoids forced garbage collection between local fits;
   ordinary R memory management remains active.
+
+* Coupled refinement reuses likelihoods and bounded count-data/normalizer
+  caches, using the optimized logconNMF backend. Caches are released on return
+  and can be disabled with `batch=list(cache=FALSE)`. The original-channel
+  criterion, iteration budgets, grouping rules and shape constraints are retained.
