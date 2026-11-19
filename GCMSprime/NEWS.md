@@ -1,3 +1,14 @@
+# GCMSprime 0.1.0.9003
+
+* Full-chromatogram component initialization retries Cholesky workspace-budget
+  failures with diagonally preconditioned Eigen CG, reporting the switch and
+  retaining the memory limit and selection settings. Requires logconNMF 0.1.0.9003.
+* `gcmsDeco(control=list(initial_solver=...))` exposes L0glm solver controls,
+  including `method`, `precond` and `max.memory` in GiB.
+  `initial_fallback=FALSE` disables the automatic retry (GCMSprime issue #1).
+* With `batch=list(cache=FALSE)`, coupled profile refinement reads local windows
+  from disk instead of creating temporary whole-sample observation caches.
+
 # GCMSprime 0.1.0.9002
 
 ## Chromatograms and calibration

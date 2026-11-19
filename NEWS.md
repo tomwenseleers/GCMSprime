@@ -1,3 +1,10 @@
+# GCMSprime 0.1.0.9003
+
+* Expose initialization solver controls through `gcmsDeco()` and automatically
+  retry Cholesky workspace-budget failures with diagonally preconditioned CG.
+  The memory limit and selection settings are retained. Requires logconNMF
+  0.1.0.9003; `initial_fallback=FALSE` disables the retry (issue #1).
+
 # GCMSprime 0.1.0.9002
 
 ## Chromatograms and calibration
