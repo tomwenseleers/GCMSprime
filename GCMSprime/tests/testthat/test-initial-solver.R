@@ -70,6 +70,7 @@ test_that("coupled and independent sample series finish with a zero Gram budget"
   expect_equal(GIC(fallback), GIC(reference), tolerance = 1e-8)
   expect_true(all(is.finite(fallback$areas)))
   expect_equal(fallback$parallel, list(ncores = 2L, workers = 1L, threads = 2L))
+  expect_equal(fallback$coupled$parallel, list(ncores = 2L, workers = 1L, threads = 2L))
   expect_null(fallback$coupled$store$cache)
   expect_true(any(fallback$coupled$history$stage == "simultaneous_cycle"))
   for (sample in 1:2) {
@@ -79,6 +80,7 @@ test_that("coupled and independent sample series finish with a zero Gram budget"
     expect_true(file.exists(fit$msp_file) && file.exists(fit$xlsx_file))
     initial <- readRDS(file.path(dirname(fallback$paths[sample]), "initial.rds"))$fit
     expect_equal(initial$model$control$initial_solver$max.memory, 0)
+    expect_equal(initial$model$ncores, 2L)
   }
   args$coupled <- FALSE
   expect_message(independent <- do.call(gcmsDeco, c(args, list(output_dir = outputs[3L]))),

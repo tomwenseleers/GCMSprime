@@ -126,6 +126,9 @@ GCMS_batch_files <- function(directory,output_dir,sample_order=NULL,alkanes_file
 #' For memory-limited series, `batch=list(workers=1L, cache=FALSE)` processes
 #' one sample at a time and reads observations from disk during coupled fitting,
 #' including local profile windows instead of temporary whole-sample caches.
+#' The worker limit applies to initialization and coupled refinement unless
+#' overridden by `batch$coupling$workers`. Native threads within the active
+#' sample can still use the `ncores` budget.
 #' `control$initial_solver` and `control$initial_fallback` apply to every
 #' independent sample initialization, just as for a single chromatogram.
 #' The solver's `max.memory` bounds its Gram/factor workspace, not total RAM;

@@ -82,10 +82,15 @@ Use one sample worker and disable observation caches to reduce concurrent
 working memory while retaining coupled refinement:
 
 ```r
-experiment <- gcmsDeco("chromatograms", output_dir="results",
+experiment <- gcmsDeco("chromatograms", output_dir="results", ncores=8L,
   control=list(initial_solver=list(solver="eigen", method=3L, precond=1L)),
   batch=list(workers=1L, cache=FALSE))
 ```
+
+This processes one sample at a time during both initialization and coupled
+refinement, while allowing up to eight native threads within the active sample.
+`batch$coupling$workers` can override the worker limit for coupled refinement
+alone if more concurrent samples are wanted in that stage.
 
 `max.memory` limits the solver's Gram/factor workspace, not total process RAM.
 The observed data, profiles and refinement buffers still need to fit in memory

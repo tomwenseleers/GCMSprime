@@ -126,6 +126,9 @@ or 2.56 GB for 1,000 samples, in addition to worker and factor memory.
 For memory-limited series, \code{batch=list(workers=1L, cache=FALSE)} processes
 one sample at a time and reads observations from disk during coupled fitting,
 including local profile windows instead of temporary whole-sample caches.
+The worker limit applies to initialization and coupled refinement unless
+overridden by \code{batch$coupling$workers}. Native threads within the active
+sample can still use the \code{ncores} budget.
 \code{control$initial_solver} and \code{control$initial_fallback} apply to every
 independent sample initialization, just as for a single chromatogram.
 The solver's \code{max.memory} bounds its Gram/factor workspace, not total RAM;
