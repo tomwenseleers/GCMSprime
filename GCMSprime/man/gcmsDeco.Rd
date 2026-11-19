@@ -158,7 +158,7 @@ For a single chromatogram, this sets its native OpenMP thread count.}
 \code{final_polishes=1L}, \code{native_sweeps=6L}, \code{block_sweeps=6L},
 \code{psf_width=NULL}, \code{screen_factor=1}, \code{censor=0.5}, \code{linkage="ward"},
 \code{joint_trials=NULL}, \code{profile_cycles=4L}, \code{fusion_passes=0L},
-\code{initial_relaxed=TRUE},
+\code{initial_relaxed=TRUE}, \code{initial_solver=list()}, \code{initial_fallback=TRUE},
 \code{profile_fusion=TRUE}, \code{profile_restarts=TRUE}. \code{joint_trials} uses direct Poisson fusion for Poisson data
 and joint local refinement for the other families. \code{psf_width} supplies
 the typical FWHM in scans. When omitted, local updates use the middle design
@@ -182,7 +182,18 @@ Broad fusions are compared with an equally refined unmerged local model.
 The entire support of every updated component is included in the local
 fit, with the remaining components and background held in an offset.
 \code{original_cleanup=TRUE} enables a final original-channel deletion, local
-fusion and residual-discovery pass. Set it to \code{FALSE} to skip that pass.}
+fusion and residual-discovery pass. Set it to \code{FALSE} to skip that pass.
+\code{initial_solver} supplies named \code{\link[L0glm:controlSolverGen]{L0glm::controlSolverGen()}} arguments for
+the initial component-selection fit, including \code{solver}, \code{method},
+\code{precond}, \code{tol}, \code{maxit} and \code{max.memory} (GiB). For example,
+\code{list(initial_solver=list(solver="eigen", method=3L, precond=1L))}
+requests Eigen conjugate gradients with diagonal preconditioning.
+The default is Eigen Cholesky. If that fit exceeds L0glm's Gram/factor
+workspace budget, \code{initial_fallback=TRUE} retries with diagonally
+preconditioned CG and reports the switch. The retry retains the memory
+limit, data, weights, background, penalty and component-selection settings.
+Other errors and failures of explicitly selected iterative solvers propagate.
+Set \code{initial_fallback=FALSE} to require the requested solver.}
 
 \item{psf_control}{Named PSF settings. Entries \code{method}, \code{standard},
 \code{precluster}, \code{weights} and \code{offset} are passed directly to \code{\link[logconNMF:estimatePSF]{logconNMF::estimatePSF()}}.
@@ -320,6 +331,15 @@ working-correlation adjustment. Small fragments contained in a broad peak
 are assessed against equally refined unmerged local fits on every original
 ion channel. Trial diagnostics are in \code{model$contained_fusion}; the
 initialization criterion and history are in \code{model$initialization}.
+Initial component selection uses the solver configured by
+\code{control$initial_solver}, a named list of \code{\link[L0glm:controlSolverGen]{L0glm::controlSolverGen()}}
+arguments. For a full chromatogram, for example,
+\code{control=list(initial_solver=list(solver="eigen", method=3L, precond=1L))}
+requests conjugate gradients with diagonal preconditioning. \code{max.memory}
+in that list specifies the Gram/factor workspace budget in GiB. By default,
+a Cholesky workspace-budget error triggers a reported retry with this CG
+solver, preserving the memory limit and selection settings. Set
+\code{control=list(initial_fallback=FALSE)} to disable the retry.
 Compatible Poisson/quasipoisson fits reuse the ion groups to screen local
 width restarts. Promising candidates and matched controls are refined and
 accepted using all original channels, with background and noise settings

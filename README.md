@@ -62,6 +62,40 @@ The fit allows asymmetric and broad profiles under a hard log-concavity
 constraint. The rank criterion selects the component set, and final
 refinement uses every original mass channel.
 
+For full chromatograms, Cholesky initialization automatically retries with
+diagonally preconditioned conjugate gradients if it exceeds L0glm's workspace
+budget. The switch is reported and retains the memory limit and selection
+settings. To request the iterative solver directly, use:
+
+```r
+fit <- gcmsDeco("sample.cdf", "sample.msp", alkanes_file="alkanes.cdf",
+  control=list(initial_solver=list(solver="eigen", method=3L, precond=1L)))
+```
+
+The `initial_solver` list accepts `L0glm::controlSolverGen()` arguments,
+including `max.memory` in GiB. Set `initial_fallback=FALSE` in `control` to
+require the chosen solver. These controls require GCMSprime and logconNMF
+0.1.0.9003 or later.
+
+For a sample series with limited RAM, the same controls apply to each sample.
+Use one sample worker and disable observation caches to reduce concurrent
+working memory while retaining coupled refinement:
+
+```r
+experiment <- gcmsDeco("chromatograms", output_dir="results", ncores=8L,
+  control=list(initial_solver=list(solver="eigen", method=3L, precond=1L)),
+  batch=list(workers=1L, cache=FALSE))
+```
+
+This processes one sample at a time during both initialization and coupled
+refinement, while allowing up to eight native threads within the active sample.
+`batch$coupling$workers` can override the worker limit for coupled refinement
+alone if more concurrent samples are wanted in that stage.
+
+`max.memory` limits the solver's Gram/factor workspace, not total process RAM.
+The observed data, profiles and refinement buffers still need to fit in memory
+for each active sample.
+
 ### Six co-eluting hydrocarbons
 
 The bundled cuticular-hydrocarbon window illustrates recovered elution profiles

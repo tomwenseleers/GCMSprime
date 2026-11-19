@@ -123,6 +123,16 @@ spectral/background updates read blocks of at most 32 channels. Each active
 independent fit has its own temporary working buffers; these are released
 before the next assigned sample. A 10,000-by-32 cache needs 2.56 MB per sample,
 or 2.56 GB for 1,000 samples, in addition to worker and factor memory.
+For memory-limited series, \code{batch=list(workers=1L, cache=FALSE)} processes
+one sample at a time and reads observations from disk during coupled fitting,
+including local profile windows instead of temporary whole-sample caches.
+The worker limit applies to initialization and coupled refinement unless
+overridden by \code{batch$coupling$workers}. Native threads within the active
+sample can still use the \code{ncores} budget.
+\code{control$initial_solver} and \code{control$initial_fallback} apply to every
+independent sample initialization, just as for a single chromatogram.
+The solver's \code{max.memory} bounds its Gram/factor workspace, not total RAM;
+each active sample still requires its observations, profiles and fit buffers.
 Keep the output directory with the saved object. Explicit \code{resume=TRUE}
 reuses independent fits only when the file metadata and fitting arguments
 match; simultaneous refinement is recomputed.

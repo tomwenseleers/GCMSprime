@@ -263,6 +263,15 @@ GCMS_write_msp <- function(model,time,mass,msp_file,compounds=NULL,ion_threshold
 #' are assessed against equally refined unmerged local fits on every original
 #' ion channel. Trial diagnostics are in `model$contained_fusion`; the
 #' initialization criterion and history are in `model$initialization`.
+#' Initial component selection uses the solver configured by
+#' `control$initial_solver`, a named list of [L0glm::controlSolverGen()]
+#' arguments. For a full chromatogram, for example,
+#' `control=list(initial_solver=list(solver="eigen", method=3L, precond=1L))`
+#' requests conjugate gradients with diagonal preconditioning. `max.memory`
+#' in that list specifies the Gram/factor workspace budget in GiB. By default,
+#' a Cholesky workspace-budget error triggers a reported retry with this CG
+#' solver, preserving the memory limit and selection settings. Set
+#' `control=list(initial_fallback=FALSE)` to disable the retry.
 #' Compatible Poisson/quasipoisson fits reuse the ion groups to screen local
 #' width restarts. Promising candidates and matched controls are refined and
 #' accepted using all original channels, with background and noise settings
