@@ -31,7 +31,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">GCMSprime</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9006</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9007</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -150,15 +150,17 @@ its banded design and fit a nonnegative grouped L0 regression across
 channels. For a single sample the independent log-concave fit supplies
 local starts. Repeated acquisitions can share a PSF estimated from
 pooled, count-conserving total-ion traces. Channel aggregation
-accelerates the initial regression. Lift its spectra back to original
-channels with a nonnegative fit.</li>
+accelerates the initial regression. Estimate the original-ion
+intensities by nonnegative least squares. The sparse Gram matrix records
+which initial profiles overlap.</li>
 <li>
 <strong>Locate candidate occurrences.</strong> With several samples,
-spectral anchors estimate monotone time maps. On that shared clock,
-propose local spectral directions that overlapping candidates cannot
-already explain by a nonnegative mixture. Retain native time coordinates
-for testing peak shape. With one sample the time map is the
-identity.</li>
+interpolate each peak’s 1%-height onset on its native scan grid.
+Reciprocal spectral matches within the retention window provide the
+anchors for monotone time maps. On that shared clock, propose local
+spectral directions that overlapping candidates cannot already explain
+by a nonnegative mixture. Retain native time coordinates for testing
+peak shape. With one sample the time map is the identity.</li>
 <li>
 <strong>Alternate two conditional updates.</strong> Visit components
 in decreasing total abundance. To update one profile, put all other

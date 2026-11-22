@@ -68,13 +68,13 @@ compounds.
 | True occurrences | 769 | 7,917 |
 | Samples containing the acid | 7 | 8 |
 | PSF calibration | Blind, two windows | Standard-assisted, ten windows |
-| Complete 16-sample analysis | **54.94 s (0.92 min)** | **552.69 s (9.21 min)** |
+| Complete 16-sample analysis | **52.37 s (0.87 min)** | **533.88 s (8.90 min)** |
 
-Both runs used GCMSprime and logconNMF 0.1.0.9006. Timings cover the
+Both runs used GCMSprime and logconNMF 0.1.0.9007. Timings cover the
 complete batch from CDF input through export. In the small experiment,
-CDF preparation, calibration and grouping took 11.34 s, grouped
-initialization and joint refinement took 39.45 s, and result
-construction and export took 3.91 s. The benchmark wrapper added 0.24 s.
+CDF preparation, calibration and grouping took 10.31 s, grouped
+initialization and joint refinement took 37.87 s, and result
+construction and export took 3.98 s. The benchmark wrapper added 0.21 s.
 The large experiment is documented below.
 
 ## Small-scale 16-sample software comparison
@@ -124,7 +124,7 @@ occurrences. Ordinary adjusted log-area R² was **0.999628**, the median
 absolute peak-area error was **0.10%**, and mean spectral ion-support F1
 was **0.995** at the shared 0.1% base-peak threshold.
 
-The benchmark wrapper measured **54.94 s** from CDF input through
+The benchmark wrapper measured **52.37 s** from CDF input through
 results with four two-thread PSF workers and eight threads available for
 joint refinement on an HP ZBook Fury G8, Intel Core i9-11950H, eight
 physical cores, 16 logical threads, Windows and R 4.5.0. CDF generation
@@ -177,22 +177,22 @@ uses RI-constrained reciprocal hits.
 
 | CDF workflow stage | Seconds |
 |:---|---:|
-| Reading data, preparing sample PSFs and initialization | 139.60 |
-| Grouped PSF regression, alignment and joint original-channel refinement | 383.22 |
-| Constructing and exporting results | 29.87 |
-| **Complete fit and exports** | **552.69** |
+| Reading data, preparing sample PSFs and initialization | 144.35 |
+| Grouped PSF regression, alignment and joint original-channel refinement | 357.67 |
+| Constructing and exporting results | 31.86 |
+| **Complete fit and exports** | **533.88** |
 
-Within the 383.22 s coupled stage, grouped PSF regression took 119.65 s
-and alignment and joint refinement took 263.33 s. Simulation, separate
+Within the 357.67 s coupled stage, grouped PSF regression took 108.75 s
+and alignment and joint refinement took 248.67 s. Simulation, separate
 standard calibration and scoring against truth are outside the timed
 fit.
 
 On the HP ZBook Fury G8 (Core i9-11950H, eight physical cores, 16
 logical cores and 64 GB RAM), the memory-aware scheduler used **6 PSF
 workers with 2 threads each**. The joint solver could use all 16
-threads. Across the measured workflow the process tree averaged **5.61
-logical-core equivalents** and peaked at **6.12 GiB working set** and
-**5.78 GiB private memory**. At least 28.57 GiB of physical memory
+threads. Across the measured workflow the process tree averaged **4.59
+logical-core equivalents** and peaked at **6.96 GiB working set** and
+**7.23 GiB private memory**. At least 29.46 GiB of physical memory
 stayed available.
 
 ![Measured process-tree memory and CPU use for sixteen full-sized
@@ -272,14 +272,14 @@ PSF regressions divide the core budget between independent samples and
 native threads. The scheduler estimates how many regressions fit in
 available memory, including Windows commit headroom. After those workers
 exit, a single process shares the original ion counts and fitted means.
-It updates profiles and backgrounds across samples and fits disjoint ion
-columns of the shared spectra concurrently. Peak merges and exchanges
-retain their original order. The general identity-link solver can stream
-original-channel blocks from disk. Use `batch=list(workers=4L)` to cap
-file-import and PSF worker counts. For this workflow,
-`experiment$parallel$workers` and `experiment$parallel$threads` describe
-the grouped PSF regressions. `ncores` sets the total thread budget for
-joint refinement.
+OpenMP updates elution profiles across samples. It fits each ion’s
+shared spectrum and sample-specific background coefficients
+independently, keeping a fixed component order within each ion. The
+general identity-link solver can stream original-channel blocks from
+disk. Use `batch=list(workers=4L)` to cap file-import and PSF worker
+counts. For this workflow, `experiment$parallel$workers` and
+`experiment$parallel$threads` describe the grouped PSF regressions.
+`ncores` sets the total thread budget for joint refinement.
 
 The same ion groups are used across samples for matching. They are
 learned from a pooled, time-binned chromatogram or supplied through
@@ -373,11 +373,11 @@ and 1,076 occurrences**.
 | 54040014_a     |         527 |     617.21 |       15,068,092 |              0.98345 |
 
 The joint quasi-GIC was **28,467,211**, with each shared spectrum
-charged once. The two beer CDFs took **374.99 s** from input through
-export. Preparation and calibration took 130.50 s, grouped regression
-and joint refinement 238.16 s, and result construction and export 5.86
-s. Separate RI calibration took 3.72 s and RI annotation and export took
-4.16 s. Plotting is excluded.
+charged once. The two beer CDFs took **302.19 s** from input through
+export. Preparation and calibration took 122.73 s, grouped regression
+and joint refinement 172.88 s, and result construction and export 6.10
+s. Separate RI calibration took 2.52 s and RI annotation and export took
+3.69 s. Plotting is excluded.
 
 Using the Agilent NIST records, a ±30 RI window and a minimum spectral
 cosine of 0.85, the two beers yielded **212 and 203 distinct reciprocal

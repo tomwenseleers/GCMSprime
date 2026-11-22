@@ -109,7 +109,7 @@ print(x, ...)
 
   Information-criterion preset or a nonnegative numeric penalty. The
   conditional solver charges a numeric penalty per dimension of the
-  spectrum and log-concave profiles. For the classic solver the numeric
+  spectrum and log-concave profiles. For the general solver the numeric
   value specifies the total charge per single-sample compound and the
   charge per selection degree of freedom in a joint fit.
 
@@ -434,7 +434,7 @@ Multiple samples share spectra on their native scan grids. Explicit
 numeric lambda is per fitted dimension for this solver. See the
 mathematical basis article.
 
-With the classic solver, `precluster=32L` performs selection and fusion
+With the general solver, `precluster=32L` performs selection and fusion
 in at most 32 size-adjusted outcome groups, followed by refinement on
 every original channel. The final original-channel cleanup checks
 deletions, local fusions and missed residual peaks using the complete

@@ -1,3 +1,7 @@
+# GCMSprime 0.1.0.9007
+
+- Single-sample and batch Poisson and quasi-Poisson analyses use the conditional solver included in logconNMF.
+
 # GCMSprime 0.1.0.9006
 
 - Multisample deconvolution uses the original-ion overlap refit in logconNMF. Peak-area benchmarks report ordinary least-squares adjusted R² and pointwise 95% prediction intervals on log-transformed areas.
@@ -9,7 +13,7 @@
 # GCMSprime 0.1.0.9004
 
 * `gcmsDeco()` uses logconNMF's conditional count solver for compatible analyses. Repeated injections can share a count-conserving PSF calibration, grouped initialization and a sparse original-ion spectrum per compound. The single-sample and 16-sample tutorials report timings and recovery from the fitted examples.
-* `algorithm` selects the solver and `objective.trace` records its conditional objective. `logconNMF::conditionalSolverAvailable()` checks Python availability.
+* `algorithm` selects the solver and `objective.trace` records its conditional objective.
 
 # GCMSprime 0.1.0.9003
 

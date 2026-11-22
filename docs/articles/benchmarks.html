@@ -31,7 +31,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">GCMSprime</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9006</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9007</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -131,7 +131,7 @@ it occurs.</p>
 <tbody>
 <tr class="odd">
 <td align="left">GCMSprime</td>
-<td align="right">54.94</td>
+<td align="right">52.37</td>
 <td align="right">769</td>
 <td align="right">26</td>
 <td align="right">100.0%</td>
@@ -200,15 +200,15 @@ cores and 16 logical threads, Windows and R 4.5.0. AMDIS runs serially
 and xcms + CAMERA uses four workers. Input conversion is timed
 separately. The six comparator rows use their saved outputs and timings
 from the identical simulated inputs.</p>
-<p>GCMSprime and logconNMF 0.1.0.9006 used 32 ion groups for the PSF
+<p>GCMSprime and logconNMF 0.1.0.9007 used 32 ion groups for the PSF
 regressions and all 258 original ions for the joint fit. The fitted rank
 is 115 shared identities with 795 sample-level calls. Its
 original-channel quasi-GIC is <strong>4,173,728</strong>. CDF
-preparation, calibration and grouping took 11.34 s, grouped regressions,
-alignment and factor updates took 39.45 s, and result construction and
-export took 3.91 s. Grouped initialization accounted for 8.50 s and
-simultaneous factorization for 30.85 s within the 39.45 s stage. The
-enclosing benchmark measured 54.94 s. On two further 16-sample
+preparation, calibration and grouping took 10.31 s, grouped regressions,
+alignment and factor updates took 37.87 s, and result construction and
+export took 3.98 s. Grouped initialization accounted for 7.96 s and
+simultaneous factorization for 29.85 s within the 37.87 s stage. The
+enclosing benchmark measured 52.37 s. On two further 16-sample
 simulations the same settings recovered <strong>775 of 778 occurrences
 with only 17 false positives</strong> and <strong>803 of 803 with only
 35 false positives</strong>. One matched occurrence in the latter

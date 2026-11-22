@@ -84,7 +84,7 @@ GCMS_batch_files <- function(directory,output_dir,sample_order=NULL,alkanes_file
 #' `exposure=NULL`, `resume=FALSE`, `plots=FALSE`, `workers=NULL` and `cache=TRUE`.
 #' `workers` controls simultaneous file imports and sample-level PSF fits.
 #' The joint count solver uses the total `ncores` budget after those stages.
-#' With the classic solver, `cache` controls aggregate and original-data caches.
+#' With the general solver, `cache` controls aggregate and original-data caches.
 #' The conditional solver holds original observations and means in memory for
 #' joint factor updates and releases its PSF workers before this stage.
 #' `exposure` may be a positive

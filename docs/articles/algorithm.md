@@ -58,13 +58,16 @@ the reported information criterion for that dataset.
     For a single sample the independent log-concave fit supplies local
     starts. Repeated acquisitions can share a PSF estimated from pooled,
     count-conserving total-ion traces. Channel aggregation accelerates
-    the initial regression. Lift its spectra back to original channels
-    with a nonnegative fit.
-2.  **Locate candidate occurrences.** With several samples, spectral
-    anchors estimate monotone time maps. On that shared clock, propose
-    local spectral directions that overlapping candidates cannot already
-    explain by a nonnegative mixture. Retain native time coordinates for
-    testing peak shape. With one sample the time map is the identity.
+    the initial regression. Estimate the original-ion intensities by
+    nonnegative least squares. The sparse Gram matrix records which
+    initial profiles overlap.
+2.  **Locate candidate occurrences.** With several samples, interpolate
+    each peak’s 1%-height onset on its native scan grid. Reciprocal
+    spectral matches within the retention window provide the anchors for
+    monotone time maps. On that shared clock, propose local spectral
+    directions that overlapping candidates cannot already explain by a
+    nonnegative mixture. Retain native time coordinates for testing peak
+    shape. With one sample the time map is the identity.
 3.  **Alternate two conditional updates.** Visit components in
     decreasing total abundance. To update one profile, put all other
     components and background in the offset. Compute per-scan
