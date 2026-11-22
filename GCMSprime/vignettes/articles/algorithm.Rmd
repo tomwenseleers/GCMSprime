@@ -89,6 +89,8 @@ reported information criterion for that dataset.
    solution. Supplied ground truth need not minimize a penalized criterion
    on one realization of noisy data.
 
+For overlapping peaks, a spectrum observed in relatively few samples can be proposed as a nonnegative combination of recurring spectra from the same aligned retention interval. Each proposed template must also occur in a sample where the putative mixture is absent. The solver refits the contributing log-concave profiles and shared spectra on the original ion counts. It tests both redistribution and retention of a residual spectrum. Within a sample, profiles whose half-height intervals overlap and whose spectra are nearly linearly dependent are also refitted jointly. The fit compares keeping the locally redundant profiles with dropping them. The fitted background and other compounds contribute to the offset in each comparison. An exchange is accepted only when it lowers the same deviance-plus-dimension penalty as the factor updates. Library identities and known peak areas enter only at validation.
+
 With the spectra fixed, profiles in different samples have separate likelihood contributions. With profiles fixed, the spectral likelihood and ion inclusion penalty separate by ion. Workers therefore update different samples or ion columns while preserving the component order within each. The spectral sweep transfers the unit-sum normalization into each profile after all ions have finished. Accepting a merge changes the offsets of its neighbours, so merge decisions remain sequential.
 
 For simulated data a truth-based comparison has a precise interpretation.
@@ -548,7 +550,7 @@ annotated exports.
 
 Directory analyses use one total core budget. For the default conditional count workflow, file import and noise estimation divide it among independent CDFs. The grouped PSF regressions choose the number of sample workers using available memory, unless the caller sets `batch$workers`. A joint fit then shares original-ion counts in memory and uses the core budget for the profile, background and shared-spectrum updates described above. Each sample retains its own time grid, PSF and noise calibration.
 
-### Disk-backed refinement in the classic solver
+### Disk-backed refinement in the general identity-link solver
 
 A shared aggregation is learned from summed chromatograms in common time bins.
 Matching and Poisson/quasipoisson profile proposals use these ion groups;

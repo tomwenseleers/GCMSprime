@@ -99,7 +99,7 @@ experiment <- gcmsDeco("chromatograms", output_dir="results", ncores=8L,
   batch=list(workers=1L, cache=FALSE))
 ```
 
-In this classic disk-backed fit, one sample is active at a time and can use up to eight native threads. The conditional count solver shares the original counts in RAM during its joint fit. Use `ncores=1L` to run the entire conditional workflow serially.
+In this disk-backed fit, one sample is active at a time and can use up to eight native threads. The conditional count solver shares the original counts in RAM during its joint fit. Use `ncores=1L` to run the entire conditional workflow serially.
 
 `max.memory` limits the solver's Gram/factor workspace, not total process RAM.
 The observed data, profiles and refinement buffers still need to fit in memory
@@ -157,13 +157,13 @@ experiment$samples
 experiment$areas
 ```
 
-Grouped PSF regressions divide the core budget between independent samples and native threads. The scheduler estimates how many regressions fit in available memory, including Windows commit headroom. After those workers exit, a single process shares the original ion counts and fitted means. It updates profiles and backgrounds across samples and fits disjoint ion columns of the shared spectra concurrently. Peak merges and exchanges retain their original order. The classic solver can stream original-channel blocks from disk.
-The full-size fit recovered **7,917 of 7,917 occurrences** with **16 false calls**
-in **11.24 min** across 16 chromatograms of 10,000 scans and 550 channels.
+Grouped PSF regressions divide the core budget between independent samples and native threads. The scheduler estimates how many regressions fit in available memory, including Windows commit headroom. After those workers exit, a single process shares the original ion counts and fitted means. It updates profiles and backgrounds across samples and fits disjoint ion columns of the shared spectra concurrently. Peak merges and exchanges retain their original order. The general identity-link solver can stream original-channel blocks from disk.
+The full-size fit recovered **7,917 of 7,917 occurrences** with **only 13 false positives**
+in **9.21 min** across 16 chromatograms of 10,000 scans and 550 channels.
 The [two 16-sample experiments](https://tomwenseleers.github.io/GCMSprime/articles/multisample.html#benchmark-scales) give the measured resource use, timings and recovery at both acquisition sizes.
 
 In the [small-scale 16-sample software comparison](https://tomwenseleers.github.io/GCMSprime/articles/benchmarks.html), GCMSprime recovers
-**767 of 769 true occurrences in 70.81 s**, including the acid compound in
+**769 of 769 true occurrences in 54.94 s**, including the acid compound in
 all seven samples where it occurs. Each chromatogram has 100 candidate
 compounds, 1,200 scans and 258 mass channels, with drift, concentration-dependent
 broadening and a smooth background derived from experimental GC/MS data.
@@ -173,15 +173,14 @@ The grouped regressions used four two-thread workers. The joint fit reused the e
 ## Benchmarks against other software
 
 On **16 chromatograms with 100 reference compounds**, GCMSprime recovers
-**767 of 769 true peak occurrences**, with **42 false positives**
-(peak F1 **0.972**). Its total-ion peak areas show **robust adjusted R² 0.999995**
+**769 of 769 true peak occurrences**, with **only 26 false positives**
+(peak F1 **0.983**). Its total-ion peak areas show **ordinary adjusted R² 0.999628**
 and **median absolute area error 0.10%**.
 
-[![True and estimated total-ion peak areas with robust fits](GCMSprime/man/figures/simulated-16-area-predictions.png)](GCMSprime/man/figures/simulated-16-area-predictions.png)
+[![True and estimated total-ion peak areas with least-squares fits](GCMSprime/man/figures/simulated-16-area-predictions.png)](GCMSprime/man/figures/simulated-16-area-predictions.png)
 
 All methods use total-ion count equivalents, accounting for native model-ion
-fractions and integration-time units. The robust log–log fit and prediction
-band show the main error distribution. Points have opacity 0.5, so darker areas
+fractions and integration-time units. The least-squares line summarizes the log–log relationship. Its pointwise 95% prediction interval describes the scatter of individual matched peak areas. Points have opacity 0.5, so darker areas
 show denser overlap. The dashed 1:1 reference is visible in every panel.
 
 [![Reciprocal spectral cosine similarities for seven workflows](GCMSprime/man/figures/simulated-16-spectral-violin.png)](GCMSprime/man/figures/simulated-16-spectral-violin.png)

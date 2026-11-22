@@ -6,7 +6,7 @@
   on 16 samples with 48 reference compounds and 1,200 scans. The conditional
   solver recovered all 380 occurrences with zero false positives. The
   shared spectra, areas and GIC agreed across 1, 8 and 16 requested threads.
-  Wall times were 71.63, 32.37 and 33.67 seconds, respectively.
+  Wall times were 63.95, 31.88 and 31.56 seconds, respectively.
   [Worker-count results](results/16_samples_parallel.csv)
 - `benchmark_fullsize_16.R` reproduces the 16-sample resource validation with
   10,000 scans, 550 recorded mass channels and about 500 compounds per sample.
@@ -52,4 +52,11 @@ Recreate the published CPU and memory figure directly from the recorded stage ti
 ```r
 source("benchmarks/plot_fullsize_resources.R")
 plotFullsize16Resources(file="fullsize-16-resources.png", physical_cores=8L, logical_cores=16L)
+```
+
+Recreate the occurrence counts and matched-area plot (violet diamonds mark acid peaks) from the same published tables.
+
+```r
+source("benchmarks/plot_fullsize_recovery.R")
+plotFullsize16Recovery()
 ```

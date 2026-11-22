@@ -33,12 +33,12 @@ separately in each sample, with a **median estimate of 829.55**. The generating
 retention-index maps are used for scoring;
 the deconvolution receives neither the known areas nor the true profiles.
 
-GCMSprime recovers **767 of 769 occurrences**, with **42 false positives**
-(peak F1 **0.972**), including the acid in all seven samples where it occurs.
+GCMSprime recovers **769 of 769 occurrences**, with **only 26 false positives**
+(peak F1 **0.983**), including the acid in all seven samples where it occurs.
 
 | Method | Seconds | TP | FP | Sensitivity | Peak F1 | Ion F1 |
 |:--|--:|--:|--:|--:|--:|--:|
-| GCMSprime | 70.81 | 767 | 42 | 99.7% | 0.972 | 0.995 |
+| GCMSprime | 54.94 | 769 | 26 | 100.0% | 0.983 | 0.995 |
 | MS-DIAL | 17.61 | 675 | 641 | 87.8% | 0.647 | 0.858 |
 | mzmine GC-EI | 38.47 | 622 | 70 | 80.9% | 0.851 | 0.860 |
 | eRah | 17.07 | 645 | 1912 | 83.9% | 0.388 | 0.771 |
@@ -53,7 +53,7 @@ their saved outputs and timings from the identical simulated inputs.
 
 GCMSprime used four two-thread workers for grouped PSF regressions and could use eight threads for the joint fit. Profile and background updates run across samples. Shared spectra run across ions. Local merge decisions and file exports also contribute to elapsed time.
 
-[![Robust estimated-versus-true total-ion peak areas](../GCMSprime/man/figures/simulated-16-area-predictions.png)](../GCMSprime/man/figures/simulated-16-area-predictions.png)
+[![Estimated-versus-true total-ion peak areas](../GCMSprime/man/figures/simulated-16-area-predictions.png)](../GCMSprime/man/figures/simulated-16-area-predictions.png)
 
 All panels use **total-ion count equivalents**. Spectra are normalized to
 unit L1 norm, with their magnitude transferred to the corresponding profile
@@ -68,14 +68,9 @@ Then $hs^\top=\widetilde h p^\top$ and $\sum_j p_j=1$.
 An area measured for a particular ion $q$ becomes
 $A_{\mathrm{TIC}}=A_q/p_q$, after converting its integration-time units.
 
-The line is a robust log–log fit using `robustbase::lmrob(setting="KS2014")`.
-The shaded 95% prediction band uses its robust residual scale and coefficient
-covariance, describing the main approximately Gaussian log-error distribution.
-The light-grey band shows the fitted prediction interval. Coloured points at
-alpha 0.5 show overlap density. The dashed 1:1 line is drawn over the points.
-The headings report robust adjusted R²; ordinary
-least-squares statistics are retained in the downloadable tables. GCMSprime
-has robust adjusted R² **0.999995** and a **median absolute area error of 0.10%**.
+The solid line fits an ordinary least-squares regression of log₁₀ estimated area on log₁₀ true area to all positive matched pairs, including the outliers. The shaded region is the pointwise 95% prediction interval for an individual peak at a given true area. The dashed line shows exact agreement. Darker points indicate overlap (opacity 0.5).
+
+GCMSprime recovered **all 769 occurrences**, with **adjusted R² 0.999628** and a **median absolute area error of 0.10%**. Even the lowest estimate was 72.5% of its true area.
 Area agreement is conditional on recovered true matches, so it is shown
 together with sensitivity and false-positive counts.
 
@@ -232,7 +227,5 @@ and `ri`, plus an increasing `time`/`ri` calibration data frame as
 `reference_ri_calibration`. The benchmark retains every call's best
 eligible library hit and reciprocal flag in `identifications`.
 
-Profile cosine compares shapes on the original time grid. Robust adjusted
-R² comes from a log–log lmrob regression on positive true matches; `area_pairs`
-gives its sample size. Duplicate calls are not summed into a matched area.
+Profile cosine compares shapes on the original time grid. Ordinary adjusted R² comes from a least-squares regression on the positive matched log₁₀ areas. The field `area_pairs` gives the number of pairs. Duplicate calls are not summed into a matched area.
 The summary reports their count alongside total false positives.

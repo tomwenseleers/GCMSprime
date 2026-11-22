@@ -80,12 +80,11 @@ exported factor scale is restored. CAMERA profiles remain explicitly labelled
 TIC-scaled representative-ion traces. These conversions use native exports and
 acquisition metadata only.
 
-\code{area_adjusted_R2} describes the robust log--log regression among matched
-positive pairs using \code{robustbase::lmrob(setting="KS2014")} and its corrected
-adjusted R-squared. \code{area_OLS_adjusted_R2} retains ordinary least-squares
-R-squared. Prediction bands use the robust residual scale and coefficient
-covariance, with approximately Gaussian errors for the main log-area
-distribution. Every observed point remains in the plot.
+\code{area_adjusted_R2} is the adjusted R-squared from ordinary least-squares
+regression of log10 estimated area on log10 true area among positive matched
+pairs. \code{area_OLS_adjusted_R2} is an alias retained for compatibility.
+Shaded bands are pointwise 95\% prediction intervals for one additional
+matched log area, calculated with \code{predict.lm(interval="prediction")}.
 \code{area_pairs} records the
 number of pairs used. These conditional area metrics should be read alongside
 TP, FP, FN and the number of matched pairs.

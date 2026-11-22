@@ -31,7 +31,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">GCMSprime</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9005</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9006</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -114,9 +114,10 @@ estimated from that window. GCMSprime estimates dispersion separately in
 each sample, with a <strong>median estimate of 829.55</strong>. The
 generating retention-index maps are used for scoring; the deconvolution
 receives neither the known areas nor the true profiles.</p>
-<p>GCMSprime recovers <strong>767 of 769 occurrences</strong>, with
-<strong>42 false positives</strong> (peak F1 <strong>0.972</strong>),
-including the acid in all seven samples where it occurs.</p>
+<p>GCMSprime recovers <strong>769 of 769 occurrences</strong>, with
+<strong>only 26 false positives</strong> (peak F1
+<strong>0.983</strong>), including the acid in all seven samples where
+it occurs.</p>
 <table class="table">
 <thead><tr class="header">
 <th align="left">Method</th>
@@ -130,11 +131,11 @@ including the acid in all seven samples where it occurs.</p>
 <tbody>
 <tr class="odd">
 <td align="left">GCMSprime</td>
-<td align="right">70.81</td>
-<td align="right">767</td>
-<td align="right">42</td>
-<td align="right">99.7%</td>
-<td align="right">0.972</td>
+<td align="right">54.94</td>
+<td align="right">769</td>
+<td align="right">26</td>
+<td align="right">100.0%</td>
+<td align="right">0.983</td>
 <td align="right">0.995</td>
 </tr>
 <tr class="even">
@@ -199,17 +200,19 @@ cores and 16 logical threads, Windows and R 4.5.0. AMDIS runs serially
 and xcms + CAMERA uses four workers. Input conversion is timed
 separately. The six comparator rows use their saved outputs and timings
 from the identical simulated inputs.</p>
-<p>GCMSprime and logconNMF 0.1.0.9005 used 32 ion groups for the PSF
+<p>GCMSprime and logconNMF 0.1.0.9006 used 32 ion groups for the PSF
 regressions and all 258 original ions for the joint fit. The fitted rank
-is 122 shared identities with 809 sample-level calls. Its
-original-channel quasi-GIC is <strong>4,194,515</strong>. CDF
-preparation, calibration and grouping took 13.81 s, grouped regressions,
-alignment and factor updates took 51.56 s, and result construction and
-export took 5.19 s. Grouped initialization accounted for 8.25 s and
-simultaneous factorization for 43.25 s within the 51.56 s stage. The
-enclosing benchmark measured 70.81 s. In an independently simulated
-16-sample dataset the same algorithm recovered 775 of 778 occurrences
-with 34 false calls.</p>
+is 115 shared identities with 795 sample-level calls. Its
+original-channel quasi-GIC is <strong>4,173,728</strong>. CDF
+preparation, calibration and grouping took 11.34 s, grouped regressions,
+alignment and factor updates took 39.45 s, and result construction and
+export took 3.91 s. Grouped initialization accounted for 8.50 s and
+simultaneous factorization for 30.85 s within the 39.45 s stage. The
+enclosing benchmark measured 54.94 s. On two further 16-sample
+simulations the same settings recovered <strong>775 of 778 occurrences
+with only 17 false positives</strong> and <strong>803 of 803 with only
+35 false positives</strong>. One matched occurrence in the latter
+simulation was estimated at 31.4% of its true area.</p>
 <p>GCMSprime used four two-thread workers for grouped PSF regressions
 and could use eight threads for the joint fit. Profile and background
 updates run across samples. Shared spectra run across ions. Local merge
@@ -227,7 +230,7 @@ reciprocal hit to a compound actually present is a true positive; every
 other returned component is a false positive. Additional calls to the
 same reference compound are included in those counts. Their areas are
 not added to the selected match.</p>
-<p><a href="../reference/figures/simulated-16-area-predictions.png"><img src="../reference/figures/simulated-16-area-predictions.png" alt="Robust log–log peak-area fits and 95% prediction bands"></a></p>
+<p><a href="../reference/figures/simulated-16-area-predictions.png"><img src="../reference/figures/simulated-16-area-predictions.png" alt="Ordinary log–log peak-area fits and 95% prediction intervals"></a></p>
 <p>All panels use <strong>total-ion count equivalents</strong>. Spectra
 are normalized to unit L1 norm, with their magnitude transferred to the
 corresponding profile or area. Native model-ion areas are corrected for
@@ -239,18 +242,17 @@ remain in the result objects.</p>
 spectrum <span class="math inline">s</span>, let <span class="math inline">c=\sum_j s_j</span>, <span class="math inline">p=s/c</span> and <span class="math inline">\widetilde h=ch</span>. Then <span class="math inline">hs^\top=\widetilde h p^\top</span> and <span class="math inline">\sum_j p_j=1</span>. An area measured for a
 particular ion <span class="math inline">q</span> becomes <span class="math inline">A_{\mathrm{TIC}}=A_q/p_q</span>, after converting
 its integration-time units.</p>
-<p>The line is a robust log–log fit using
-<code>robustbase::lmrob(setting="KS2014")</code>. The shaded 95%
-prediction band uses its robust residual scale and coefficient
-covariance, describing the main approximately Gaussian log-error
-distribution. The light-grey band shows the fitted prediction interval.
-Coloured points at alpha 0.5 show overlap density. The dashed 1:1 line
-is drawn over the points. The headings report robust adjusted R²;
-ordinary least-squares statistics are retained in the downloadable
-tables. GCMSprime has robust adjusted R² <strong>0.999995</strong> and a
-<strong>median absolute area error of 0.10%</strong>. Area agreement is
-conditional on recovered true matches, so it is shown together with
-sensitivity and false-positive counts.</p>
+<p>The solid line fits an ordinary least-squares regression of log₁₀
+estimated area on log₁₀ true area to all positive matched pairs,
+including the outliers. The shaded region is the pointwise 95%
+prediction interval for an individual peak at a given true area. The
+dashed line shows exact agreement. Darker points indicate overlap
+(opacity 0.5).</p>
+<p>GCMSprime recovered <strong>all 769 occurrences</strong>, with
+<strong>adjusted R² 0.999628</strong> and a <strong>median absolute area
+error of 0.10%</strong>. Even the lowest estimate was 72.5% of its true
+area. Area agreement is conditional on recovered true matches, so it is
+shown together with sensitivity and false-positive counts.</p>
 <p><a href="../reference/figures/simulated-16-spectral-violin.png"><img src="../reference/figures/simulated-16-spectral-violin.png" alt="Reciprocal spectral cosine similarity with individual points"></a></p>
 <p>Each point is a reciprocal spectral hit. Crosses identify hits to
 compounds absent from that sample; the cosine axis uses logit spacing.
@@ -346,7 +348,8 @@ matching or RI thresholds were relaxed.</p>
 <p>Sensitivity is also calculated separately in quartiles of true
 integrated peak area, including every true occurrence. This makes the
 preferential recovery of large peaks visible alongside the conditional
-area regressions.</p>
+area regressions. GCMSprime recovered <strong>all 193 peaks in the
+smallest quarter</strong>.</p>
 <table class="table">
 <colgroup>
 <col width="20%">
@@ -365,7 +368,7 @@ area regressions.</p>
 <tbody>
 <tr class="odd">
 <td align="left">GCMSprime</td>
-<td align="right">99.0%</td>
+<td align="right">100.0%</td>
 <td align="right">100.0%</td>
 <td align="right">100.0%</td>
 <td align="right">100.0%</td>

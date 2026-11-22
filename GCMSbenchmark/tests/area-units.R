@@ -31,7 +31,11 @@ y<-2+.9*x+rnorm(100,sd=.03)
 y[1:4]<-y[1:4]+5
 seed<-.Random.seed
 z<-internal$area_regression(data.frame(area_true=10^x,area_estimated=10^y))
-stopifnot(inherits(z$fit,"lmrob"),abs(coef(z$fit)[2]-.9)<.03,
-  identical(seed,.Random.seed),z$adjusted_R2>z$OLS_adjusted_R2)
-band<-predict(z$fit,data.frame(log_true=x),interval="prediction")
-stopifnot(all(is.finite(band)),all(band[,"lwr"]<band[,"upr"]))
+ref <- lm(y ~ x)
+newdata <- data.frame(x=c(1,2,2.9))
+band <- predict(z$fit, data.frame(log_true=newdata$x), interval="prediction", level=.95)
+stopifnot(inherits(z$fit,"lm"), identical(seed,.Random.seed),
+  isTRUE(all.equal(unname(coef(z$fit)),unname(coef(ref)))),
+  isTRUE(all.equal(z$adjusted_R2,summary(ref)$adj.r.squared)),
+  identical(z$adjusted_R2,z$OLS_adjusted_R2),
+  isTRUE(all.equal(unname(band),unname(predict(ref,newdata,interval="prediction",level=.95)))))

@@ -1,3 +1,7 @@
+# GCMSprime 0.1.0.9006
+
+- Multisample deconvolution uses the original-ion overlap refit in logconNMF. Peak-area benchmarks report ordinary least-squares adjusted R² and pointwise 95% prediction intervals on log-transformed areas.
+
 # GCMSprime 0.1.0.9005
 
 * Compatible count-model batches read CDFs and estimate noise in parallel. After the grouped PSF regressions finish, the joint original-ion fit uses the same total core budget for sample profiles and shared spectra. `batch$workers` controls concurrent file imports and grouped regressions. `ncores=1L` runs the complete pipeline serially.

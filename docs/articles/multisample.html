@@ -31,7 +31,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">GCMSprime</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9005</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9006</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -186,16 +186,16 @@ compounds.</p>
 </tr>
 <tr class="even">
 <td align="left">Complete 16-sample analysis</td>
-<td align="right"><strong>70.81 s (1.18 min)</strong></td>
-<td align="right"><strong>674.23 s (11.24 min)</strong></td>
+<td align="right"><strong>54.94 s (0.92 min)</strong></td>
+<td align="right"><strong>552.69 s (9.21 min)</strong></td>
 </tr>
 </tbody>
 </table>
-<p>Both runs used GCMSprime and logconNMF 0.1.0.9005. Timings cover the
+<p>Both runs used GCMSprime and logconNMF 0.1.0.9006. Timings cover the
 complete batch from CDF input through export. In the small experiment,
-CDF preparation, calibration and grouping took 13.81 s, grouped
-initialization and joint refinement took 51.56 s, and result
-construction and export took 5.19 s. The benchmark wrapper added 0.25 s.
+CDF preparation, calibration and grouping took 11.34 s, grouped
+initialization and joint refinement took 39.45 s, and result
+construction and export took 3.91 s. The benchmark wrapper added 0.24 s.
 The large experiment is documented below.</p>
 </div>
 <div class="section level2">
@@ -233,19 +233,19 @@ complete reference library:</p>
 <span><span class="co"># Optional figures from the saved results:</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/source.html" class="external-link">source</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">bench</span>, <span class="st">"plot-simulated-16.R"</span><span class="op">)</span>, encoding<span class="op">=</span><span class="st">"UTF-8"</span><span class="op">)</span></span>
 <span><span class="fu">plotBenchmark16</span><span class="op">(</span><span class="st">"benchmark-small"</span><span class="op">)</span></span></code></pre></div>
-<p>The analysis recovered <strong>767 of 769 true occurrences</strong>,
-with <strong>42 false positives</strong> (peak F1
-<strong>0.972</strong>), including all seven acid occurrences. Robust
-adjusted log-area R² was <strong>0.999995</strong>, the median absolute
+<p>The analysis recovered <strong>769 of 769 true occurrences</strong>,
+with <strong>only 26 false positives</strong> (peak F1
+<strong>0.983</strong>), including all seven acid occurrences. Ordinary
+adjusted log-area R² was <strong>0.999628</strong>, the median absolute
 peak-area error was <strong>0.10%</strong>, and mean spectral
 ion-support F1 was <strong>0.995</strong> at the shared 0.1% base-peak
 threshold.</p>
-<p>The benchmark wrapper measured <strong>70.81 s</strong> from CDF
+<p>The benchmark wrapper measured <strong>54.94 s</strong> from CDF
 input through results with four two-thread PSF workers and eight threads
 available for joint refinement on an HP ZBook Fury G8, Intel Core
 i9-11950H, eight physical cores, 16 logical threads, Windows and R
 4.5.0. CDF generation is separate.</p>
-<p><a href="../reference/figures/simulated-16-area-predictions.png"><img src="../reference/figures/simulated-16-area-predictions.png" alt="Total-ion area accuracy with robust log–log fits"></a></p>
+<p><a href="../reference/figures/simulated-16-area-predictions.png"><img src="../reference/figures/simulated-16-area-predictions.png" alt="Total-ion area accuracy with ordinary log–log fits"></a></p>
 <p><a href="../reference/figures/simulated-16-acid-profiles.png"><img src="../reference/figures/simulated-16-acid-profiles.png" alt="Acid profiles across all samples, truth dashed and estimates solid"></a></p>
 <p>The <a href="benchmarks.html">benchmarks against other software</a>
 give all seven workflows, matching rules, noise calibration, profile
@@ -262,7 +262,7 @@ abundance and drift in retention time. The data include irregular scan
 intervals, a background estimated from <code>gcmsData2</code> and
 quasi-Poisson dispersion 783.18. A separate narrow-peak standard
 supplies the time-varying PSF.</p>
-<p>The conditional solver estimated <strong>1,005 shared
+<p>The conditional solver estimated <strong>1,002 shared
 identities</strong> from the original ion measurements. All
 <strong>7,917 true occurrences</strong> were recovered, including every
 occurrence of the shark-fin acid. The largest absolute area error among
@@ -279,15 +279,15 @@ the eight acid occurrences was <strong>0.19%</strong>.</p>
 </tr>
 <tr class="even">
 <td align="left">False positives / false negatives</td>
-<td align="right">16 / 0</td>
+<td align="right">13 / 0</td>
 </tr>
 <tr class="odd">
 <td align="left">Occurrence F1</td>
-<td align="right">0.99899</td>
+<td align="right">0.99918</td>
 </tr>
 <tr class="even">
 <td align="left">Joint quasi-GIC</td>
-<td align="right">34,070,769</td>
+<td align="right">34,062,277</td>
 </tr>
 <tr class="odd">
 <td align="left">Median spectral cosine</td>
@@ -295,17 +295,21 @@ the eight acid occurrences was <strong>0.19%</strong>.</p>
 </tr>
 <tr class="even">
 <td align="left">Mean within-spectrum ion F1</td>
-<td align="right">0.99516</td>
+<td align="right">0.99519</td>
 </tr>
 <tr class="odd">
 <td align="left">Mean profile cosine</td>
-<td align="right">0.999983</td>
+<td align="right">0.999984</td>
 </tr>
 <tr class="even">
 <td align="left">Median absolute peak-area error</td>
 <td align="right">0.095%</td>
 </tr>
 <tr class="odd">
+<td align="left">Adjusted log-area R²</td>
+<td align="right">0.999976</td>
+</tr>
+<tr class="even">
 <td align="left">Acid occurrences recovered</td>
 <td align="right">8 / 8</td>
 </tr>
@@ -329,34 +333,34 @@ uses RI-constrained reciprocal hits.</p>
 <tr class="odd">
 <td align="left">Reading data, preparing sample PSFs and
 initialization</td>
-<td align="right">174.00</td>
+<td align="right">139.60</td>
 </tr>
 <tr class="even">
 <td align="left">Grouped PSF regression, alignment and joint
 original-channel refinement</td>
-<td align="right">459.06</td>
+<td align="right">383.22</td>
 </tr>
 <tr class="odd">
 <td align="left">Constructing and exporting results</td>
-<td align="right">41.17</td>
+<td align="right">29.87</td>
 </tr>
 <tr class="even">
 <td align="left"><strong>Complete fit and exports</strong></td>
-<td align="right"><strong>674.23</strong></td>
+<td align="right"><strong>552.69</strong></td>
 </tr>
 </tbody>
 </table>
-<p>Within the 459.06 s coupled stage, grouped PSF regression took 111.18
-s and alignment and joint refinement took 347.55 s. Simulation, separate
+<p>Within the 383.22 s coupled stage, grouped PSF regression took 119.65
+s and alignment and joint refinement took 263.33 s. Simulation, separate
 standard calibration and scoring against truth are outside the timed
 fit.</p>
 <p>On the HP ZBook Fury G8 (Core i9-11950H, eight physical cores, 16
 logical cores and 64 GB RAM), the memory-aware scheduler used <strong>6
 PSF workers with 2 threads each</strong>. The joint solver could use all
 16 threads. Across the measured workflow the process tree averaged
-<strong>4.70 logical-core equivalents</strong> and peaked at
-<strong>6.75 GiB working set</strong> and <strong>6.65 GiB private
-memory</strong>. At least 29.46 GiB of physical memory stayed
+<strong>5.61 logical-core equivalents</strong> and peaked at
+<strong>6.12 GiB working set</strong> and <strong>5.78 GiB private
+memory</strong>. At least 28.57 GiB of physical memory stayed
 available.</p>
 <div class="float">
 <img src="../reference/figures/fullsize-16-resources.png" alt="Measured process-tree memory and CPU use for sixteen full-sized chromatograms"><div class="figcaption">Measured process-tree memory and CPU use for
@@ -366,6 +370,11 @@ sixteen full-sized chromatograms</div>
 <img src="../reference/figures/fullsize-16-recovery.png" alt="Occurrence recovery and total-ion peak-area accuracy across sixteen full-sized samples"><div class="figcaption">Occurrence recovery and total-ion peak-area
 accuracy across sixteen full-sized samples</div>
 </div>
+<p>In the left panel, the red bar segments count unmatched calls and the
+open circles give the true counts. The right panel shows only calls
+paired with a true occurrence. Violet diamonds identify the eight
+matched acid peaks. The dashed line marks exact agreement and the
+shading is the ordinary 95% prediction interval on the log scale.</p>
 <div class="float">
 <img src="../reference/figures/fullsize-16-acid.png" alt="Acid profiles: inferred solid and true dashed, blue for smaller areas and red for larger areas"><div class="figcaption">Acid profiles: inferred solid and true dashed,
 blue for smaller areas and red for larger areas</div>
@@ -430,7 +439,7 @@ available memory, including Windows commit headroom. After those workers
 exit, a single process shares the original ion counts and fitted means.
 It updates profiles and backgrounds across samples and fits disjoint ion
 columns of the shared spectra concurrently. Peak merges and exchanges
-retain their original order. The classic solver can stream
+retain their original order. The general identity-link solver can stream
 original-channel blocks from disk. Use
 <code>batch=list(workers=4L)</code> to cap file-import and PSF worker
 counts. For this workflow, <code>experiment$parallel$workers</code> and
@@ -507,7 +516,7 @@ mass channels.</p>
 <p>A 26-column spline basis with ion-specific nonnegative coefficients
 allows the background spectrum to change through each chromatogram. The
 fit used four threads per worker and retained <strong>643 shared
-identities and 1,079 occurrences</strong>.</p>
+identities and 1,076 occurrences</strong>.</p>
 <table class="table">
 <colgroup>
 <col width="20%">
@@ -526,33 +535,32 @@ identities and 1,079 occurrences</strong>.</p>
 <tbody>
 <tr class="odd">
 <td align="left">502131900304_a</td>
-<td align="right">550</td>
+<td align="right">549</td>
 <td align="right">631.78</td>
-<td align="right">15,217,743</td>
-<td align="right">0.98301</td>
+<td align="right">14,310,415</td>
+<td align="right">0.98416</td>
 </tr>
 <tr class="even">
 <td align="left">54040014_a</td>
-<td align="right">529</td>
+<td align="right">527</td>
 <td align="right">617.21</td>
-<td align="right">15,419,546</td>
-<td align="right">0.98316</td>
+<td align="right">15,068,092</td>
+<td align="right">0.98345</td>
 </tr>
 </tbody>
 </table>
-<p>The joint quasi-GIC was <strong>29,721,269</strong>, with each shared
-spectrum charged once. The two beer CDFs took <strong>375.49 s</strong>
-from input through export. Preparation and calibration took 158.21 s,
-grouped regression and joint refinement 209.73 s, and result
-construction and export 7.02 s. Separate RI calibration took 3.29 s and
-RI annotation and export took 3.86 s. Plotting is excluded.</p>
-<p>With identical Agilent NIST records, a ±30 RI window and cosine
-≥0.85, the two beers gave <strong>213 and 203 distinct reciprocal
-identifications</strong>. The classic fit gave 163 and 147. Additional
-forward assignments to an identity already called in the same sample
-numbered 87 and 73, compared with 65 and 54 for the classic fit. These
-library hits provide external validation for real samples of unknown
-composition.</p>
+<p>The joint quasi-GIC was <strong>28,467,211</strong>, with each shared
+spectrum charged once. The two beer CDFs took <strong>374.99 s</strong>
+from input through export. Preparation and calibration took 130.50 s,
+grouped regression and joint refinement 238.16 s, and result
+construction and export 5.86 s. Separate RI calibration took 3.72 s and
+RI annotation and export took 4.16 s. Plotting is excluded.</p>
+<p>Using the Agilent NIST records, a ±30 RI window and a minimum
+spectral cosine of 0.85, the two beers yielded <strong>212 and 203
+distinct reciprocal identifications</strong>. There were 88 and 73
+additional forward assignments to identities already called in the
+respective samples. These are tentative identifications in beers of
+unknown composition.</p>
 <p>Diagnostic ions identify all 17 alkanes from C7 to C23. The retention
 coordinate is the 1%-height onset plus half the local narrow-peak width
 at that height. The natural cubic RI curve passes through all accepted

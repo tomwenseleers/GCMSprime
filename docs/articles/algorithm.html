@@ -31,7 +31,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">GCMSprime</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9005</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9006</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -179,6 +179,20 @@ Relative objective improvement below <span class="math inline">10^{-3}</span> en
 return a local solution. Supplied ground truth need not minimize a
 penalized criterion on one realization of noisy data.</li>
 </ol>
+<p>For overlapping peaks, a spectrum observed in relatively few samples
+can be proposed as a nonnegative combination of recurring spectra from
+the same aligned retention interval. Each proposed template must also
+occur in a sample where the putative mixture is absent. The solver
+refits the contributing log-concave profiles and shared spectra on the
+original ion counts. It tests both redistribution and retention of a
+residual spectrum. Within a sample, profiles whose half-height intervals
+overlap and whose spectra are nearly linearly dependent are also
+refitted jointly. The fit compares keeping the locally redundant
+profiles with dropping them. The fitted background and other compounds
+contribute to the offset in each comparison. An exchange is accepted
+only when it lowers the same deviance-plus-dimension penalty as the
+factor updates. Library identities and known peak areas enter only at
+validation.</p>
 <p>With the spectra fixed, profiles in different samples have separate
 likelihood contributions. With profiles fixed, the spectral likelihood
 and ion inclusion penalty separate by ion. Workers therefore update
@@ -665,7 +679,7 @@ in memory and uses the core budget for the profile, background and
 shared-spectrum updates described above. Each sample retains its own
 time grid, PSF and noise calibration.</p>
 <div class="section level3">
-<h3 id="disk-backed-refinement-in-the-classic-solver">Disk-backed refinement in the classic solver<a class="anchor" aria-label="anchor" href="#disk-backed-refinement-in-the-classic-solver"></a>
+<h3 id="disk-backed-refinement-in-the-general-identity-link-solver">Disk-backed refinement in the general identity-link solver<a class="anchor" aria-label="anchor" href="#disk-backed-refinement-in-the-general-identity-link-solver"></a>
 </h3>
 <p>A shared aggregation is learned from summed chromatograms in common
 time bins. Matching and Poisson/quasipoisson profile proposals use these

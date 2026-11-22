@@ -37,7 +37,7 @@ plotBenchmark16 <- function(results, output_dir = results) {
       y <- z$data$log_estimated
       interval <- if (!is.null(z$fit)) {
         grid <- seq(min(x), max(x), length.out = 160L)
-        stats::predict(z$fit, newdata = data.frame(log_true = grid), interval = "prediction")
+        stats::predict(z$fit, newdata = data.frame(log_true = grid), interval = "prediction", level = 0.95)
       } else NULL
       ylim <- range(c(y, interval, xlim))
       graphics::plot(x, y, type = "n", xlim = xlim, ylim = ylim,
@@ -54,12 +54,12 @@ plotBenchmark16 <- function(results, output_dir = results) {
       graphics::abline(0, 1, col = reference_colour, lty = 2, lwd = 1.65)
       graphics::mtext(labels[m], 3, 2.05, font = 2)
       digits <- if (isTRUE(z$adjusted_R2 > 0.9995)) 6L else 3L
-      graphics::mtext(bquote("Robust adjusted"~R^2==.(fmt(z$adjusted_R2, digits))~~
+      graphics::mtext(bquote("Adjusted"~R^2==.(fmt(z$adjusted_R2, digits))~~
         .(sprintf("(%d / %d peaks)", length(x), nrow(truth)))), 3, 0.65, cex = 0.8)
     }
     graphics::plot.new()
     graphics::legend("center", bty = "n", cex = 1.27, y.intersp = 1.45,
-      legend = c("Matched peak area", "Robust log–log fit", "95% robust prediction band",
+      legend = c("Matched peak area", "Least-squares log–log fit", "95% prediction interval",
         "1:1 reference"),
       col = c(grDevices::adjustcolor(colour[1L], alpha.f = 0.5),
         "black", area_band_colour, reference_colour),

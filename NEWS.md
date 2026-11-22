@@ -1,3 +1,7 @@
+# GCMSprime 0.1.0.9006
+
+- Multisample deconvolution uses the original-ion overlap refit in logconNMF. Peak-area benchmarks report ordinary least-squares adjusted R² and pointwise 95% prediction intervals on log-transformed areas.
+
 # GCMSprime 0.1.0.9005
 
 * Compatible count-model batches read CDFs and estimate noise in parallel. After the grouped PSF regressions finish, the joint original-ion fit uses the same total core budget for sample profiles and shared spectra. `batch$workers` controls concurrent file imports and grouped regressions. `ncores=1L` runs the complete pipeline serially.
@@ -9,10 +13,14 @@
 
 # GCMSprime 0.1.0.9003
 
-* Expose initialization solver controls through `gcmsDeco()` and automatically
-  retry Cholesky workspace-budget failures with diagonally preconditioned CG.
-  The memory limit and selection settings are retained. Requires logconNMF
-  0.1.0.9003; `initial_fallback=FALSE` disables the retry (issue #1).
+* Full-chromatogram component initialization retries Cholesky workspace-budget
+  failures with diagonally preconditioned Eigen CG, reporting the switch and
+  retaining the memory limit and selection settings. Requires logconNMF 0.1.0.9003.
+* `gcmsDeco(control=list(initial_solver=...))` exposes L0glm solver controls,
+  including `method`, `precond` and `max.memory` in GiB.
+  `initial_fallback=FALSE` disables the automatic retry (GCMSprime issue #1).
+* With `batch=list(cache=FALSE)`, coupled profile refinement reads local windows
+  from disk instead of creating temporary whole-sample observation caches.
 
 # GCMSprime 0.1.0.9002
 
@@ -21,7 +29,9 @@
 * ANDI-MS CDF import and export preserve scan timing, acquired mass channels
   and sample metadata.
 * Standard-assisted or blind constant/time-varying PSF estimation, pooled
-  noise calibration and smooth background initialization.
+  noise calibration and smooth background initialization. Automatic background
+  knots follow the narrow-peak PSF scale and allow slowly changing spectra.
+  Algorithm-versioned cache keys prevent reuse of obsolete initial fits.
 * Reusable TIC-based standard calibration preserves physical scan times and
   builds each sample's sparse PSF without repeatedly fitting the standard.
 
@@ -41,8 +51,13 @@
   labels, selects alkane standards, aligns samples and estimates shared spectra
   with sample-specific areas and profiles.
 
+* Coupled refinement reuses likelihoods and bounded count-data/normalizer
+  caches, using the optimized logconNMF backend. Caches are released on return
+  and can be disabled with `batch=list(cache=FALSE)`. The original-channel
+  criterion, iteration budgets, grouping rules and shape constraints are retained.
 * `ncores` is a total logical-CPU budget for concurrent samples and native
-  fitting. A shared reusable ion-group map and bounded coupled updates keep
+  fitting. Automatic directory budgets use logical cores; single chromatograms
+  use physical cores. A shared reusable ion-group map and bounded coupled updates keep
   memory use controlled while retaining full spectra and sample-specific PSFs.
 * Stage timings, thread-allocation metadata and a sixteen-sample simulated
   example accompany serial/parallel result checks.
@@ -75,8 +90,3 @@
 
 * Nested stage timing avoids forced garbage collection between local fits;
   ordinary R memory management remains active.
-
-* Coupled refinement reuses likelihoods and bounded count-data/normalizer
-  caches, using the optimized logconNMF backend. Caches are released on return
-  and can be disabled with `batch=list(cache=FALSE)`. The original-channel
-  criterion, iteration budgets, grouping rules and shape constraints are retained.

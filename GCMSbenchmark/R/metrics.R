@@ -172,33 +172,14 @@ area_regression <- function(pairs) {
   data <- data.frame(log_true=log10(true[keep]),log_estimated=log10(estimated[keep]))
   fit <- NULL
   r2 <- NA_real_
-  ols_r2 <- NA_real_
   method <- "unavailable"
-  if (nrow(data)>=3L && diff(range(data$log_true))>0) {
-    fit <- stats::lm(log_estimated ~ log_true,data=data)
-    ols_r2 <- if(diff(range(data$log_estimated))>0)
-      suppressWarnings(summary(fit)$adj.r.squared) else NA_real_
-    method<-"least squares"
-    # Tiny or exactly fitted datasets do not need a robust scale estimate.
-    if(nrow(data)>=10L && max(abs(stats::residuals(fit)))>
-        sqrt(.Machine$double.eps)*max(1,abs(data$log_estimated))) {
-      rng<-get0(".Random.seed",envir=.GlobalEnv,inherits=FALSE)
-      kind<-RNGkind()
-      on.exit({
-        do.call(RNGkind,as.list(kind))
-        if(is.null(rng))rm(list=".Random.seed",envir=.GlobalEnv)else
-          assign(".Random.seed",rng,envir=.GlobalEnv)
-      })
-      RNGkind("Mersenne-Twister","Inversion","Rejection")
-      set.seed(9118)
-      fit<-robustbase::lmrob(log_estimated~log_true,data=data,
-        setting="KS2014")
-      method<-"lmrob (KS2014)"
-    }
-    if(diff(range(data$log_estimated))>0)
-      r2<-suppressWarnings(summary(fit)$adj.r.squared)
+  if (nrow(data) >= 3L && diff(range(data$log_true)) > 0) {
+    fit <- stats::lm(log_estimated ~ log_true, data = data)
+    if (diff(range(data$log_estimated)) > 0)
+      r2 <- suppressWarnings(summary(fit)$adj.r.squared)
+    method <- "least squares"
   }
-  list(data=data,fit=fit,adjusted_R2=r2,OLS_adjusted_R2=ols_r2,method=method)
+  list(data=data, fit=fit, adjusted_R2=r2, OLS_adjusted_R2=r2, method=method)
 }
 
 score_row <- function(method,fit,truth,pairs) {

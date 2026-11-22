@@ -1,2 +1,2 @@
 "joint_GIC","deconvolution_wall_seconds","RI_calibration_seconds","RI_annotation_seconds","reported_total_seconds","clustering","initial","coupled","exports","total","ncores","workers","threads","shared_compounds","occurrences"
-29721269.0781974,375.49,3.29000000000002,3.86000000000001,382.64,0,158.21,209.73,7.02000000000004,374.96,8,2,4,643,1079
+28467211.431801,374.99,3.72000000000003,4.15999999999997,382.87,0,130.5,238.16,5.86000000000004,374.52,8,2,4,643,1076
