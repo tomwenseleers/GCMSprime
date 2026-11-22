@@ -84,14 +84,15 @@ runBenchmark16 <- function(output_dir, method = c("GCMSprime", "xcms+CAMERA"),
   fits <- lapply(method, function(engine) {
     GCMSbenchmark::GCMSbenchmark(input$files,
       output_dir = file.path(output_dir, "runs", engine), method = engine,
-      truth = input$truth, ncores = if (engine == "xcms+CAMERA") min(4L, ncores) else ncores,
+      truth = input$truth, ncores = min(ncores, switch(engine, "GCMSprime"=8L, "xcms+CAMERA"=4L, ncores)),
       control = control[intersect(names(control), engine)], rt_tolerance = rt_tolerance,
       min_cosine = 0.70,matching="reciprocal",ri_tolerance=30,reference=input$reference,
       ion_threshold=.001,
       family = stats::quasipoisson("identity"),
       precluster = 32L, nwindows = 2L, baseline_df = 4L, correlation = "none",
       psf_control = list(maxiter = 3L),
-      batch = list(coupling = list(cycles = 2L, initial_cycles = 1L, rounds = 1L, q = 32L)))
+      algorithm = "conditional",
+      batch = list(workers = min(4L, ncores), coupling = list(alignment_window = 0.5)))
   })
   fit <- structure(list(methods = do.call(c, lapply(fits, `[[`, "methods")),
     files = input$files, directory = output_dir,

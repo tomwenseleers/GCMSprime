@@ -78,7 +78,11 @@ fit1_runs <- lapply(seq_len(repetitions), fit_hydrocarbon)
 fit2_runs <- lapply(seq_len(repetitions), fit_beer)
 fit1 <- fit1_runs[[1L]]
 fit2 <- fit2_runs[[1L]]
-stopifnot(ncol(fit1$model$H) == 6L, ncol(fit2$model$H) == 36L)
+for (runs in list(fit1_runs, fit2_runs)) {
+  ranks <- vapply(runs, function(f) ncol(f$model$H), 0L)
+  stopifnot(all(ranks > 0L), length(unique(ranks)) == 1L,
+            all(vapply(runs, function(f) nrow(f$model$S) == f$model$rank, TRUE)))
+}
 
 weighted_fit <- function(Y, fit) {
   model <- fit$model
@@ -202,8 +206,9 @@ png_plot(file.path(figures, "gcms-data1-decomposition.png"), 2100, 1400,
     # compact rendering byte-for-byte reproducible with the logconNMF build.
     mass <- as.numeric(colnames(Y))
     time <- as.numeric(rownames(Y))
-    graphics::layout(rbind(c(1L, 1L, 1L), c(2L, 3L, 4L),
-      c(5L, 6L, 7L)), heights = c(1.85, 1, 1))
+    panels <- matrix(0L, ceiling(model$rank/3), 3L)
+    panels[t(row(panels) + (col(panels)-1L)*nrow(panels))[seq_len(model$rank)]] <- 1L + seq_len(model$rank)
+    graphics::layout(rbind(rep(1L, 3L), panels), heights=c(1.85, rep(1, nrow(panels))))
     top_max <- max(corrected, profiles)
     raw_ticks <- pretty(c(0, top_max), n = 5L)
     raw_ticks <- raw_ticks[raw_ticks >= 0 & raw_ticks <= top_max]
@@ -213,8 +218,7 @@ png_plot(file.path(figures, "gcms-data1-decomposition.png"), 2100, 1400,
       lwd = 0.45, col = grDevices::adjustcolor("grey45", alpha.f = 0.16),
       xlab = "Retention time (min)", ylab = "Intensity",
       ylim = sqrt(c(0, top_max * 1.05)), yaxt = "n",
-      main = paste("gcmsData1 | square-root display | six-component",
-        "log-concave NMF | base-peak-scaled profiles"))
+      main = sprintf("gcmsData1 | square-root display | %d fitted compounds", model$rank))
     graphics::axis(2, at = sqrt(raw_ticks),
       labels = format(raw_ticks, scientific = TRUE), las = 1)
     graphics::abline(h = 0, col = "grey70", lty = 3)

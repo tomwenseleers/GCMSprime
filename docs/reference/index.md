@@ -2,8 +2,8 @@
 
 ## Deconvolution, quantification and reports
 
-- [`residuals(`*`<GCMSdeco>`*`)`](https://tomwenseleers.github.io/GCMSprime/reference/gcmsDeco.md)
-  [`gcmsDeco()`](https://tomwenseleers.github.io/GCMSprime/reference/gcmsDeco.md)
+- [`gcmsDeco()`](https://tomwenseleers.github.io/GCMSprime/reference/gcmsDeco.md)
+  [`residuals(`*`<GCMSdeco>`*`)`](https://tomwenseleers.github.io/GCMSprime/reference/gcmsDeco.md)
   [`coef(`*`<GCMSdeco>`*`)`](https://tomwenseleers.github.io/GCMSprime/reference/gcmsDeco.md)
   [`fitted(`*`<GCMSdeco>`*`)`](https://tomwenseleers.github.io/GCMSprime/reference/gcmsDeco.md)
   [`nobs(`*`<GCMSdeco>`*`)`](https://tomwenseleers.github.io/GCMSprime/reference/gcmsDeco.md)

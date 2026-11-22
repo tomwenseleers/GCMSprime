@@ -131,6 +131,8 @@ GCMS_write_msp <- function(model,time,mass,msp_file,compounds=NULL,ion_threshold
 #'   spectra while retaining sample-specific profiles and areas. Set to `FALSE`
 #'   to export only the independent sample fits.
 #' @param batch Named directory options; see [GCMSbatch].
+#' @name gcmsDeco
+#' @order 1
 #' @param cdf_file A directory of sample subdirectories with a `standards`
 #'   subdirectory, or a local ANDI-MS \code{.cdf} path or HTTP(S) URL. The optional
 #'   \pkg{ncdf4} package is required. Masses are binned to the nearest integer
@@ -159,16 +161,16 @@ GCMS_write_msp <- function(model,time,mass,msp_file,compounds=NULL,ion_threshold
 #'   The default \code{quasipoisson("identity")} estimates one pooled dispersion
 #'   across channels, suitable for overdispersed instrumental intensities.
 #' @param lambda Information-criterion preset or a nonnegative numeric penalty.
-#'   For an individual chromatogram the numeric value is the total charge
-#'   per compound. The directory workflow uses this charge in each
-#'   initial fit. Its joint refinement uses the numeric value per selection
-#'   degree of freedom. Both charges precede any temporal adjustment.
+#'   The conditional solver charges a numeric penalty per dimension of the
+#'   spectrum and log-concave profiles. For the classic solver the numeric
+#'   value specifies the total charge per single-sample compound and the
+#'   charge per selection degree of freedom in a joint fit.
 #' @param ncores Total logical-CPU budget. \code{NULL} uses physical cores for
 #'   one chromatogram and logical cores for directory input. Directory analyses
 #'   run up to \code{min(samples,ncores)} sample workers,
-#'   dividing the native thread budget between them. With at least 16 samples,
-#'   \code{ncores=16L} uses 16 workers with one native thread each. BLAS threads
-#'   are limited during batch fitting and caller settings are restored.
+#'   dividing native threads between them. For conditional grouped regressions
+#'   automatic worker allocation also accounts for available memory. BLAS
+#'   threads are limited during batch fitting and restored on return.
 #'   For a single chromatogram, this sets its native OpenMP thread count.
 #' @param nwindows Number of overlapping blind-PSF windows, default \code{10L}.
 #'   \code{1L} uses a shared PSF. The returned sparse design interpolates the
@@ -251,7 +253,13 @@ GCMS_write_msp <- function(model,time,mass,msp_file,compounds=NULL,ion_threshold
 #' `psf_working_weight` summarises the average Poisson-scale precision for
 #' comparing noise scales; the actual PSF likelihood uses the specified family.
 #'
-#' \code{precluster=32L} performs selection and fusion in at most 32 size-adjusted
+#' With the conditional count solver, a grouped PSF regression supplies starting
+#' spectra. The final iterations use every ion, count the positive spectral
+#' coefficients and the free ordinates of each log-concave curve. Multiple
+#' samples share spectra on their native scan grids. Explicit numeric lambda
+#' is per fitted dimension for this solver. See the mathematical basis article.
+#'
+#' With the classic solver, \code{precluster=32L} performs selection and fusion in at most 32 size-adjusted
 #' outcome groups, followed by refinement on every original channel. The final
 #' original-channel cleanup checks deletions, local fusions and missed residual
 #' peaks using the complete compound-count criterion. Its diagnostics are in
@@ -281,13 +289,10 @@ GCMS_write_msp <- function(model,time,mass,msp_file,compounds=NULL,ion_threshold
 #' spreadsheet and returned coefficient rows use increasing apex retention time. Rank selection,
 #' hard log concavity, censored Gamma intensities and compound-count information
 #' criteria follow [logconNMF::logconNMF()].
-#' During coupled refinement, aggregate observations are shared in memory.
-#' Eligible count workers can retain one original matrix up to 64 MiB plus
-#' an equally sized likelihood-normalizer cache; larger chromatograms retain
-#' local disk reads. The caches are scoped to the fit and released on exit.
-#' Set `batch=list(cache=FALSE)` to disable persistent input caches. Likelihood
-#' reuse and stationary-background checks preserve the criterion, convergence
-#' tolerance and original-channel acceptance checks.
+#' The conditional solver uses grouped PSF regressions followed by original-ion
+#' updates of shared spectra, sample profiles and background. Its peak memory
+#' includes the raw count matrices and fitted means. For disk-backed joint
+#' refinement use `algorithm="classic"` and `batch=list(cache=FALSE)`.
 #'
 #' @section Experimental GC/MS examples:
 #' The [GC/MS deconvolution tutorial](../articles/gcms-deconvolution.html)
@@ -306,6 +311,9 @@ GCMS_write_msp <- function(model,time,mass,msp_file,compounds=NULL,ion_threshold
 #' }
 #'
 #' @param library Optional GCMSlibrary for retention-index-constrained identification.
+#' @param algorithm Count-factorization algorithm passed to [logconNMF::logconNMF()].
+#' @param objective.trace Record original-ion objective values after each
+#'   conditional block. Leave FALSE for elapsed-time measurements.
 #' @param search Named options for librarySearch(), such as phase="DB5",
 #'   ri_tolerance=30, n_matches=5 and method="stein_scott". The alkane file supplies
 #'   RI calibration automatically; a precomputed calibration can be supplied here.
@@ -335,7 +343,9 @@ gcmsDeco <- function(cdf_file,msp_file=NULL,family=quasipoisson("identity"),lamb
                      correlation=c("auto","none","lag1"),
                      ncores=NULL,control=list(),psf_control=list(),verbose=FALSE,
                      xlsx_file=NULL,sample_name=NULL,library=NULL,search=list(),
-                     output_dir=NULL,coupled=TRUE,batch=list(),ion_threshold=.001) {
+                     output_dir=NULL,coupled=TRUE,batch=list(),ion_threshold=.001,
+                     algorithm=c("auto","conditional","classic"),objective.trace=FALSE) {
+  algorithm <- match.arg(algorithm)
   invisible(GCMS_report_spectra(matrix(numeric(),0L,0L),ion_threshold))
   if(length(cdf_file)==1L&&dir.exists(cdf_file)) {
     args<-as.list(environment())
@@ -394,21 +404,23 @@ gcmsDeco <- function(cdf_file,msp_file=NULL,family=quasipoisson("identity"),lamb
   calibration <- blind$calibration
   X <- blind$X
   width <- max(1, blind$width_scans)
-  if(is.null(baseline_df)) baseline_df<-max(4L,min(40L,3L+ceiling(n/(50*width))))
-  if(length(baseline_df)!=1L||!is.finite(baseline_df)||baseline_df<1||baseline_df!=floor(baseline_df)) stop("Use a positive integer baseline_df.")
-  if(baseline_df %in% c(2L,3L)) stop("Use baseline_df=1 for a constant or at least 4 for a cubic spline.",call.=FALSE)
-  if(baseline_df>n) stop("baseline_df exceeds the number of scans.",call.=FALSE)
-  B<-if(baseline_df==1L) matrix(1,n,1L) else as.matrix(splines::bs(raw$time,df=baseline_df,intercept=TRUE))
-  nmf_lambda<-if(is.numeric(lambda))lambda/ncol(Y) else lambda
+  B <- GCMS_background(raw$time, width, baseline_df)
+  baseline_df <- ncol(B)
+  conditional <- algorithm != "classic" && spec$kind %in% c(1L,2L) && logconNMF::conditionalSolverAvailable()
+  nmf_lambda<-if(is.numeric(lambda) && !conditional) lambda/ncol(Y) else lambda
   model<-timed("factorization",logconNMF(Y,X=X,family=family,lambda=nmf_lambda,background=B,precluster=precluster,
     dispersion=spec$dispersion,theta=if(spec$name=="nb") spec$theta*(if(spec$theta_update) -1 else 1) else NULL,
-    correlation=spec$correlation,ncores=ncores,control=control,verbose=verbose))
+    correlation=spec$correlation,ncores=ncores,control=control,verbose=verbose,
+    algorithm=algorithm,time=raw$time,objective.trace=objective.trace))
   model$spec$dispersion_estimated<-spec$dispersion_estimated
   model$spec$theta_estimated<-spec$theta_estimated
   model$spec$correlation_estimate<-spec$correlation_estimate
   model$spec$noise_diagnostics<-spec$noise_diagnostics
   model$nuisance_df<-as.integer(spec$dispersion_estimated)+as.integer(spec$theta_estimated)
-  model$ic_df<-ncol(Y)*model$rank+model$nuisance_df
+  if (is.null(model$conditional_objective)) model$ic_df<-ncol(Y)*model$rank+model$nuisance_df else {
+    model$ic_df <- model$conditional_objective$shape_df + model$conditional_objective$spectral_df + model$nuisance_df
+    model$objective <- -2*model$loglik + model$lambda*model$ic_df
+  }
   compounds<-GCMS_compounds(model,raw$time,sample_name)
   compounds$apex_scan<-raw$scans[compounds$apex_scan]
   model$y<-model$mu<-NULL

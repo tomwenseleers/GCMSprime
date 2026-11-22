@@ -31,7 +31,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">GCMSprime</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9002</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9004</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -107,6 +107,102 @@ estimated dispersion <span class="math inline">\phi</span>. The same
 notation below covers likelihood and quasi-likelihood; Section 5
 specifies the noise models. The <a href="identification-theory.html">identification article</a> covers
 retention indices and spectral library search.</p>
+<div class="section level2">
+<h2 id="conditional-count-objective">Sparse spectra and log-concave profiles for count data<a class="anchor" aria-label="anchor" href="#conditional-count-objective"></a>
+</h2>
+<p>For a count matrix with time in rows and ions in columns, write the
+expected signal in sample <span class="math inline">s</span> as <span class="math display">
+\mu_{sij} = \epsilon + (B_s A_s)_{ij} + \sum_{k=1}^K h_{sik}p_{kj},
+\qquad p_{kj}\ge0,\quad \sum_j p_{kj}=1 .
+</span> An absent compound has <span class="math inline">h_{s\cdot
+k}=0</span>. Otherwise its positive support is a contiguous interval.
+For successive positive observations the slopes <span class="math inline">(\log h_{s,i+1,k}-\log
+h_{sik})/(t_{s,i+1}-t_{si})</span> are nonincreasing. This permits
+asymmetric peaks, including an abrupt change of slope at the apex. Each
+<span class="math inline">h_{sik}</span> is the compound’s expected
+total ion count in that scan. Two samples can have different peak
+shapes, widths, areas and acquisition times.</p>
+<p>With <span class="math inline">\operatorname{Var}(Y_{sij})=\phi_s\mu_{sij}</span>,
+the conditional updates minimize <span class="math display">
+J =
+2\sum_{sij}\frac{y_{sij}\log(y_{sij}/\mu_{sij})-y_{sij}+\mu_{sij}}{\phi_s}
+   + \lambda_{\rm eff}
+      \left[\sum_{k=1}^{K}(\lVert p_k\rVert_0-1)+\sum_{sk}d(h_{s\cdot
+k})\right].
+</span> Use <span class="math inline">0\log 0=0</span>. A spectrum with
+<span class="math inline">u</span> positive ions contributes <span class="math inline">u-1</span> free proportions. A positive log profile
+on two or more scans contributes two endpoint ordinates plus one
+dimension per interior strict decrease in log slope. A single-scan
+support contributes one dimension and an absent profile contributes
+zero. This is the dimension of the fitted face of the log-concavity
+cone, conditional on support and knots. Searching over their locations
+adds selection uncertainty. The working GIC uses <span class="math inline">\lambda_{\rm eff}=\kappa\log(p)\log\log(n)</span>.
+For a joint fit use <span class="math inline">p=n=\sum_s n_s</span>. The
+temporal information factor <span class="math inline">\kappa</span>
+equals one for independent residuals. Backgrounds are estimated on a
+fixed basis and remain unpenalized. The fitted noise parameters add a
+constant charge to the reported information criterion for that
+dataset.</p>
+<ol style="list-style-type: decimal">
+<li>
+<strong>Form a spectral dictionary.</strong> Calibrate the PSF, form
+its banded design and fit a nonnegative grouped L0 regression across
+channels. For a single sample the independent log-concave fit supplies
+local starts. Repeated acquisitions can share a PSF estimated from
+pooled, count-conserving total-ion traces. Channel aggregation
+accelerates the initial regression. Lift its spectra back to original
+channels with a nonnegative fit.</li>
+<li>
+<strong>Locate candidate occurrences.</strong> With several samples,
+spectral anchors estimate monotone time maps. On that shared clock,
+propose local spectral directions that overlapping candidates cannot
+already explain by a nonnegative mixture. Retain native time coordinates
+for testing peak shape. With one sample the time map is the
+identity.</li>
+<li>
+<strong>Alternate two conditional updates.</strong> Visit components
+in decreasing total abundance. To update one profile, put all other
+components and background in the offset. Compute per-scan conditional
+count estimates, project their logarithms onto the concavity cone with
+information weights, optimize the amplitude, and compare with keeping or
+removing the old profile using original-ion <span class="math inline">J</span>. A curve reaching a window boundary can
+expand. For fixed profiles, refit a common spectrum from all
+occurrences. Compare each ion with zero using the same penalty and
+transfer the spectrum’s normalization into the profiles. Update the
+background.</li>
+<li>
+<strong>Check ambiguous overlaps.</strong> Test proposed local
+support exchanges and joint refits against the same original-channel
+objective. The default allows 12 initial sweeps and up to two exchange
+rounds, with at most ten refit sweeps after an accepted exchange.
+Relative objective improvement below <span class="math inline">10^{-3}</span> ends a round. These bounded searches
+return a local solution. Supplied ground truth need not minimize a
+penalized criterion on one realization of noisy data.</li>
+</ol>
+<p>For simulated data a truth-based comparison has a precise
+interpretation. Write <span class="math inline">\mu^\star=E(Y)</span>
+and fix dispersion and weights. The expected difference in Poisson
+deviances between any fixed <span class="math inline">\mu</span> and
+<span class="math inline">\mu^\star</span> is <span class="math inline">2\sum[\mu^\star\log(\mu^\star/\mu)+\mu-\mu^\star]/\phi</span>,
+which is nonnegative. On a single noisy dataset this inequality need not
+hold. Adding a dimension penalty can also favor a simpler approximation
+in expectation. A true-profile initialization consequently provides a
+reference value for this dataset. A certificate of global optimality
+would require a lower bound over all admissible factorizations. In a
+grouped Poisson regression, starting the fitted mean at <span class="math inline">HS+BA</span> gives the correct first Fisher weights.
+The support penalty and the sample score can still move the coefficients
+away from their generating values.</p>
+<p>Use <code>objective.trace=TRUE</code> to record original-channel
+deviance, the two dimension counts, rank, occurrences and <span class="math inline">J</span> after each block. The values in
+<code>conditional_objective</code> use the saturated model as the
+deviance reference. The <code><a href="https://tomwenseleers.github.io/L0glm/reference/model_criteria.html" class="external-link">GIC()</a></code> extractor includes the
+data-dependent likelihood constant and estimated noise dimensions.
+Comparisons on the same observations and noise specification give the
+same objective differences.</p>
+<p>The following sections detail PSF calibration, the general-family
+solver and chromatographic interpretation. Sections 3 and 4 give the
+component-count penalty used with <code>algorithm="classic"</code>.</p>
+</div>
 <div class="section level2">
 <h2 id="deconvolution-based-on-a-known-peak-shape">1. Deconvolution based on a known peak shape<a class="anchor" aria-label="anchor" href="#deconvolution-based-on-a-known-peak-shape"></a>
 </h2>

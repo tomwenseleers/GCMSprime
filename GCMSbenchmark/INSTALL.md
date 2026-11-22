@@ -28,6 +28,11 @@ format conversion used for several external engines.
 [Bioconductor installation](https://bioconductor.org/install/) ·
 [eRah manual](https://cran.r-project.org/web/packages/erah/vignettes/erah-manual.html)
 
+The conditional GCMSprime benchmark also requires a Python environment with
+NumPy, SciPy, Numba and threadpoolctl. Run
+`python -m pip install numpy scipy numba threadpoolctl` in that environment,
+then verify `logconNMF::conditionalSolverAvailable()` in R.
+
 ## MS-DIAL
 
 Download the GC–MS-capable console distribution from the developers' site.

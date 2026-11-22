@@ -33,12 +33,12 @@ separately in each sample, with a **median estimate of 829.55**. The generating
 retention-index maps are used for scoring;
 the deconvolution receives neither the known areas nor the true profiles.
 
-GCMSprime recovers **750 of 769 occurrences**, with **142 false positives**
-(peak F1 **0.903**), including the acid in all seven samples where it occurs.
+GCMSprime recovers **767 of 769 occurrences**, with **42 false positives**
+(peak F1 **0.972**), including the acid in all seven samples where it occurs.
 
 | Method | Seconds | TP | FP | Sensitivity | Peak F1 | Ion F1 |
 |:--|--:|--:|--:|--:|--:|--:|
-| GCMSprime | 146.50 | 750 | 142 | 97.5% | 0.903 | 0.972 |
+| GCMSprime | 124.70 | 767 | 42 | 99.7% | 0.972 | 0.995 |
 | MS-DIAL | 17.61 | 675 | 641 | 87.8% | 0.647 | 0.858 |
 | mzmine GC-EI | 38.47 | 622 | 70 | 80.9% | 0.851 | 0.860 |
 | eRah | 17.07 | 645 | 1912 | 83.9% | 0.388 | 0.771 |
@@ -48,9 +48,9 @@ GCMSprime recovers **750 of 769 occurrences**, with **142 false positives**
 
 Times are wall-clock analysis times on an HP ZBook Fury G8 Mobile
 Workstation with an Intel Core i9-11950H at 2.60 GHz, eight physical cores
-and 16 logical threads, Windows and R 4.5.0. GCMSprime uses 16
-single-threaded sample workers, AMDIS runs serially, and xcms + CAMERA uses
-four workers. Input conversion is timed separately.
+and 16 logical threads, Windows and R 4.5.0. GCMSprime uses four sample workers with two threads each, AMDIS runs serially, and xcms + CAMERA uses
+four workers. Input conversion is timed separately. The six comparator rows use
+their saved outputs and timings from the identical simulated inputs.
 
 `ncores` can use any number of available cores. GCMSprime parallelizes
 deconvolution across sample workers; when enough samples are available,
@@ -76,11 +76,11 @@ $A_{\mathrm{TIC}}=A_q/p_q$, after converting its integration-time units.
 The line is a robust log–log fit using `robustbase::lmrob(setting="KS2014")`.
 The shaded 95% prediction band uses its robust residual scale and coefficient
 covariance, describing the main approximately Gaussian log-error distribution.
-Every panel uses a light-grey band; the coloured observations are drawn last
-at alpha 0.5, so superimposed points accumulate into darker concentrations.
+The light-grey band shows the fitted prediction interval. Coloured points at
+alpha 0.5 show overlap density. The dashed 1:1 line is drawn over the points.
 The headings report robust adjusted R²; ordinary
 least-squares statistics are retained in the downloadable tables. GCMSprime
-has robust adjusted R² **0.9992** and a **median absolute area error of 1.38%**.
+has robust adjusted R² **0.999995** and a **median absolute area error of 0.10%**.
 Area agreement is conditional on recovered true matches, so it is shown
 together with sensitivity and false-positive counts.
 
@@ -101,7 +101,7 @@ Ion support uses a shared **0.1% of base-peak intensity cutoff**, applied
 independently to reference and recovered spectra for every method:
 $I_j>0$ and $I_j\geq0.001\max_l I_l$.
 Within-spectrum $F_1=2TP/(2TP+FP+FN)$ is averaged over correctly matched
-true spectra. GCMSprime achieves **mean ion F1 0.972**, compared with
+true spectra. GCMSprime achieves **mean ion F1 0.995**, compared with
 **0.860** for the strongest comparator. Individual points accompany the
 violins; the logit-spaced axis retains labels in the original F1 units.
 
@@ -128,11 +128,10 @@ horizontal axis; profile amplitudes remain on their native total-ion scale.
 
 GCMSprime recovers all occurrences of both the regular EMG and the
 shark-fin-shaped acid. Mean profile cosine, counting missed occurrences as
-zero, is **0.983 for the regular compound** and **0.963 for the acid**;
-median cosine among matched occurrences is **0.9999** and **0.9959**,
+zero, is **0.999996 for the regular compound** and **0.999982 for the acid**;
+median cosine among matched occurrences is **0.999998** and **0.999990**,
 respectively. Other configurations often truncate profiles, split their
-contributions or miss the acid. MS-DIAL slightly exceeds GCMSprime for the
-regular compound (mean cosine 0.998), but recovers only five of the seven acid
+contributions or miss the acid. MS-DIAL also resolves the regular compound (mean cosine 0.998). It recovers five of the seven acid
 occurrences and has acid mean cosine 0.449. CAMERA supplies a
 representative-ion trace scaled to the grouped total-ion area. The mzmine
 export here contains spectra and areas without component scan profiles.

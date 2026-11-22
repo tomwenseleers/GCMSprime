@@ -83,10 +83,9 @@ If acquisition dates are absent, pass explicit relative sample paths in
 \code{coupling=list()} for \code{\link[logconNMF:logconNMF]{logconNMF::logconNMF()}} controls, \code{sample_order=NULL},
 \code{exposure=NULL}, \code{resume=FALSE}, \code{plots=FALSE}, \code{workers=NULL} and \code{cache=TRUE}.
 \code{workers} limits concurrent samples within the total \code{ncores} budget.
-\code{cache} controls aggregate observations and bounded original count-data
-caches during simultaneous fitting. Each eligible worker retains at most
-64 MiB of observations plus their likelihood normalizers; buffers are
-released when the fit returns. \code{cache=FALSE} disables persistent input caches.
+With the classic solver, \code{cache} controls aggregate and original-data caches.
+The conditional solver holds original observations and means in memory for
+joint factor updates and releases its PSF workers before this stage.
 \code{exposure} may be a positive
 scalar, a list with one scan-wise vector per acquisition-ordered sample, or
 a function of a sample's metadata and time vector. The default preserves
@@ -116,19 +115,11 @@ The output directory contains per-sample MSP, Excel and fitted RDS files,
 an acquisition-ordered \code{samples.csv}, \code{areas.csv}, a consensus MSP library,
 and \code{experiment.xlsx} with samples, compounds, areas and packed spectra.
 \code{batch=list(plots=TRUE)} also writes each sample's trace and heatmap PDFs.
-Observations and factors are stored per sample, enabling streamed fitting;
-only aggregate observations are cached across samples in RAM, and the returned
-object contains paths, tables and compact common spectra. Original-channel
-spectral/background updates read blocks of at most 32 channels. Each active
-independent fit has its own temporary working buffers; these are released
-before the next assigned sample. A 10,000-by-32 cache needs 2.56 MB per sample,
-or 2.56 GB for 1,000 samples, in addition to worker and factor memory.
-For memory-limited series, \code{batch=list(workers=1L, cache=FALSE)} processes
-one sample at a time and reads observations from disk during coupled fitting,
-including local profile windows instead of temporary whole-sample caches.
-The worker limit applies to initialization and coupled refinement unless
-overridden by \code{batch$coupling$workers}. Native threads within the active
-sample can still use the \code{ncores} budget.
+The returned object stores file paths, tables and common spectra. Automatic
+worker allocation for conditional PSF regressions accounts for memory.
+Set \code{batch=list(workers=4L)} to cap sample-level concurrency explicitly.
+For a disk-backed joint fit use \code{algorithm="classic"} with
+\code{batch=list(workers=1L, cache=FALSE)}.
 \code{control$initial_solver} and \code{control$initial_fallback} apply to every
 independent sample initialization, just as for a single chromatogram.
 The solver's \code{max.memory} bounds its Gram/factor workspace, not total RAM;

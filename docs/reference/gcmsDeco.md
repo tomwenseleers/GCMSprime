@@ -9,15 +9,6 @@ channels are retained in the final spectra.
 ## Usage
 
 ``` r
-# S3 method for class 'GCMSdeco'
-residuals(
-  object,
-  type = c("pearson", "response"),
-  time_range = NULL,
-  mass = NULL,
-  ...
-)
-
 gcmsDeco(
   cdf_file,
   msp_file = NULL,
@@ -43,7 +34,18 @@ gcmsDeco(
   output_dir = NULL,
   coupled = TRUE,
   batch = list(),
-  ion_threshold = 0.001
+  ion_threshold = 0.001,
+  algorithm = c("auto", "conditional", "classic"),
+  objective.trace = FALSE
+)
+
+# S3 method for class 'GCMSdeco'
+residuals(
+  object,
+  type = c("pearson", "response"),
+  time_range = NULL,
+  mass = NULL,
+  ...
 )
 
 # S3 method for class 'GCMSdeco'
@@ -84,29 +86,6 @@ print(x, ...)
 
 ## Arguments
 
-- object, x:
-
-  A fitted `gcmsDeco` object.
-
-- type:
-
-  Residual type: `"pearson"` uses the fitted marginal variance;
-  `"response"` returns observed minus fitted latent intensity.
-
-- time_range:
-
-  Optional increasing pair of sample retention-time bounds in minutes.
-  Infinite bounds are accepted. This can exclude the solvent interval or
-  select a chromatographic window.
-
-- mass:
-
-  Optional nominal m/z values for residual extraction.
-
-- ...:
-
-  Further method arguments.
-
 - cdf_file:
 
   A directory of sample subdirectories with a `standards` subdirectory,
@@ -128,11 +107,11 @@ print(x, ...)
 
 - lambda:
 
-  Information-criterion preset or a nonnegative numeric penalty. For an
-  individual chromatogram the numeric value is the total charge per
-  compound. The directory workflow uses this charge in each initial fit.
-  Its joint refinement uses the numeric value per selection degree of
-  freedom. Both charges precede any temporal adjustment.
+  Information-criterion preset or a nonnegative numeric penalty. The
+  conditional solver charges a numeric penalty per dimension of the
+  spectrum and log-concave profiles. For the classic solver the numeric
+  value specifies the total charge per single-sample compound and the
+  charge per selection degree of freedom in a joint fit.
 
 - nwindows:
 
@@ -147,6 +126,12 @@ print(x, ...)
   [`logconNMF::estimatePSF()`](https://tomwenseleers.github.io/logconNMF/reference/estimatePSF.html),
   with automatic support, sample refinement and resampling to the sample
   scan interval.
+
+- time_range:
+
+  Optional increasing pair of sample retention-time bounds in minutes.
+  Infinite bounds are accepted. This can exclude the solvent interval or
+  select a chromatographic window.
 
 - calibration_range:
 
@@ -199,10 +184,10 @@ print(x, ...)
 
   Total logical-CPU budget. `NULL` uses physical cores for one
   chromatogram and logical cores for directory input. Directory analyses
-  run up to `min(samples,ncores)` sample workers, dividing the native
-  thread budget between them. With at least 16 samples, `ncores=16L`
-  uses 16 workers with one native thread each. BLAS threads are limited
-  during batch fitting and caller settings are restored. For a single
+  run up to `min(samples,ncores)` sample workers, dividing native
+  threads between them. For conditional grouped regressions automatic
+  worker allocation also accounts for available memory. BLAS threads are
+  limited during batch fitting and restored on return. For a single
   chromatogram, this sets its native OpenMP thread count.
 
 - control:
@@ -211,7 +196,8 @@ print(x, ...)
   `native_sweeps=6L`, `block_sweeps=6L`, `psf_width=NULL`,
   `screen_factor=1`, `censor=0.5`, `linkage="ward"`,
   `joint_trials=NULL`, `profile_cycles=4L`, `fusion_passes=0L`,
-  `initial_relaxed=TRUE`, `profile_fusion=TRUE`,
+  `initial_relaxed=TRUE`, `initial_solver=list()`,
+  `initial_fallback=TRUE`, `profile_fusion=TRUE`,
   `profile_restarts=TRUE`. `joint_trials` uses direct Poisson fusion for
   Poisson data and joint local refinement for the other families.
   `psf_width` supplies the typical FWHM in scans. When omitted, local
@@ -237,7 +223,20 @@ print(x, ...)
   included in the local fit, with the remaining components and
   background held in an offset. `original_cleanup=TRUE` enables a final
   original-channel deletion, local fusion and residual-discovery pass.
-  Set it to `FALSE` to skip that pass.
+  Set it to `FALSE` to skip that pass. `initial_solver` supplies named
+  [`L0glm::controlSolverGen()`](https://tomwenseleers.github.io/L0glm/reference/controlSolverGen.html)
+  arguments for the initial component-selection fit, including `solver`,
+  `method`, `precond`, `tol`, `maxit` and `max.memory` (GiB). For
+  example,
+  `list(initial_solver=list(solver="eigen", method=3L, precond=1L))`
+  requests Eigen conjugate gradients with diagonal preconditioning. The
+  default is Eigen Cholesky. If that fit exceeds L0glm's Gram/factor
+  workspace budget, `initial_fallback=TRUE` retries with diagonally
+  preconditioned CG and reports the switch. The retry retains the memory
+  limit, data, weights, background, penalty and component-selection
+  settings. Other errors and failures of explicitly selected iterative
+  solvers propagate. Set `initial_fallback=FALSE` to require the
+  requested solver.
 
 - psf_control:
 
@@ -319,6 +318,33 @@ print(x, ...)
   peak areas and information criteria are unaffected; raw factors remain
   in `model$S`.
 
+- algorithm:
+
+  Count-factorization algorithm passed to
+  [`logconNMF::logconNMF()`](https://tomwenseleers.github.io/logconNMF/reference/logconNMF.html).
+
+- objective.trace:
+
+  Record original-ion objective values after each conditional block.
+  Leave FALSE for elapsed-time measurements.
+
+- object, x:
+
+  A fitted `gcmsDeco` object.
+
+- type:
+
+  Residual type: `"pearson"` uses the fitted marginal variance;
+  `"response"` returns observed minus fitted latent intensity.
+
+- mass:
+
+  Optional nominal m/z values for residual extraction.
+
+- ...:
+
+  Further method arguments.
+
 - normalize:
 
   Spectral coefficient normalization: `"none"` returns integrated
@@ -398,11 +424,18 @@ for the distributional details. The returned `psf_working_weight`
 summarises the average Poisson-scale precision for comparing noise
 scales; the actual PSF likelihood uses the specified family.
 
-`precluster=32L` performs selection and fusion in at most 32
-size-adjusted outcome groups, followed by refinement on every original
-channel. The final original-channel cleanup checks deletions, local
-fusions and missed residual peaks using the complete compound-count
-criterion. Its diagnostics are in `model$cleanup`;
+With the conditional count solver, a grouped PSF regression supplies
+starting spectra. The final iterations use every ion, count the positive
+spectral coefficients and the free ordinates of each log-concave curve.
+Multiple samples share spectra on their native scan grids. Explicit
+numeric lambda is per fitted dimension for this solver. See the
+mathematical basis article.
+
+With the classic solver, `precluster=32L` performs selection and fusion
+in at most 32 size-adjusted outcome groups, followed by refinement on
+every original channel. The final original-channel cleanup checks
+deletions, local fusions and missed residual peaks using the complete
+compound-count criterion. Its diagnostics are in `model$cleanup`;
 `control=list(original_cleanup=FALSE)` skips it. See
 [`logconNMF::logconNMF()`](https://tomwenseleers.github.io/logconNMF/reference/logconNMF.html)
 for the selection criterion and shape constraints. The backend uses a
@@ -412,6 +445,16 @@ working-correlation adjustment. Small fragments contained in a broad
 peak are assessed against equally refined unmerged local fits on every
 original ion channel. Trial diagnostics are in `model$contained_fusion`;
 the initialization criterion and history are in `model$initialization`.
+Initial component selection uses the solver configured by
+`control$initial_solver`, a named list of
+[`L0glm::controlSolverGen()`](https://tomwenseleers.github.io/L0glm/reference/controlSolverGen.html)
+arguments. For a full chromatogram, for example,
+`control=list(initial_solver=list(solver="eigen", method=3L, precond=1L))`
+requests conjugate gradients with diagonal preconditioning. `max.memory`
+in that list specifies the Gram/factor workspace budget in GiB. By
+default, a Cholesky workspace-budget error triggers a reported retry
+with this CG solver, preserving the memory limit and selection settings.
+Set `control=list(initial_fallback=FALSE)` to disable the retry.
 Compatible Poisson/quasipoisson fits reuse the ion groups to screen
 local width restarts. Promising candidates and matched controls are
 refined and accepted using all original channels, with background and
@@ -422,13 +465,11 @@ use increasing apex retention time. Rank selection, hard log concavity,
 censored Gamma intensities and compound-count information criteria
 follow
 [`logconNMF::logconNMF()`](https://tomwenseleers.github.io/logconNMF/reference/logconNMF.html).
-During coupled refinement, aggregate observations are shared in memory.
-Eligible count workers can retain one original matrix up to 64 MiB plus
-an equally sized likelihood-normalizer cache; larger chromatograms
-retain local disk reads. The caches are scoped to the fit and released
-on exit. Set `batch=list(cache=FALSE)` to disable persistent input
-caches. Likelihood reuse and stationary-background checks preserve the
-criterion, convergence tolerance and original-channel acceptance checks.
+The conditional solver uses grouped PSF regressions followed by
+original-ion updates of shared spectra, sample profiles and background.
+Its peak memory includes the raw count matrices and fitted means. For
+disk-backed joint refinement use `algorithm="classic"` and
+`batch=list(cache=FALSE)`.
 
 ## Experimental GC/MS examples
 

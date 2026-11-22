@@ -64,7 +64,7 @@ test_that("short CDF windows can use a constant unpenalized background", {
     dispersion=1,ncores=1L,
     control=list(kernel_est=kernel,maxiter=0L,censor=.5,
       fit=list(IC="gic")))
-  direct <- logconNMF(Y,X=canonical_psf$X,background=matrix(1,n,1L),
+  direct <- logconNMF(Y,X=canonical_psf$X,background=matrix(1,n,1L),time=f$time,
     family=poisson("identity"),precluster=2L,dispersion=1,
     correlation="none",ncores=1L,control=fit_control)
   for(component in c("H","S","alpha")) {

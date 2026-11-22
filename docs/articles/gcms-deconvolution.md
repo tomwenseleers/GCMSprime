@@ -135,15 +135,15 @@ is available through the calls in this section.
 The table reports the median elapsed time across three complete
 CDF-to-MSP fits on the [benchmark
 workstation](https://tomwenseleers.github.io/L0glm/articles/performance.html#reproduce-and-extend),
-using a clean optimized source build, default aggregate-screened,
-original-data-checked local profile restarts, eight OpenMP threads and
-one BLAS thread. Timings include CDF reading, PSF initialization,
-factorization, original-channel completion and MSP export.
+using a clean optimized source build, grouped PSF initialization and
+conditional original-channel updates, eight OpenMP threads and one BLAS
+thread. Timings include CDF reading, PSF initialization, factorization,
+original-channel completion and MSP export.
 
 | Dataset | Scans | Mass channels | Components | Seconds | Quasi-GIC | Adjusted weighted R² |
 |:---|---:|---:|---:|---:|---:|---:|
-| `gcmsData1` | 119 | 670 | 6 | 1.92 | 247,218 | 0.98983 |
-| `gcmsData2` | 1,764 | 518 | 36 | 30.80 | 1,466,359 | 0.99479 |
+| `gcmsData1` | 119 | 670 | 6 | 4.31 | 215,547 | 0.98987 |
+| `gcmsData2` | 1,764 | 518 | 36 | 40.15 | 1,010,182 | 0.99482 |
 
 Weighted R² uses weights `1/pmax(fitted_mean, 0.1)` and a separate
 weighted mean for each mass channel. Its adjustment is conditional on
@@ -162,8 +162,9 @@ the criterion-selected sparse start identified by the diagnostic-ion
 sensitivity grid. The beer fit uses a relaxed grouped-support refit so
 that the broad acid candidate is retained for profile refinement; it
 represents the extended acid contribution with one log-concave profile
-while retaining all 518 mass channels. Diagnostics are available in
-`fit2$model$contained_fusion` and `fit2$model$initialization`.
+while retaining all 518 mass channels. The fitted deviance, support
+dimensions and penalty are available in
+`fit2$model$conditional_objective`.
 
 ### Cuticular hydrocarbons
 

@@ -107,11 +107,10 @@ paths in `batch=list(sample_order=...)`.
 [`logconNMF::logconNMF()`](https://tomwenseleers.github.io/logconNMF/reference/logconNMF.html)
 controls, `sample_order=NULL`, `exposure=NULL`, `resume=FALSE`,
 `plots=FALSE`, `workers=NULL` and `cache=TRUE`. `workers` limits
-concurrent samples within the total `ncores` budget. `cache` controls
-aggregate observations and bounded original count-data caches during
-simultaneous fitting. Each eligible worker retains at most 64 MiB of
-observations plus their likelihood normalizers; buffers are released
-when the fit returns. `cache=FALSE` disables persistent input caches.
+concurrent samples within the total `ncores` budget. With the classic
+solver, `cache` controls aggregate and original-data caches. The
+conditional solver holds original observations and means in memory for
+joint factor updates and releases its PSF workers before this stage.
 `exposure` may be a positive scalar, a list with one scan-wise vector
 per acquisition-ordered sample, or a function of a sample's metadata and
 time vector. The default preserves vendor intensities. Known integration
@@ -143,17 +142,18 @@ The output directory contains per-sample MSP, Excel and fitted RDS
 files, an acquisition-ordered `samples.csv`, `areas.csv`, a consensus
 MSP library, and `experiment.xlsx` with samples, compounds, areas and
 packed spectra. `batch=list(plots=TRUE)` also writes each sample's trace
-and heatmap PDFs. Observations and factors are stored per sample,
-enabling streamed fitting; only aggregate observations are cached across
-samples in RAM, and the returned object contains paths, tables and
-compact common spectra. Original-channel spectral/background updates
-read blocks of at most 32 channels. Each active independent fit has its
-own temporary working buffers; these are released before the next
-assigned sample. A 10,000-by-32 cache needs 2.56 MB per sample, or 2.56
-GB for 1,000 samples, in addition to worker and factor memory. Keep the
-output directory with the saved object. Explicit `resume=TRUE` reuses
-independent fits only when the file metadata and fitting arguments
-match; simultaneous refinement is recomputed.
+and heatmap PDFs. The returned object stores file paths, tables and
+common spectra. Automatic worker allocation for conditional PSF
+regressions accounts for memory. Set `batch=list(workers=4L)` to cap
+sample-level concurrency explicitly. For a disk-backed joint fit use
+`algorithm="classic"` with `batch=list(workers=1L, cache=FALSE)`.
+`control$initial_solver` and `control$initial_fallback` apply to every
+independent sample initialization, just as for a single chromatogram.
+The solver's `max.memory` bounds its Gram/factor workspace, not total
+RAM; each active sample still requires its observations, profiles and
+fit buffers. Keep the output directory with the saved object. Explicit
+`resume=TRUE` reuses independent fits only when the file metadata and
+fitting arguments match; simultaneous refinement is recomputed.
 
 ## See also
 

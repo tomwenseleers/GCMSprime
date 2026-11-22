@@ -1,6 +1,15 @@
 # Benchmarks against other software
 
-## Sixteen simulated chromatograms
+## Small-scale 16-sample software comparison
+
+This page reports the **small-scale** seven-workflow comparison. It is
+distinct from the [large-scale 16-sample resource
+benchmark](https://tomwenseleers.github.io/GCMSprime/articles/multisample.html#benchmark-scales)
+with 10,000 scans per sample and 1,000 reference compounds across the
+experiment. The linked overview reports both timings, settings and short
+reproduction recipes. Here GCMSprime uses 32 common ion groups, two
+blind-PSF windows, at most three PSF iterations, and up to 12 initial
+conditional sweeps on the original ions.
 
 The **16 chromatograms** share a library of **100 reference compounds**.
 Each spans a 20-minute retention window, with 1,200 scans and all 258
@@ -21,13 +30,13 @@ window. GCMSprime estimates dispersion separately in each sample, with a
 used for scoring; the deconvolution receives neither the known areas nor
 the true profiles.
 
-GCMSprime recovers **750 of 769 occurrences**, with **142 false
-positives** (peak F1 **0.903**), including the acid in all seven samples
+GCMSprime recovers **767 of 769 occurrences**, with **42 false
+positives** (peak F1 **0.972**), including the acid in all seven samples
 where it occurs.
 
 | Method        | Seconds |  TP |   FP | Sensitivity | Peak F1 | Ion F1 |
 |:--------------|--------:|----:|-----:|------------:|--------:|-------:|
-| GCMSprime     |  146.50 | 750 |  142 |       97.5% |   0.903 |  0.972 |
+| GCMSprime     |  124.70 | 767 |   42 |       99.7% |   0.972 |  0.995 |
 | MS-DIAL       |   17.61 | 675 |  641 |       87.8% |   0.647 |  0.858 |
 | mzmine GC-EI  |   38.47 | 622 |   70 |       80.9% |   0.851 |  0.860 |
 | eRah          |   17.07 | 645 | 1912 |       83.9% |   0.388 |  0.771 |
@@ -37,16 +46,21 @@ where it occurs.
 
 Times are wall-clock analysis times on an HP ZBook Fury G8 Mobile
 Workstation with an Intel Core i9-11950H at 2.60 GHz, eight physical
-cores and 16 logical threads, Windows and R 4.5.0. GCMSprime uses 16
-single-threaded sample workers, AMDIS runs serially, and xcms + CAMERA
-uses four workers. Input conversion is timed separately.
+cores and 16 logical threads, Windows and R 4.5.0. GCMSprime uses four
+sample workers with two threads each, AMDIS runs serially, and xcms +
+CAMERA uses four workers. Input conversion is timed separately. The six
+comparator rows use their saved outputs and timings from the identical
+simulated inputs.
 
-GCMSprime screens alternative local profile starts in the common channel
-aggregation, then checks promising starts against matched local
-refinements on the original mass channels. Its final spectra and
-reported criterion use the original data. The coupled quasi-GIC is
-**8,069,415**. Timers include automatic memory collection during the
-work without forcing a separate collection before each internal stage.
+The 32-group PSF regressions initialize a joint fit on all 258 original
+ions. The fitted rank is 122 shared identities with 809 sample-level
+calls. Its original-channel quasi-GIC is **4,194,515**. Calibration and
+grouping took 15.13 s, grouped regressions, alignment and factor updates
+took 103.90 s, and result construction and export took 5.41 s. Grouped
+initialization accounted for 8.89 s and simultaneous factorization for
+94.92 s within the 103.90 s stage. The enclosing benchmark measured
+124.70 s. In an independently simulated 16-sample dataset the same
+algorithm recovered 775 of 778 occurrences with 34 false calls.
 
 `ncores` can use any number of available cores. GCMSprime parallelizes
 deconvolution across sample workers; when enough samples are available,
@@ -85,12 +99,12 @@ A\_{\mathrm{TIC}}=A_q/p_q, after converting its integration-time units.
 The line is a robust log–log fit using
 `robustbase::lmrob(setting="KS2014")`. The shaded 95% prediction band
 uses its robust residual scale and coefficient covariance, describing
-the main approximately Gaussian log-error distribution. Every panel uses
-a light-grey band; the coloured observations are drawn last at alpha
-0.5, so superimposed points accumulate into darker concentrations. The
+the main approximately Gaussian log-error distribution. The light-grey
+band shows the fitted prediction interval. Coloured points at alpha 0.5
+show overlap density. The dashed 1:1 line is drawn over the points. The
 headings report robust adjusted R²; ordinary least-squares statistics
 are retained in the downloadable tables. GCMSprime has robust adjusted
-R² **0.9992** and a **median absolute area error of 1.38%**. Area
+R² **0.999995** and a **median absolute area error of 0.10%**. Area
 agreement is conditional on recovered true matches, so it is shown
 together with sensitivity and false-positive counts.
 
@@ -112,7 +126,7 @@ Ion support uses a shared **0.1% of base-peak intensity cutoff**,
 applied independently to reference and recovered spectra for every
 method: I_j\>0 and I_j\geq0.001\max_l I_l. Within-spectrum
 F_1=2TP/(2TP+FP+FN) is averaged over correctly matched true spectra.
-GCMSprime achieves **mean ion F1 0.972**, compared with **0.860** for
+GCMSprime achieves **mean ion F1 0.995**, compared with **0.860** for
 the strongest comparator. Individual points accompany the violins; the
 logit-spaced axis retains labels in the original F1 units.
 
@@ -152,29 +166,31 @@ true
 area](../reference/figures/simulated-16-acid-profiles.png)](https://tomwenseleers.github.io/GCMSprime/reference/figures/simulated-16-acid-profiles.png)
 
 The first panel set shows the regular compound with the largest total
-true area across samples; the second shows the acid compound. All 16
-samples are included and ordered by true abundance, from **blue for the
-smallest area to red for the largest**. **Dashed curves are ground
-truth; solid curves are returned profiles.** Intensities retain their
-original total-ion scale, without unit-area or peak-height
-normalization. Absent compounds have zero true signal. Compatible
-fragments remain separate curves so splitting stays visible. The
-generating retention-index calibration supplies the common horizontal
-axis; profile amplitudes remain on their native total-ion scale.
+true area across samples (present in **11 of 16 samples**); the second
+shows the acid compound (present in **7 of 16**). These are the same
+saved profiles shown on the logconNMF homepage. All 16 samples are
+included and ordered by true abundance, from **blue for the smallest
+area to red for the largest**. **Dashed curves are ground truth; solid
+curves are returned profiles.** Intensities retain their original
+total-ion scale, without unit-area or peak-height normalization. Absent
+compounds have zero true signal. Compatible fragments remain separate
+curves so splitting stays visible. The generating retention-index
+calibration supplies the common horizontal axis; profile amplitudes
+remain on their native total-ion scale.
 
 GCMSprime recovers all occurrences of both the regular EMG and the
 shark-fin-shaped acid. Mean profile cosine, counting missed occurrences
-as zero, is **0.983 for the regular compound** and **0.963 for the
-acid**; median cosine among matched occurrences is **0.9999** and
-**0.9959**, respectively. Other configurations often truncate profiles,
-split their contributions or miss the acid. MS-DIAL slightly exceeds
-GCMSprime for the regular compound (mean cosine 0.998), but recovers
-only five of the seven acid occurrences and has acid mean cosine 0.449.
-CAMERA supplies a representative-ion trace scaled to the grouped
-total-ion area. The mzmine export here contains spectra and areas
-without component scan profiles. MSHub factorizes aligned ion-peak
-integrals across samples. Its model has no common compound elution
-profile constrained to be shared across mass channels, so component scan
+as zero, is **0.999996 for the regular compound** and **0.999982 for the
+acid**; median cosine among matched occurrences is **0.999998** and
+**0.999990**, respectively. Other configurations often truncate
+profiles, split their contributions or miss the acid. MS-DIAL also
+resolves the regular compound (mean cosine 0.998). It recovers five of
+the seven acid occurrences and has acid mean cosine 0.449. CAMERA
+supplies a representative-ion trace scaled to the grouped total-ion
+area. The mzmine export here contains spectra and areas without
+component scan profiles. MSHub factorizes aligned ion-peak integrals
+across samples. Its model has no common compound elution profile
+constrained to be shared across mass channels, so component scan
 profiles are absent from the model itself. See [Aksenov et
 al. (2021)](https://pmc.ncbi.nlm.nih.gov/articles/PMC7971188/).
 
@@ -199,7 +215,7 @@ area regressions.
 
 | Method        | Smallest quarter | Lower-middle | Upper-middle | Largest quarter |
 |:--------------|-----------------:|-------------:|-------------:|----------------:|
-| GCMSprime     |            95.9% |        96.9% |        97.9% |           99.5% |
+| GCMSprime     |            99.0% |       100.0% |       100.0% |          100.0% |
 | MS-DIAL       |            79.3% |        84.4% |        91.1% |           96.4% |
 | mzmine GC-EI  |            70.5% |        79.2% |        82.3% |           91.7% |
 | eRah          |            72.0% |        78.6% |        89.1% |           95.8% |
@@ -240,11 +256,9 @@ table](https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst
 [matched
 pairs](https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst/benchmarks/results/matches.csv),
 [all component
-identifications](https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst/benchmarks/results/identifications.csv)
+identifications](https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst/benchmarks/results/identifications.csv),
 [stage timings and coupled
 GIC](https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst/benchmarks/results/native-timings.csv),
-[restart
-diagnostics](https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst/benchmarks/results/restart-diagnostics.csv)
 and [xcms tuning
 results](https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst/benchmarks/results/xcms-training-results.csv).
 

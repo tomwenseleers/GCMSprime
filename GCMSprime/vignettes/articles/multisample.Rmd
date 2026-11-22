@@ -5,7 +5,7 @@ output: rmarkdown::html_document
 ---
 
 `gcmsDeco()` accepts an experiment directory and analyzes its chromatograms
-together. Each sample gets its own time-varying PSF, smooth background and
+together. The batch can share PSF calibration. Each sample has its own native scan grid, smooth background and
 log-concave compound profiles. Simultaneous factorisation shares mass spectra across
 samples and returns one consensus compound library with a sample-by-compound
 area table.
@@ -56,44 +56,31 @@ experiment <- gcmsDeco("chromatograms", output_dir="beer_results",
 
 ## Two distinct 16-sample benchmarks {#benchmark-scales}
 
-The small-scale software comparison and the large-scale resource validation
-are **different simulations and fits**. Both use 16 single-threaded sample
-workers, up to 32 common ion groups and original-channel likelihood checks and
-spectral updates. Their data sizes, PSF initialization and refinement budgets
-differ:
+The two experiments use different simulated chromatograms. Both retain the
+native scan grids and report recovery against the generating compounds.
 
-| Setting or wall time | Small-scale software comparison | Large-scale resource validation |
+| Setting | Small-scale software comparison | Large-scale resource validation |
 |:--|--:|--:|
 | Samples | 16 | 16 |
 | Scans per sample | 1,200 | 10,000 |
-| Recorded mass channels | 258 | 550 |
+| Recorded ion channels | 258 | 550 |
 | Reference compounds | 100 | 1,000 |
-| True sample-compound occurrences | 769 | 7,917 |
-| Samples containing the acid | 7 / 16 | 8 / 16 |
-| PSF initialization | Blind, 2 windows | Standard-assisted blind, 10 windows |
-| Coupled refinement budget | 1 initial + 1 round of 2 cycles | 5 initial + 3 rounds of 10 cycles |
-| Common ion grouping (s) | 1.29 | 18.94 |
-| Parallel independent fits, including sample PSFs (s) | 118.63 | 933.45 |
-| Alignment, grouping and simultaneous refinement (s) | 22.87 | 1530.20 |
-| Result construction and exports (s) | 3.46 | 51.55 |
-| Complete analysis wall time | **146.50 s (2.44 min)** | **2534.14 s (42.24 min)** |
+| True occurrences | 769 | 7,917 |
+| Samples containing the acid | 7 | 8 |
+| PSF calibration | Blind, two windows | Standard-assisted, ten windows |
+| Complete 16-sample analysis | **124.70 s (2.08 min)** | **1,360.13 s (22.67 min)** |
 
-These are elapsed times for the whole 16-sample batch, not per-sample times.
-Input simulation/CDF generation and the large benchmark's separate standard
-calibration are excluded. Small-case internal stages sum to 146.25 s; its
-enclosing comparison call adds 0.25 s. The large case uses the package's full
-default refinement budget; the small comparison explicitly uses a shorter
-budget. The contrast is therefore not a controlled scaling experiment, and
-profile-quality differences cannot be attributed to refinement alone.
+Times cover the full batch and exclude simulation. In the small experiment,
+calibration and grouping took 15.13 s, grouped initialization and joint
+refinement took 103.90 s, and result construction and export took 5.41 s.
+The benchmark wrapper added 0.26 s. The large experiment is documented below.
 
 ## Small-scale 16-sample software comparison {#sixteen-simulated-chromatograms}
 
-This is the **small-scale** software-comparison fit (seed `9118`), with an
-explicit fast configuration: two blind-PSF windows, at most three PSF iterations,
-and three coupled cycles (one initial cycle plus one round of two), with
-`q=32`. It does not use the full default refinement budget. Its profile figures
-use the same saved profile table as the logconNMF homepage and the
-GCMSprime seven-workflow comparison.
+The small-scale fit (seed `9118`) uses two blind-PSF windows, three PSF
+iterations, 32 common ion groups and up to 12 initial conditional sweeps on
+the original channels. All profile figures for this simulation on both
+websites use the same saved fit.
 
 The **16 chromatograms** share a library of **100 reference compounds**.
 Each spans a 20-minute retention window, with 1,200 scans and all 258 mass channels.
@@ -119,21 +106,20 @@ reference library:
 library(GCMSbenchmark)
 bench <- system.file("benchmarks", package="GCMSbenchmark", mustWork=TRUE)
 source(file.path(bench, "simulated-16.R"), encoding="UTF-8")
-small <- runBenchmark16("benchmark-small", method="GCMSprime", ncores=16L)
+small <- runBenchmark16("benchmark-small", method="GCMSprime", ncores=8L)
 small$summary[c("analysis_s", "TP", "FP", "FN", "F1")]
 # Optional figures from the saved results:
 source(file.path(bench, "plot-simulated-16.R"), encoding="UTF-8")
 plotBenchmark16("benchmark-small")
 ~~~
 
-The analysis recovered **750 of 769 true occurrences**, with **142 false
-positives** (peak F1 **0.903**), including all seven acid occurrences.
-Robust adjusted log-area R² was **0.9992**, the median absolute peak-area error
-was **1.38%**, and mean spectral ion-support F1 was **0.972** at the shared
+The analysis recovered **767 of 769 true occurrences**, with **42 false
+positives** (peak F1 **0.972**), including all seven acid occurrences.
+Robust adjusted log-area R² was **0.999995**, the median absolute peak-area error
+was **0.10%**, and mean spectral ion-support F1 was **0.995** at the shared
 0.1% base-peak threshold.
 
-The CDF-to-results analysis took **146.50 s** with 16 single-threaded sample
-workers on an HP ZBook Fury G8, Intel Core i9-11950H, eight physical cores,
+The CDF-to-results analysis took **124.70 s** with four two-thread sample workers on an HP ZBook Fury G8, Intel Core i9-11950H, eight physical cores,
 16 logical threads, Windows and R 4.5.0. CDF generation is separate.
 
 [![Total-ion area accuracy with robust log–log fits](../reference/figures/simulated-16-area-predictions.png)](../reference/figures/simulated-16-area-predictions.png)
@@ -146,64 +132,52 @@ workflows, matching rules, noise calibration, profile plots and tables.
 
 ## Large-scale 16-sample resource benchmark {#full-sized-chromatograms-and-memory}
 
-This **large-scale** fit uses seed `171117` and a separate simulated
-narrow-peak calibration standard. Its default coupled budget is 35 cycles
-(five initial cycles plus three rounds of ten), with `q=64`. The higher scan
-resolution, different simulated abundances and PSF calibration also distinguish
-it from the small software comparison.
+This independent simulation (seed `171117`) has **16 chromatograms, 10,000 scans,
+550 recorded ion channels and 1,000 reference compounds**. Their spectra occupy
+258 channels. The remaining channels contain background. The simulated peaks
+broaden with abundance and drift in retention time. The data include irregular
+scan intervals, a background estimated from `gcmsData2` and quasi-Poisson
+dispersion 783.18. A separate narrow-peak standard supplies the time-varying PSF.
 
-A separate resource validation uses **16 chromatograms with 10,000 scans and
-550 recorded mass bins each**. There are 1,000 reference compounds, present
-independently in half the samples on average: the realized data contain
-7,917 true occurrences, roughly 500 per sample. Library
-compound ions occupy 258 of the recorded bins; the other bins retain background
-observations. The simulator includes concentration-dependent EMG widths and
-tails, retention drift, irregular scan intervals, a smooth experimental-window
-background and one acid-like compound, present in eight samples. The generating
-quasi-Poisson dispersion is 783.18.
-
-This CDF workflow uses the package defaults, a calibrated narrow-peak standard,
-time-varying sample PSFs and at most 32 common ion groups. `ncores=NULL` selects
-**16 single-threaded workers** on the test machine. Original channels enter
-the likelihood checks and final spectra. Input simulation and the separate
-standard calibration are outside the workflow timing.
+The conditional solver estimated **1,005 shared identities**
+from the original ion measurements. All **7,917 true occurrences** were
+recovered, including every occurrence of the shark-fin acid. The largest absolute
+area error among the eight acid occurrences was **0.19%**.
 
 | Quantity | Measured result |
 |:--|--:|
-| True peak occurrences recovered | 7,864 / 7,917 |
-| False positives / false negatives | 131 / 53 |
-| Occurrence F1 | 0.9884 |
-| Estimated shared components | 1,129 |
-| Joint quasi-GIC | 86,522,402 |
-| Median spectral cosine | 0.9999977 |
-| Mean within-spectrum ion F1 | 0.978 |
-| Mean profile cosine | 0.9994 |
-| Median absolute area error | 0.239% |
+| True occurrences recovered | 7,917 / 7,917 |
+| False positives / false negatives | 16 / 0 |
+| Occurrence F1 | 0.99899 |
+| Joint quasi-GIC | 34,070,769 |
+| Median spectral cosine | 0.9999989 |
+| Mean within-spectrum ion F1 | 0.99516 |
+| Mean profile cosine | 0.999983 |
+| Median absolute peak-area error | 0.095% |
 | Acid occurrences recovered | 8 / 8 |
 
 Scoring uses maximum-cardinality one-to-one matching within 0.25 minutes and
-spectral cosine at least 0.9; ion-support F1 uses the shared 0.1% base-peak
-threshold. Area, spectrum and profile summaries condition on correct matches.
-All acid occurrences are detected; one difficult overlap still gives a distorted
-acid profile. This resource test is separate from the RI-aware reciprocal-hit
-seven-workflow comparison above.
+a minimum spectral cosine of 0.9. Ion-support F1 uses a shared cutoff of
+0.1% of base-peak intensity. Area and profile accuracy are measured on matched
+occurrences. The small-scale software comparison uses RI-constrained reciprocal hits.
 
-| Workflow stage | Seconds |
+| CDF workflow stage | Seconds |
 |:--|--:|
-| Common ion grouping | 18.94 |
-| Parallel independent fits, including sample PSFs | 933.45 |
-| Alignment, grouping and simultaneous refinement | 1530.20 |
-| Result construction and exports | 51.55 |
-| Complete workflow | 2534.14 |
+| Reading data, preparing sample PSFs and initialization | 226.10 |
+| Grouped PSF regression, alignment and joint original-channel refinement | 1092.54 |
+| Constructing and exporting results | 41.49 |
+| **Complete fit and exports** | **1,360.13** |
 
-The workstation is an HP ZBook Fury G8 with an Intel Core i9-11950H at 2.60 GHz,
-eight physical cores, 16 logical threads and 64 GB RAM, running Windows and
-R 4.5.0. Sampled peak combined private memory is **22.78
-GiB**, and peak summed working set is **18.53 GiB**;
-at least **26.07 GiB** of physical memory remains
-available. These measurements include active workers and fitting workspaces,
-not just the 40.96 MB aggregate observation cache. Mean CPU use over the complete
-run is 10.83 logical-core equivalents.
+Of the 1,092.54 s in the second stage, 116.03 s
+were spent on grouped PSF regressions and 976.14 s on
+the joint conditional fit. Simulation, separate standard calibration and scoring
+against truth are outside these timings. With 16 logical threads requested, the
+memory-aware scheduler chose **4 workers with 4 threads each**
+for independent fits. The joint updates use one BLAS thread. On the Windows HP
+ZBook Fury G8 (Core i9-11950H, eight physical cores, 64 GB RAM), the combined
+process tree reached **7.01 GiB private memory** and
+**7.43 GiB working set**. At least 28.00 GiB of
+physical memory remained available. Mean CPU use was 2.17 logical cores.
 
 ![Measured process-tree memory and CPU use for sixteen full-sized chromatograms](../reference/figures/fullsize-16-resources.png)
 
@@ -251,22 +225,13 @@ The output directory contains:
   plus trace and heatmap PDFs when `batch$plots=TRUE`.
 
 Spectral text cells are unwrapped and list fragments by decreasing intensity.
-Sample objects retain factor matrices and CDF paths. Plots reload the required
-observations. Simultaneous fitting stores original observations and large
-weight/offset arrays on disk. It caches the common aggregate channels in RAM
-and streams bounded blocks of original channels for likelihood and spectral
-updates. At 10,000 scans and 32 groups, the aggregate cache occupies 2.56 MB
-per sample, or 2.56 GB for 1,000 samples. Factors and active workers need
-additional memory. Each coupled count-model worker can retain one original
-chromatogram up to 64 MiB plus an equally sized likelihood-normalizer
-cache, adding at most 2 GiB across 16 workers. Larger samples retain
-local reads. These transient buffers are released when fitting ends. Set
-`batch=list(cache=FALSE)` to read the aggregate data
-from disk as needed. Use `batch=list(workers=4L)` to cap the number of
-concurrent samples within the `ncores` budget. For directory input,
-`ncores=NULL` uses the detected logical core count. Thus 16 samples on a
-16-logical-core machine use 16 single-threaded workers by default; a single
-CDF uses the physical core count.
+Sample objects retain factor matrices and CDF paths. The grouped PSF regressions run in parallel within the `ncores` budget.
+The count solver limits automatic worker concurrency using the scan count and
+available memory, including Windows commit headroom. Each worker releases its
+design before joint refinement. The conditional updates hold original-ion
+observations and fitted means in memory and use the native time grid of each
+sample. The classic solver can stream original-channel blocks from disk.
+Use `batch=list(workers=4L)` to set concurrency explicitly.
 
 The same ion groups are used across samples for matching. They are learned
 from a pooled, time-binned chromatogram or supplied through `precluster` as
@@ -317,15 +282,15 @@ into profile and background design values during fitting.
 ## Calibrated beer example
 
 An alkane standard supplies narrow peak shapes for both full chromatograms.
-The default standard-assisted blind fit then adjusts a time-varying PSF to each
-sample. In this example, `calibration_range=c(6, Inf)` excludes the solvent and
+The conditional count workflow estimates a pooled time-varying PSF and transfers it to each sample's observed scan times. In this example, `calibration_range=c(6, Inf)` excludes the solvent and
 early contaminated region from PSF calibration; the analytical samples retain
 their full time range and all 518 measured mass channels.
 
 ```r
 standard <- "chromatograms/standards/alkanes.cdf"
 experiment <- gcmsDeco("chromatograms", output_dir="beer_results",
-  alkanes_file=standard, calibration_range=c(6, Inf), precluster=32L)
+  alkanes_file=standard, calibration_range=c(6, Inf), precluster=32L,
+  algorithm="conditional", ncores=8L, batch=list(workers=2L))
 
 # Use the calibrated narrow-peak width for onset-based RI coordinates.
 reference <- readRDS(experiment$paths[
@@ -336,35 +301,27 @@ experiment <- annotateRI(experiment, cal, phase="DB5",
   xlsx_file="beer_results/experiment.xlsx")
 ```
 
-`ncores=NULL` detects 16 logical cores on the benchmark workstation: the two
-independent fits run concurrently with eight native threads per sample and one
-BLAS thread. The background uses channel-specific nonnegative spline
-coefficients, so its spectrum can change smoothly along the chromatogram.
+A 26-column spline basis with ion-specific nonnegative coefficients allows
+the background spectrum to change through each chromatogram. The fit used
+four threads per worker and retained **643 shared identities and 1,079 occurrences**.
 
-The complete fit links **707 occurrences into 574 shared compounds**:
+| Sample | Occurrences | Dispersion | Sample quasi-GIC | Adjusted weighted R² |
+|:--|--:|--:|--:|--:|
+| 502131900304_a | 550 | 631.78 | 15,217,743 | 0.98301 |
+| 54040014_a | 529 | 617.21 | 15,419,546 | 0.98316 |
 
-| Sample | Occurrences | Background basis columns | Independent stage (s) | Sample quasi-GIC after joint refinement | Adjusted weighted R² |
-|:--|--:|--:|--:|--:|--:|
-| 502131900304_a | 362 | 26 | 816.35 | 16,331,563 | 0.98846 |
-| 54040014_a | 345 | 28 | 532.82 | 16,580,715 | 0.98824 |
+The joint quasi-GIC was **29,721,269**, with each shared spectrum charged once.
+Deconvolution took **643.56 s** from CDF input through export. Calibration and
+grouping took 138.31 s, grouped regressions and joint refinement 495.80 s,
+and result construction and export 8.72 s. Subsequent RI calibration took
+4.05 s and RI annotation and export took 4.85 s. These timings exclude plots.
 
-Independent fits have adjusted weighted R² of
-0.98968 and
-0.98935, respectively. Sharing
-spectra trades some per-sample fit for a more compact common library. The
-**joint quasi-GIC is 31,297,190**, counting each shared spectrum once
-and one amplitude per occurrence. The sample GIC entries above count full
-spectra within each sample and must not be summed as the joint criterion.
-
-Common ion grouping takes 5.56 s, concurrent independent
-fits 820.78 s, and alignment plus simultaneous refinement
-266.91 s. Measured deconvolution wall time, including result
-exports, is **1,099.70 s**. The separately
-measured standard RI calibration takes 4.50 s
-and RI annotation plus refreshed MSP/Excel exports
-4.36 s: the sum of these measured stages is
-**1,108.56 s**. Diagnostic plot generation is
-separate. These figures use the workstation described above.
+With identical Agilent NIST records, a ±30 RI window and cosine ≥0.85, the two
+beers gave **213 and 203 distinct reciprocal identifications**. The classic fit
+gave 163 and 147. Additional forward assignments to an identity already
+called in the same sample numbered 87 and 73, compared with 65 and 54 for the
+classic fit. These library hits provide external validation for real samples
+of unknown composition.
 
 Diagnostic ions identify all 17 alkanes from C7 to C23. The retention coordinate
 is the 1%-height onset plus half the local narrow-peak width at that height.

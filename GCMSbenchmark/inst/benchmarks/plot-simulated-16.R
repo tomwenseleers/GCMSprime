@@ -49,11 +49,11 @@ plotBenchmark16 <- function(results, output_dir = results) {
       }
       if (!is.null(interval))
         graphics::lines(grid, interval[, "fit"], col = "black", lwd = 2.3)
-      graphics::abline(0, 1, col = reference_colour, lty = 2, lwd = 1.65)
       graphics::points(x, y, pch = 16, cex = 0.78,
         col = grDevices::adjustcolor(colour[m], alpha.f = 0.5))
+      graphics::abline(0, 1, col = reference_colour, lty = 2, lwd = 1.65)
       graphics::mtext(labels[m], 3, 2.05, font = 2)
-      digits <- if (isTRUE(z$adjusted_R2 > 0.9995)) 5L else 3L
+      digits <- if (isTRUE(z$adjusted_R2 > 0.9995)) 6L else 3L
       graphics::mtext(bquote("Robust adjusted"~R^2==.(fmt(z$adjusted_R2, digits))~~
         .(sprintf("(%d / %d peaks)", length(x), nrow(truth)))), 3, 0.65, cex = 0.8)
     }
@@ -225,7 +225,7 @@ benchmark16ProfilePlots <- function(results,methods,labels,draw) {
         if(method!="Ground truth")curves(d,1,1.5)
         curves(known,2,1.2)
         q<-quality[quality$kind==kind &quality$method==method,,drop=FALSE]
-        if(nrow(q))graphics::mtext(sprintf("Profile cosine %.3f · %d/%d true calls",
+        if(nrow(q))graphics::mtext(sprintf("Profile cosine %.6f · %d/%d true calls",
           q$mean_profile_cosine,q$recovered,q$present),3,line=.2,cex=.75)
       }
       graphics::mtext(paste("Small-scale 16-sample benchmark |",

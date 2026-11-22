@@ -1,3 +1,8 @@
+# GCMSprime 0.1.0.9004
+
+* `gcmsDeco()` uses logconNMF's conditional count solver for compatible analyses. Repeated injections can share a count-conserving PSF calibration, grouped initialization and a sparse original-ion spectrum per compound. The single-sample and 16-sample tutorials report timings and recovery from the fitted examples.
+* `algorithm` selects the solver and `objective.trace` records its conditional objective. `logconNMF::conditionalSolverAvailable()` checks Python availability.
+
 # GCMSprime 0.1.0.9003
 
 * Expose initialization solver controls through `gcmsDeco()` and automatically
