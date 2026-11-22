@@ -2,9 +2,12 @@
 
 - [The two bundled CDF windows](https://tomwenseleers.github.io/GCMSprime/articles/gcms-deconvolution.html)
   include the fitting calls, timing protocol and downloadable spectra.
-- `Rscript benchmarks/16_samples_parallel.R` is a compact worker-consistency
-  test with 48 reference compounds and 1,200 scans. It checks fitted supports,
-  spectra and grouping across worker budgets.
+- `Rscript benchmarks/16_samples_parallel.R` checks worker consistency
+  on 16 samples with 48 reference compounds and 1,200 scans. The conditional
+  solver recovered all 380 occurrences with zero false positives. The
+  shared spectra, areas and GIC agreed across 1, 8 and 16 requested threads.
+  Wall times were 71.70, 37.59 and 37.49 seconds, respectively.
+  [Worker-count results](results/16_samples_parallel.csv)
 - `benchmark_fullsize_16.R` reproduces the 16-sample resource validation with
   10,000 scans, 550 recorded mass channels and about 500 compounds per sample.
   From the repository root, run:

@@ -2,7 +2,9 @@ library(GCMSprime)
 library(logconNMF)
 
 benchmark_samples16 <- function(output = tempfile("GCMSprime_samples16_"),
-                                cores = c(1L, 8L, 16L)) {
+                                cores = c(1L, 8L, 16L),
+                                algorithm = c("conditional", "classic")) {
+  algorithm <- match.arg(algorithm)
   blas <- RhpcBLASctl::blas_get_num_procs()
   on.exit(RhpcBLASctl::blas_set_num_threads(blas))
   RhpcBLASctl::blas_set_num_threads(1L)
@@ -23,8 +25,7 @@ benchmark_samples16 <- function(output = tempfile("GCMSprime_samples16_"),
     gcmsDeco(input, output_dir = file.path(output, paste0("workers", ncores)),
       family = quasipoisson("identity"), dispersion = 2, correlation = "none",
       nwindows = 2L, baseline_df = 4L, precluster = 32L, ncores = ncores,
-      psf_control = list(maxiter = 3L),
-      batch = list(coupling = list(cycles = 2L, initial_cycles = 1L, rounds = 1L, q = 32L)))
+      psf_control = list(maxiter = 3L), algorithm = algorithm)
   })
   common <- fits[[1L]]$coupled
   for (z in fits) {
@@ -38,7 +39,7 @@ benchmark_samples16 <- function(output = tempfile("GCMSprime_samples16_"),
   full <- matrix(0, K, ncol(common$P))
   full[, match(colnames(P), common$mass)] <- P
   cos <- tcrossprod(common$P, full) / sqrt(outer(rowSums(common$P^2), rowSums(full^2)))
-  rt <- vapply(seq_len(K), function(k) median(vapply(seq_along(truth), function(s) {
+  rt <- vapply(seq_len(K), function(k) median(vapply(which(present[,k]), function(s) {
     z <- truth[[s]]
     common$alignment$maps[[s]]$evaluate(z$time[z$apex[k]])
   }, 0.)), 0.)
@@ -64,7 +65,7 @@ benchmark_samples16 <- function(output = tempfile("GCMSprime_samples16_"),
   mcc <- (as.double(TP)*TN-as.double(FP)*FN)/sqrt(as.double(TP+FP)*(TP+FN)*(TN+FP)*(TN+FN))
   out <- do.call(rbind, lapply(seq_along(fits), function(i) {
     z <- fits[[i]]
-    data.frame(ncores = cores[i], workers = z$parallel$workers,
+    data.frame(algorithm = z$coupled$algorithm, ncores = cores[i], workers = z$parallel$workers,
       clustering = z$seconds[['clustering']], initial = z$seconds[['initial']],
       coupled = z$seconds[['coupled']], exports = z$seconds[['exports']],
       total = z$seconds[['total']], GIC = GIC(z), shared = G,
@@ -76,4 +77,4 @@ benchmark_samples16 <- function(output = tempfile("GCMSprime_samples16_"),
   out
 }
 
-benchmark_samples16()
+if (sys.nframe() == 0L && !interactive()) print(benchmark_samples16())
