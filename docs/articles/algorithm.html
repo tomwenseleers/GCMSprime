@@ -31,7 +31,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">GCMSprime</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9004</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9005</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -179,6 +179,14 @@ Relative objective improvement below <span class="math inline">10^{-3}</span> en
 return a local solution. Supplied ground truth need not minimize a
 penalized criterion on one realization of noisy data.</li>
 </ol>
+<p>With the spectra fixed, profiles in different samples have separate
+likelihood contributions. With profiles fixed, the spectral likelihood
+and ion inclusion penalty separate by ion. Workers therefore update
+different samples or ion columns while preserving the component order
+within each. The spectral sweep transfers the unit-sum normalization
+into each profile after all ions have finished. Accepting a merge
+changes the offsets of its neighbours, so merge decisions remain
+sequential.</p>
 <p>For simulated data a truth-based comparison has a precise
 interpretation. Write <span class="math inline">\mu^\star=E(Y)</span>
 and fix dispersion and weights. The expected difference in Poisson
@@ -648,12 +656,17 @@ executable calls and annotated exports.</p>
 <div class="section level2">
 <h2 id="parallel-processing-and-sample-specific-peak-shapes">Parallel processing and sample-specific peak shapes<a class="anchor" aria-label="anchor" href="#parallel-processing-and-sample-specific-peak-shapes"></a>
 </h2>
-<p>Directory analyses use one total logical-core budget. For example,
-<code>ncores=16L</code> uses sixteen single-threaded sample workers when
-at least sixteen chromatograms are available. With fewer samples, each
-worker receives a larger share of the native thread budget. Every sample
-retains its own sparse PSF, scan grid, background and noise
-calibration.</p>
+<p>Directory analyses use one total core budget. For the default
+conditional count workflow, file import and noise estimation divide it
+among independent CDFs. The grouped PSF regressions choose the number of
+sample workers using available memory, unless the caller sets
+<code>batch$workers</code>. A joint fit then shares original-ion counts
+in memory and uses the core budget for the profile, background and
+shared-spectrum updates described above. Each sample retains its own
+time grid, PSF and noise calibration.</p>
+<div class="section level3">
+<h3 id="disk-backed-refinement-in-the-classic-solver">Disk-backed refinement in the classic solver<a class="anchor" aria-label="anchor" href="#disk-backed-refinement-in-the-classic-solver"></a>
+</h3>
 <p>A shared aggregation is learned from summed chromatograms in common
 time bins. Matching and Poisson/quasipoisson profile proposals use these
 ion groups; proposal acceptance and spectral estimation use the original
@@ -683,6 +696,7 @@ candidates and refreshes only edges incident to a merged compound,
 preserving the greedy selection rule. These execution details and the
 complete objective are given in the <a href="https://tomwenseleers.github.io/logconNMF/articles/algorithm.html#parallel-samples-and-bounded-memory-updates" class="external-link">logconNMF
 algorithm</a>.</p>
+</div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

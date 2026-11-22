@@ -36,7 +36,7 @@ where it occurs.
 
 | Method        | Seconds |  TP |   FP | Sensitivity | Peak F1 | Ion F1 |
 |:--------------|--------:|----:|-----:|------------:|--------:|-------:|
-| GCMSprime     |  124.70 | 767 |   42 |       99.7% |   0.972 |  0.995 |
+| GCMSprime     |   70.81 | 767 |   42 |       99.7% |   0.972 |  0.995 |
 | MS-DIAL       |   17.61 | 675 |  641 |       87.8% |   0.647 |  0.858 |
 | mzmine GC-EI  |   38.47 | 622 |   70 |       80.9% |   0.851 |  0.860 |
 | eRah          |   17.07 | 645 | 1912 |       83.9% |   0.388 |  0.771 |
@@ -46,27 +46,27 @@ where it occurs.
 
 Times are wall-clock analysis times on an HP ZBook Fury G8 Mobile
 Workstation with an Intel Core i9-11950H at 2.60 GHz, eight physical
-cores and 16 logical threads, Windows and R 4.5.0. GCMSprime uses four
-sample workers with two threads each, AMDIS runs serially, and xcms +
-CAMERA uses four workers. Input conversion is timed separately. The six
-comparator rows use their saved outputs and timings from the identical
-simulated inputs.
+cores and 16 logical threads, Windows and R 4.5.0. AMDIS runs serially
+and xcms + CAMERA uses four workers. Input conversion is timed
+separately. The six comparator rows use their saved outputs and timings
+from the identical simulated inputs.
 
-The 32-group PSF regressions initialize a joint fit on all 258 original
-ions. The fitted rank is 122 shared identities with 809 sample-level
-calls. Its original-channel quasi-GIC is **4,194,515**. Calibration and
-grouping took 15.13 s, grouped regressions, alignment and factor updates
-took 103.90 s, and result construction and export took 5.41 s. Grouped
-initialization accounted for 8.89 s and simultaneous factorization for
-94.92 s within the 103.90 s stage. The enclosing benchmark measured
-124.70 s. In an independently simulated 16-sample dataset the same
-algorithm recovered 775 of 778 occurrences with 34 false calls.
+GCMSprime and logconNMF 0.1.0.9005 used 32 ion groups for the PSF
+regressions and all 258 original ions for the joint fit. The fitted rank
+is 122 shared identities with 809 sample-level calls. Its
+original-channel quasi-GIC is **4,194,515**. CDF preparation,
+calibration and grouping took 13.81 s, grouped regressions, alignment
+and factor updates took 51.56 s, and result construction and export took
+5.19 s. Grouped initialization accounted for 8.25 s and simultaneous
+factorization for 43.25 s within the 51.56 s stage. The enclosing
+benchmark measured 70.81 s. In an independently simulated 16-sample
+dataset the same algorithm recovered 775 of 778 occurrences with 34
+false calls.
 
-`ncores` can use any number of available cores. GCMSprime parallelizes
-deconvolution across sample workers; when enough samples are available,
-the independent fitting time can decrease approximately in proportion to
-the worker count. The complete analysis also includes simultaneous
-refinement and data transfers.
+GCMSprime used four two-thread workers for grouped PSF regressions and
+could use eight threads for the joint fit. Profile and background
+updates run across samples. Shared spectra run across ions. Local merge
+decisions and file exports also contribute to elapsed time.
 
 ## Reciprocal spectral matches and integrated areas
 

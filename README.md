@@ -95,14 +95,11 @@ working memory while retaining coupled refinement:
 
 ```r
 experiment <- gcmsDeco("chromatograms", output_dir="results", ncores=8L,
-  control=list(initial_solver=list(solver="eigen", method=3L, precond=1L)),
+  algorithm="classic", control=list(initial_solver=list(solver="eigen", method=3L, precond=1L)),
   batch=list(workers=1L, cache=FALSE))
 ```
 
-This processes one sample at a time during both initialization and coupled
-refinement, while allowing up to eight native threads within the active sample.
-`batch$coupling$workers` can override the worker limit for coupled refinement
-alone if more concurrent samples are wanted in that stage.
+In this classic disk-backed fit, one sample is active at a time and can use up to eight native threads. The conditional count solver shares the original counts in RAM during its joint fit. Use `ncores=1L` to run the entire conditional workflow serially.
 
 `max.memory` limits the solver's Gram/factor workspace, not total process RAM.
 The observed data, profiles and refinement buffers still need to fit in memory
@@ -160,23 +157,18 @@ experiment$samples
 experiment$areas
 ```
 
-The grouped PSF regressions run in parallel within the `ncores` budget.
-The count solver limits automatic worker concurrency using the scan count and
-available memory, including Windows commit headroom. Each worker releases its
-design before joint refinement. The conditional updates hold original-ion
-observations and fitted means in memory and use the native time grid of each
-sample. The classic solver can stream original-channel blocks from disk.
+Grouped PSF regressions divide the core budget between independent samples and native threads. The scheduler estimates how many regressions fit in available memory, including Windows commit headroom. After those workers exit, a single process shares the original ion counts and fitted means. It updates profiles and backgrounds across samples and fits disjoint ion columns of the shared spectra concurrently. Peak merges and exchanges retain their original order. The classic solver can stream original-channel blocks from disk.
 The full-size fit recovered **7,917 of 7,917 occurrences** with **16 false calls**
-in **22.67 min** across 16 chromatograms of 10,000 scans and 550 channels.
+in **11.24 min** across 16 chromatograms of 10,000 scans and 550 channels.
 The [two 16-sample experiments](https://tomwenseleers.github.io/GCMSprime/articles/multisample.html#benchmark-scales) give the measured resource use, timings and recovery at both acquisition sizes.
 
 In the [small-scale 16-sample software comparison](https://tomwenseleers.github.io/GCMSprime/articles/benchmarks.html), GCMSprime recovers
-**767 of 769 true occurrences in 124.70 s**, including the acid compound in
+**767 of 769 true occurrences in 70.81 s**, including the acid compound in
 all seven samples where it occurs. Each chromatogram has 100 candidate
 compounds, 1,200 scans and 258 mass channels, with drift, concentration-dependent
 broadening and a smooth background derived from experimental GC/MS data.
 Initialization uses 32 ion groups and the final fit uses every original ion.
-The complete analysis used four sample workers and the original-channel criterion for every conditional update.
+The grouped regressions used four two-thread workers. The joint fit reused the eight-thread budget on the original ion channels.
 
 ## Benchmarks against other software
 

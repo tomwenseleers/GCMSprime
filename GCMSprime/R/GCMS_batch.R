@@ -82,7 +82,8 @@ GCMS_batch_files <- function(directory,output_dir,sample_order=NULL,alkanes_file
 #' `batch` supports `method="cosine"` or `"hellinger"`, `align=TRUE`,
 #' `coupling=list()` for [logconNMF::logconNMF()] controls, `sample_order=NULL`,
 #' `exposure=NULL`, `resume=FALSE`, `plots=FALSE`, `workers=NULL` and `cache=TRUE`.
-#' `workers` limits concurrent samples within the total `ncores` budget.
+#' `workers` controls simultaneous file imports and sample-level PSF fits.
+#' The joint count solver uses the total `ncores` budget after those stages.
 #' With the classic solver, `cache` controls aggregate and original-data caches.
 #' The conditional solver holds original observations and means in memory for
 #' joint factor updates and releases its PSF workers before this stage.
@@ -184,7 +185,7 @@ GCMSdeco_directory <- function(cdf_file,msp_file=NULL,family,lambda,nwindows,
     dispersion=dispersion,theta=theta,correlation=correlation,ncores=threads,
     control=control,psf_control=psf_control,verbose=verbose,ion_threshold=ion_threshold,
     algorithm=if(coupled) "classic" else algorithm,objective.trace=objective.trace)
-  if(pooled) initial_time <- GCMS_time(starts <- GCMS_pooled_starts(manifest,common_args,output_dir,precluster,ncores))[["elapsed"]]
+  if(pooled) initial_time <- GCMS_time(starts <- GCMS_pooled_starts(manifest,common_args,output_dir,precluster,ncores,batch$workers))[["elapsed"]]
   if(is.null(starts)) {
     clustering_time<-GCMS_time(channel_map<-GCMS_batch_groups(manifest,metadata,precluster,time_range,ncores))[["elapsed"]]
     effective<-if(is.null(channel_map))precluster else channel_map
@@ -430,11 +431,11 @@ GCMS_initial_sample <- function(task) {
 }
 
 
-GCMS_batch_apply <- function(tasks,workers,threads) {
+GCMS_batch_apply <- function(tasks,workers,threads,fun=GCMS_initial_sample) {
   blas<-RhpcBLASctl::blas_get_num_procs()
   on.exit(RhpcBLASctl::blas_set_num_threads(blas),add=TRUE)
   RhpcBLASctl::blas_set_num_threads(1L)
-  if(workers==1L)return(lapply(tasks,GCMS_initial_sample))
+  if(workers==1L)return(lapply(tasks,fun))
   keys<-c("OPENBLAS_NUM_THREADS","MKL_NUM_THREADS","OMP_NUM_THREADS","OMP_WAIT_POLICY","R_LIBS")
   old<-Sys.getenv(keys,unset=NA_character_)
   on.exit({Sys.unsetenv(keys[is.na(old)]);do.call(Sys.setenv,as.list(old[!is.na(old)]))},add=TRUE)
@@ -445,7 +446,7 @@ GCMS_batch_apply <- function(tasks,workers,threads) {
   initialize<-function(paths){.libPaths(paths);loadNamespace("GCMSprime");NULL}
   environment(initialize)<-baseenv()
   parallel::clusterCall(cl,initialize,.libPaths())
-  parallel::parLapplyLB(cl,tasks,GCMS_initial_sample,chunk.size=1L)
+  parallel::parLapplyLB(cl,tasks,fun,chunk.size=1L)
 }
 
 GCMS_batch_groups <- function(manifest,metadata,precluster,time_range,ncores) {

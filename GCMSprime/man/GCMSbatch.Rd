@@ -82,7 +82,8 @@ If acquisition dates are absent, pass explicit relative sample paths in
 \code{batch} supports \code{method="cosine"} or \code{"hellinger"}, \code{align=TRUE},
 \code{coupling=list()} for \code{\link[logconNMF:logconNMF]{logconNMF::logconNMF()}} controls, \code{sample_order=NULL},
 \code{exposure=NULL}, \code{resume=FALSE}, \code{plots=FALSE}, \code{workers=NULL} and \code{cache=TRUE}.
-\code{workers} limits concurrent samples within the total \code{ncores} budget.
+\code{workers} controls simultaneous file imports and sample-level PSF fits.
+The joint count solver uses the total \code{ncores} budget after those stages.
 With the classic solver, \code{cache} controls aggregate and original-data caches.
 The conditional solver holds original observations and means in memory for
 joint factor updates and releases its PSF workers before this stage.

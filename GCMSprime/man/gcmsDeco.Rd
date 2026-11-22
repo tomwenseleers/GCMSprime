@@ -144,7 +144,10 @@ one chromatogram and logical cores for directory input. Directory analyses
 run up to \code{min(samples,ncores)} sample workers,
 dividing native threads between them. For conditional grouped regressions
 automatic worker allocation also accounts for available memory. BLAS
-threads are limited during batch fitting and restored on return.
+threads are limited during batch fitting and restored on return. Compatible
+count-model batches also read CDFs and estimate noise concurrently. After the
+PSF workers exit, the joint count solver reuses the budget for sample profiles
+and ion columns of the shared spectra.
 For a single chromatogram, this sets its native OpenMP thread count.}
 
 \item{control}{Named list: \code{broad_repeats=1L}, \code{full_sweeps=1L},

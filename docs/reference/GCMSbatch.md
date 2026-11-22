@@ -106,9 +106,10 @@ paths in `batch=list(sample_order=...)`.
 `coupling=list()` for
 [`logconNMF::logconNMF()`](https://tomwenseleers.github.io/logconNMF/reference/logconNMF.html)
 controls, `sample_order=NULL`, `exposure=NULL`, `resume=FALSE`,
-`plots=FALSE`, `workers=NULL` and `cache=TRUE`. `workers` limits
-concurrent samples within the total `ncores` budget. With the classic
-solver, `cache` controls aggregate and original-data caches. The
+`plots=FALSE`, `workers=NULL` and `cache=TRUE`. `workers` controls
+simultaneous file imports and sample-level PSF fits. The joint count
+solver uses the total `ncores` budget after those stages. With the
+classic solver, `cache` controls aggregate and original-data caches. The
 conditional solver holds original observations and means in memory for
 joint factor updates and releases its PSF workers before this stage.
 `exposure` may be a positive scalar, a list with one scan-wise vector

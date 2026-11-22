@@ -13,7 +13,7 @@ share spectra through logconNMF::logconNMF() while keeping original scan grids."
 
     <a class="navbar-brand me-2" href="../index.html">GCMSprime</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9004</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9005</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -150,7 +150,8 @@ If acquisition dates are absent, pass explicit relative sample paths in
 <p><code>batch</code> supports <code>method="cosine"</code> or <code>"hellinger"</code>, <code>align=TRUE</code>,
 <code>coupling=list()</code> for <code><a href="https://tomwenseleers.github.io/logconNMF/reference/logconNMF.html" class="external-link">logconNMF::logconNMF()</a></code> controls, <code>sample_order=NULL</code>,
 <code>exposure=NULL</code>, <code>resume=FALSE</code>, <code>plots=FALSE</code>, <code>workers=NULL</code> and <code>cache=TRUE</code>.
-<code>workers</code> limits concurrent samples within the total <code>ncores</code> budget.
+<code>workers</code> controls simultaneous file imports and sample-level PSF fits.
+The joint count solver uses the total <code>ncores</code> budget after those stages.
 With the classic solver, <code>cache</code> controls aggregate and original-data caches.
 The conditional solver holds original observations and means in memory for
 joint factor updates and releases its PSF workers before this stage.
@@ -229,3 +230,4 @@ match; simultaneous refinement is recomputed.</p>
 
 
   </body></html>
+

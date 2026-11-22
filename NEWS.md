@@ -1,3 +1,7 @@
+# GCMSprime 0.1.0.9005
+
+* Compatible count-model batches read CDFs and estimate noise in parallel. After the grouped PSF regressions finish, the joint original-ion fit uses the same total core budget for sample profiles and shared spectra. `batch$workers` controls concurrent file imports and grouped regressions. `ncores=1L` runs the complete pipeline serially.
+
 # GCMSprime 0.1.0.9004
 
 * `gcmsDeco()` uses logconNMF's conditional count solver for compatible analyses. Repeated injections can share a count-conserving PSF calibration, grouped initialization and a sparse original-ion spectrum per compound. The single-sample and 16-sample tutorials report timings and recovery from the fitted examples.

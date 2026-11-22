@@ -68,12 +68,12 @@ native scan grids and report recovery against the generating compounds.
 | True occurrences | 769 | 7,917 |
 | Samples containing the acid | 7 | 8 |
 | PSF calibration | Blind, two windows | Standard-assisted, ten windows |
-| Complete 16-sample analysis | **124.70 s (2.08 min)** | **1,360.13 s (22.67 min)** |
+| Complete 16-sample analysis | **70.81 s (1.18 min)** | **674.23 s (11.24 min)** |
 
-Times cover the full batch and exclude simulation. In the small experiment,
-calibration and grouping took 15.13 s, grouped initialization and joint
-refinement took 103.90 s, and result construction and export took 5.41 s.
-The benchmark wrapper added 0.26 s. The large experiment is documented below.
+Both runs used GCMSprime and logconNMF 0.1.0.9005. Timings cover the complete batch from CDF input through export. In the small experiment,
+CDF preparation, calibration and grouping took 13.81 s, grouped initialization and joint
+refinement took 51.56 s, and result construction and export took 5.19 s.
+The benchmark wrapper added 0.25 s. The large experiment is documented below.
 
 ## Small-scale 16-sample software comparison {#sixteen-simulated-chromatograms}
 
@@ -119,7 +119,7 @@ Robust adjusted log-area R² was **0.999995**, the median absolute peak-area err
 was **0.10%**, and mean spectral ion-support F1 was **0.995** at the shared
 0.1% base-peak threshold.
 
-The CDF-to-results analysis took **124.70 s** with four two-thread sample workers on an HP ZBook Fury G8, Intel Core i9-11950H, eight physical cores,
+The benchmark wrapper measured **70.81 s** from CDF input through results with four two-thread PSF workers and eight threads available for joint refinement on an HP ZBook Fury G8, Intel Core i9-11950H, eight physical cores,
 16 logical threads, Windows and R 4.5.0. CDF generation is separate.
 
 [![Total-ion area accuracy with robust log–log fits](../reference/figures/simulated-16-area-predictions.png)](../reference/figures/simulated-16-area-predictions.png)
@@ -163,21 +163,14 @@ occurrences. The small-scale software comparison uses RI-constrained reciprocal 
 
 | CDF workflow stage | Seconds |
 |:--|--:|
-| Reading data, preparing sample PSFs and initialization | 226.10 |
-| Grouped PSF regression, alignment and joint original-channel refinement | 1092.54 |
-| Constructing and exporting results | 41.49 |
-| **Complete fit and exports** | **1,360.13** |
+| Reading data, preparing sample PSFs and initialization | 174.00 |
+| Grouped PSF regression, alignment and joint original-channel refinement | 459.06 |
+| Constructing and exporting results | 41.17 |
+| **Complete fit and exports** | **674.23** |
 
-Of the 1,092.54 s in the second stage, 116.03 s
-were spent on grouped PSF regressions and 976.14 s on
-the joint conditional fit. Simulation, separate standard calibration and scoring
-against truth are outside these timings. With 16 logical threads requested, the
-memory-aware scheduler chose **4 workers with 4 threads each**
-for independent fits. The joint updates use one BLAS thread. On the Windows HP
-ZBook Fury G8 (Core i9-11950H, eight physical cores, 64 GB RAM), the combined
-process tree reached **7.01 GiB private memory** and
-**7.43 GiB working set**. At least 28.00 GiB of
-physical memory remained available. Mean CPU use was 2.17 logical cores.
+Within the 459.06 s coupled stage, grouped PSF regression took 111.18 s and alignment and joint refinement took 347.55 s. Simulation, separate standard calibration and scoring against truth are outside the timed fit.
+
+On the HP ZBook Fury G8 (Core i9-11950H, eight physical cores, 16 logical cores and 64 GB RAM), the memory-aware scheduler used **6 PSF workers with 2 threads each**. The joint solver could use all 16 threads. Across the measured workflow the process tree averaged **4.70 logical-core equivalents** and peaked at **6.75 GiB working set** and **6.65 GiB private memory**. At least 29.46 GiB of physical memory stayed available.
 
 ![Measured process-tree memory and CPU use for sixteen full-sized chromatograms](../reference/figures/fullsize-16-resources.png)
 
@@ -225,13 +218,8 @@ The output directory contains:
   plus trace and heatmap PDFs when `batch$plots=TRUE`.
 
 Spectral text cells are unwrapped and list fragments by decreasing intensity.
-Sample objects retain factor matrices and CDF paths. The grouped PSF regressions run in parallel within the `ncores` budget.
-The count solver limits automatic worker concurrency using the scan count and
-available memory, including Windows commit headroom. Each worker releases its
-design before joint refinement. The conditional updates hold original-ion
-observations and fitted means in memory and use the native time grid of each
-sample. The classic solver can stream original-channel blocks from disk.
-Use `batch=list(workers=4L)` to set concurrency explicitly.
+Sample objects retain factor matrices and CDF paths. Grouped PSF regressions divide the core budget between independent samples and native threads. The scheduler estimates how many regressions fit in available memory, including Windows commit headroom. After those workers exit, a single process shares the original ion counts and fitted means. It updates profiles and backgrounds across samples and fits disjoint ion columns of the shared spectra concurrently. Peak merges and exchanges retain their original order. The classic solver can stream original-channel blocks from disk.
+Use `batch=list(workers=4L)` to cap file-import and PSF worker counts. For this workflow, `experiment$parallel$workers` and `experiment$parallel$threads` describe the grouped PSF regressions. `ncores` sets the total thread budget for joint refinement.
 
 The same ion groups are used across samples for matching. They are learned
 from a pooled, time-binned chromatogram or supplied through `precluster` as
@@ -311,10 +299,7 @@ four threads per worker and retained **643 shared identities and 1,079 occurrenc
 | 54040014_a | 529 | 617.21 | 15,419,546 | 0.98316 |
 
 The joint quasi-GIC was **29,721,269**, with each shared spectrum charged once.
-Deconvolution took **643.56 s** from CDF input through export. Calibration and
-grouping took 138.31 s, grouped regressions and joint refinement 495.80 s,
-and result construction and export 8.72 s. Subsequent RI calibration took
-4.05 s and RI annotation and export took 4.85 s. These timings exclude plots.
+The two beer CDFs took **375.49 s** from input through export. Preparation and calibration took 158.21 s, grouped regression and joint refinement 209.73 s, and result construction and export 7.02 s. Separate RI calibration took 3.29 s and RI annotation and export took 3.86 s. Plotting is excluded.
 
 With identical Agilent NIST records, a ±30 RI window and cosine ≥0.85, the two
 beers gave **213 and 203 distinct reciprocal identifications**. The classic fit

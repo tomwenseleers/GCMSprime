@@ -187,8 +187,11 @@ print(x, ...)
   run up to `min(samples,ncores)` sample workers, dividing native
   threads between them. For conditional grouped regressions automatic
   worker allocation also accounts for available memory. BLAS threads are
-  limited during batch fitting and restored on return. For a single
-  chromatogram, this sets its native OpenMP thread count.
+  limited during batch fitting and restored on return. Compatible
+  count-model batches also read CDFs and estimate noise concurrently.
+  After the PSF workers exit, the joint count solver reuses the budget
+  for sample profiles and ion columns of the shared spectra. For a
+  single chromatogram, this sets its native OpenMP thread count.
 
 - control:
 

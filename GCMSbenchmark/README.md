@@ -38,7 +38,7 @@ GCMSprime recovers **767 of 769 occurrences**, with **42 false positives**
 
 | Method | Seconds | TP | FP | Sensitivity | Peak F1 | Ion F1 |
 |:--|--:|--:|--:|--:|--:|--:|
-| GCMSprime | 124.70 | 767 | 42 | 99.7% | 0.972 | 0.995 |
+| GCMSprime | 70.81 | 767 | 42 | 99.7% | 0.972 | 0.995 |
 | MS-DIAL | 17.61 | 675 | 641 | 87.8% | 0.647 | 0.858 |
 | mzmine GC-EI | 38.47 | 622 | 70 | 80.9% | 0.851 | 0.860 |
 | eRah | 17.07 | 645 | 1912 | 83.9% | 0.388 | 0.771 |
@@ -48,15 +48,10 @@ GCMSprime recovers **767 of 769 occurrences**, with **42 false positives**
 
 Times are wall-clock analysis times on an HP ZBook Fury G8 Mobile
 Workstation with an Intel Core i9-11950H at 2.60 GHz, eight physical cores
-and 16 logical threads, Windows and R 4.5.0. GCMSprime uses four sample workers with two threads each, AMDIS runs serially, and xcms + CAMERA uses
-four workers. Input conversion is timed separately. The six comparator rows use
+and 16 logical threads, Windows and R 4.5.0. AMDIS runs serially and xcms + CAMERA uses four workers. Input conversion is timed separately. The six comparator rows use
 their saved outputs and timings from the identical simulated inputs.
 
-`ncores` can use any number of available cores. GCMSprime parallelizes
-deconvolution across sample workers; when enough samples are available,
-the independent fitting time can decrease approximately in proportion to
-the worker count. The complete analysis also includes simultaneous refinement
-and data transfers.
+GCMSprime used four two-thread workers for grouped PSF regressions and could use eight threads for the joint fit. Profile and background updates run across samples. Shared spectra run across ions. Local merge decisions and file exports also contribute to elapsed time.
 
 [![Robust estimated-versus-true total-ion peak areas](../GCMSprime/man/figures/simulated-16-area-predictions.png)](../GCMSprime/man/figures/simulated-16-area-predictions.png)
 

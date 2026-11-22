@@ -83,6 +83,15 @@ the reported information criterion for that dataset.
     searches return a local solution. Supplied ground truth need not
     minimize a penalized criterion on one realization of noisy data.
 
+With the spectra fixed, profiles in different samples have separate
+likelihood contributions. With profiles fixed, the spectral likelihood
+and ion inclusion penalty separate by ion. Workers therefore update
+different samples or ion columns while preserving the component order
+within each. The spectral sweep transfers the unit-sum normalization
+into each profile after all ions have finished. Accepting a merge
+changes the offsets of its neighbours, so merge decisions remain
+sequential.
+
 For simulated data a truth-based comparison has a precise
 interpretation. Write \mu^\star=E(Y) and fix dispersion and weights. The
 expected difference in Poisson deviances between any fixed \mu and
@@ -524,11 +533,16 @@ gives executable calls and annotated exports.
 
 ## Parallel processing and sample-specific peak shapes
 
-Directory analyses use one total logical-core budget. For example,
-`ncores=16L` uses sixteen single-threaded sample workers when at least
-sixteen chromatograms are available. With fewer samples, each worker
-receives a larger share of the native thread budget. Every sample
-retains its own sparse PSF, scan grid, background and noise calibration.
+Directory analyses use one total core budget. For the default
+conditional count workflow, file import and noise estimation divide it
+among independent CDFs. The grouped PSF regressions choose the number of
+sample workers using available memory, unless the caller sets
+`batch$workers`. A joint fit then shares original-ion counts in memory
+and uses the core budget for the profile, background and shared-spectrum
+updates described above. Each sample retains its own time grid, PSF and
+noise calibration.
+
+### Disk-backed refinement in the classic solver
 
 A shared aggregation is learned from summed chromatograms in common time
 bins. Matching and Poisson/quasipoisson profile proposals use these ion

@@ -13,19 +13,28 @@ GCMS_background <- function(time, width, df) {
   if (df==1L) matrix(1,n,1L) else as.matrix(splines::bs(time,df=df,intercept=TRUE))
 }
 
-GCMS_pooled_starts <- function(manifest, args, output, precluster, ncores) {
-  slices <- lapply(seq_len(nrow(manifest)), function(i) {
-    id <- manifest$sample_id[i]
-    d <- file.path(output, "samples", id)
-    dir.create(d, showWarnings = FALSE)
-    raw <- GCMS_read_cdf(manifest$cdf_file[i], args$time_range)
-    noise <- estimateSignalNoise(raw$Y, args$family, args$dispersion, args$theta,
-      correlation=args$correlation, ncores=ncores)
-    observed <- file.path(d, "observed.rds")
-    saveRDS(raw$Y, observed, compress=FALSE)
-    list(y=observed, time=raw$time, scans=raw$scans, mass=raw$mass, total=rowSums(raw$Y),
-      spec=noise$spec, working_weight=noise$working_weight, d=d)
-  })
+GCMS_read_pooled_sample <- function(job) {
+  id <- job$id
+  d <- file.path(job$output, "samples", id)
+  dir.create(d, showWarnings = FALSE)
+  raw <- GCMS_read_cdf(job$file, job$time_range)
+  noise <- estimateSignalNoise(raw$Y, job$family, job$dispersion, job$theta,
+    correlation=job$correlation, ncores=job$threads)
+  observed <- file.path(d, "observed.rds")
+  saveRDS(raw$Y, observed, compress=FALSE)
+  list(y=observed, time=raw$time, scans=raw$scans, mass=raw$mass, total=rowSums(raw$Y),
+    spec=noise$spec, working_weight=noise$working_weight, d=d)
+}
+
+GCMS_pooled_starts <- function(manifest, args, output, precluster, ncores, workers=NULL) {
+  # Divide the core budget between independent CDFs and within-file noise fits.
+  if (is.null(workers)) workers <- ceiling(sqrt(ncores))
+  workers <- min(ncores, nrow(manifest), GCMS_threads(workers))
+  threads <- max(1L, ncores %/% workers)
+  jobs <- lapply(seq_len(nrow(manifest)), function(i)
+    c(list(id=manifest$sample_id[i], file=manifest$cdf_file[i], output=output, threads=threads),
+      args[c("time_range","family","dispersion","theta","correlation")]))
+  slices <- GCMS_batch_apply(jobs, workers, threads, fun = GCMS_read_pooled_sample)
   mass <- slices[[1L]]$mass
   if (any(!vapply(slices, function(x) identical(x$mass, mass), TRUE))) return(NULL)
   edges <- lapply(slices, function(x) GCMS_scan_edges(x$time))

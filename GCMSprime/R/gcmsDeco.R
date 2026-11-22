@@ -170,7 +170,10 @@ GCMS_write_msp <- function(model,time,mass,msp_file,compounds=NULL,ion_threshold
 #'   run up to \code{min(samples,ncores)} sample workers,
 #'   dividing native threads between them. For conditional grouped regressions
 #'   automatic worker allocation also accounts for available memory. BLAS
-#'   threads are limited during batch fitting and restored on return.
+#'   threads are limited during batch fitting and restored on return. Compatible
+#'   count-model batches also read CDFs and estimate noise concurrently. After the
+#'   PSF workers exit, the joint count solver reuses the budget for sample profiles
+#'   and ion columns of the shared spectra.
 #'   For a single chromatogram, this sets its native OpenMP thread count.
 #' @param nwindows Number of overlapping blind-PSF windows, default \code{10L}.
 #'   \code{1L} uses a shared PSF. The returned sparse design interpolates the
