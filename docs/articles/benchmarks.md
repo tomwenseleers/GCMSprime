@@ -201,13 +201,10 @@ al. (2021)](https://pmc.ncbi.nlm.nih.gov/articles/PMC7971188/).
 
 The xcms + CAMERA configuration uses an **8.6-second filter FWHM**,
 signal-to-noise threshold **1.5**, a minimum of **four ions**, and
-CAMERA FWHM grouping with `perfwhm=0.8`. Eight alternatives were
-compared on odd-numbered samples. The selected setting recovered 321
-rather than 301 true occurrences there, while keeping peak F1 within
-0.01 of the best candidate. On the even-numbered samples reserved for
-checking, recovery increased from 286 to 314 and F1 from 0.773 to 0.803.
-Across all samples, sensitivity increased from **76.3% to 82.6%**. No
-matching or RI thresholds were relaxed.
+CAMERA FWHM grouping with `perfwhm=0.8`. Settings were selected on
+odd-numbered samples and checked on even-numbered samples. This
+configuration recovered 635 of 769 occurrences across all samples (82.6%
+sensitivity).
 
 ### Recovery across true peak sizes
 
