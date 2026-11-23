@@ -317,6 +317,15 @@ GCMS_write_msp <- function(model,time,mass,msp_file,compounds=NULL,ion_threshold
 #' @param algorithm Count-factorization algorithm passed to [logconNMF::logconNMF()].
 #' @param objective.trace Record original-ion objective values after each
 #'   conditional block. Leave FALSE for elapsed-time measurements.
+#' @param truth.profiles Optional known elution profiles for the conditional
+#'   count solver. Supply a scan-by-compound matrix for one CDF, or one matrix
+#'   or simulator truth record per sample for a directory. Name the list by
+#'   unique CDF basenames without extensions or by manifest sample IDs.
+#'   Matched compound IDs identify columns across samples. The usual fit and
+#'   a second fit initialized from the profiles are scored on the same counts.
+#'   Inspect `fit$gic_gap` and use `plot(fit$gic_gap)` for a single or coupled
+#'   fit. Independent directory fits return one diagnostic per sample.
+#'   See [logconNMF::gicGap()] for the definition.
 #' @param search Named options for librarySearch(), such as phase="DB5",
 #'   ri_tolerance=30, n_matches=5 and method="stein_scott". The alkane file supplies
 #'   RI calibration automatically; a precomputed calibration can be supplied here.
@@ -347,7 +356,7 @@ gcmsDeco <- function(cdf_file,msp_file=NULL,family=quasipoisson("identity"),lamb
                      ncores=NULL,control=list(),psf_control=list(),verbose=FALSE,
                      xlsx_file=NULL,sample_name=NULL,library=NULL,search=list(),
                      output_dir=NULL,coupled=TRUE,batch=list(),ion_threshold=.001,
-                     algorithm=c("auto","conditional","classic"),objective.trace=FALSE) {
+                     algorithm=c("auto","conditional","classic"),objective.trace=FALSE,truth.profiles=NULL) {
   algorithm <- match.arg(algorithm)
   invisible(GCMS_report_spectra(matrix(numeric(),0L,0L),ion_threshold))
   if(length(cdf_file)==1L&&dir.exists(cdf_file)) {
@@ -414,7 +423,7 @@ gcmsDeco <- function(cdf_file,msp_file=NULL,family=quasipoisson("identity"),lamb
   model<-timed("factorization",logconNMF(Y,X=X,family=family,lambda=nmf_lambda,background=B,precluster=precluster,
     dispersion=spec$dispersion,theta=if(spec$name=="nb") spec$theta*(if(spec$theta_update) -1 else 1) else NULL,
     correlation=spec$correlation,ncores=ncores,control=control,verbose=verbose,
-    algorithm=algorithm,time=raw$time,objective.trace=objective.trace))
+    algorithm=algorithm,time=raw$time,objective.trace=objective.trace,truth.profiles=truth.profiles))
   model$spec$dispersion_estimated<-spec$dispersion_estimated
   model$spec$theta_estimated<-spec$theta_estimated
   model$spec$correlation_estimate<-spec$correlation_estimate
@@ -424,6 +433,8 @@ gcmsDeco <- function(cdf_file,msp_file=NULL,family=quasipoisson("identity"),lamb
     model$ic_df <- model$conditional_objective$shape_df + model$conditional_objective$spectral_df + model$nuisance_df
     model$objective <- -2*model$loglik + model$lambda*model$ic_df
   }
+  # GCMSprime estimates noise before handing the dispersion to logconNMF.
+  if (!is.null(model$gic_gap)) model$gic_gap <- logconNMF::gicGap(model)
   compounds<-GCMS_compounds(model,raw$time,sample_name)
   compounds$apex_scan<-raw$scans[compounds$apex_scan]
   model$y<-model$mu<-NULL
@@ -435,6 +446,7 @@ gcmsDeco <- function(cdf_file,msp_file=NULL,family=quasipoisson("identity"),lamb
     alkanes_file=if(is.null(alkanes_file)) NULL else normalizePath(alkanes_file,winslash="/",mustWork=FALSE),
     sample_name=sample_name,msp_file=msp_file,xlsx_file=xlsx_file,ion_threshold=ion_threshold,
     seconds=c(seconds,total=proc.time()[["elapsed"]]-begun)),class="GCMSdeco")
+  if (!is.null(model$gic_gap)) object$gic_gap <- model$gic_gap
   if(!is.null(library)) object<-timed("librarySearch",do.call(identifyCompounds,
     c(list(x=object,library=library),search)))
   object$compounds<-timed("write_msp",GCMS_write_msp(model,raw$time,raw$mass,msp_file,object$compounds,ion_threshold))

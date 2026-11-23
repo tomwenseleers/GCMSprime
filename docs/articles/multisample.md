@@ -141,6 +141,42 @@ software](https://tomwenseleers.github.io/GCMSprime/articles/benchmarks.md)
 give all seven workflows, matching rules, noise calibration, profile
 plots and tables.
 
+### How close is the fit to a truth-initialized solution?
+
+The standard fit’s GIC decreased monotonically from 21,188,577 to
+4,173,728 after dictionary construction. It reached 96.7% of its total
+decrease in five sweeps and finished **0.454% above** the GIC of
+4,154,879 obtained by initializing from the true shapes and cross-sample
+identities. Both runs estimated spectra, areas and backgrounds from the
+same counts. This measures sensitivity to initialization on a simulation
+with known profiles.
+
+``` r
+
+checked <- gcmsDeco("benchmark-small/input", output_dir = "benchmark-small-gap",
+  family = quasipoisson("identity"), ncores = 8L, nwindows = 2L,
+  precluster = 32L, baseline_df = 4L, correlation = "none",
+  psf_control = list(maxiter = 3L),
+  batch = list(workers = 4L, coupling = list(alignment_window = 0.5)),
+  truth.profiles = readRDS("benchmark-small/truth.rds"))
+checked$gic_gap$percent
+plot(checked$gic_gap)
+```
+
+![GIC trajectories for the standard and true-profile starts on the
+16-sample
+simulation](../reference/figures/empirical-gic-convergence.png)
+
+GIC trajectories for the standard and true-profile starts on the
+16-sample simulation
+
+In two runs per setting the complete workflow averaged 50.9 s with the
+diagnostic off, 57.0 s with the standard trace alone, and 76.2 s with
+the reference fit and both traces. The reference fit itself took 18.7 s.
+The [algorithm
+vignette](https://tomwenseleers.github.io/logconNMF/articles/algorithm.html#empirical-gic-gap)
+shows both trajectories and explains the fixed-shape comparison.
+
 ## Large-scale 16-sample resource benchmark
 
 This independent simulation (seed `171117`) has **16 chromatograms,

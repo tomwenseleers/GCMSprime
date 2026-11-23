@@ -148,7 +148,7 @@ NULL
 GCMSdeco_directory <- function(cdf_file,msp_file=NULL,family,lambda,nwindows,
     alkanes_file,time_range,calibration_range,baseline_df,precluster,dispersion,theta,
     correlation,ncores,control,psf_control,verbose,xlsx_file,sample_name,library,search,
-    output_dir,coupled,batch,ion_threshold=.001,algorithm="auto",objective.trace=FALSE) {
+    output_dir,coupled,batch,ion_threshold=.001,algorithm="auto",objective.trace=FALSE,truth.profiles=NULL) {
   begun<-proc.time()[["elapsed"]]
   if(!requireNamespace("ncdf4",quietly=TRUE)||!requireNamespace("openxlsx",quietly=TRUE))
     stop("Install ncdf4 and openxlsx for directory input and batch exports.")
@@ -164,6 +164,25 @@ GCMSdeco_directory <- function(cdf_file,msp_file=NULL,family,lambda,nwindows,
   if(is.null(output_dir))output_dir<-paste0(normalizePath(cdf_file,winslash="/",mustWork=TRUE),"_GCMSprime")
   found<-GCMS_batch_files(cdf_file,output_dir,batch$sample_order,alkanes_file)
   manifest<-found$manifest;metadata<-found$metadata
+  if (!is.null(truth.profiles)) {
+    if (inherits(truth.profiles,"GCMS_simulated_samples"))
+      truth.profiles <- stats::setNames(truth.profiles$samples,vapply(truth.profiles$samples,"[[","","sample_id"))
+    if (!is.list(truth.profiles) || length(truth.profiles)!=nrow(manifest))
+      stop("Supply one truth.profiles entry per CDF in the experiment.",call.=FALSE)
+    nm <- names(truth.profiles)
+    if (!is.null(nm)) {
+      keys <- if (!anyDuplicated(manifest$sample_name) && setequal(nm,manifest$sample_name))
+        manifest$sample_name else manifest$sample_id
+      if (anyDuplicated(nm) || !setequal(nm,keys))
+        stop("Use unique CDF basenames or manifest sample IDs for truth.profiles.",call.=FALSE)
+      truth.profiles <- truth.profiles[keys]
+    }
+    names(truth.profiles) <- manifest$sample_id
+    truth.profiles <- lapply(truth.profiles,function(x) {
+      if (!is.list(x)) return(x)
+      x[intersect(c("H","id","time","W_true","H_true","present","exposure"),names(x))]
+    })
+  }
   dir.create(output_dir,recursive=TRUE,showWarnings=FALSE);output_dir<-normalizePath(output_dir,winslash="/")
   dir.create(file.path(output_dir,"samples"),showWarnings=FALSE)
   family_name <- if(is.character(family)) family[1L] else if(is.list(family)) family$family
@@ -198,7 +217,8 @@ GCMSdeco_directory <- function(cdf_file,msp_file=NULL,family,lambda,nwindows,
     options<-batch
     if(is.list(batch$exposure))options$exposure<-batch$exposure[[s]]
     list(s=s,manifest=manifest[s,,drop=FALSE],output_dir=output_dir,
-      metadata=list(metadata[[s]]),batch=options,args=common_args)
+      metadata=list(metadata[[s]]),batch=options,args=common_args,
+      truth.profiles=if(!coupled && !is.null(truth.profiles)) truth.profiles[[s]])
   })
   if(is.null(starts)) initial_time<-initial_time+GCMS_time(results<-GCMS_batch_apply(tasks,workers,threads))[["elapsed"]] else results<-starts$results
   descriptors<-lapply(results,`[[`,"descriptor");paths<-vapply(results,`[[`,"","path")
@@ -226,7 +246,7 @@ GCMSdeco_directory <- function(cdf_file,msp_file=NULL,family,lambda,nwindows,
     coupled_time<-GCMS_time(common<-logconNMF::logconNMF(descriptors,family=family,lambda=lambda,
       path=tempfile("coupled_",tmpdir=output_dir),precluster=effective,
       method=batch$method,align=batch$align,ncores=ncores,control=coupling,verbose=verbose,
-      algorithm=algorithm,objective.trace=objective.trace))[["elapsed"]]
+      algorithm=algorithm,objective.trace=objective.trace,truth.profiles=truth.profiles))[["elapsed"]]
     for(s in seq_along(paths)) {
       fit<-readRDS(paths[s]);fit$model<-logconNMF::sampleNMF(common,s);fit$mass<-axis
       if(!is.null(starts)) fit$seconds <- common$seconds
@@ -269,6 +289,8 @@ GCMSdeco_directory <- function(cdf_file,msp_file=NULL,family,lambda,nwindows,
     seconds=c(clustering=clustering_time,initial=initial_time,coupled=coupled_time,
       exports=proc.time()[["elapsed"]]-begun-clustering_time-initial_time-coupled_time,
       total=proc.time()[["elapsed"]]-begun)),class="GCMSbatch")
+  if (!is.null(truth.profiles)) object$gic_gap <- if(coupled) common$gic_gap else
+    stats::setNames(lapply(paths,function(p)readRDS(p)$gic_gap),manifest$sample_id)
   utils::write.csv(manifest,file.path(output_dir,"samples.csv"),row.names=FALSE)
   if(!is.null(areas)) {
     utils::write.csv(cbind(sample_id=rownames(areas),as.data.frame(areas)),file.path(output_dir,"areas.csv"),row.names=FALSE)
@@ -409,6 +431,7 @@ GCMS_initial_sample <- function(task) {
       psf_control=fit_args$psf_control,verbose=fit_args$verbose,
       sample_name=id,ion_threshold=fit_args$ion_threshold,algorithm=fit_args$algorithm,
       objective.trace=fit_args$objective.trace)
+    if (!is.null(task$truth.profiles)) args$truth.profiles <- task$truth.profiles
     signature<-GCMS_batch_signature(file,standard,args)
     saved<-if(isTRUE(batch$resume)&&file.exists(cache))readRDS(cache)else NULL
     cache_hit<-!is.null(saved)&&identical(saved$signature,signature)

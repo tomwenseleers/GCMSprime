@@ -1,3 +1,7 @@
+# GCMSprime 0.1.0.9008
+
+- Single-CDF and experiment fits accept `truth.profiles` to measure the empirical GIC gap and plot convergence on simulations with known compound profiles.
+
 # GCMSprime 0.1.0.9007
 
 - Single-sample and batch Poisson and quasi-Poisson analyses use the conditional solver included in logconNMF.

@@ -8,3 +8,7 @@ to see their documentation.
   [`EBIC()`](https://tomwenseleers.github.io/L0glm/reference/model_criteria.html),
   [`GIC()`](https://tomwenseleers.github.io/L0glm/reference/model_criteria.html),
   [`MBIC()`](https://tomwenseleers.github.io/L0glm/reference/model_criteria.html)
+
+- logconNMF:
+
+  [`gicGap()`](https://tomwenseleers.github.io/logconNMF/reference/gicGap.html)

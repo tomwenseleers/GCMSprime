@@ -131,6 +131,16 @@ extractor includes the data-dependent likelihood constant and estimated
 noise dimensions. Comparisons on the same observations and noise
 specification give the same objective differences.
 
+For simulated data, pass `truth.profiles` to
+[`gcmsDeco()`](https://tomwenseleers.github.io/GCMSprime/reference/gcmsDeco.md)
+to compare the standard fit with the same solver initialized from known,
+matched elution profiles. Both fits estimate spectra and abundances from
+the measured counts. On the small 16-sample benchmark GIC decreased or
+held steady at all 56 checkpoints and finished 0.454% above the
+truth-initialized fit. The [multisample
+example](https://tomwenseleers.github.io/GCMSprime/articles/multisample.html#empirical-gic-gap)
+includes the code, timings and convergence figure link.
+
 The following sections detail PSF calibration, the general-family solver
 and chromatographic interpretation. Sections 3 and 4 give the
 component-count penalty used with `algorithm="classic"`.

@@ -13,7 +13,7 @@ are retained in the final spectra."><meta property="og:image" content="https://t
 
     <a class="navbar-brand me-2" href="../index.html">GCMSprime</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9007</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9008</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -88,7 +88,8 @@ are retained in the final spectra.</p>
 <span>  batch <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  ion_threshold <span class="op">=</span> <span class="fl">0.001</span>,</span>
 <span>  algorithm <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"auto"</span>, <span class="st">"conditional"</span>, <span class="st">"classic"</span><span class="op">)</span>,</span>
-<span>  objective.trace <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  objective.trace <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  truth.profiles <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'GCMSdeco'</span></span>
@@ -361,6 +362,18 @@ areas and information criteria are unaffected; raw factors remain in
 <dt id="arg-objective-trace">objective.trace<a class="anchor" aria-label="anchor" href="#arg-objective-trace"></a></dt>
 <dd><p>Record original-ion objective values after each
 conditional block. Leave FALSE for elapsed-time measurements.</p></dd>
+
+
+<dt id="arg-truth-profiles">truth.profiles<a class="anchor" aria-label="anchor" href="#arg-truth-profiles"></a></dt>
+<dd><p>Optional known elution profiles for the conditional
+count solver. Supply a scan-by-compound matrix for one CDF, or one matrix
+or simulator truth record per sample for a directory. Name the list by
+unique CDF basenames without extensions or by manifest sample IDs.
+Matched compound IDs identify columns across samples. The usual fit and
+a second fit initialized from the profiles are scored on the same counts.
+Inspect <code>fit$gic_gap</code> and use <code>plot(fit$gic_gap)</code> for a single or coupled
+fit. Independent directory fits return one diagnostic per sample.
+See <code><a href="https://tomwenseleers.github.io/logconNMF/reference/gicGap.html" class="external-link">logconNMF::gicGap()</a></code> for the definition.</p></dd>
 
 
 <dt id="arg-object-x">object, x<a class="anchor" aria-label="anchor" href="#arg-object-x"></a></dt>

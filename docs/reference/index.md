@@ -75,6 +75,7 @@
 
 - [`reexports`](https://tomwenseleers.github.io/GCMSprime/reference/reexports.md)
   [`GIC`](https://tomwenseleers.github.io/GCMSprime/reference/reexports.md)
+  [`gicGap`](https://tomwenseleers.github.io/GCMSprime/reference/reexports.md)
   [`EBIC`](https://tomwenseleers.github.io/GCMSprime/reference/reexports.md)
   [`MBIC`](https://tomwenseleers.github.io/GCMSprime/reference/reexports.md)
   : Objects exported from other packages

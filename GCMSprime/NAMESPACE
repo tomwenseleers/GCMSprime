@@ -34,6 +34,7 @@ export(MBIC)
 export(annotateRI)
 export(calibrateRI)
 export(gcmsDeco)
+export(gicGap)
 export(identifyCompounds)
 export(libraryIonWeights)
 export(libraryMetadata)
@@ -65,7 +66,10 @@ importFrom(Matrix,
   tail
 )
 importFrom(Rcpp,evalCpp)
-importFrom(logconNMF,simulateGCMSSamples)
+importFrom(logconNMF,
+  gicGap,
+  simulateGCMSSamples
+)
 importFrom(stats,
   AIC,
   BIC,

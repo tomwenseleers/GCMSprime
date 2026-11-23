@@ -31,7 +31,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">GCMSprime</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9007</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9008</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -223,6 +223,13 @@ deviance reference. The <code><a href="https://tomwenseleers.github.io/L0glm/ref
 data-dependent likelihood constant and estimated noise dimensions.
 Comparisons on the same observations and noise specification give the
 same objective differences.</p>
+<p>For simulated data, pass <code>truth.profiles</code> to
+<code><a href="../reference/gcmsDeco.html">gcmsDeco()</a></code> to compare the standard fit with the same solver
+initialized from known, matched elution profiles. Both fits estimate
+spectra and abundances from the measured counts. On the small 16-sample
+benchmark GIC decreased or held steady at all 56 checkpoints and
+finished 0.454% above the truth-initialized fit. The <a href="multisample.html#empirical-gic-gap">multisample example</a>
+includes the code, timings and convergence figure link.</p>
 <p>The following sections detail PSF calibration, the general-family
 solver and chromatographic interpretation. Sections 3 and 4 give the
 component-count penalty used with <code>algorithm="classic"</code>.</p>

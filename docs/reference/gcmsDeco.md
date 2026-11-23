@@ -36,7 +36,8 @@ gcmsDeco(
   batch = list(),
   ion_threshold = 0.001,
   algorithm = c("auto", "conditional", "classic"),
-  objective.trace = FALSE
+  objective.trace = FALSE,
+  truth.profiles = NULL
 )
 
 # S3 method for class 'GCMSdeco'
@@ -330,6 +331,20 @@ print(x, ...)
 
   Record original-ion objective values after each conditional block.
   Leave FALSE for elapsed-time measurements.
+
+- truth.profiles:
+
+  Optional known elution profiles for the conditional count solver.
+  Supply a scan-by-compound matrix for one CDF, or one matrix or
+  simulator truth record per sample for a directory. Name the list by
+  unique CDF basenames without extensions or by manifest sample IDs.
+  Matched compound IDs identify columns across samples. The usual fit
+  and a second fit initialized from the profiles are scored on the same
+  counts. Inspect `fit$gic_gap` and use `plot(fit$gic_gap)` for a single
+  or coupled fit. Independent directory fits return one diagnostic per
+  sample. See
+  [`logconNMF::gicGap()`](https://tomwenseleers.github.io/logconNMF/reference/gicGap.html)
+  for the definition.
 
 - object, x:
 

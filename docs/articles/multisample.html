@@ -31,7 +31,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">GCMSprime</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9007</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9008</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -250,6 +250,36 @@ i9-11950H, eight physical cores, 16 logical threads, Windows and R
 <p>The <a href="benchmarks.html">benchmarks against other software</a>
 give all seven workflows, matching rules, noise calibration, profile
 plots and tables.</p>
+<div class="section level3">
+<h3 id="empirical-gic-gap">How close is the fit to a truth-initialized solution?<a class="anchor" aria-label="anchor" href="#empirical-gic-gap"></a>
+</h3>
+<p>The standard fit’s GIC decreased monotonically from 21,188,577 to
+4,173,728 after dictionary construction. It reached 96.7% of its total
+decrease in five sweeps and finished <strong>0.454% above</strong> the
+GIC of 4,154,879 obtained by initializing from the true shapes and
+cross-sample identities. Both runs estimated spectra, areas and
+backgrounds from the same counts. This measures sensitivity to
+initialization on a simulation with known profiles.</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">checked</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gcmsDeco.html">gcmsDeco</a></span><span class="op">(</span><span class="st">"benchmark-small/input"</span>, output_dir <span class="op">=</span> <span class="st">"benchmark-small-gap"</span>,</span>
+<span>  family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">quasipoisson</a></span><span class="op">(</span><span class="st">"identity"</span><span class="op">)</span>, ncores <span class="op">=</span> <span class="fl">8L</span>, nwindows <span class="op">=</span> <span class="fl">2L</span>,</span>
+<span>  precluster <span class="op">=</span> <span class="fl">32L</span>, baseline_df <span class="op">=</span> <span class="fl">4L</span>, correlation <span class="op">=</span> <span class="st">"none"</span>,</span>
+<span>  psf_control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>maxiter <span class="op">=</span> <span class="fl">3L</span><span class="op">)</span>,</span>
+<span>  batch <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>workers <span class="op">=</span> <span class="fl">4L</span>, coupling <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>alignment_window <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  truth.profiles <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="st">"benchmark-small/truth.rds"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">checked</span><span class="op">$</span><span class="va">gic_gap</span><span class="op">$</span><span class="va">percent</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">checked</span><span class="op">$</span><span class="va">gic_gap</span><span class="op">)</span></span></code></pre></div>
+<div class="float">
+<img src="../reference/figures/empirical-gic-convergence.png" alt="GIC trajectories for the standard and true-profile starts on the 16-sample simulation"><div class="figcaption">GIC trajectories for the standard and
+true-profile starts on the 16-sample simulation</div>
+</div>
+<p>In two runs per setting the complete workflow averaged 50.9 s with
+the diagnostic off, 57.0 s with the standard trace alone, and 76.2 s
+with the reference fit and both traces. The reference fit itself took
+18.7 s. The <a href="https://tomwenseleers.github.io/logconNMF/articles/algorithm.html#empirical-gic-gap" class="external-link">algorithm
+vignette</a> shows both trajectories and explains the fixed-shape
+comparison.</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="full-sized-chromatograms-and-memory">Large-scale 16-sample resource benchmark<a class="anchor" aria-label="anchor" href="#full-sized-chromatograms-and-memory"></a>
@@ -395,7 +425,7 @@ grid.</p>
 reproducible script</a> and <a href="https://github.com/tomwenseleers/GCMSprime/tree/master/benchmarks/results/fullsize16" class="external-link">compact
 measured results</a> are supplied with the source. From the GCMSprime
 repository root:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Run from a GCMSprime repository checkout; use a fresh output directory.</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/source.html" class="external-link">source</a></span><span class="op">(</span><span class="st">"benchmarks/benchmark_fullsize_16.R"</span><span class="op">)</span></span>
 <span><span class="fu">benchmarkFullsize16</span><span class="op">(</span><span class="st">"benchmark-large"</span>, stage<span class="op">=</span><span class="st">"all"</span>, ncores<span class="op">=</span><span class="fl">16L</span><span class="op">)</span></span>
@@ -452,7 +482,7 @@ learned from a pooled, time-binned chromatogram or supplied through
 <code>precluster</code> as a saved <a href="https://tomwenseleers.github.io/logconNMF/reference/channelGroups.html" class="external-link">channel
 map</a>, for example one trained on reference spectra. Each sample’s PSF
 and scan grid remain separate.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sample1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="va">experiment</span><span class="op">$</span><span class="va">paths</span><span class="op">[</span><span class="fl">1L</span><span class="op">]</span><span class="op">)</span></span>
 <span><span class="va">sample1</span><span class="op">$</span><span class="va">compounds</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">sample1</span>, type<span class="op">=</span><span class="st">"profiles"</span>, file<span class="op">=</span><span class="st">"sample1_profiles_spectra.pdf"</span><span class="op">)</span></span>
@@ -480,7 +510,7 @@ units, so scan duration and the number of exported mass peaks alone do
 not identify physical count exposure.</p>
 <p>If integrated counts and their durations are known, supply exposure
 explicitly:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">experiment</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gcmsDeco.html">gcmsDeco</a></span><span class="op">(</span><span class="st">"chromatograms"</span>, output_dir<span class="op">=</span><span class="st">"count_results"</span>,</span>
 <span>  family<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">poisson</a></span><span class="op">(</span><span class="st">"identity"</span><span class="op">)</span>,</span>
 <span>  batch<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>exposure<span class="op">=</span><span class="kw">function</span><span class="op">(</span><span class="va">metadata</span>, <span class="va">time</span><span class="op">)</span> <span class="va">metadata</span><span class="op">$</span><span class="va">scan_duration</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
@@ -501,7 +531,7 @@ In this example, <code>calibration_range=c(6, Inf)</code> excludes the
 solvent and early contaminated region from PSF calibration; the
 analytical samples retain their full time range and all 518 measured
 mass channels.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">standard</span> <span class="op">&lt;-</span> <span class="st">"chromatograms/standards/alkanes.cdf"</span></span>
 <span><span class="va">experiment</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gcmsDeco.html">gcmsDeco</a></span><span class="op">(</span><span class="st">"chromatograms"</span>, output_dir<span class="op">=</span><span class="st">"beer_results"</span>,</span>
 <span>  alkanes_file<span class="op">=</span><span class="va">standard</span>, calibration_range<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">6</span>, <span class="cn">Inf</span><span class="op">)</span>, precluster<span class="op">=</span><span class="fl">32L</span>,</span>

@@ -4,6 +4,7 @@
 \name{reexports}
 \alias{reexports}
 \alias{GIC}
+\alias{gicGap}
 \alias{EBIC}
 \alias{MBIC}
 \title{Objects exported from other packages}
@@ -14,5 +15,7 @@ below to see their documentation.
 
 \describe{
   \item{L0glm}{\code{\link[L0glm:EBIC]{EBIC()}}, \code{\link[L0glm:GIC]{GIC()}}, \code{\link[L0glm:MBIC]{MBIC()}}}
+
+  \item{logconNMF}{\code{\link[logconNMF:gicGap]{gicGap()}}}
 }}
 

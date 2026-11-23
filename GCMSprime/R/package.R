@@ -22,6 +22,9 @@
 #' @importFrom L0glm GIC
 #' @export
 L0glm::GIC
+#' @importFrom logconNMF gicGap
+#' @export
+logconNMF::gicGap
 #' @importFrom L0glm EBIC
 #' @export
 L0glm::EBIC
