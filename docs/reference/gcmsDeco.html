@@ -13,7 +13,7 @@ are retained in the final spectra."><meta property="og:image" content="https://t
 
     <a class="navbar-brand me-2" href="../index.html">GCMSprime</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9008</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9009</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -87,7 +87,6 @@ are retained in the final spectra.</p>
 <span>  coupled <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  batch <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  ion_threshold <span class="op">=</span> <span class="fl">0.001</span>,</span>
-<span>  algorithm <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"auto"</span>, <span class="st">"conditional"</span>, <span class="st">"classic"</span><span class="op">)</span>,</span>
 <span>  objective.trace <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  truth.profiles <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span>
@@ -355,10 +354,6 @@ areas and information criteria are unaffected; raw factors remain in
 <code>model$S</code>.</p></dd>
 
 
-<dt id="arg-algorithm">algorithm<a class="anchor" aria-label="anchor" href="#arg-algorithm"></a></dt>
-<dd><p>Count-factorization algorithm passed to <code><a href="https://tomwenseleers.github.io/logconNMF/reference/logconNMF.html" class="external-link">logconNMF::logconNMF()</a></code>.</p></dd>
-
-
 <dt id="arg-objective-trace">objective.trace<a class="anchor" aria-label="anchor" href="#arg-objective-trace"></a></dt>
 <dd><p>Record original-ion objective values after each
 conditional block. Leave FALSE for elapsed-time measurements.</p></dd>
@@ -370,7 +365,8 @@ count solver. Supply a scan-by-compound matrix for one CDF, or one matrix
 or simulator truth record per sample for a directory. Name the list by
 unique CDF basenames without extensions or by manifest sample IDs.
 Matched compound IDs identify columns across samples. The usual fit and
-a second fit initialized from the profiles are scored on the same counts.
+a second fit initialised from the profiles are scored on the same counts.
+Their signed percentage difference in GIC is the empirical optimality gap.
 Inspect <code>fit$gic_gap</code> and use <code>plot(fit$gic_gap)</code> for a single or coupled
 fit. Independent directory fits return one diagnostic per sample.
 See <code><a href="https://tomwenseleers.github.io/logconNMF/reference/gicGap.html" class="external-link">logconNMF::gicGap()</a></code> for the definition.</p></dd>
@@ -497,7 +493,7 @@ criteria follow <code><a href="https://tomwenseleers.github.io/logconNMF/referen
 The conditional solver uses grouped PSF regressions followed by original-ion
 updates of shared spectra, sample profiles and background. Its peak memory
 includes the raw count matrices and fitted means. For disk-backed joint
-refinement use <code>algorithm="classic"</code> and <code>batch=list(cache=FALSE)</code>.</p>
+refinement use <code>batch=list(cache=FALSE)</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="experimental-gc-ms-examples">Experimental GC/MS examples<a class="anchor" aria-label="anchor" href="#experimental-gc-ms-examples"></a></h2>

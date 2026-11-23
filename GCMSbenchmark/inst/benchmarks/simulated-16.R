@@ -91,7 +91,6 @@ runBenchmark16 <- function(output_dir, method = c("GCMSprime", "xcms+CAMERA"),
       family = stats::quasipoisson("identity"),
       precluster = 32L, nwindows = 2L, baseline_df = 4L, correlation = "none",
       psf_control = list(maxiter = 3L),
-      algorithm = "conditional",
       batch = list(workers = min(4L, ncores), coupling = list(alignment_window = 0.5)))
   })
   fit <- structure(list(methods = do.call(c, lapply(fits, `[[`, "methods")),

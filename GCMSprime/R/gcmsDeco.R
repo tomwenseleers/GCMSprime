@@ -295,7 +295,7 @@ GCMS_write_msp <- function(model,time,mass,msp_file,compounds=NULL,ion_threshold
 #' The conditional solver uses grouped PSF regressions followed by original-ion
 #' updates of shared spectra, sample profiles and background. Its peak memory
 #' includes the raw count matrices and fitted means. For disk-backed joint
-#' refinement use `algorithm="classic"` and `batch=list(cache=FALSE)`.
+#' refinement use `batch=list(cache=FALSE)`.
 #'
 #' @section Experimental GC/MS examples:
 #' The [GC/MS deconvolution tutorial](../articles/gcms-deconvolution.html)
@@ -314,7 +314,6 @@ GCMS_write_msp <- function(model,time,mass,msp_file,compounds=NULL,ion_threshold
 #' }
 #'
 #' @param library Optional GCMSlibrary for retention-index-constrained identification.
-#' @param algorithm Count-factorization algorithm passed to [logconNMF::logconNMF()].
 #' @param objective.trace Record original-ion objective values after each
 #'   conditional block. Leave FALSE for elapsed-time measurements.
 #' @param truth.profiles Optional known elution profiles for the conditional
@@ -322,7 +321,8 @@ GCMS_write_msp <- function(model,time,mass,msp_file,compounds=NULL,ion_threshold
 #'   or simulator truth record per sample for a directory. Name the list by
 #'   unique CDF basenames without extensions or by manifest sample IDs.
 #'   Matched compound IDs identify columns across samples. The usual fit and
-#'   a second fit initialized from the profiles are scored on the same counts.
+#'   a second fit initialised from the profiles are scored on the same counts.
+#'   Their signed percentage difference in GIC is the empirical optimality gap.
 #'   Inspect `fit$gic_gap` and use `plot(fit$gic_gap)` for a single or coupled
 #'   fit. Independent directory fits return one diagnostic per sample.
 #'   See [logconNMF::gicGap()] for the definition.
@@ -356,13 +356,20 @@ gcmsDeco <- function(cdf_file,msp_file=NULL,family=quasipoisson("identity"),lamb
                      ncores=NULL,control=list(),psf_control=list(),verbose=FALSE,
                      xlsx_file=NULL,sample_name=NULL,library=NULL,search=list(),
                      output_dir=NULL,coupled=TRUE,batch=list(),ion_threshold=.001,
-                     algorithm=c("auto","conditional","classic"),objective.trace=FALSE,truth.profiles=NULL) {
-  algorithm <- match.arg(algorithm)
+                     objective.trace=FALSE,truth.profiles=NULL) {
   invisible(GCMS_report_spectra(matrix(numeric(),0L,0L),ion_threshold))
-  if(length(cdf_file)==1L&&dir.exists(cdf_file)) {
-    args<-as.list(environment())
+  args<-as.list(environment())
+  if(length(cdf_file)==1L&&dir.exists(cdf_file))
     return(do.call(GCMSdeco_directory,args))
-  }
+  args[c("output_dir","coupled","batch")]<-NULL
+  do.call(GCMS_fit_cdf,args)
+}
+
+GCMS_fit_cdf <- function(cdf_file,msp_file,family,lambda,nwindows,alkanes_file,time_range,
+                         calibration_range,baseline_df,precluster,dispersion,theta,correlation,
+                         ncores,control,psf_control,verbose,xlsx_file=NULL,sample_name=NULL,
+                         library=NULL,search=list(),ion_threshold=.001,objective.trace=FALSE,
+                         truth.profiles=NULL,initial_only=FALSE) {
   if(is.null(msp_file))stop("Supply msp_file for a single chromatogram.")
   begun<-proc.time()[["elapsed"]];seconds<-numeric()
   if(!is.list(search)||length(search)&&(is.null(names(search))||any(!nzchar(names(search)))||
@@ -418,12 +425,16 @@ gcmsDeco <- function(cdf_file,msp_file=NULL,family=quasipoisson("identity"),lamb
   width <- max(1, blind$width_scans)
   B <- GCMS_background(raw$time, width, baseline_df)
   baseline_df <- ncol(B)
-  conditional <- algorithm != "classic" && spec$kind %in% c(1L,2L) && logconNMF::conditionalSolverAvailable()
-  nmf_lambda<-if(is.numeric(lambda) && !conditional) lambda/ncol(Y) else lambda
-  model<-timed("factorization",logconNMF(Y,X=X,family=family,lambda=nmf_lambda,background=B,precluster=precluster,
+  fit_args<-list(y=Y,X=X,family=family,lambda=lambda,background=B,precluster=precluster,
     dispersion=spec$dispersion,theta=if(spec$name=="nb") spec$theta*(if(spec$theta_update) -1 else 1) else NULL,
-    correlation=spec$correlation,ncores=ncores,control=control,verbose=verbose,
-    algorithm=algorithm,time=raw$time,objective.trace=objective.trace,truth.profiles=truth.profiles))
+    correlation=spec$correlation,ncores=ncores,control=control,verbose=verbose)
+  model<-timed("factorization",if (initial_only) {
+    # Joint refinement follows across samples. Stop after the independent start.
+    do.call(logconNMF::splogconNMF,fit_args)
+  } else {
+    if (is.numeric(lambda) && !spec$kind %in% c(1L,2L)) fit_args$lambda<-lambda/ncol(Y)
+    do.call(logconNMF,c(fit_args,list(time=raw$time,objective.trace=objective.trace,truth.profiles=truth.profiles)))
+  })
   model$spec$dispersion_estimated<-spec$dispersion_estimated
   model$spec$theta_estimated<-spec$theta_estimated
   model$spec$correlation_estimate<-spec$correlation_estimate

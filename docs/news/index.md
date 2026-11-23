@@ -1,5 +1,13 @@
 # Changelog
 
+## GCMSprime 0.1.0.9009
+
+- [`gcmsDeco()`](https://tomwenseleers.github.io/GCMSprime/reference/gcmsDeco.md)
+  selects the fitting method automatically. For disk-backed joint
+  refinement use `batch = list(cache = FALSE)`.
+- The multisample tutorial reports the empirical optimality gap in GIC
+  and shows the truth-initialised reference in red.
+
 ## GCMSprime 0.1.0.9008
 
 - Single-CDF and experiment fits accept `truth.profiles` to measure the

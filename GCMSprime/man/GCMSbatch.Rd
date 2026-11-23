@@ -119,8 +119,7 @@ and \code{experiment.xlsx} with samples, compounds, areas and packed spectra.
 The returned object stores file paths, tables and common spectra. Automatic
 worker allocation for conditional PSF regressions accounts for memory.
 Set \code{batch=list(workers=4L)} to cap sample-level concurrency explicitly.
-For a disk-backed joint fit use \code{algorithm="classic"} with
-\code{batch=list(workers=1L, cache=FALSE)}.
+For a disk-backed joint fit use \code{batch=list(workers=1L, cache=FALSE)}.
 \code{control$initial_solver} and \code{control$initial_fallback} apply to every
 independent sample initialization, just as for a single chromatogram.
 The solver's \code{max.memory} bounds its Gram/factor workspace, not total RAM;

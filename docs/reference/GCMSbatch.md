@@ -147,14 +147,14 @@ and heatmap PDFs. The returned object stores file paths, tables and
 common spectra. Automatic worker allocation for conditional PSF
 regressions accounts for memory. Set `batch=list(workers=4L)` to cap
 sample-level concurrency explicitly. For a disk-backed joint fit use
-`algorithm="classic"` with `batch=list(workers=1L, cache=FALSE)`.
-`control$initial_solver` and `control$initial_fallback` apply to every
-independent sample initialization, just as for a single chromatogram.
-The solver's `max.memory` bounds its Gram/factor workspace, not total
-RAM; each active sample still requires its observations, profiles and
-fit buffers. Keep the output directory with the saved object. Explicit
-`resume=TRUE` reuses independent fits only when the file metadata and
-fitting arguments match; simultaneous refinement is recomputed.
+`batch=list(workers=1L, cache=FALSE)`. `control$initial_solver` and
+`control$initial_fallback` apply to every independent sample
+initialization, just as for a single chromatogram. The solver's
+`max.memory` bounds its Gram/factor workspace, not total RAM; each
+active sample still requires its observations, profiles and fit buffers.
+Keep the output directory with the saved object. Explicit `resume=TRUE`
+reuses independent fits only when the file metadata and fitting
+arguments match; simultaneous refinement is recomputed.
 
 ## See also
 

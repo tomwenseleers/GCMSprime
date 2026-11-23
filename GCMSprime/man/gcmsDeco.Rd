@@ -41,7 +41,6 @@ gcmsDeco(
   coupled = TRUE,
   batch = list(),
   ion_threshold = 0.001,
-  algorithm = c("auto", "conditional", "classic"),
   objective.trace = FALSE,
   truth.profiles = NULL
 )
@@ -245,8 +244,6 @@ Use zero to retain every positive ion. The fitted model, profiles, peak
 areas and information criteria are unaffected; raw factors remain in
 \code{model$S}.}
 
-\item{algorithm}{Count-factorization algorithm passed to \code{\link[logconNMF:logconNMF]{logconNMF::logconNMF()}}.}
-
 \item{objective.trace}{Record original-ion objective values after each
 conditional block. Leave FALSE for elapsed-time measurements.}
 
@@ -255,7 +252,8 @@ count solver. Supply a scan-by-compound matrix for one CDF, or one matrix
 or simulator truth record per sample for a directory. Name the list by
 unique CDF basenames without extensions or by manifest sample IDs.
 Matched compound IDs identify columns across samples. The usual fit and
-a second fit initialized from the profiles are scored on the same counts.
+a second fit initialised from the profiles are scored on the same counts.
+Their signed percentage difference in GIC is the empirical optimality gap.
 Inspect \code{fit$gic_gap} and use \code{plot(fit$gic_gap)} for a single or coupled
 fit. Independent directory fits return one diagnostic per sample.
 See \code{\link[logconNMF:gicGap]{logconNMF::gicGap()}} for the definition.}
@@ -379,7 +377,7 @@ criteria follow \code{\link[logconNMF:logconNMF]{logconNMF::logconNMF()}}.
 The conditional solver uses grouped PSF regressions followed by original-ion
 updates of shared spectra, sample profiles and background. Its peak memory
 includes the raw count matrices and fitted means. For disk-backed joint
-refinement use \code{algorithm="classic"} and \code{batch=list(cache=FALSE)}.
+refinement use \code{batch=list(cache=FALSE)}.
 }
 \section{Experimental GC/MS examples}{
 

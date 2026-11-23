@@ -32,7 +32,7 @@ remotes::install_github(c(
 ))
 ```
 
-The R package includes the conditional Poisson and quasi-Poisson solver. It fits the original ion counts with compiled C++ kernels and uses OpenMP when available. `algorithm="auto"` selects the solver for compatible count data.
+The R package includes the conditional Poisson and quasi-Poisson solver. It fits the original ion counts with compiled C++ kernels and uses OpenMP when available. Solver selection is automatic for the requested noise model and memory settings.
 
 ## Automatic deconvolution for single samples
 
@@ -85,7 +85,7 @@ working memory while retaining coupled refinement:
 
 ```r
 experiment <- gcmsDeco("chromatograms", output_dir="results", ncores=8L,
-  algorithm="classic", control=list(initial_solver=list(solver="eigen", method=3L, precond=1L)),
+  control=list(initial_solver=list(solver="eigen", method=3L, precond=1L)),
   batch=list(workers=1L, cache=FALSE))
 ```
 
@@ -159,6 +159,10 @@ compounds, 1,200 scans and 258 mass channels, with drift, concentration-dependen
 broadening and a smooth background derived from experimental GC/MS data.
 Initialization uses 32 ion groups and the final fit uses every original ion.
 The grouped regressions used four two-thread workers. The joint fit reused the eight-thread budget on the original ion channels.
+
+The default fit achieved an **empirical optimality gap of 0.45%** relative to a
+fit initialised with the true elution profiles and cross-sample compound identities.
+[Compare the GIC traces](https://tomwenseleers.github.io/GCMSprime/articles/multisample.html#empirical-gic-gap).
 
 ## Benchmarks against other software
 

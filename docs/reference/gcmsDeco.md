@@ -35,7 +35,6 @@ gcmsDeco(
   coupled = TRUE,
   batch = list(),
   ion_threshold = 0.001,
-  algorithm = c("auto", "conditional", "classic"),
   objective.trace = FALSE,
   truth.profiles = NULL
 )
@@ -322,11 +321,6 @@ print(x, ...)
   peak areas and information criteria are unaffected; raw factors remain
   in `model$S`.
 
-- algorithm:
-
-  Count-factorization algorithm passed to
-  [`logconNMF::logconNMF()`](https://tomwenseleers.github.io/logconNMF/reference/logconNMF.html).
-
 - objective.trace:
 
   Record original-ion objective values after each conditional block.
@@ -339,10 +333,11 @@ print(x, ...)
   simulator truth record per sample for a directory. Name the list by
   unique CDF basenames without extensions or by manifest sample IDs.
   Matched compound IDs identify columns across samples. The usual fit
-  and a second fit initialized from the profiles are scored on the same
-  counts. Inspect `fit$gic_gap` and use `plot(fit$gic_gap)` for a single
-  or coupled fit. Independent directory fits return one diagnostic per
-  sample. See
+  and a second fit initialised from the profiles are scored on the same
+  counts. Their signed percentage difference in GIC is the empirical
+  optimality gap. Inspect `fit$gic_gap` and use `plot(fit$gic_gap)` for
+  a single or coupled fit. Independent directory fits return one
+  diagnostic per sample. See
   [`logconNMF::gicGap()`](https://tomwenseleers.github.io/logconNMF/reference/gicGap.html)
   for the definition.
 
@@ -486,8 +481,7 @@ follow
 The conditional solver uses grouped PSF regressions followed by
 original-ion updates of shared spectra, sample profiles and background.
 Its peak memory includes the raw count matrices and fitted means. For
-disk-backed joint refinement use `algorithm="classic"` and
-`batch=list(cache=FALSE)`.
+disk-backed joint refinement use `batch=list(cache=FALSE)`.
 
 ## Experimental GC/MS examples
 

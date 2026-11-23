@@ -31,7 +31,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">GCMSprime</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9008</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9009</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -255,11 +255,14 @@ plots and tables.</p>
 </h3>
 <p>The standard fit’s GIC decreased monotonically from 21,188,577 to
 4,173,728 after dictionary construction. It reached 96.7% of its total
-decrease in five sweeps and finished <strong>0.454% above</strong> the
-GIC of 4,154,879 obtained by initializing from the true shapes and
-cross-sample identities. Both runs estimated spectra, areas and
-backgrounds from the same counts. This measures sensitivity to
-initialization on a simulation with known profiles.</p>
+decrease in five sweeps. The default fit achieved an <strong>empirical
+optimality gap of 0.45%</strong> relative to a fit initialised with the
+true elution profiles and cross-sample compound identities (GIC
+4,154,879). Both fits used the same counts and stopping rules.
+Continuing both fits narrowed the gap to <strong>0.29% after five extra
+sweeps</strong> and <strong>0.15% after 100</strong>. The dotted red
+line marks the reference endpoint under the default stopping rules. <a href="https://tomwenseleers.github.io/logconNMF/benchmark-gic-continuation.csv" class="external-link">Download
+both continuation traces</a>.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">checked</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gcmsDeco.html">gcmsDeco</a></span><span class="op">(</span><span class="st">"benchmark-small/input"</span>, output_dir <span class="op">=</span> <span class="st">"benchmark-small-gap"</span>,</span>
 <span>  family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">quasipoisson</a></span><span class="op">(</span><span class="st">"identity"</span><span class="op">)</span>, ncores <span class="op">=</span> <span class="fl">8L</span>, nwindows <span class="op">=</span> <span class="fl">2L</span>,</span>
@@ -535,7 +538,7 @@ mass channels.</p>
 <code class="sourceCode R"><span><span class="va">standard</span> <span class="op">&lt;-</span> <span class="st">"chromatograms/standards/alkanes.cdf"</span></span>
 <span><span class="va">experiment</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gcmsDeco.html">gcmsDeco</a></span><span class="op">(</span><span class="st">"chromatograms"</span>, output_dir<span class="op">=</span><span class="st">"beer_results"</span>,</span>
 <span>  alkanes_file<span class="op">=</span><span class="va">standard</span>, calibration_range<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">6</span>, <span class="cn">Inf</span><span class="op">)</span>, precluster<span class="op">=</span><span class="fl">32L</span>,</span>
-<span>  algorithm<span class="op">=</span><span class="st">"conditional"</span>, ncores<span class="op">=</span><span class="fl">8L</span>, batch<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>workers<span class="op">=</span><span class="fl">2L</span><span class="op">)</span><span class="op">)</span></span>
+<span>  ncores<span class="op">=</span><span class="fl">8L</span>, batch<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>workers<span class="op">=</span><span class="fl">2L</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Use the calibrated narrow-peak width for onset-based RI coordinates.</span></span>
 <span><span class="va">reference</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="va">experiment</span><span class="op">$</span><span class="va">paths</span><span class="op">[</span></span>

@@ -132,10 +132,13 @@ workflows, matching rules, noise calibration, profile plots and tables.
 
 The standard fit's GIC decreased monotonically from 21,188,577 to 4,173,728
 after dictionary construction. It reached 96.7% of its total decrease in
-five sweeps and finished **0.454% above** the GIC of 4,154,879 obtained by
-initializing from the true shapes and cross-sample identities. Both runs
-estimated spectra, areas and backgrounds from the same counts. This measures
-sensitivity to initialization on a simulation with known profiles.
+five sweeps. The default fit achieved an **empirical optimality gap of 0.45%**
+relative to a fit initialised with the true elution profiles and cross-sample
+compound identities (GIC 4,154,879). Both fits used the same counts and
+stopping rules. Continuing both fits narrowed the gap to **0.29% after five
+extra sweeps** and **0.15% after 100**. The dotted red line marks the reference
+endpoint under the default stopping rules.
+[Download both continuation traces](https://tomwenseleers.github.io/logconNMF/benchmark-gic-continuation.csv).
 
 ~~~r
 checked <- gcmsDeco("benchmark-small/input", output_dir = "benchmark-small-gap",
@@ -308,7 +311,7 @@ their full time range and all 518 measured mass channels.
 standard <- "chromatograms/standards/alkanes.cdf"
 experiment <- gcmsDeco("chromatograms", output_dir="beer_results",
   alkanes_file=standard, calibration_range=c(6, Inf), precluster=32L,
-  algorithm="conditional", ncores=8L, batch=list(workers=2L))
+  ncores=8L, batch=list(workers=2L))
 
 # Use the calibrated narrow-peak width for onset-based RI coordinates.
 reference <- readRDS(experiment$paths[

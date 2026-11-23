@@ -2,9 +2,7 @@ library(GCMSprime)
 library(logconNMF)
 
 benchmark_samples16 <- function(output = tempfile("GCMSprime_samples16_"),
-                                cores = c(1L, 8L, 16L),
-                                algorithm = c("conditional", "classic")) {
-  algorithm <- match.arg(algorithm)
+                                cores = c(1L, 8L, 16L)) {
   blas <- RhpcBLASctl::blas_get_num_procs()
   on.exit(RhpcBLASctl::blas_set_num_threads(blas))
   RhpcBLASctl::blas_set_num_threads(1L)
@@ -25,7 +23,7 @@ benchmark_samples16 <- function(output = tempfile("GCMSprime_samples16_"),
     gcmsDeco(input, output_dir = file.path(output, paste0("workers", ncores)),
       family = quasipoisson("identity"), dispersion = 2, correlation = "none",
       nwindows = 2L, baseline_df = 4L, precluster = 32L, ncores = ncores,
-      psf_control = list(maxiter = 3L), algorithm = algorithm)
+      psf_control = list(maxiter = 3L))
   })
   common <- fits[[1L]]$coupled
   for (z in fits) {

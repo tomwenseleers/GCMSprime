@@ -4,7 +4,7 @@ test_that("CDF and directory fits return correctly scored diagnostics", {
   d <- tempfile()
   dir.create(d)
   paths <- file.path(d,c("A.cdf","B.cdf"))
-  outputs <- paste0(d,c("_joint","_independent"))
+  outputs <- paste0(d,c("_joint","_independent","_disk"))
   on.exit(unlink(c(d,outputs),recursive=TRUE))
   kernel <- convKernel("gaussian",15L,list(sigma=2))
   n <- 80L
@@ -33,4 +33,9 @@ test_that("CDF and directory fits return correctly scored diagnostics", {
       expect_equal(unname(vapply(batch$gic_gap,"[[",0,"fitted_gic")),batch$samples$GIC)
     }
   }
+  disk <- do.call(gcmsDeco,c(list(cdf_file=d,output_dir=outputs[3],
+                        batch=list(workers=1L,cache=FALSE)),args))
+  expect_identical(disk$coupled$algorithm,"general")
+  expect_null(disk$coupled$store$cache)
+  expect_true(is.finite(as.numeric(GIC(disk))))
 })

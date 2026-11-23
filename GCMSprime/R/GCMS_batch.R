@@ -119,8 +119,7 @@ GCMS_batch_files <- function(directory,output_dir,sample_order=NULL,alkanes_file
 #' The returned object stores file paths, tables and common spectra. Automatic
 #' worker allocation for conditional PSF regressions accounts for memory.
 #' Set `batch=list(workers=4L)` to cap sample-level concurrency explicitly.
-#' For a disk-backed joint fit use `algorithm="classic"` with
-#' `batch=list(workers=1L, cache=FALSE)`.
+#' For a disk-backed joint fit use `batch=list(workers=1L, cache=FALSE)`.
 #' `control$initial_solver` and `control$initial_fallback` apply to every
 #' independent sample initialization, just as for a single chromatogram.
 #' The solver's `max.memory` bounds its Gram/factor workspace, not total RAM;
@@ -148,7 +147,7 @@ NULL
 GCMSdeco_directory <- function(cdf_file,msp_file=NULL,family,lambda,nwindows,
     alkanes_file,time_range,calibration_range,baseline_df,precluster,dispersion,theta,
     correlation,ncores,control,psf_control,verbose,xlsx_file,sample_name,library,search,
-    output_dir,coupled,batch,ion_threshold=.001,algorithm="auto",objective.trace=FALSE,truth.profiles=NULL) {
+    output_dir,coupled,batch,ion_threshold=.001,objective.trace=FALSE,truth.profiles=NULL) {
   begun<-proc.time()[["elapsed"]]
   if(!requireNamespace("ncdf4",quietly=TRUE)||!requireNamespace("openxlsx",quietly=TRUE))
     stop("Install ncdf4 and openxlsx for directory input and batch exports.")
@@ -186,7 +185,8 @@ GCMSdeco_directory <- function(cdf_file,msp_file=NULL,family,lambda,nwindows,
   dir.create(output_dir,recursive=TRUE,showWarnings=FALSE);output_dir<-normalizePath(output_dir,winslash="/")
   dir.create(file.path(output_dir,"samples"),showWarnings=FALSE)
   family_name <- if(is.character(family)) family[1L] else if(is.list(family)) family$family
-  pooled <- coupled && algorithm != "classic" && length(family_name)==1L &&
+  coupling<-utils::modifyList(list(cache=batch$cache,workers=batch$workers),batch$coupling,keep.null=TRUE)
+  pooled <- coupled && !isFALSE(coupling$cache) && length(family_name)==1L &&
     family_name %in% c("poisson","quasipoisson") && length(unique(manifest$alkanes_file))==1L &&
     (is.null(batch$exposure) || identical(batch$exposure,1)) && !isTRUE(batch$resume) &&
     !length(setdiff(names(control), c("initial_solver","initial_fallback","initial_relaxed"))) &&
@@ -203,7 +203,7 @@ GCMSdeco_directory <- function(cdf_file,msp_file=NULL,family,lambda,nwindows,
     calibration_range=calibration_range,baseline_df=baseline_df,precluster=precluster,
     dispersion=dispersion,theta=theta,correlation=correlation,ncores=threads,
     control=control,psf_control=psf_control,verbose=verbose,ion_threshold=ion_threshold,
-    algorithm=if(coupled) "classic" else algorithm,objective.trace=objective.trace)
+    initial_only=coupled,objective.trace=objective.trace)
   if(pooled) initial_time <- GCMS_time(starts <- GCMS_pooled_starts(manifest,common_args,output_dir,precluster,ncores,batch$workers))[["elapsed"]]
   if(is.null(starts)) {
     clustering_time<-GCMS_time(channel_map<-GCMS_batch_groups(manifest,metadata,precluster,time_range,ncores))[["elapsed"]]
@@ -239,14 +239,13 @@ GCMSdeco_directory <- function(cdf_file,msp_file=NULL,family,lambda,nwindows,
       }
       descriptors[[s]]<-x
     }
-    coupling<-utils::modifyList(list(cache=batch$cache,workers=batch$workers),batch$coupling,keep.null=TRUE)
     if (!is.null(starts))
       coupling$initial <- utils::modifyList(control[intersect(names(control), c("initial_solver","initial_fallback"))],
         if(is.null(coupling$initial)) list() else coupling$initial)
     coupled_time<-GCMS_time(common<-logconNMF::logconNMF(descriptors,family=family,lambda=lambda,
       path=tempfile("coupled_",tmpdir=output_dir),precluster=effective,
       method=batch$method,align=batch$align,ncores=ncores,control=coupling,verbose=verbose,
-      algorithm=algorithm,objective.trace=objective.trace,truth.profiles=truth.profiles))[["elapsed"]]
+      objective.trace=objective.trace,truth.profiles=truth.profiles))[["elapsed"]]
     for(s in seq_along(paths)) {
       fit<-readRDS(paths[s]);fit$model<-logconNMF::sampleNMF(common,s);fit$mass<-axis
       if(!is.null(starts)) fit$seconds <- common$seconds
@@ -429,13 +428,13 @@ GCMS_initial_sample <- function(task) {
       dispersion=fit_args$dispersion,theta=fit_args$theta,
       correlation=fit_args$correlation,ncores=fit_args$ncores,control=fit_args$control,
       psf_control=fit_args$psf_control,verbose=fit_args$verbose,
-      sample_name=id,ion_threshold=fit_args$ion_threshold,algorithm=fit_args$algorithm,
+      sample_name=id,ion_threshold=fit_args$ion_threshold,initial_only=fit_args$initial_only,
       objective.trace=fit_args$objective.trace)
     if (!is.null(task$truth.profiles)) args$truth.profiles <- task$truth.profiles
     signature<-GCMS_batch_signature(file,standard,args)
     saved<-if(isTRUE(batch$resume)&&file.exists(cache))readRDS(cache)else NULL
     cache_hit<-!is.null(saved)&&identical(saved$signature,signature)
-    fit<-if(cache_hit)saved$fit else do.call(gcmsDeco,args)
+    fit<-if(cache_hit)saved$fit else do.call(GCMS_fit_cdf,args)
     saveRDS(list(signature=signature,fit=fit),cache)
     path<-file.path(d,"fit.rds");saveRDS(fit,path)
     raw<-GCMS_read_cdf(file,fit_args$time_range);yfile<-file.path(d,"observed.rds");saveRDS(raw$Y,yfile,compress=FALSE)

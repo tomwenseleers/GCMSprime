@@ -135,15 +135,17 @@ For simulated data, pass `truth.profiles` to
 [`gcmsDeco()`](https://tomwenseleers.github.io/GCMSprime/reference/gcmsDeco.md)
 to compare the standard fit with the same solver initialized from known,
 matched elution profiles. Both fits estimate spectra and abundances from
-the measured counts. On the small 16-sample benchmark GIC decreased or
-held steady at all 56 checkpoints and finished 0.454% above the
-truth-initialized fit. The [multisample
+the measured counts. On the small 16-sample benchmark, GIC decreased or
+held steady at all 56 checkpoints. The default fit achieved an
+**empirical optimality gap of 0.45%** relative to a fit initialised with
+the true elution profiles and cross-sample compound identities. The
+[multisample
 example](https://tomwenseleers.github.io/GCMSprime/articles/multisample.html#empirical-gic-gap)
 includes the code, timings and convergence figure link.
 
-The following sections detail PSF calibration, the general-family solver
-and chromatographic interpretation. Sections 3 and 4 give the
-component-count penalty used with `algorithm="classic"`.
+Solver selection is automatic. Sections 3 and 4 give the component-count
+penalty used for other noise families and for disk-backed joint
+refinement.
 
 ## 1. Deconvolution based on a known peak shape
 

@@ -13,7 +13,7 @@ share spectra through logconNMF::logconNMF() while keeping original scan grids."
 
     <a class="navbar-brand me-2" href="../index.html">GCMSprime</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9007</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9009</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -185,8 +185,7 @@ and <code>experiment.xlsx</code> with samples, compounds, areas and packed spect
 The returned object stores file paths, tables and common spectra. Automatic
 worker allocation for conditional PSF regressions accounts for memory.
 Set <code>batch=list(workers=4L)</code> to cap sample-level concurrency explicitly.
-For a disk-backed joint fit use <code>algorithm="classic"</code> with
-<code>batch=list(workers=1L, cache=FALSE)</code>.
+For a disk-backed joint fit use <code>batch=list(workers=1L, cache=FALSE)</code>.
 <code>control$initial_solver</code> and <code>control$initial_fallback</code> apply to every
 independent sample initialization, just as for a single chromatogram.
 The solver's <code>max.memory</code> bounds its Gram/factor workspace, not total RAM;
