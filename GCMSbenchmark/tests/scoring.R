@@ -16,6 +16,18 @@ stopifnot(s$summary$TP==2L,s$summary$FP==1L,s$summary$FN==0L,
   s$summary$acid_TP==1L,s$summary$area_median_error_factor==0,
   all(s$matches$spectral_cosine==1),all(s$matches$profile_cosine==1))
 stopifnot(is.na(scoreGCMSbenchmark(x)$summary$F1))
+stopifnot(s$summary$true_rank==2L,is.na(s$summary$estimated_rank),is.na(s$summary$rank_exact))
+y <- x
+names(y$methods) <- "GCMSprime"
+single <- scoreGCMSbenchmark(y,truth)$summary
+stopifnot(single$estimated_rank==3L,identical(single$rank_exact,FALSE))
+y$files <- c("sample.cdf","second.cdf")
+both <- c(truth,list(second=truth$sample))
+y$methods$GCMSprime$shared <- 2L
+joint <- scoreGCMSbenchmark(y,both)$summary
+stopifnot(joint$true_rank==2L,joint$estimated_rank==2L,isTRUE(joint$rank_exact))
+missing_truth <- scoreGCMSbenchmark(y)$summary
+stopifnot(is.na(missing_truth$true_rank),is.na(missing_truth$rank_exact))
 
 area <- internal$area_regression(data.frame(area_true=c(1,10,100,1,NA),
   area_estimated=c(5,50,500,0,10)))

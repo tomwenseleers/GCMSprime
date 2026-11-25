@@ -31,7 +31,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">GCMSprime</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9009</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9010</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -170,6 +170,16 @@ compounds.</p>
 <td align="right">1,000</td>
 </tr>
 <tr class="odd">
+<td align="left">True factorisation rank</td>
+<td align="right">100</td>
+<td align="right">1,000</td>
+</tr>
+<tr class="even">
+<td align="left">Estimated rank</td>
+<td align="right"><strong>100 (exact)</strong></td>
+<td align="right">1,002</td>
+</tr>
+<tr class="odd">
 <td align="left">True occurrences</td>
 <td align="right">769</td>
 <td align="right">7,917</td>
@@ -186,25 +196,32 @@ compounds.</p>
 </tr>
 <tr class="even">
 <td align="left">Complete 16-sample analysis</td>
-<td align="right"><strong>52.37 s (0.87 min)</strong></td>
+<td align="right"><strong>196.28 s (3.27 min)</strong></td>
 <td align="right"><strong>533.88 s (8.90 min)</strong></td>
 </tr>
 </tbody>
 </table>
-<p>Both runs used GCMSprime and logconNMF 0.1.0.9007. Timings cover the
-complete batch from CDF input through export. In the small experiment,
-CDF preparation, calibration and grouping took 10.31 s, grouped
-initialization and joint refinement took 37.87 s, and result
-construction and export took 3.98 s. The benchmark wrapper added 0.21 s.
-The large experiment is documented below.</p>
+<p>The small experiment used 100 extra selective sweeps, a temporary
+fourfold penalty and a second blind PSF. Preparation, PSF calibration
+and ion grouping took 14.59 s, grouped regression and joint fitting
+177.10 s, and export 4.33 s. The enclosing benchmark took <strong>196.28
+s</strong> from CDF input through results. The large resource benchmark
+used the default support settings.</p>
+<p>With the default stopping and support settings, the same CDF files
+took <strong>54.66 s</strong> and gave <strong>estimated rank
+115</strong> against <strong>true rank 100</strong>, with 769 true
+positives and only 26 false positives. The figures use the optional
+search.</p>
 </div>
 <div class="section level2">
 <h2 id="sixteen-simulated-chromatograms">Small-scale 16-sample software comparison<a class="anchor" aria-label="anchor" href="#sixteen-simulated-chromatograms"></a>
 </h2>
 <p>The small-scale fit (seed <code>9118</code>) uses two blind-PSF
 windows, three PSF iterations, 32 common ion groups and up to 12 initial
-conditional sweeps on the original channels. All profile figures for
-this simulation on both websites use the same saved fit.</p>
+conditional sweeps on the original channels. The published small fit
+also used 100 extra selective sweeps, a temporary fourfold penalty and a
+second blind PSF. All profile figures for this simulation on both
+websites use the same saved fit.</p>
 <p>The <strong>16 chromatograms</strong> share a library of <strong>100
 reference compounds</strong>. Each spans a 20-minute retention window,
 with 1,200 scans and all 258 mass channels. Compounds are absent from
@@ -228,19 +245,19 @@ complete reference library:</p>
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">GCMSbenchmark</span><span class="op">)</span></span>
 <span><span class="va">bench</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"benchmarks"</span>, package<span class="op">=</span><span class="st">"GCMSbenchmark"</span>, mustWork<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/source.html" class="external-link">source</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">bench</span>, <span class="st">"simulated-16.R"</span><span class="op">)</span>, encoding<span class="op">=</span><span class="st">"UTF-8"</span><span class="op">)</span></span>
-<span><span class="va">small</span> <span class="op">&lt;-</span> <span class="fu">runBenchmark16</span><span class="op">(</span><span class="st">"benchmark-small"</span>, method<span class="op">=</span><span class="st">"GCMSprime"</span>, ncores<span class="op">=</span><span class="fl">8L</span><span class="op">)</span></span>
-<span><span class="va">small</span><span class="op">$</span><span class="va">summary</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"analysis_s"</span>, <span class="st">"TP"</span>, <span class="st">"FP"</span>, <span class="st">"FN"</span>, <span class="st">"F1"</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="va">small</span> <span class="op">&lt;-</span> <span class="fu">runBenchmark16</span><span class="op">(</span><span class="st">"benchmark-small"</span>, method<span class="op">=</span><span class="st">"GCMSprime"</span>, ncores<span class="op">=</span><span class="fl">8L</span>, support_search<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="va">small</span><span class="op">$</span><span class="va">summary</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"analysis_s"</span>, <span class="st">"true_rank"</span>, <span class="st">"estimated_rank"</span>, <span class="st">"rank_exact"</span>, <span class="st">"TP"</span>, <span class="st">"FP"</span>, <span class="st">"FN"</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="co"># Optional figures from the saved results:</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/source.html" class="external-link">source</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">bench</span>, <span class="st">"plot-simulated-16.R"</span><span class="op">)</span>, encoding<span class="op">=</span><span class="st">"UTF-8"</span><span class="op">)</span></span>
 <span><span class="fu">plotBenchmark16</span><span class="op">(</span><span class="st">"benchmark-small"</span><span class="op">)</span></span></code></pre></div>
 <p>The analysis recovered <strong>769 of 769 true occurrences</strong>,
-with <strong>only 26 false positives</strong> (peak F1
-<strong>0.983</strong>), including all seven acid occurrences. Ordinary
-adjusted log-area R² was <strong>0.999628</strong>, the median absolute
-peak-area error was <strong>0.10%</strong>, and mean spectral
+with <strong>zero false positives</strong> (peak F1
+<strong>1.000</strong>), including all seven acid occurrences. Ordinary
+adjusted log-area R² was <strong>0.999993</strong>, the median absolute
+peak-area error was <strong>0.079%</strong>, and mean spectral
 ion-support F1 was <strong>0.995</strong> at the shared 0.1% base-peak
 threshold.</p>
-<p>The benchmark wrapper measured <strong>52.37 s</strong> from CDF
+<p>The benchmark wrapper measured <strong>196.28 s</strong> from CDF
 input through results with four two-thread PSF workers and eight threads
 available for joint refinement on an HP ZBook Fury G8, Intel Core
 i9-11950H, eight physical cores, 16 logical threads, Windows and R
@@ -253,22 +270,25 @@ plots and tables.</p>
 <div class="section level3">
 <h3 id="empirical-gic-gap">How close is the fit to a truth-initialized solution?<a class="anchor" aria-label="anchor" href="#empirical-gic-gap"></a>
 </h3>
-<p>The standard fit’s GIC decreased monotonically from 21,188,577 to
-4,173,728 after dictionary construction. It reached 96.7% of its total
-decrease in five sweeps. The default fit achieved an <strong>empirical
-optimality gap of 0.45%</strong> relative to a fit initialised with the
-true elution profiles and cross-sample compound identities (GIC
-4,154,879). Both fits used the same counts and stopping rules.
-Continuing both fits narrowed the gap to <strong>0.29% after five extra
-sweeps</strong> and <strong>0.15% after 100</strong>. The dotted red
-line marks the reference endpoint under the default stopping rules. <a href="https://tomwenseleers.github.io/logconNMF/benchmark-gic-continuation.csv" class="external-link">Download
-both continuation traces</a>.</p>
+<p>The estimated-profile start descended from 21,188,577 to
+<strong>4,146,698</strong> and the true-profile start from 10,875,547 to
+<strong>4,142,623</strong>. Both reached <strong>estimated rank 100,
+equal to the true rank of 100</strong>. The GIC held steady or decreased
+at every recorded checkpoint (158 for the estimated start and 126 for
+the true-profile start). Both fits used the observed counts and
+identical search settings. Their endpoints differ by
+<strong>0.098%</strong> of the absolute reference GIC. This empirical
+optimality gap measures agreement with an attainable reference. Its
+distance from the global minimum is unknown.</p>
+<p>The dotted red line marks the fitted reference endpoint. <a href="https://tomwenseleers.github.io/logconNMF/benchmark-gic-trace.csv" class="external-link">Download
+both complete traces</a>.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">checked</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gcmsDeco.html">gcmsDeco</a></span><span class="op">(</span><span class="st">"benchmark-small/input"</span>, output_dir <span class="op">=</span> <span class="st">"benchmark-small-gap"</span>,</span>
 <span>  family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">quasipoisson</a></span><span class="op">(</span><span class="st">"identity"</span><span class="op">)</span>, ncores <span class="op">=</span> <span class="fl">8L</span>, nwindows <span class="op">=</span> <span class="fl">2L</span>,</span>
 <span>  precluster <span class="op">=</span> <span class="fl">32L</span>, baseline_df <span class="op">=</span> <span class="fl">4L</span>, correlation <span class="op">=</span> <span class="st">"none"</span>,</span>
 <span>  psf_control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>maxiter <span class="op">=</span> <span class="fl">3L</span><span class="op">)</span>,</span>
-<span>  batch <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>workers <span class="op">=</span> <span class="fl">4L</span>, coupling <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>alignment_window <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  batch <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>workers <span class="op">=</span> <span class="fl">4L</span>, coupling <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>alignment_window <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span>    refinement_sweeps <span class="op">=</span> <span class="fl">100L</span>, penalty_search <span class="op">=</span> <span class="cn">TRUE</span>, alternative_X <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  truth.profiles <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="st">"benchmark-small/truth.rds"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">checked</span><span class="op">$</span><span class="va">gic_gap</span><span class="op">$</span><span class="va">percent</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">checked</span><span class="op">$</span><span class="va">gic_gap</span><span class="op">)</span></span></code></pre></div>
@@ -276,12 +296,10 @@ both continuation traces</a>.</p>
 <img src="../reference/figures/empirical-gic-convergence.png" alt="GIC trajectories for the standard and true-profile starts on the 16-sample simulation"><div class="figcaption">GIC trajectories for the standard and
 true-profile starts on the 16-sample simulation</div>
 </div>
-<p>In two runs per setting the complete workflow averaged 50.9 s with
-the diagnostic off, 57.0 s with the standard trace alone, and 76.2 s
-with the reference fit and both traces. The reference fit itself took
-18.7 s. The <a href="https://tomwenseleers.github.io/logconNMF/articles/algorithm.html#empirical-gic-gap" class="external-link">algorithm
-vignette</a> shows both trajectories and explains the fixed-shape
-comparison.</p>
+<p>The recovery timings above exclude the true-profile fit. Passing
+<code>truth.profiles</code> runs that additional fit and records both
+trajectories. <a href="https://tomwenseleers.github.io/logconNMF/articles/algorithm.html#empirical-gic-gap" class="external-link">Mathematical
+definition and convergence plot</a>.</p>
 </div>
 </div>
 <div class="section level2">
@@ -295,11 +313,12 @@ abundance and drift in retention time. The data include irregular scan
 intervals, a background estimated from <code>gcmsData2</code> and
 quasi-Poisson dispersion 783.18. A separate narrow-peak standard
 supplies the time-varying PSF.</p>
-<p>The conditional solver estimated <strong>1,002 shared
-identities</strong> from the original ion measurements. All
-<strong>7,917 true occurrences</strong> were recovered, including every
-occurrence of the shark-fin acid. The largest absolute area error among
-the eight acid occurrences was <strong>0.19%</strong>.</p>
+<p>With a <strong>true rank of 1,000</strong>, the conditional solver
+estimated <strong>1,002 shared factors</strong> from the original ion
+measurements. All <strong>7,917 true occurrences</strong> were
+recovered, including every occurrence of the shark-fin acid. The largest
+absolute area error among the eight acid occurrences was
+<strong>0.19%</strong>.</p>
 <table class="table">
 <thead><tr class="header">
 <th align="left">Quantity</th>
@@ -307,42 +326,46 @@ the eight acid occurrences was <strong>0.19%</strong>.</p>
 </tr></thead>
 <tbody>
 <tr class="odd">
+<td align="left">True rank / estimated rank</td>
+<td align="right">1,000 / 1,002</td>
+</tr>
+<tr class="even">
 <td align="left">True occurrences recovered</td>
 <td align="right">7,917 / 7,917</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">False positives / false negatives</td>
 <td align="right">13 / 0</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">Occurrence F1</td>
 <td align="right">0.99918</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">Joint quasi-GIC</td>
 <td align="right">34,062,277</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">Median spectral cosine</td>
 <td align="right">0.9999989</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">Mean within-spectrum ion F1</td>
 <td align="right">0.99519</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">Mean profile cosine</td>
 <td align="right">0.999984</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">Median absolute peak-area error</td>
 <td align="right">0.095%</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">Adjusted log-area R²</td>
 <td align="right">0.999976</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">Acid occurrences recovered</td>
 <td align="right">8 / 8</td>
 </tr>

@@ -3,6 +3,7 @@ plotFullsize16Recovery <- function(directory="benchmarks/results/fullsize16",
                                    file="fullsize-16-recovery.png") {
   metrics <- utils::read.csv(file.path(directory,"metrics.csv"))
   pairs <- utils::read.csv(file.path(directory,"matches.csv"))
+  rank_file <- file.path(directory,"rank.csv")
   fit <- utils::getFromNamespace("area_regression","GCMSbenchmark")(pairs)
   if (is.null(fit$fit)) stop("At least three positive area pairs and two distinct true areas are required.")
   x <- fit$data$log_true
@@ -20,6 +21,12 @@ plotFullsize16Recovery <- function(directory="benchmarks/results/fullsize16",
     main=sprintf("%s / %s true occurrences recovered",format(sum(metrics$TP),big.mark=","),
                  format(sum(metrics$true_compounds),big.mark=",")))
   graphics::points(mid,metrics$true_compounds,pch=1,cex=.85)
+  if (file.exists(rank_file)) {
+    ranks <- utils::read.csv(rank_file)
+    graphics::mtext(sprintf("True rank %s   |   Estimated rank %s%s",
+      format(ranks$true_rank,big.mark=","),format(ranks$estimated_rank,big.mark=","),
+      if (isTRUE(ranks$rank_exact)) " (exact)" else ""),3,line=.35,cex=.83)
+  }
   graphics::axis(1,at=mid,labels=seq_len(nrow(metrics)),cex.axis=.8,tick=FALSE)
   graphics::legend("topleft",c("True positives","False positives","True count"),
     fill=c("#1876C2","#DF4747",NA),pch=c(NA,NA,1),border=NA,bty="n",cex=.85,ncol=3L)

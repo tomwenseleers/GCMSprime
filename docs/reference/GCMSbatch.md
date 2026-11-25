@@ -107,19 +107,22 @@ paths in `batch=list(sample_order=...)`.
 [`logconNMF::logconNMF()`](https://tomwenseleers.github.io/logconNMF/reference/logconNMF.html)
 controls, `sample_order=NULL`, `exposure=NULL`, `resume=FALSE`,
 `plots=FALSE`, `workers=NULL` and `cache=TRUE`. `workers` controls
-simultaneous file imports and sample-level PSF fits. The joint count
-solver uses the total `ncores` budget after those stages. With the
-general solver, `cache` controls aggregate and original-data caches. The
-conditional solver holds original observations and means in memory for
-joint factor updates and releases its PSF workers before this stage.
-`exposure` may be a positive scalar, a list with one scan-wise vector
-per acquisition-ordered sample, or a function of a sample's metadata and
-time vector. The default preserves vendor intensities. Known integration
-durations are appropriate when the data are integrated ion counts.
-Sequential full-scan mass spectrometers allocate acquisition time over
-m/z; exported peak counts and retained traces do not identify the
-per-mass dwell time. No automatic division by the number of exported
-channels is applied.
+simultaneous file imports and sample-level PSF fits. For a more
+extensive search, pass `refinement_sweeps=100L`, `penalty_search=TRUE`
+and `alternative_X=TRUE` in `batch$coupling`. The fit compares the
+resulting candidates on the original ion data at the original penalty.
+The joint count solver uses the total `ncores` budget after those
+stages. With the general solver, `cache` controls aggregate and
+original-data caches. The conditional solver holds original observations
+and means in memory for joint factor updates and releases its PSF
+workers before this stage. `exposure` may be a positive scalar, a list
+with one scan-wise vector per acquisition-ordered sample, or a function
+of a sample's metadata and time vector. The default preserves vendor
+intensities. Known integration durations are appropriate when the data
+are integrated ion counts. Sequential full-scan mass spectrometers
+allocate acquisition time over m/z; exported peak counts and retained
+traces do not identify the per-mass dwell time. No automatic division by
+the number of exported channels is applied.
 
 Samples run concurrently with their own sparse PSF and smooth
 background. A simultaneous multisample fit uses criterion-checked sparse

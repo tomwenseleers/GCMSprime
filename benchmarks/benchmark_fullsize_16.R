@@ -110,6 +110,10 @@ benchmarkFullsize16 <- function(directory="codex_sandbox/fullsize16",
     })
     summary <- do.call(rbind,lapply(assessed,`[[`,"summary"))
     pairs <- do.call(rbind,lapply(assessed,`[[`,"matches"))
+    true_rank <- length(unique(unlist(lapply(truth,function(z) z$id[z$area>0]),use.names=FALSE)))
+    estimated_rank <- object$coupled$rank
+    write.csv(data.frame(true_rank=true_rank,estimated_rank=estimated_rank,rank_exact=true_rank==estimated_rank),
+              file.path(root,"rank.csv"),row.names=FALSE)
     write.csv(summary,file.path(root,"quality.csv"),row.names=FALSE)
     write.csv(pairs,file.path(root,"matches.csv"),row.names=FALSE)
     print(summary);cat("Joint GIC:",GIC(object),"\n")

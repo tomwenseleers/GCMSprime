@@ -30,19 +30,23 @@ window. GCMSprime estimates dispersion separately in each sample, with a
 used for scoring; the deconvolution receives neither the known areas nor
 the true profiles.
 
-GCMSprime recovers **769 of 769 occurrences**, with **only 26 false
-positives** (peak F1 **0.983**), including the acid in all seven samples
-where it occurs.
+The optional search recovered **true rank 100 exactly (estimated rank
+100)** and **769 of 769 occurrences with zero false positives**. The
+acid was recovered in all seven samples where it was present.
 
-| Method        | Seconds |  TP |   FP | Sensitivity | Peak F1 | Ion F1 |
-|:--------------|--------:|----:|-----:|------------:|--------:|-------:|
-| GCMSprime     |   52.37 | 769 |   26 |      100.0% |   0.983 |  0.995 |
-| MS-DIAL       |   17.61 | 675 |  641 |       87.8% |   0.647 |  0.858 |
-| mzmine GC-EI  |   38.47 | 622 |   70 |       80.9% |   0.851 |  0.860 |
-| eRah          |   17.07 | 645 | 1912 |       83.9% |   0.388 |  0.771 |
-| AMDIS         |   92.58 | 671 | 1153 |       87.3% |   0.518 |  0.854 |
-| xcms + CAMERA |   24.06 | 635 |  146 |       82.6% |   0.819 |  0.617 |
-| MSHub         |   20.58 | 635 | 2797 |       82.6% |   0.302 |  0.844 |
+| Method        | Seconds |  Estimated rank |  TP |   FP | Sensitivity | Peak F1 | Ion F1 |
+|:--------------|--------:|----------------:|----:|-----:|------------:|--------:|-------:|
+| GCMSprime     |  196.28 | **100 (exact)** | 769 |    0 |      100.0% |   1.000 |  0.995 |
+| MS-DIAL       |   17.61 |               — | 675 |  641 |       87.8% |   0.647 |  0.858 |
+| mzmine GC-EI  |   38.47 |               — | 622 |   70 |       80.9% |   0.851 |  0.860 |
+| eRah          |   17.07 |               — | 645 | 1912 |       83.9% |   0.388 |  0.771 |
+| AMDIS         |   92.58 |               — | 671 | 1153 |       87.3% |   0.518 |  0.854 |
+| xcms + CAMERA |   24.06 |               — | 635 |  146 |       82.6% |   0.819 |  0.617 |
+| MSHub         |   20.58 |             281 | 635 | 2797 |       82.6% |   0.302 |  0.844 |
+
+The true rank is 100 distinct compounds present in at least one sample.
+The rank column counts shared fitted factors. A dash identifies
+workflows without a comparable cross-sample factorisation rank.
 
 Times are wall-clock analysis times on an HP ZBook Fury G8 Mobile
 Workstation with an Intel Core i9-11950H at 2.60 GHz, eight physical
@@ -51,24 +55,43 @@ and xcms + CAMERA uses four workers. Input conversion is timed
 separately. The six comparator rows use their saved outputs and timings
 from the identical simulated inputs.
 
-GCMSprime and logconNMF 0.1.0.9007 used 32 ion groups for the PSF
-regressions and all 258 original ions for the joint fit. The fitted rank
-is 115 shared identities with 795 sample-level calls. Its
-original-channel quasi-GIC is **4,173,728**. CDF preparation,
-calibration and grouping took 10.31 s, grouped regressions, alignment
-and factor updates took 37.87 s, and result construction and export took
-3.98 s. Grouped initialization accounted for 7.96 s and simultaneous
-factorization for 29.85 s within the 37.87 s stage. The enclosing
-benchmark measured 52.37 s. On two further 16-sample simulations the
-same settings recovered **775 of 778 occurrences with only 17 false
-positives** and **803 of 803 with only 35 false positives**. One matched
-occurrence in the latter simulation was estimated at 31.4% of its true
-area.
+The small experiment used 100 extra selective sweeps, a temporary
+fourfold penalty and a second blind PSF. Preparation, PSF calibration
+and ion grouping took 14.59 s, grouped regression and joint fitting
+177.10 s, and export 4.33 s. The enclosing benchmark took **196.28 s**
+from CDF input through results. The large resource benchmark used the
+default support settings.
+
+With the default stopping and support settings, the same CDF files took
+**54.66 s** and gave **estimated rank 115** against **true rank 100**,
+with 769 true positives and only 26 false positives. The figures use the
+optional search. The original-channel GIC of the selected rank-100 fit
+was **4,146,698**.
 
 GCMSprime used four two-thread workers for grouped PSF regressions and
 could use eight threads for the joint fit. Profile and background
 updates run across samples. Shared spectra run across ions. Local merge
 decisions and file exports also contribute to elapsed time.
+
+## Sensitivity to the starting peak width
+
+The same 16 chromatograms were also fitted from Gaussian PSFs of 3.64
+and 14.56 scans at half height. The calibrated and both Gaussian starts
+recovered **estimated rank 100, equal to true rank 100**, all 769
+occurrences and zero false positives after the blind PSF exchange.
+Across starts, the largest difference between two estimates of a matched
+peak area was 0.86%. The acid area in sample 009 was 99.76–99.81% of
+truth. The calibration, support proposals and GIC comparisons used only
+observed counts.
+
+![False positive and missed calls across three PSF starts and three
+searches](../reference/figures/psf-start-recovery.png)
+
+False positive and missed calls across three PSF starts and three
+searches
+
+[Rank, original-price GIC, recovery and area measurements for all nine
+fits](https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst/benchmarks/results/psf-starts.csv).
 
 ## Reciprocal spectral matches and integrated areas
 
@@ -106,8 +129,8 @@ dashed line shows exact agreement. Darker points indicate overlap
 (opacity 0.5).
 
 GCMSprime recovered **all 769 occurrences**, with **adjusted R²
-0.999628** and a **median absolute area error of 0.10%**. Even the
-lowest estimate was 72.5% of its true area. Area agreement is
+0.999993** and a **median absolute area error of 0.079%**. Even the
+lowest estimate was 98.3% of its true area. Area agreement is
 conditional on recovered true matches, so it is shown together with
 sensitivity and false-positive counts.
 
@@ -183,7 +206,7 @@ remain on their native total-ion scale.
 
 GCMSprime recovers all occurrences of both the regular EMG and the
 shark-fin-shaped acid. Mean profile cosine, counting missed occurrences
-as zero, is **0.999996 for the regular compound** and **0.999982 for the
+as zero, is **0.999996 for the regular compound** and **0.999983 for the
 acid**; median cosine among matched occurrences is **0.999998** and
 **0.999990**, respectively. Other configurations often truncate
 profiles, split their contributions or miss the acid. MS-DIAL also
@@ -242,7 +265,7 @@ plotBenchmark16(file.path(bench, "results"), "benchmark-figures")
 
 # Generate the same samples and rerun selected installed workflows.
 fit <- runBenchmark16("benchmark-run",
-  method=c("GCMSprime", "xcms+CAMERA"), ncores=16L)
+  method=c("GCMSprime", "xcms+CAMERA"), ncores=16L, support_search=TRUE)
 ```
 
 The simulation uses seed 9118. The tested versions are MS-DIAL

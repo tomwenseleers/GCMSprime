@@ -52,7 +52,14 @@ plotBenchmark16 <- function(results, output_dir = results) {
       graphics::points(x, y, pch = 16, cex = 0.78,
         col = grDevices::adjustcolor(colour[m], alpha.f = 0.5))
       graphics::abline(0, 1, col = reference_colour, lty = 2, lwd = 1.65)
-      graphics::mtext(labels[m], 3, 2.05, font = 2)
+      fit_row <- summary[summary$method==m,,drop=FALSE]
+      panel_title <- labels[m]
+      if (all(c("true_rank","estimated_rank") %in% names(fit_row)) &&
+          is.finite(fit_row$estimated_rank) && is.finite(fit_row$true_rank)) {
+        panel_title <- sprintf("%s  |  rank %d/%d%s",labels[m],fit_row$estimated_rank,
+          fit_row$true_rank,if (isTRUE(fit_row$rank_exact)) " (exact)" else "")
+      }
+      graphics::mtext(panel_title, 3, 2.05, font = 2)
       digits <- if (isTRUE(z$adjusted_R2 > 0.9995)) 6L else 3L
       graphics::mtext(bquote("Adjusted"~R^2==.(fmt(z$adjusted_R2, digits))~~
         .(sprintf("(%d / %d peaks)", length(x), nrow(truth)))), 3, 0.65, cex = 0.8)

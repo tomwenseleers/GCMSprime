@@ -69,7 +69,7 @@ GCMSbenchmark <- function(cdf_file, output_dir, method="GCMSprime", truth=NULL,
 }
 
 print.GCMSbenchmark <- function(x, ...) {
-  keep <- intersect(c("method","status","analysis_s","components","shared","TP","FP",
+  keep <- intersect(c("method","status","analysis_s","components","shared","true_rank","estimated_rank","rank_exact","TP","FP",
     "FN","F1","spectral_cosine","profile_cosine"),names(x$summary))
   print(x$summary[,keep,drop=FALSE],row.names=FALSE,...)
   invisible(x)

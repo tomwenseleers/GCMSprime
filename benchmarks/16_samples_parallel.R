@@ -18,6 +18,7 @@ benchmark_samples16 <- function(output = tempfile("GCMSprime_samples16_"),
   })
   P <- sim$P
   present <- t(sim$present)
+  true_rank <- sum(colSums(present)>0)
   rm(sim)
   fits <- lapply(cores, function(ncores) {
     gcmsDeco(input, output_dir = file.path(output, paste0("workers", ncores)),
@@ -67,6 +68,7 @@ benchmark_samples16 <- function(output = tempfile("GCMSprime_samples16_"),
       clustering = z$seconds[['clustering']], initial = z$seconds[['initial']],
       coupled = z$seconds[['coupled']], exports = z$seconds[['exports']],
       total = z$seconds[['total']], GIC = GIC(z), shared = G,
+      true_rank = true_rank, estimated_rank = G, rank_exact = G==true_rank,
       occurrences = sum(!is.na(z$areas)), TP = TP, FP = FP, FN = FN, TN = TN,
       F1 = f1, MCC = mcc,
       median_spectral_cosine = median(cos[cbind(which(!is.na(map)), na.omit(map))]))

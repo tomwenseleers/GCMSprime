@@ -4,12 +4,13 @@
   include the fitting calls, timing protocol and downloadable spectra.
 - `Rscript benchmarks/16_samples_parallel.R` checks worker consistency
   on 16 samples with 48 reference compounds and 1,200 scans. The conditional
-  solver recovered all 380 occurrences with zero false positives. The
+  solver recovered **true rank 48 exactly (estimated rank 48)** and all 380 occurrences with zero false positives. The
   shared spectra, areas and GIC agreed across 1, 8 and 16 requested threads.
   Wall times were 56.56, 28.61 and 27.88 seconds, respectively.
   [Worker-count results](results/16_samples_parallel.csv)
 - `benchmark_fullsize_16.R` reproduces the 16-sample resource validation with
   10,000 scans, 550 recorded mass channels and about 500 compounds per sample.
+  The true rank was 1,000 and the estimated rank was 1,002.
   From the repository root, run:
 
   ```r
@@ -24,7 +25,8 @@
   The [multisample tutorial](https://tomwenseleers.github.io/GCMSprime/articles/multisample.html)
   reports current resource use and quality. Compact published results are in
   [`results/fullsize16`](results/fullsize16).
-- The separate RI-aware seven-workflow comparison uses 100 reference compounds,
+- In the separate RI-aware seven-workflow comparison, the optional support
+  search recovered **true rank 100 exactly (estimated rank 100)**. The simulation uses 100 reference compounds,
   1,200 scans, 258 channels and one acid-like compound. Its complete recipe and
   results are in [`GCMSbenchmark`](../GCMSbenchmark).
 - Run `Rscript benchmarks/library_search_weights.R path/to/MoNA-export-GC-MS_Spectra.msp output`

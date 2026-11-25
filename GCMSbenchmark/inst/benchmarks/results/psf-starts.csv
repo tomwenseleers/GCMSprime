@@ -1,0 +1,10 @@
+"initial_psf","search","rank","TP","FP","FN","GIC","median_absolute_area_error_pct","acid009_area_pct","true_rank","rank_exact"
+"Blind calibrated","100 full sweeps",109,769,14,0,4157283.24506533,0.0822167350633451,99.7790144951685,100,FALSE
+"Blind calibrated","Temporary fourfold search",100,769,0,0,4146856.19847129,0.0789661246828444,99.7574961730423,100,TRUE
+"Blind calibrated","Fourfold search and blind PSF exchange",100,769,0,0,4146698.1525338,0.0785741834336329,99.7572761870391,100,TRUE
+"Gaussian half-width","100 full sweeps",119,763,39,6,4203256.28232531,0.0997910509041189,99.9215986511489,100,FALSE
+"Gaussian half-width","Temporary fourfold search",112,763,28,6,4196933.2234665,0.0963209250796293,99.9147523193101,100,FALSE
+"Gaussian half-width","Fourfold search and blind PSF exchange",100,769,0,0,4144749.67531934,0.0792099765195897,99.810175298524,100,TRUE
+"Gaussian double-width","100 full sweeps",134,763,124,6,8892656.75452673,0.189193570256097,99.8173701601784,100,FALSE
+"Gaussian double-width","Temporary fourfold search",119,768,84,1,7385702.10117117,0.14499038118117,100.225088326385,100,FALSE
+"Gaussian double-width","Fourfold search and blind PSF exchange",100,769,0,0,4141610.50696609,0.0777089463980141,99.8140677487788,100,TRUE

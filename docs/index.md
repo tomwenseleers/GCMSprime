@@ -1,6 +1,4 @@
-Accurate integration.\
-Cleaner spectra.
-======================
+# GCMSprime
 
 GC/MS DECONVOLUTION · QUANTIFICATION · IDENTIFICATION
 
@@ -167,15 +165,16 @@ independently, keeping a fixed component order within each ion. The
 general identity-link solver can stream original-channel blocks from
 disk. The full-size fit recovered **7,917 of 7,917 occurrences** with
 **only 13 false positives** in **8.90 min** across 16 chromatograms of
-10,000 scans and 550 channels. The [two 16-sample
+10,000 scans and 550 channels. Its estimated rank was **1,002** for a
+true rank of **1,000**. The [two 16-sample
 experiments](https://tomwenseleers.github.io/GCMSprime/articles/multisample.html#benchmark-scales)
 give the measured resource use, timings and recovery at both acquisition
 sizes.
 
 In the [small-scale 16-sample software
 comparison](https://tomwenseleers.github.io/GCMSprime/articles/benchmarks.md),
-GCMSprime recovers **769 of 769 true occurrences in 52.37 s**, including
-the acid compound in all seven samples where it occurs. Each
+GCMSprime recovers **769 of 769 true occurrences in 196.28 s**,
+including the acid compound in all seven samples where it occurs. Each
 chromatogram has 100 candidate compounds, 1,200 scans and 258 mass
 channels, with drift, concentration-dependent broadening and a smooth
 background derived from experimental GC/MS data. Initialization uses 32
@@ -183,17 +182,18 @@ ion groups and the final fit uses every original ion. The grouped
 regressions used four two-thread workers. The joint fit reused the
 eight-thread budget on the original ion channels.
 
-The default fit achieved an **empirical optimality gap of 0.45%**
-relative to a fit initialised with the true elution profiles and
-cross-sample compound identities. [Compare the GIC
+The optional support search recovered **true rank 100 exactly (estimated
+rank 100)** and achieved an **empirical GIC gap of 0.098%** relative to
+a fit initialised with the true elution profiles and cross-sample
+compound identities. [Compare the GIC
 traces](https://tomwenseleers.github.io/GCMSprime/articles/multisample.html#empirical-gic-gap).
 
 ## Benchmarks against other software
 
 On **16 chromatograms with 100 reference compounds**, GCMSprime recovers
-**769 of 769 true peak occurrences**, with **only 26 false positives**
-(peak F1 **0.983**). Its total-ion peak areas show **ordinary adjusted
-R² 0.999628** and **median absolute area error 0.10%**.
+**769 of 769 true peak occurrences**, with **zero false positives**
+(peak F1 **1.000**). Its total-ion peak areas show **ordinary adjusted
+R² 0.999993** and **median absolute area error 0.079%**.
 
 [![True and estimated total-ion peak areas with least-squares
 fits](reference/figures/simulated-16-area-predictions.png)](https://tomwenseleers.github.io/GCMSprime/reference/figures/simulated-16-area-predictions.png)

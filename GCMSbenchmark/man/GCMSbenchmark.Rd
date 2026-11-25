@@ -89,6 +89,13 @@ matched log area, calculated with \code{predict.lm(interval="prediction")}.
 number of pairs used. These conditional area metrics should be read alongside
 TP, FP, FN and the number of matched pairs.
 
+For simulations, \code{true_rank} counts distinct compound IDs with positive
+true area in at least one sample. Use consistent compound IDs across samples.
+\code{estimated_rank} counts fitted GCMSprime or MSHub factors.
+\code{rank_exact} is true when the two counts agree. Other workflows can
+report aligned feature counts in \code{shared}. A missing rank is reported
+as \code{NA}. Peak calls and recovery are counted separately in each sample.
+
 \code{spectral_F1} is the arithmetic mean of within-spectrum ion-support F1
 across correctly matched true occurrences. An ion is present when its positive
 intensity is at least \code{ion_threshold} times its spectrum's base peak.

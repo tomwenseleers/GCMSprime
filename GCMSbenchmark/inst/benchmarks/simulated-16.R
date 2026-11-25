@@ -56,7 +56,7 @@ simulateBenchmark16 <- function(directory) {
 }
 
 runBenchmark16 <- function(output_dir, method = c("GCMSprime", "xcms+CAMERA"),
-                           control = list(), ncores = 16L) {
+                           control = list(), ncores = 16L, support_search = FALSE) {
   methods <- utils::getFromNamespace("bench_methods", "GCMSbenchmark")
   if (identical(tolower(method), "all")) {
     method <- methods
@@ -80,6 +80,9 @@ runBenchmark16 <- function(output_dir, method = c("GCMSprime", "xcms+CAMERA"),
     "xcms+CAMERA" = list(detection = list(fwhm = 8.6, snthresh = 1.5),
       fwhm_grouping = list(perfwhm = 0.8), grouping = FALSE, min_ions = 4L))
   control <- utils::modifyList(settings, control)
+  coupling <- list(alignment_window = 0.5)
+  if (isTRUE(support_search))
+    coupling <- c(coupling, list(refinement_sweeps = 100L, penalty_search = TRUE, alternative_X = TRUE))
   rt_tolerance <- 0.12
   fits <- lapply(method, function(engine) {
     GCMSbenchmark::GCMSbenchmark(input$files,
@@ -91,7 +94,7 @@ runBenchmark16 <- function(output_dir, method = c("GCMSprime", "xcms+CAMERA"),
       family = stats::quasipoisson("identity"),
       precluster = 32L, nwindows = 2L, baseline_df = 4L, correlation = "none",
       psf_control = list(maxiter = 3L),
-      batch = list(workers = min(4L, ncores), coupling = list(alignment_window = 0.5)))
+      batch = list(workers = min(4L, ncores), coupling = coupling))
   })
   fit <- structure(list(methods = do.call(c, lapply(fits, `[[`, "methods")),
     files = input$files, directory = output_dir,

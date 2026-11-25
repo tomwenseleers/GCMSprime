@@ -182,11 +182,17 @@ area_regression <- function(pairs) {
   list(data=data, fit=fit, adjusted_R2=r2, OLS_adjusted_R2=r2, method=method)
 }
 
-score_row <- function(method,fit,truth,pairs) {
+score_row <- function(method,fit,truth,pairs,n_samples,true_rank) {
   ok <- identical(fit$status,"ok")
   optional <- function(x, default=NA_real_) if (length(x)==1L) x else default
   n <- if(ok) nrow(fit$peaks) else NA_integer_
   ntruth <- if (is.null(truth)) NA_integer_ else sum(lengths(lapply(truth,`[[`,"id")))
+  estimated_rank <- NA_integer_
+  if (ok && method %in% c("GCMSprime","MSHub")) {
+    estimated_rank <- optional(fit$shared,NA_integer_)
+    if (method=="GCMSprime" && n_samples==1L && is.na(estimated_rank))
+      estimated_rank <- n
+  }
   scored <- ok && !is.na(ntruth)
   tp <- if(scored) nrow(pairs) else NA_integer_
   fp <- n-tp
@@ -210,7 +216,8 @@ score_row <- function(method,fit,truth,pairs) {
   data.frame(method=method,status=fit$status,message=fit$message,
     note=optional(fit$note,""),analysis_s=optional(fit$analysis),
     input_conversion_s=optional(fit$preparation),adapter_elapsed_s=optional(fit$total),
-    components=n,shared=optional(fit$shared),TP=tp,FP=fp,FN=fn,F1=f1,
+    components=n,shared=optional(fit$shared),true_rank=true_rank,estimated_rank=estimated_rank,
+    rank_exact=estimated_rank==true_rank,TP=tp,FP=fp,FN=fn,F1=f1,
     TP_cosine_90=if(scored)sum(pairs$spectral_cosine>=.90) else NA_integer_,
     median_abs_rt_error_s=60*metric_median(abs(pairs$rt_error_min)),
     spectral_cosine=metric_median(pairs$spectral_cosine),
@@ -285,6 +292,11 @@ scoreGCMSbenchmark <- function(x,truth=NULL,rt_tolerance=.12,min_cosine=.70,
   }
   x$matches <- empty_matches()
   x$identifications <- empty_identifications()
+  true_rank <- NA_integer_
+  if (!is.null(truth)) {
+    active <- unlist(lapply(truth,function(z) as.character(z$id[z$area>0])),use.names=FALSE)
+    if (!anyNA(active)) true_rank <- length(unique(active))
+  }
   rows <- lapply(names(x$methods),function(method) {
     fit <- x$methods[[method]]
     pairs <- if (is.null(truth) || !identical(fit$status,"ok")) empty_matches() else if(matching=="reciprocal") {
@@ -296,7 +308,7 @@ scoreGCMSbenchmark <- function(x,truth=NULL,rt_tolerance=.12,min_cosine=.70,
       do.call(rbind,lapply(names(truth),function(id) match_sample(fit,
         which(fit$peaks$sample==id),truth[[id]],id,method,rt_tolerance,min_cosine,ion_threshold)))
     x$matches <<- rbind(x$matches,pairs)
-    row <- score_row(method,fit,truth,pairs)
+    row <- score_row(method,fit,truth,pairs,length(x$files),true_rank)
     row$ion_threshold<-ion_threshold
     if (matching=="reciprocal") {
       hits <- x$identifications[x$identifications$method==method,]

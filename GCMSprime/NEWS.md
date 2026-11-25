@@ -1,3 +1,7 @@
+# GCMSprime 0.1.0.9010
+
+- Joint CDF fits accept the optional logconNMF support search through `batch$coupling`. The 16-sample benchmark includes the measured CDF-to-export time and recovery from three PSF starts.
+
 # GCMSprime 0.1.0.9009
 
 - `gcmsDeco()` selects the fitting method automatically. For disk-backed joint refinement use `batch = list(cache = FALSE)`.

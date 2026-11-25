@@ -31,7 +31,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">GCMSprime</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9007</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9010</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -114,14 +114,25 @@ estimated from that window. GCMSprime estimates dispersion separately in
 each sample, with a <strong>median estimate of 829.55</strong>. The
 generating retention-index maps are used for scoring; the deconvolution
 receives neither the known areas nor the true profiles.</p>
-<p>GCMSprime recovers <strong>769 of 769 occurrences</strong>, with
-<strong>only 26 false positives</strong> (peak F1
-<strong>0.983</strong>), including the acid in all seven samples where
-it occurs.</p>
+<p>The optional search recovered <strong>true rank 100 exactly
+(estimated rank 100)</strong> and <strong>769 of 769 occurrences with
+zero false positives</strong>. The acid was recovered in all seven
+samples where it was present.</p>
 <table class="table">
+<colgroup>
+<col width="12%">
+<col width="12%">
+<col width="12%">
+<col width="12%">
+<col width="12%">
+<col width="12%">
+<col width="12%">
+<col width="12%">
+</colgroup>
 <thead><tr class="header">
 <th align="left">Method</th>
 <th align="right">Seconds</th>
+<th align="right">Estimated rank</th>
 <th align="right">TP</th>
 <th align="right">FP</th>
 <th align="right">Sensitivity</th>
@@ -131,16 +142,18 @@ it occurs.</p>
 <tbody>
 <tr class="odd">
 <td align="left">GCMSprime</td>
-<td align="right">52.37</td>
+<td align="right">196.28</td>
+<td align="right"><strong>100 (exact)</strong></td>
 <td align="right">769</td>
-<td align="right">26</td>
+<td align="right">0</td>
 <td align="right">100.0%</td>
-<td align="right">0.983</td>
+<td align="right">1.000</td>
 <td align="right">0.995</td>
 </tr>
 <tr class="even">
 <td align="left">MS-DIAL</td>
 <td align="right">17.61</td>
+<td align="right">—</td>
 <td align="right">675</td>
 <td align="right">641</td>
 <td align="right">87.8%</td>
@@ -150,6 +163,7 @@ it occurs.</p>
 <tr class="odd">
 <td align="left">mzmine GC-EI</td>
 <td align="right">38.47</td>
+<td align="right">—</td>
 <td align="right">622</td>
 <td align="right">70</td>
 <td align="right">80.9%</td>
@@ -159,6 +173,7 @@ it occurs.</p>
 <tr class="even">
 <td align="left">eRah</td>
 <td align="right">17.07</td>
+<td align="right">—</td>
 <td align="right">645</td>
 <td align="right">1912</td>
 <td align="right">83.9%</td>
@@ -168,6 +183,7 @@ it occurs.</p>
 <tr class="odd">
 <td align="left">AMDIS</td>
 <td align="right">92.58</td>
+<td align="right">—</td>
 <td align="right">671</td>
 <td align="right">1153</td>
 <td align="right">87.3%</td>
@@ -177,6 +193,7 @@ it occurs.</p>
 <tr class="even">
 <td align="left">xcms + CAMERA</td>
 <td align="right">24.06</td>
+<td align="right">—</td>
 <td align="right">635</td>
 <td align="right">146</td>
 <td align="right">82.6%</td>
@@ -186,6 +203,7 @@ it occurs.</p>
 <tr class="odd">
 <td align="left">MSHub</td>
 <td align="right">20.58</td>
+<td align="right">281</td>
 <td align="right">635</td>
 <td align="right">2797</td>
 <td align="right">82.6%</td>
@@ -194,29 +212,50 @@ it occurs.</p>
 </tr>
 </tbody>
 </table>
+<p>The true rank is 100 distinct compounds present in at least one
+sample. The rank column counts shared fitted factors. A dash identifies
+workflows without a comparable cross-sample factorisation rank.</p>
 <p>Times are wall-clock analysis times on an HP ZBook Fury G8 Mobile
 Workstation with an Intel Core i9-11950H at 2.60 GHz, eight physical
 cores and 16 logical threads, Windows and R 4.5.0. AMDIS runs serially
 and xcms + CAMERA uses four workers. Input conversion is timed
 separately. The six comparator rows use their saved outputs and timings
 from the identical simulated inputs.</p>
-<p>GCMSprime and logconNMF 0.1.0.9007 used 32 ion groups for the PSF
-regressions and all 258 original ions for the joint fit. The fitted rank
-is 115 shared identities with 795 sample-level calls. Its
-original-channel quasi-GIC is <strong>4,173,728</strong>. CDF
-preparation, calibration and grouping took 10.31 s, grouped regressions,
-alignment and factor updates took 37.87 s, and result construction and
-export took 3.98 s. Grouped initialization accounted for 7.96 s and
-simultaneous factorization for 29.85 s within the 37.87 s stage. The
-enclosing benchmark measured 52.37 s. On two further 16-sample
-simulations the same settings recovered <strong>775 of 778 occurrences
-with only 17 false positives</strong> and <strong>803 of 803 with only
-35 false positives</strong>. One matched occurrence in the latter
-simulation was estimated at 31.4% of its true area.</p>
+<p>The small experiment used 100 extra selective sweeps, a temporary
+fourfold penalty and a second blind PSF. Preparation, PSF calibration
+and ion grouping took 14.59 s, grouped regression and joint fitting
+177.10 s, and export 4.33 s. The enclosing benchmark took <strong>196.28
+s</strong> from CDF input through results. The large resource benchmark
+used the default support settings.</p>
+<p>With the default stopping and support settings, the same CDF files
+took <strong>54.66 s</strong> and gave <strong>estimated rank
+115</strong> against <strong>true rank 100</strong>, with 769 true
+positives and only 26 false positives. The figures use the optional
+search. The original-channel GIC of the selected rank-100 fit was
+<strong>4,146,698</strong>.</p>
 <p>GCMSprime used four two-thread workers for grouped PSF regressions
 and could use eight threads for the joint fit. Profile and background
 updates run across samples. Shared spectra run across ions. Local merge
 decisions and file exports also contribute to elapsed time.</p>
+</div>
+<div class="section level2">
+<h2 id="sensitivity-to-the-starting-peak-width">Sensitivity to the starting peak width<a class="anchor" aria-label="anchor" href="#sensitivity-to-the-starting-peak-width"></a>
+</h2>
+<p>The same 16 chromatograms were also fitted from Gaussian PSFs of 3.64
+and 14.56 scans at half height. The calibrated and both Gaussian starts
+recovered <strong>estimated rank 100, equal to true rank 100</strong>,
+all 769 occurrences and zero false positives after the blind PSF
+exchange. Across starts, the largest difference between two estimates of
+a matched peak area was 0.86%. The acid area in sample 009 was
+99.76–99.81% of truth. The calibration, support proposals and GIC
+comparisons used only observed counts.</p>
+<div class="float">
+<img src="../reference/figures/psf-start-recovery.png" alt="False positive and missed calls across three PSF starts and three searches"><div class="figcaption">False positive and missed calls across three PSF
+starts and three searches</div>
+</div>
+<p><a href="https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst/benchmarks/results/psf-starts.csv" class="external-link">Rank,
+original-price GIC, recovery and area measurements for all nine
+fits</a>.</p>
 </div>
 <div class="section level2">
 <h2 id="reciprocal-spectral-matches-and-integrated-areas">Reciprocal spectral matches and integrated areas<a class="anchor" aria-label="anchor" href="#reciprocal-spectral-matches-and-integrated-areas"></a>
@@ -249,8 +288,8 @@ prediction interval for an individual peak at a given true area. The
 dashed line shows exact agreement. Darker points indicate overlap
 (opacity 0.5).</p>
 <p>GCMSprime recovered <strong>all 769 occurrences</strong>, with
-<strong>adjusted R² 0.999628</strong> and a <strong>median absolute area
-error of 0.10%</strong>. Even the lowest estimate was 72.5% of its true
+<strong>adjusted R² 0.999993</strong> and a <strong>median absolute area
+error of 0.079%</strong>. Even the lowest estimate was 98.3% of its true
 area. Area agreement is conditional on recovered true matches, so it is
 shown together with sensitivity and false-positive counts.</p>
 <p><a href="../reference/figures/simulated-16-spectral-violin.png"><img src="../reference/figures/simulated-16-spectral-violin.png" alt="Reciprocal spectral cosine similarity with individual points"></a></p>
@@ -315,7 +354,7 @@ native total-ion scale.</p>
 <p>GCMSprime recovers all occurrences of both the regular EMG and the
 shark-fin-shaped acid. Mean profile cosine, counting missed occurrences
 as zero, is <strong>0.999996 for the regular compound</strong> and
-<strong>0.999982 for the acid</strong>; median cosine among matched
+<strong>0.999983 for the acid</strong>; median cosine among matched
 occurrences is <strong>0.999998</strong> and <strong>0.999990</strong>,
 respectively. Other configurations often truncate profiles, split their
 contributions or miss the acid. MS-DIAL also resolves the regular
@@ -427,7 +466,7 @@ guide</a> covers the R packages and external engines.</p>
 <span></span>
 <span><span class="co"># Generate the same samples and rerun selected installed workflows.</span></span>
 <span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu">runBenchmark16</span><span class="op">(</span><span class="st">"benchmark-run"</span>,</span>
-<span>  method<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"GCMSprime"</span>, <span class="st">"xcms+CAMERA"</span><span class="op">)</span>, ncores<span class="op">=</span><span class="fl">16L</span><span class="op">)</span></span></code></pre></div>
+<span>  method<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"GCMSprime"</span>, <span class="st">"xcms+CAMERA"</span><span class="op">)</span>, ncores<span class="op">=</span><span class="fl">16L</span>, support_search<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p>The simulation uses seed 9118. The tested versions are MS-DIAL
 5.5.261105, mzmine 4.11.0, eRah 2.2.0, AMDIS 2.71, xcms 4.6.4, CAMERA
 1.64.0 and standalone MSHub revision <code>59fe5d5d7ad5</code>. Native

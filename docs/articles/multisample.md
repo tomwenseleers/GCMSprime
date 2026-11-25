@@ -65,24 +65,33 @@ compounds.
 | Scans per sample | 1,200 | 10,000 |
 | Recorded ion channels | 258 | 550 |
 | Reference compounds | 100 | 1,000 |
+| True factorisation rank | 100 | 1,000 |
+| Estimated rank | **100 (exact)** | 1,002 |
 | True occurrences | 769 | 7,917 |
 | Samples containing the acid | 7 | 8 |
 | PSF calibration | Blind, two windows | Standard-assisted, ten windows |
-| Complete 16-sample analysis | **52.37 s (0.87 min)** | **533.88 s (8.90 min)** |
+| Complete 16-sample analysis | **196.28 s (3.27 min)** | **533.88 s (8.90 min)** |
 
-Both runs used GCMSprime and logconNMF 0.1.0.9007. Timings cover the
-complete batch from CDF input through export. In the small experiment,
-CDF preparation, calibration and grouping took 10.31 s, grouped
-initialization and joint refinement took 37.87 s, and result
-construction and export took 3.98 s. The benchmark wrapper added 0.21 s.
-The large experiment is documented below.
+The small experiment used 100 extra selective sweeps, a temporary
+fourfold penalty and a second blind PSF. Preparation, PSF calibration
+and ion grouping took 14.59 s, grouped regression and joint fitting
+177.10 s, and export 4.33 s. The enclosing benchmark took **196.28 s**
+from CDF input through results. The large resource benchmark used the
+default support settings.
+
+With the default stopping and support settings, the same CDF files took
+**54.66 s** and gave **estimated rank 115** against **true rank 100**,
+with 769 true positives and only 26 false positives. The figures use the
+optional search.
 
 ## Small-scale 16-sample software comparison
 
 The small-scale fit (seed `9118`) uses two blind-PSF windows, three PSF
 iterations, 32 common ion groups and up to 12 initial conditional sweeps
-on the original channels. All profile figures for this simulation on
-both websites use the same saved fit.
+on the original channels. The published small fit also used 100 extra
+selective sweeps, a temporary fourfold penalty and a second blind PSF.
+All profile figures for this simulation on both websites use the same
+saved fit.
 
 The **16 chromatograms** share a library of **100 reference compounds**.
 Each spans a 20-minute retention window, with 1,200 scans and all 258
@@ -111,20 +120,20 @@ reference library:
 library(GCMSbenchmark)
 bench <- system.file("benchmarks", package="GCMSbenchmark", mustWork=TRUE)
 source(file.path(bench, "simulated-16.R"), encoding="UTF-8")
-small <- runBenchmark16("benchmark-small", method="GCMSprime", ncores=8L)
-small$summary[c("analysis_s", "TP", "FP", "FN", "F1")]
+small <- runBenchmark16("benchmark-small", method="GCMSprime", ncores=8L, support_search=TRUE)
+small$summary[c("analysis_s", "true_rank", "estimated_rank", "rank_exact", "TP", "FP", "FN")]
 # Optional figures from the saved results:
 source(file.path(bench, "plot-simulated-16.R"), encoding="UTF-8")
 plotBenchmark16("benchmark-small")
 ```
 
-The analysis recovered **769 of 769 true occurrences**, with **only 26
-false positives** (peak F1 **0.983**), including all seven acid
-occurrences. Ordinary adjusted log-area R² was **0.999628**, the median
-absolute peak-area error was **0.10%**, and mean spectral ion-support F1
-was **0.995** at the shared 0.1% base-peak threshold.
+The analysis recovered **769 of 769 true occurrences**, with **zero
+false positives** (peak F1 **1.000**), including all seven acid
+occurrences. Ordinary adjusted log-area R² was **0.999993**, the median
+absolute peak-area error was **0.079%**, and mean spectral ion-support
+F1 was **0.995** at the shared 0.1% base-peak threshold.
 
-The benchmark wrapper measured **52.37 s** from CDF input through
+The benchmark wrapper measured **196.28 s** from CDF input through
 results with four two-thread PSF workers and eight threads available for
 joint refinement on an HP ZBook Fury G8, Intel Core i9-11950H, eight
 physical cores, 16 logical threads, Windows and R 4.5.0. CDF generation
@@ -143,16 +152,19 @@ plots and tables.
 
 ### How close is the fit to a truth-initialized solution?
 
-The standard fit’s GIC decreased monotonically from 21,188,577 to
-4,173,728 after dictionary construction. It reached 96.7% of its total
-decrease in five sweeps. The default fit achieved an **empirical
-optimality gap of 0.45%** relative to a fit initialised with the true
-elution profiles and cross-sample compound identities (GIC 4,154,879).
-Both fits used the same counts and stopping rules. Continuing both fits
-narrowed the gap to **0.29% after five extra sweeps** and **0.15% after
-100**. The dotted red line marks the reference endpoint under the
-default stopping rules. [Download both continuation
-traces](https://tomwenseleers.github.io/logconNMF/benchmark-gic-continuation.csv).
+The estimated-profile start descended from 21,188,577 to **4,146,698**
+and the true-profile start from 10,875,547 to **4,142,623**. Both
+reached **estimated rank 100, equal to the true rank of 100**. The GIC
+held steady or decreased at every recorded checkpoint (158 for the
+estimated start and 126 for the true-profile start). Both fits used the
+observed counts and identical search settings. Their endpoints differ by
+**0.098%** of the absolute reference GIC. This empirical optimality gap
+measures agreement with an attainable reference. Its distance from the
+global minimum is unknown.
+
+The dotted red line marks the fitted reference endpoint. [Download both
+complete
+traces](https://tomwenseleers.github.io/logconNMF/benchmark-gic-trace.csv).
 
 ``` r
 
@@ -160,7 +172,8 @@ checked <- gcmsDeco("benchmark-small/input", output_dir = "benchmark-small-gap",
   family = quasipoisson("identity"), ncores = 8L, nwindows = 2L,
   precluster = 32L, baseline_df = 4L, correlation = "none",
   psf_control = list(maxiter = 3L),
-  batch = list(workers = 4L, coupling = list(alignment_window = 0.5)),
+  batch = list(workers = 4L, coupling = list(alignment_window = 0.5,
+    refinement_sweeps = 100L, penalty_search = TRUE, alternative_X = TRUE)),
   truth.profiles = readRDS("benchmark-small/truth.rds"))
 checked$gic_gap$percent
 plot(checked$gic_gap)
@@ -173,12 +186,10 @@ simulation](../reference/figures/empirical-gic-convergence.png)
 GIC trajectories for the standard and true-profile starts on the
 16-sample simulation
 
-In two runs per setting the complete workflow averaged 50.9 s with the
-diagnostic off, 57.0 s with the standard trace alone, and 76.2 s with
-the reference fit and both traces. The reference fit itself took 18.7 s.
-The [algorithm
-vignette](https://tomwenseleers.github.io/logconNMF/articles/algorithm.html#empirical-gic-gap)
-shows both trajectories and explains the fixed-shape comparison.
+The recovery timings above exclude the true-profile fit. Passing
+`truth.profiles` runs that additional fit and records both trajectories.
+[Mathematical definition and convergence
+plot](https://tomwenseleers.github.io/logconNMF/articles/algorithm.html#empirical-gic-gap).
 
 ## Large-scale 16-sample resource benchmark
 
@@ -190,13 +201,15 @@ retention time. The data include irregular scan intervals, a background
 estimated from `gcmsData2` and quasi-Poisson dispersion 783.18. A
 separate narrow-peak standard supplies the time-varying PSF.
 
-The conditional solver estimated **1,002 shared identities** from the
-original ion measurements. All **7,917 true occurrences** were
-recovered, including every occurrence of the shark-fin acid. The largest
-absolute area error among the eight acid occurrences was **0.19%**.
+With a **true rank of 1,000**, the conditional solver estimated **1,002
+shared factors** from the original ion measurements. All **7,917 true
+occurrences** were recovered, including every occurrence of the
+shark-fin acid. The largest absolute area error among the eight acid
+occurrences was **0.19%**.
 
 | Quantity                          | Measured result |
 |:----------------------------------|----------------:|
+| True rank / estimated rank        |   1,000 / 1,002 |
 | True occurrences recovered        |   7,917 / 7,917 |
 | False positives / false negatives |          13 / 0 |
 | Occurrence F1                     |         0.99918 |
