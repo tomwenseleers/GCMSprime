@@ -31,7 +31,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">GCMSprime</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9010</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9011</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -221,6 +221,11 @@ cores and 16 logical threads, Windows and R 4.5.0. AMDIS runs serially
 and xcms + CAMERA uses four workers. Input conversion is timed
 separately. The six comparator rows use their saved outputs and timings
 from the identical simulated inputs.</p>
+<p>A shorter search recovered <strong>true rank 100 exactly</strong> in
+<strong>104.48 s</strong>, with all 769 true occurrences and only 1
+extra occurrence. The same control recovered <strong>true rank 1,000
+exactly</strong> on the independent large example. <a href="multisample.html#local-rank-search">Compare local search at both
+scales</a>.</p>
 <p>The small experiment used 100 extra selective sweeps, a temporary
 fourfold penalty and a second blind PSF. Preparation, PSF calibration
 and ion grouping took 14.59 s, grouped regression and joint fitting
@@ -230,9 +235,9 @@ used the default support settings.</p>
 <p>With the default stopping and support settings, the same CDF files
 took <strong>54.66 s</strong> and gave <strong>estimated rank
 115</strong> against <strong>true rank 100</strong>, with 769 true
-positives and only 26 false positives. The figures use the optional
-search. The original-channel GIC of the selected rank-100 fit was
-<strong>4,146,698</strong>.</p>
+positives and only 26 false positives. The software-comparison figures
+use the 196.28 s extended fit. The original-channel GIC of the selected
+rank-100 fit was <strong>4,146,698</strong>.</p>
 <p>GCMSprime used four two-thread workers for grouped PSF regressions
 and could use eight threads for the joint fit. Profile and background
 updates run across samples. Shared spectra run across ions. Local merge

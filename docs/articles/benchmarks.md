@@ -55,6 +55,12 @@ and xcms + CAMERA uses four workers. Input conversion is timed
 separately. The six comparator rows use their saved outputs and timings
 from the identical simulated inputs.
 
+A shorter search recovered **true rank 100 exactly** in **104.48 s**,
+with all 769 true occurrences and only 1 extra occurrence. The same
+control recovered **true rank 1,000 exactly** on the independent large
+example. [Compare local search at both
+scales](https://tomwenseleers.github.io/GCMSprime/articles/multisample.html#local-rank-search).
+
 The small experiment used 100 extra selective sweeps, a temporary
 fourfold penalty and a second blind PSF. Preparation, PSF calibration
 and ion grouping took 14.59 s, grouped regression and joint fitting
@@ -64,9 +70,9 @@ default support settings.
 
 With the default stopping and support settings, the same CDF files took
 **54.66 s** and gave **estimated rank 115** against **true rank 100**,
-with 769 true positives and only 26 false positives. The figures use the
-optional search. The original-channel GIC of the selected rank-100 fit
-was **4,146,698**.
+with 769 true positives and only 26 false positives. The
+software-comparison figures use the 196.28 s extended fit. The
+original-channel GIC of the selected rank-100 fit was **4,146,698**.
 
 GCMSprime used four two-thread workers for grouped PSF regressions and
 could use eight threads for the joint fit. Profile and background

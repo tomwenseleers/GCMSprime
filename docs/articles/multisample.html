@@ -31,7 +31,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">GCMSprime</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9010</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9011</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -210,8 +210,102 @@ used the default support settings.</p>
 <p>With the default stopping and support settings, the same CDF files
 took <strong>54.66 s</strong> and gave <strong>estimated rank
 115</strong> against <strong>true rank 100</strong>, with 769 true
-positives and only 26 false positives. The figures use the optional
-search.</p>
+positives and only 26 false positives. The software-comparison figures
+use the 196.28 s extended fit.</p>
+<div class="section level3">
+<h3 id="local-rank-search">Local search for the shared rank<a class="anchor" aria-label="anchor" href="#local-rank-search"></a>
+</h3>
+<p>The same optional search recovered the exact shared rank in both
+experiments. Each inferred identity matched one generating compound
+across samples. A false positive in these fits is an extra occurrence of
+a correctly identified compound in a sample. The true spectra, profiles
+and ranks were used only for evaluation.</p>
+<table style="width:100%;" class="table">
+<colgroup>
+<col width="16%">
+<col width="16%">
+<col width="16%">
+<col width="16%">
+<col width="16%">
+<col width="16%">
+</colgroup>
+<thead><tr class="header">
+<th align="left">Dataset and control</th>
+<th align="right">True / estimated rank</th>
+<th align="right">TP</th>
+<th align="right">FP</th>
+<th align="right">Original-ion GIC</th>
+<th align="right">Complete time</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left">Small, default</td>
+<td align="right">100 / 115</td>
+<td align="right">769</td>
+<td align="right">26</td>
+<td align="right">4,173,728</td>
+<td align="right">54.66 s</td>
+</tr>
+<tr class="even">
+<td align="left">Small, local search</td>
+<td align="right"><strong>100 / 100 (exact)</strong></td>
+<td align="right">769</td>
+<td align="right">1</td>
+<td align="right">4,142,023</td>
+<td align="right">104.48 s</td>
+</tr>
+<tr class="odd">
+<td align="left">Large, default</td>
+<td align="right">1,000 / 1,002</td>
+<td align="right">7,917</td>
+<td align="right">13</td>
+<td align="right">34,062,277</td>
+<td align="right">533.88 s</td>
+</tr>
+<tr class="even">
+<td align="left">Large, local search</td>
+<td align="right"><strong>1,000 / 1,000 (exact)</strong></td>
+<td align="right">7,917</td>
+<td align="right">2</td>
+<td align="right">34,056,138</td>
+<td align="right">562.05 s</td>
+</tr>
+</tbody>
+</table>
+<div class="float">
+<img src="../reference/figures/rank-search-comparison.png" alt="Shared rank, occurrence recovery and complete CDF workflow time with and without local search"><div class="figcaption">Shared rank, occurrence recovery and complete
+CDF workflow time with and without local search</div>
+</div>
+<p>Use <code>control = list(penalty_search = TRUE)</code> in
+<code><a href="https://tomwenseleers.github.io/logconNMF/reference/logconNMF.html" class="external-link">logconNMF()</a></code>, or pass the same control through
+<code>batch$coupling</code> in <code><a href="../reference/gcmsDeco.html">gcmsDeco()</a></code>. Keep the PSF,
+registration and noise settings for the acquisition. The following
+commands reproduce the local-search fits in fresh directories from the
+GCMSprime repository root. The large example calibrates its PSF from the
+separate standard.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tomwenseleers.github.io/GCMSprime/">GCMSprime</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/source.html" class="external-link">source</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"benchmarks"</span>, <span class="st">"simulated-16.R"</span>, package <span class="op">=</span> <span class="st">"GCMSbenchmark"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">small</span> <span class="op">&lt;-</span> <span class="fu">simulateBenchmark16</span><span class="op">(</span><span class="st">"small-local/input"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">9118L</span><span class="op">)</span></span>
+<span><span class="va">small_fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gcmsDeco.html">gcmsDeco</a></span><span class="op">(</span><span class="st">"small-local/input"</span>, output_dir <span class="op">=</span> <span class="st">"small-local/fit"</span>, ncores <span class="op">=</span> <span class="fl">8L</span>,</span>
+<span>  family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">quasipoisson</a></span><span class="op">(</span><span class="st">"identity"</span><span class="op">)</span>, precluster <span class="op">=</span> <span class="fl">32L</span>, nwindows <span class="op">=</span> <span class="fl">2L</span>,</span>
+<span>  baseline_df <span class="op">=</span> <span class="fl">4L</span>, correlation <span class="op">=</span> <span class="st">"none"</span>, psf_control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>maxiter <span class="op">=</span> <span class="fl">3L</span><span class="op">)</span>,</span>
+<span>  batch <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>workers <span class="op">=</span> <span class="fl">4L</span>, coupling <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>alignment_window <span class="op">=</span> <span class="fl">0.5</span>, penalty_search <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/source.html" class="external-link">source</a></span><span class="op">(</span><span class="st">"benchmarks/benchmark_fullsize_16.R"</span><span class="op">)</span></span>
+<span><span class="fu">benchmarkFullsize16</span><span class="op">(</span><span class="st">"large-local"</span>, ncores <span class="op">=</span> <span class="fl">16L</span>, workers <span class="op">=</span> <span class="fl">6L</span>,</span>
+<span>                    coupling <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>penalty_search <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="st">"large-local/analysis.rds"</span><span class="op">)</span></span>
+<span><span class="va">fit</span><span class="op">$</span><span class="va">coupled</span><span class="op">$</span><span class="va">rank</span></span>
+<span><span class="va">fit</span><span class="op">$</span><span class="va">coupled</span><span class="op">$</span><span class="va">refinement</span></span></code></pre></div>
+<p>The timings include CDF processing, PSF initialization, joint fitting
+and export. Simulation, scoring and separate standard calibration are
+outside the timed fits. The area and profile figures below use the
+extended search for the small software comparison and the default fit
+for the large resource benchmark. <a href="https://github.com/tomwenseleers/GCMSprime/blob/master/benchmarks/results/rank-search.csv" class="external-link">Per-fit
+results and area errors</a>.</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="sixteen-simulated-chromatograms">Small-scale 16-sample software comparison<a class="anchor" aria-label="anchor" href="#sixteen-simulated-chromatograms"></a>
@@ -241,7 +335,7 @@ generating retention-index maps are used for scoring; the deconvolution
 receives neither the known areas nor the true profiles.</p>
 <p>The reproducible recipe includes the empirical background and
 complete reference library:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">GCMSbenchmark</span><span class="op">)</span></span>
 <span><span class="va">bench</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"benchmarks"</span>, package<span class="op">=</span><span class="st">"GCMSbenchmark"</span>, mustWork<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/source.html" class="external-link">source</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">bench</span>, <span class="st">"simulated-16.R"</span><span class="op">)</span>, encoding<span class="op">=</span><span class="st">"UTF-8"</span><span class="op">)</span></span>
@@ -282,7 +376,7 @@ optimality gap measures agreement with an attainable reference. Its
 distance from the global minimum is unknown.</p>
 <p>The dotted red line marks the fitted reference endpoint. <a href="https://tomwenseleers.github.io/logconNMF/benchmark-gic-trace.csv" class="external-link">Download
 both complete traces</a>.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">checked</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gcmsDeco.html">gcmsDeco</a></span><span class="op">(</span><span class="st">"benchmark-small/input"</span>, output_dir <span class="op">=</span> <span class="st">"benchmark-small-gap"</span>,</span>
 <span>  family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">quasipoisson</a></span><span class="op">(</span><span class="st">"identity"</span><span class="op">)</span>, ncores <span class="op">=</span> <span class="fl">8L</span>, nwindows <span class="op">=</span> <span class="fl">2L</span>,</span>
 <span>  precluster <span class="op">=</span> <span class="fl">32L</span>, baseline_df <span class="op">=</span> <span class="fl">4L</span>, correlation <span class="op">=</span> <span class="st">"none"</span>,</span>
@@ -451,7 +545,7 @@ grid.</p>
 reproducible script</a> and <a href="https://github.com/tomwenseleers/GCMSprime/tree/master/benchmarks/results/fullsize16" class="external-link">compact
 measured results</a> are supplied with the source. From the GCMSprime
 repository root:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Run from a GCMSprime repository checkout; use a fresh output directory.</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/source.html" class="external-link">source</a></span><span class="op">(</span><span class="st">"benchmarks/benchmark_fullsize_16.R"</span><span class="op">)</span></span>
 <span><span class="fu">benchmarkFullsize16</span><span class="op">(</span><span class="st">"benchmark-large"</span>, stage<span class="op">=</span><span class="st">"all"</span>, ncores<span class="op">=</span><span class="fl">16L</span><span class="op">)</span></span>
@@ -508,7 +602,7 @@ learned from a pooled, time-binned chromatogram or supplied through
 <code>precluster</code> as a saved <a href="https://tomwenseleers.github.io/logconNMF/reference/channelGroups.html" class="external-link">channel
 map</a>, for example one trained on reference spectra. Each sample’s PSF
 and scan grid remain separate.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sample1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="va">experiment</span><span class="op">$</span><span class="va">paths</span><span class="op">[</span><span class="fl">1L</span><span class="op">]</span><span class="op">)</span></span>
 <span><span class="va">sample1</span><span class="op">$</span><span class="va">compounds</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">sample1</span>, type<span class="op">=</span><span class="st">"profiles"</span>, file<span class="op">=</span><span class="st">"sample1_profiles_spectra.pdf"</span><span class="op">)</span></span>
@@ -536,7 +630,7 @@ units, so scan duration and the number of exported mass peaks alone do
 not identify physical count exposure.</p>
 <p>If integrated counts and their durations are known, supply exposure
 explicitly:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">experiment</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gcmsDeco.html">gcmsDeco</a></span><span class="op">(</span><span class="st">"chromatograms"</span>, output_dir<span class="op">=</span><span class="st">"count_results"</span>,</span>
 <span>  family<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">poisson</a></span><span class="op">(</span><span class="st">"identity"</span><span class="op">)</span>,</span>
 <span>  batch<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>exposure<span class="op">=</span><span class="kw">function</span><span class="op">(</span><span class="va">metadata</span>, <span class="va">time</span><span class="op">)</span> <span class="va">metadata</span><span class="op">$</span><span class="va">scan_duration</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
@@ -557,7 +651,7 @@ In this example, <code>calibration_range=c(6, Inf)</code> excludes the
 solvent and early contaminated region from PSF calibration; the
 analytical samples retain their full time range and all 518 measured
 mass channels.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">standard</span> <span class="op">&lt;-</span> <span class="st">"chromatograms/standards/alkanes.cdf"</span></span>
 <span><span class="va">experiment</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gcmsDeco.html">gcmsDeco</a></span><span class="op">(</span><span class="st">"chromatograms"</span>, output_dir<span class="op">=</span><span class="st">"beer_results"</span>,</span>
 <span>  alkanes_file<span class="op">=</span><span class="va">standard</span>, calibration_range<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">6</span>, <span class="cn">Inf</span><span class="op">)</span>, precluster<span class="op">=</span><span class="fl">32L</span>,</span>

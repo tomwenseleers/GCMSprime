@@ -53,6 +53,15 @@ independent residuals. Backgrounds are estimated on a fixed basis and
 remain unpenalized. The fitted noise parameters add a constant charge to
 the reported information criterion for that dataset.
 
+For the local count search, pass
+`batch = list(coupling = list(penalty_search = TRUE))`. Weak occurrences
+can transfer their signal to overlapping log-concave profiles. Across
+samples, similar spectra with overlapping aligned half-height intervals
+can share one identity after a local joint refit with their neighbours.
+The original-channel GIC decides each support change. [Rank and timing
+on both
+simulations](https://tomwenseleers.github.io/GCMSprime/articles/multisample.html#local-rank-search).
+
 The adaptive-ridge calibration in the initial PSF regression applies
 each time that regression uses the surrogate. Factor updates charge the
 full original GIC price per degree of freedom. A temporary fourfold

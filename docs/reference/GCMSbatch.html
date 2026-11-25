@@ -13,7 +13,7 @@ share spectra through logconNMF::logconNMF() while keeping original scan grids."
 
     <a class="navbar-brand me-2" href="../index.html">GCMSprime</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9010</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9011</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -151,6 +151,8 @@ If acquisition dates are absent, pass explicit relative sample paths in
 <code>coupling=list()</code> for <code><a href="https://tomwenseleers.github.io/logconNMF/reference/logconNMF.html" class="external-link">logconNMF::logconNMF()</a></code> controls, <code>sample_order=NULL</code>,
 <code>exposure=NULL</code>, <code>resume=FALSE</code>, <code>plots=FALSE</code>, <code>workers=NULL</code> and <code>cache=TRUE</code>.
 <code>workers</code> controls simultaneous file imports and sample-level PSF fits.
+For a local rank search on count data use <code>batch=list(coupling=list(penalty_search=TRUE))</code>.
+The search refits overlapping peaks on the original scans and ion channels.
 For a more extensive search, pass <code>refinement_sweeps=100L</code>,
 <code>penalty_search=TRUE</code> and <code>alternative_X=TRUE</code> in <code>batch$coupling</code>.
 The fit compares the resulting candidates on the original ion data at the original penalty.

@@ -1,5 +1,12 @@
 # Changelog
 
+## GCMSprime 0.1.0.9011
+
+- `batch = list(coupling = list(penalty_search = TRUE))` enables local
+  rank refinement on the original ion data. The multisample tutorial
+  compares complete analysis times and occurrence recovery on the two
+  16-sample simulations.
+
 ## GCMSprime 0.1.0.9010
 
 - Joint CDF fits accept the optional logconNMF support search through

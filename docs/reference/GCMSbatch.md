@@ -107,7 +107,10 @@ paths in `batch=list(sample_order=...)`.
 [`logconNMF::logconNMF()`](https://tomwenseleers.github.io/logconNMF/reference/logconNMF.html)
 controls, `sample_order=NULL`, `exposure=NULL`, `resume=FALSE`,
 `plots=FALSE`, `workers=NULL` and `cache=TRUE`. `workers` controls
-simultaneous file imports and sample-level PSF fits. For a more
+simultaneous file imports and sample-level PSF fits. For a local rank
+search on count data use
+`batch=list(coupling=list(penalty_search=TRUE))`. The search refits
+overlapping peaks on the original scans and ion channels. For a more
 extensive search, pass `refinement_sweeps=100L`, `penalty_search=TRUE`
 and `alternative_X=TRUE` in `batch$coupling`. The fit compares the
 resulting candidates on the original ion data at the original penalty.

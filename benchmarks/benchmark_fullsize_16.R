@@ -6,7 +6,8 @@
 
 benchmarkFullsize16 <- function(directory="codex_sandbox/fullsize16",
   stage=c("all","prepare","fit","score"),ncores=NULL,
-  background_file="GCMSbenchmark/inst/benchmarks/gcms-data2-background.rds") {
+  background_file="GCMSbenchmark/inst/benchmarks/gcms-data2-background.rds",
+  coupling=list(),workers=NULL) {
   stage <- match.arg(stage)
   library(L0glm);library(logconNMF);library(GCMSprime);library(Matrix)
   root <- normalizePath(directory,winslash="/",mustWork=FALSE)
@@ -73,9 +74,10 @@ benchmarkFullsize16 <- function(directory="codex_sandbox/fullsize16",
       rm(raw);gc()
     } else standard <- readRDS(standard_file)
     # Omit ncores or use NULL to test the automatic logical-core budget.
+    set.seed(171117L)
     object <- gcmsDeco(file.path(input,"samples"),
       output_dir=file.path(root,"analysis"),ncores=ncores,
-      psf_control=list(standard=standard),verbose=TRUE)
+      psf_control=list(standard=standard),batch=list(workers=workers,coupling=coupling),verbose=TRUE)
     saveRDS(object,file.path(root,"analysis.rds"))
     capture.output(sessionInfo(),file=file.path(root,"sessionInfo.txt"))
     print(object$parallel);print(object$seconds)

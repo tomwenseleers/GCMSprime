@@ -83,6 +83,8 @@ If acquisition dates are absent, pass explicit relative sample paths in
 \code{coupling=list()} for \code{\link[logconNMF:logconNMF]{logconNMF::logconNMF()}} controls, \code{sample_order=NULL},
 \code{exposure=NULL}, \code{resume=FALSE}, \code{plots=FALSE}, \code{workers=NULL} and \code{cache=TRUE}.
 \code{workers} controls simultaneous file imports and sample-level PSF fits.
+For a local rank search on count data use \code{batch=list(coupling=list(penalty_search=TRUE))}.
+The search refits overlapping peaks on the original scans and ion channels.
 For a more extensive search, pass \code{refinement_sweeps=100L},
 \code{penalty_search=TRUE} and \code{alternative_X=TRUE} in \code{batch$coupling}.
 The fit compares the resulting candidates on the original ion data at the original penalty.

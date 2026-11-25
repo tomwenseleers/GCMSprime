@@ -163,10 +163,14 @@ means. OpenMP updates elution profiles across samples. It fits each
 ion’s shared spectrum and sample-specific background coefficients
 independently, keeping a fixed component order within each ion. The
 general identity-link solver can stream original-channel blocks from
-disk. The full-size fit recovered **7,917 of 7,917 occurrences** with
-**only 13 false positives** in **8.90 min** across 16 chromatograms of
-10,000 scans and 550 channels. Its estimated rank was **1,002** for a
-true rank of **1,000**. The [two 16-sample
+disk. The local rank search recovered **all 7,917 occurrences** in
+**9.37 min** with **only 2 false positives** across 16 chromatograms of
+10,000 scans and 550 channels. Its **estimated rank of 1,000 exactly
+matched the true rank of 1,000**. The same control recovered **true rank
+100 exactly** in **104.48 s** on the smaller simulation. [Compare rank,
+recovery and
+timing](https://tomwenseleers.github.io/GCMSprime/articles/multisample.html#local-rank-search).
+The [two 16-sample
 experiments](https://tomwenseleers.github.io/GCMSprime/articles/multisample.html#benchmark-scales)
 give the measured resource use, timings and recovery at both acquisition
 sizes.
@@ -182,10 +186,11 @@ ion groups and the final fit uses every original ion. The grouped
 regressions used four two-thread workers. The joint fit reused the
 eight-thread budget on the original ion channels.
 
-The optional support search recovered **true rank 100 exactly (estimated
-rank 100)** and achieved an **empirical GIC gap of 0.098%** relative to
-a fit initialised with the true elution profiles and cross-sample
-compound identities. [Compare the GIC
+The extended search with 100 extra sweeps and a second blind PSF
+recovered **true rank 100 exactly (estimated rank 100)** and achieved an
+**empirical GIC gap of 0.098%** relative to a fit initialised with the
+true elution profiles and cross-sample compound identities. [Compare the
+GIC
 traces](https://tomwenseleers.github.io/GCMSprime/articles/multisample.html#empirical-gic-gap).
 
 ## Benchmarks against other software

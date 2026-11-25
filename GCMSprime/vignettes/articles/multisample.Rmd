@@ -74,7 +74,54 @@ native scan grids and report recovery against the generating compounds.
 
 The small experiment used 100 extra selective sweeps, a temporary fourfold penalty and a second blind PSF. Preparation, PSF calibration and ion grouping took 14.59 s, grouped regression and joint fitting 177.10 s, and export 4.33 s. The enclosing benchmark took **196.28 s** from CDF input through results. The large resource benchmark used the default support settings.
 
-With the default stopping and support settings, the same CDF files took **54.66 s** and gave **estimated rank 115** against **true rank 100**, with 769 true positives and only 26 false positives. The figures use the optional search.
+With the default stopping and support settings, the same CDF files took **54.66 s** and gave **estimated rank 115** against **true rank 100**, with 769 true positives and only 26 false positives. The software-comparison figures use the 196.28 s extended fit.
+
+
+### Local search for the shared rank {#local-rank-search}
+
+The same optional search recovered the exact shared rank in both experiments.
+Each inferred identity matched one generating compound across samples. A false
+positive in these fits is an extra occurrence of a correctly identified compound
+in a sample. The true spectra, profiles and ranks were used only for evaluation.
+
+| Dataset and control | True / estimated rank | TP | FP | Original-ion GIC | Complete time |
+|:--|--:|--:|--:|--:|--:|
+| Small, default | 100 / 115 | 769 | 26 | 4,173,728 | 54.66 s |
+| Small, local search | **100 / 100 (exact)** | 769 | 1 | 4,142,023 | 104.48 s |
+| Large, default | 1,000 / 1,002 | 7,917 | 13 | 34,062,277 | 533.88 s |
+| Large, local search | **1,000 / 1,000 (exact)** | 7,917 | 2 | 34,056,138 | 562.05 s |
+
+![Shared rank, occurrence recovery and complete CDF workflow time with and without local search](../reference/figures/rank-search-comparison.png)
+
+Use `control = list(penalty_search = TRUE)` in `logconNMF()`, or pass the
+same control through `batch$coupling` in `gcmsDeco()`. Keep the PSF,
+registration and noise settings for the acquisition. The following commands
+reproduce the local-search fits in fresh directories from the GCMSprime
+repository root. The large example calibrates its PSF from the separate standard.
+
+```r
+library(GCMSprime)
+source(system.file("benchmarks", "simulated-16.R", package = "GCMSbenchmark"))
+small <- simulateBenchmark16("small-local/input")
+set.seed(9118L)
+small_fit <- gcmsDeco("small-local/input", output_dir = "small-local/fit", ncores = 8L,
+  family = quasipoisson("identity"), precluster = 32L, nwindows = 2L,
+  baseline_df = 4L, correlation = "none", psf_control = list(maxiter = 3L),
+  batch = list(workers = 4L, coupling = list(alignment_window = 0.5, penalty_search = TRUE)))
+
+source("benchmarks/benchmark_fullsize_16.R")
+benchmarkFullsize16("large-local", ncores = 16L, workers = 6L,
+                    coupling = list(penalty_search = TRUE))
+fit <- readRDS("large-local/analysis.rds")
+fit$coupled$rank
+fit$coupled$refinement
+```
+
+The timings include CDF processing, PSF initialization, joint fitting and
+export. Simulation, scoring and separate standard calibration are outside the
+timed fits. The area and profile figures below use the extended search for
+the small software comparison and the default fit for the large resource
+benchmark. [Per-fit results and area errors](https://github.com/tomwenseleers/GCMSprime/blob/master/benchmarks/results/rank-search.csv).
 
 ## Small-scale 16-sample software comparison {#sixteen-simulated-chromatograms}
 
