@@ -11,9 +11,9 @@ plotFullsize16Recovery <- function(directory="benchmarks/results/fullsize16",
   grid <- seq(min(x),max(x),length.out=200L)
   band <- stats::predict(fit$fit,data.frame(log_true=grid),interval="prediction",level=0.95)
   acid <- with(pairs,acid[is.finite(area_true) & area_true>0 & is.finite(area_estimated) & area_estimated>0])
-  grDevices::png(file,width=2200L,height=1000L,res=180)
+  grDevices::png(file,width=2200L,height=1200L,res=180)
   on.exit(grDevices::dev.off())
-  graphics::par(mfrow=c(1,2),mar=c(5,5,4,1))
+  graphics::par(mfrow=c(1,2),mar=c(5,5,4,1),pty="s")
   heights <- rbind(metrics$TP,metrics$FP)
   mid <- graphics::barplot(heights,col=c("#1876C2","#DF4747"),border=NA,
     names.arg=rep("",nrow(metrics)),xlab="Sample",ylab="Compound occurrences",
@@ -30,8 +30,9 @@ plotFullsize16Recovery <- function(directory="benchmarks/results/fullsize16",
   graphics::axis(1,at=mid,labels=seq_len(nrow(metrics)),cex.axis=.8,tick=FALSE)
   graphics::legend("topleft",c("True positives","False positives","True count"),
     fill=c("#1876C2","#DF4747",NA),pch=c(NA,NA,1),border=NA,bty="n",cex=.85,ncol=3L)
-  lim <- range(x,y,band)
-  graphics::plot(x,y,type="n",xlim=lim,ylim=lim,las=1,cex.axis=1.08,cex.lab=1.15,
+  lim <- c(7.5,10.5)
+  ticks <- seq(lim[1L],lim[2L],by=0.5)
+  graphics::plot(x,y,type="n",xlim=lim,ylim=lim,xaxs="i",yaxs="i",axes=FALSE,cex.lab=1.15,
     xlab=expression(log[10]~"true total-ion area"),
     ylab=expression(log[10]~"estimated total-ion area"),main="Peak-area accuracy")
   graphics::mtext(sprintf("Adjusted R² %.6f   |   Median absolute area error %.3f%%",
@@ -43,6 +44,9 @@ plotFullsize16Recovery <- function(directory="benchmarks/results/fullsize16",
   violet <- grDevices::adjustcolor("#69418e",alpha.f=.5)
   graphics::points(x[!acid],y[!acid],pch=16,cex=.37,col=blue)
   graphics::points(x[acid],y[acid],pch=23,cex=.95,col="#563470",bg=violet)
+  graphics::axis(1,at=ticks,las=1,cex.axis=1.08)
+  graphics::axis(2,at=ticks,las=1,cex.axis=1.08)
+  graphics::box()
   graphics::legend("topleft",c("Matched peak","Matched acid peak","Least-squares fit",
                               "95% prediction interval","1:1 reference"),
     col=c(blue,"#563470","black","grey83","#23364D"),pt.bg=c(NA,violet,NA,NA,NA),

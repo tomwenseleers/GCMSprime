@@ -25,31 +25,28 @@ plotBenchmark16 <- function(results, output_dir = results) {
     area_regression(matches[matches$method == m, , drop = FALSE])
   }), methods)
 
-  draw("simulated-16-area-predictions.png", 2390, 1440, {
-    columns <- min(4L, length(methods) + 1L)
-    graphics::par(mfrow = c(ceiling((length(methods) + 1L) / columns), columns),
+  columns <- min(4L, length(methods) + 1L)
+  rows <- ceiling((length(methods) + 1L) / columns)
+  draw("simulated-16-area-predictions.png", 600L * columns, 700L * rows, {
+    graphics::par(mfrow = c(rows, columns), pty = "s", xaxs = "i", yaxs = "i",
       mar = c(2.9, 1.6, 3.8, 1.0), oma = c(2.7, 3.4, 0.7, 0.5),
       mgp = c(2.15, 0.57, 0), las = 1, tcl = -0.25, cex.axis = 1.2)
-    xlim <- range(log10(truth$area_true[is.finite(truth$area_true) & truth$area_true > 0])) + c(-0.06, 0.06)
+    limits <- c(7.5, 10.5)
+    ticks <- seq(limits[1L], limits[2L], by = 0.5)
     bands <- lapply(models, function(z) {
       if (is.null(z$fit)) return(NULL)
       grid <- data.frame(log_true = seq(min(z$data$log_true), max(z$data$log_true), length.out = 160L))
       cbind(grid, stats::predict(z$fit, grid, interval = "prediction", level = 0.95))
     })
-    ylim <- range(xlim, unlist(lapply(models, function(z) z$data$log_estimated)),
-      unlist(lapply(bands, function(b) c(b$lwr, b$upr))), finite = TRUE)
     for (i in seq_along(methods)) {
       m <- methods[i]
       z <- models[[m]]
       x <- z$data$log_true
       y <- z$data$log_estimated
       interval <- bands[[m]]
-      graphics::plot(x, y, type = "n", xlim = xlim, ylim = ylim,
+      graphics::plot(x, y, type = "n", xlim = limits, ylim = limits,
         xlab = "", ylab = "", axes = FALSE)
-      graphics::grid(col = "#e5ebee", lty = 1)
-      graphics::axis(1)
-      graphics::axis(2, labels = (i - 1L) %% columns == 0L)
-      graphics::box()
+      graphics::abline(h = ticks, v = ticks, col = "#e5ebee", lty = 1)
       if (!is.null(interval)) {
         graphics::polygon(c(interval$log_true, rev(interval$log_true)),
           c(interval$lwr, rev(interval$upr)), col = area_band_colour, border = NA)
@@ -58,6 +55,14 @@ plotBenchmark16 <- function(results, output_dir = results) {
       graphics::points(x, y, pch = 16, cex = 0.78,
         col = grDevices::adjustcolor(colour[m], alpha.f = 0.5))
       graphics::abline(0, 1, col = reference_colour, lty = 2, lwd = 1.65)
+      graphics::axis(1, at = ticks)
+      graphics::axis(2, at = ticks, labels = (i - 1L) %% columns == 0L)
+      graphics::box()
+      outside <- sum(x < limits[1L] | x > limits[2L] | y < limits[1L] | y > limits[2L])
+      if (outside > 0L) {
+        graphics::legend("topleft", legend = sprintf("%d outside axes", outside),
+          bty = "n", text.col = "#485767", cex = 1.0)
+      }
       fit_row <- summary[summary$method==m,,drop=FALSE]
       panel_title <- labels[m]
       if (all(c("true_rank","estimated_rank") %in% names(fit_row)) &&
