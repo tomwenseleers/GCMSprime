@@ -33,11 +33,11 @@ separately in each sample, with a **median estimate of 829.55**. The generating
 retention-index maps are used for scoring;
 the deconvolution receives neither the known areas nor the true profiles.
 
-The optional search recovered **true rank 100 exactly (estimated rank 100)** and **769 of 769 occurrences with zero false positives**. The acid was recovered in all seven samples where it was present.
+The optional search recovered **true rank 100 exactly (estimated rank 100)** and **769 of 769 occurrences with only one false positive**. The acid was recovered in all seven samples where it was present.
 
 | Method | Seconds | Estimated rank | TP | FP | Sensitivity | Peak F1 | Ion F1 |
 |:--|--:|--:|--:|--:|--:|--:|--:|
-| GCMSprime | 196.28 | **100 (exact)** | 769 | 0 | 100.0% | 1.000 | 0.995 |
+| GCMSprime | 104.48 | **100 (exact)** | 769 | 1 | 100.0% | 0.999 | 0.996 |
 | MS-DIAL | 17.61 | — | 675 | 641 | 87.8% | 0.647 | 0.858 |
 | mzmine GC-EI | 38.47 | — | 622 | 70 | 80.9% | 0.851 | 0.860 |
 | eRah | 17.07 | — | 645 | 1912 | 83.9% | 0.388 | 0.771 |
@@ -52,7 +52,7 @@ Workstation with an Intel Core i9-11950H at 2.60 GHz, eight physical cores
 and 16 logical threads, Windows and R 4.5.0. AMDIS runs serially and xcms + CAMERA uses four workers. Input conversion is timed separately. The six comparator rows use
 their saved outputs and timings from the identical simulated inputs.
 
-The small experiment used 100 extra selective sweeps, a temporary fourfold penalty and a second blind PSF. Preparation, PSF calibration and ion grouping took 14.59 s, grouped regression and joint fitting 177.10 s, and export 4.33 s. The enclosing benchmark took **196.28 s** from CDF input through results. The large resource benchmark used the default support settings.
+The small benchmark used the fast local search on the blind, time-varying PSF start. Data preparation, PSF calibration and ion grouping took 10.85 s, grouped regression and joint fitting 89.05 s, and export 4.35 s. Including the benchmark wrapper, the complete analysis took **104.48 s**. The original-ion GIC was **4,142,023**.
 
 With the default stopping and support settings, the same CDF files took **54.66 s** and gave **estimated rank 115** against **true rank 100**, with 769 true positives and only 26 false positives. The figures use the optional search.
 
@@ -75,7 +75,7 @@ $A_{\mathrm{TIC}}=A_q/p_q$, after converting its integration-time units.
 
 The solid line fits an ordinary least-squares regression of log₁₀ estimated area on log₁₀ true area to all positive matched pairs, including the outliers. The shaded region is the pointwise 95% prediction interval for an individual peak at a given true area. The dashed line shows exact agreement. Darker points indicate overlap (opacity 0.5).
 
-GCMSprime recovered **all 769 occurrences**, with **adjusted R² 0.999993** and a **median absolute area error of 0.079%**. Even the lowest estimate was 98.3% of its true area.
+GCMSprime recovered **all 769 occurrences**, with **adjusted R² 0.999993** and a **median absolute area error of 0.082%**. Even the lowest estimate was 98.1% of its true area.
 Area agreement is conditional on recovered true matches, so it is shown
 together with sensitivity and false-positive counts.
 
@@ -96,7 +96,7 @@ Ion support uses a shared **0.1% of base-peak intensity cutoff**, applied
 independently to reference and recovered spectra for every method:
 $I_j>0$ and $I_j\geq0.001\max_l I_l$.
 Within-spectrum $F_1=2TP/(2TP+FP+FN)$ is averaged over correctly matched
-true spectra. GCMSprime achieves **mean ion F1 0.995**, compared with
+true spectra. GCMSprime achieves **mean ion F1 0.996**, compared with
 **0.860** for the strongest comparator. Individual points accompany the
 violins; the logit-spaced axis retains labels in the original F1 units.
 

@@ -56,7 +56,7 @@ simulateBenchmark16 <- function(directory) {
 }
 
 runBenchmark16 <- function(output_dir, method = c("GCMSprime", "xcms+CAMERA"),
-                           control = list(), ncores = 16L, support_search = FALSE) {
+                           control = list(), ncores = 16L, support_search = TRUE) {
   methods <- utils::getFromNamespace("bench_methods", "GCMSbenchmark")
   if (identical(tolower(method), "all")) {
     method <- methods
@@ -82,7 +82,7 @@ runBenchmark16 <- function(output_dir, method = c("GCMSprime", "xcms+CAMERA"),
   control <- utils::modifyList(settings, control)
   coupling <- list(alignment_window = 0.5)
   if (isTRUE(support_search))
-    coupling <- c(coupling, list(refinement_sweeps = 100L, penalty_search = TRUE, alternative_X = TRUE))
+    coupling$penalty_search <- TRUE
   rt_tolerance <- 0.12
   fits <- lapply(method, function(engine) {
     GCMSbenchmark::GCMSbenchmark(input$files,

@@ -1,7 +1,7 @@
 Package: GCMSbenchmark
 Type: Package
 Title: Compare GC/MS Chromatogram Deconvolution Workflows
-Version: 0.1.2
+Version: 0.1.3
 Authors@R: person("Tom", "Wenseleers", role = c("aut", "cre"),
     email = "tom.wenseleers@kuleuven.be")
 Description: Runs local gas chromatography mass spectrometry deconvolution

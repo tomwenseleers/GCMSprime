@@ -152,7 +152,7 @@ The local rank search recovered **all 7,917 occurrences** in **9.37 min** with *
 The [two 16-sample experiments](https://tomwenseleers.github.io/GCMSprime/articles/multisample.html#benchmark-scales) give the measured resource use, timings and recovery at both acquisition sizes.
 
 In the [small-scale 16-sample software comparison](https://tomwenseleers.github.io/GCMSprime/articles/benchmarks.html), GCMSprime recovers
-**769 of 769 true occurrences in 196.28 s**, including the acid compound in
+**769 of 769 true occurrences in 104.48 s**, including the acid compound in
 all seven samples where it occurs. Each chromatogram has 100 candidate
 compounds, 1,200 scans and 258 mass channels, with drift, concentration-dependent
 broadening and a smooth background derived from experimental GC/MS data.
@@ -166,9 +166,9 @@ fit initialised with the true elution profiles and cross-sample compound identit
 ## Benchmarks against other software
 
 On **16 chromatograms with 100 reference compounds**, GCMSprime recovers
-**769 of 769 true peak occurrences**, with **zero false positives**
-(peak F1 **1.000**). Its total-ion peak areas show **ordinary adjusted R² 0.999993**
-and **median absolute area error 0.079%**.
+**769 of 769 true peak occurrences**, with **only one false positive**
+(peak F1 **0.999**). Its total-ion peak areas show **ordinary adjusted R² 0.999993**
+and **median absolute area error 0.082%**.
 
 [![True and estimated total-ion peak areas with least-squares fits](GCMSprime/man/figures/simulated-16-area-predictions.png)](GCMSprime/man/figures/simulated-16-area-predictions.png)
 
@@ -181,7 +181,7 @@ show denser overlap. The dashed 1:1 reference is visible in every panel.
 [![Within-spectrum F1 using the shared 0.1% base-peak cutoff](GCMSprime/man/figures/simulated-16-spectral-support.png)](GCMSprime/man/figures/simulated-16-spectral-support.png)
 
 The shared **0.1% base-peak cutoff** gives GCMSprime **mean ion-support
-F1 0.995**, compared with **0.860** for the strongest comparator. This is
+F1 0.996**, compared with **0.860** for the strongest comparator. This is
 also the default cutoff for GCMSprime's reported spectra and spectral exports.
 Matching requires reciprocal best spectral hits within **30 RI units**.
 The reference includes compounds absent from individual samples.
