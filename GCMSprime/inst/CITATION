@@ -1,0 +1,8 @@
+bibentry(
+  bibtype = "Manual",
+  title = paste(meta$Package, meta$Title, sep = ": "),
+  author = c(person("Tom", "Wenseleers"), person("Christophe", "Vanderaa")),
+  year = format(as.Date(meta$Date), "%Y"),
+  note = paste("R package version", meta$Version),
+  url = "https://tomwenseleers.github.io/GCMSprime/"
+)

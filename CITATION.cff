@@ -1,0 +1,12 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it using the metadata below."
+type: software
+title: "GCMSprime: Scalable and Automated GC–MS Deconvolution, Quantification, and Spectral Library Search in R"
+authors:
+  - family-names: Wenseleers
+    given-names: Tom
+  - family-names: Vanderaa
+    given-names: Christophe
+repository-code: https://github.com/tomwenseleers/GCMSprime
+url: https://tomwenseleers.github.io/GCMSprime/
+license: GPL-2.0-or-later

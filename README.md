@@ -243,13 +243,8 @@ calibration and comparison benchmarks.
 ## Citation
 
 An article describing the methods implemented in GCMSprime is in preparation.
-If you use the package before the article is formally published, we would
-appreciate a citation to the package:
-
-Wenseleers T, Vanderaa C (2026).
-*GCMSprime: Scalable and Automated GC–MS Deconvolution, Quantification, and Spectral Library Search in R*.
-R package version 0.1.0.9000,
-<https://tomwenseleers.github.io/GCMSprime/>.
+To cite the installed version, use `citation("GCMSprime")` in R. GitHub also
+provides a citation under **Cite this repository**.
 
 The [Authors and Citation page](https://tomwenseleers.github.io/GCMSprime/authors.html#citation) also provides the
 citation in BibTeX format. Please also cite the methodological sources linked
