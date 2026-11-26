@@ -165,6 +165,23 @@ also the default cutoff for GCMSprime's reported spectra and spectral exports.
 Matching requires reciprocal best spectral hits within **30 RI units**.
 The reference includes compounds absent from individual samples.
 
+### Elution profile recovery
+
+The regular compound with the largest total area was present in 11 of the 16
+chromatograms. GCMSprime recovered all 11 profiles, with a mean cosine
+similarity of **0.999995** to the simulated elution curves. The shark-fin
+acid was present in seven chromatograms. GCMSprime recovered all seven profiles,
+with a mean cosine similarity of **0.999983**.
+
+Both figures show all 16 samples on the original total-ion intensity scale.
+Solid lines show estimated profiles and dashed lines show the simulated truth.
+Colours run from blue to red with increasing true peak area. Samples in which
+the compound was absent have a true profile of zero.
+
+[![Estimated and true elution profiles of the highest-abundance regular compound across 16 samples, by method](reference/figures/simulated-16-regular-profiles.png)](reference/figures/simulated-16-regular-profiles.png)
+
+[![Estimated and true elution profiles of the shark-fin acid across 16 samples, by method](reference/figures/simulated-16-acid-profiles.png)](reference/figures/simulated-16-acid-profiles.png)
+
 See [benchmarks against other software](articles/benchmarks.html) for timings,
 TP/FP counts, square-root signal heatmaps, recovered compound areas and
 regular/acid elution profiles. The
