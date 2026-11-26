@@ -151,7 +151,7 @@ and **median absolute area error 0.082%**.
 
 [![True and estimated total-ion peak areas with least-squares fits](reference/figures/simulated-16-area-predictions.png)](reference/figures/simulated-16-area-predictions.png)
 
-All methods use total-ion count equivalents, accounting for native model-ion
+The method panels share the same estimated-area axis. All methods use total-ion count equivalents, accounting for native model-ion
 fractions and integration-time units. The least-squares line summarizes the log–log relationship. Its pointwise 95% prediction interval describes the scatter of individual matched peak areas. Points have opacity 0.5, so darker areas
 show denser overlap. The dashed 1:1 reference is visible in every panel.
 

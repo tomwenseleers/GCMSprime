@@ -28,15 +28,17 @@ plotFullsize16Resources <- function(directory = "benchmarks/results/fullsize16",
   graphics::par(mar = c(.6, 4.8, 1.15, 1), las = 1)
   t <- x$seconds
   graphics::plot(0, type = "n", xlim = xl,
-                 ylim = c(0, max(x$available_GiB, x$working_GiB, x$private_GiB) * 1.08),
+                 ylim = c(0, max(x$available_GiB, x$working_GiB, x$private_GiB, na.rm = TRUE) * 1.08),
                  xlab = "", ylab = "Memory (GiB)", xaxt = "n", bty = "l")
   graphics::abline(h = graphics::axTicks(2), col = "#e5eaee")
   graphics::abline(v = cuts[2:4], col = "#a3b1be", lty = 3)
-  graphics::lines(t / 60, x$available_GiB, col = "#71818c", lwd = 1.2, lty = 2)
+  available <- "available_GiB" %in% names(x) && any(is.finite(x$available_GiB))
+  if (available) graphics::lines(t / 60, x$available_GiB, col = "#71818c", lwd = 1.2, lty = 2)
   graphics::lines(t / 60, x$working_GiB, col = "#008b91", lwd = 1.9)
   graphics::lines(t / 60, x$private_GiB, col = "#163e63", lwd = 1.15)
-  graphics::legend("right", c("System RAM available", "Process-tree working set", "Process-tree private memory"),
-                   col = c("#71818c", "#008b91", "#163e63"), lty = c(2, 1, 1), lwd = c(1.2, 1.9, 1.15),
+  series <- c(available, TRUE, TRUE)
+  graphics::legend("right", c("System RAM available", "Process-tree working set", "Process-tree private memory")[series],
+                   col = c("#71818c", "#008b91", "#163e63")[series], lty = c(2, 1, 1)[series], lwd = c(1.2, 1.9, 1.15)[series],
                    bty = "n", cex = .83)
   graphics::par(mar = c(4.6, 4.8, 1.15, 1), mgp = c(2.6, .7, 0))
   # Interpolate cumulative CPU time so irregular monitor intervals get their actual duration.

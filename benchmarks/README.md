@@ -10,13 +10,13 @@
   [Worker-count results](results/16_samples_parallel.csv)
 - `benchmark_fullsize_16.R` reproduces the 16-sample resource validation with
   10,000 scans, 550 recorded mass channels and about 500 compounds per sample.
-  The true rank was 1,000 and the estimated rank was 1,002.
+  The fast local search recovered the true rank of 1,000 exactly.
   From the repository root, run:
 
   ```r
   source("benchmarks/benchmark_fullsize_16.R")
   benchmarkFullsize16(stage="prepare")
-  benchmarkFullsize16(stage="fit")
+  benchmarkFullsize16(stage="fit", ncores=16L, workers=6L, coupling=list(penalty_search=TRUE))
   benchmarkFullsize16(stage="score")
   ```
 

@@ -55,7 +55,17 @@ GCMSprime used four two-thread workers for grouped PSF regressions and could use
 
 ## Sensitivity to the starting peak width
 
-The same 16 chromatograms were also fitted from Gaussian PSFs of 3.64 and 14.56 scans at half height. The calibrated and both Gaussian starts recovered **estimated rank 100, equal to true rank 100**, all 769 occurrences and zero false positives after the blind PSF exchange. Across starts, the largest difference between two estimates of a matched peak area was 0.86%. The acid area in sample 009 was 99.76–99.81% of truth. The calibration, support proposals and GIC comparisons used only observed counts.
+The local rank search was applied to each starting PSF on the same 16 chromatograms. All runs used eight threads and scored matched peaks on the original ion channels.
+
+| Starting PSF | Estimated / true rank | TP | FP | Missed | Acid recovered | Median area error | Original-ion GIC | CDF time |
+|:--|--:|--:|--:|--:|--:|--:|--:|--:|
+| Calibrated time-varying | **100 / 100 (exact)** | 769 | 1 | 0 | 7 / 7 | 0.082% | 4,142,023 | 104.48 s |
+| Half-width Gaussian | 108 / 100 | 764 | 13 | 5 | 7 / 7 | 0.089% | 4,171,642 | 113.66 s |
+| Double-width Gaussian | 105 / 100 | 769 | 23 | 0 | 7 / 7 | 0.095% | 4,324,923 | 297.27 s |
+
+The calibrated start recovered the true rank exactly. The half-width Gaussian retained extra factors and missed five occurrences. The local search remains optional. [Reproduce the Gaussian starts](https://github.com/tomwenseleers/GCMSprime/blob/master/benchmarks/benchmark_gaussian_starts.R) · [Download the measurements](https://github.com/tomwenseleers/GCMSprime/blob/master/benchmarks/results/fast-gaussian-starts.csv).
+
+The extended search added a second blind PSF and 100 refinement sweeps. From the calibrated start and both Gaussian starts it recovered **estimated rank 100, equal to true rank 100**, all 769 occurrences and zero false positives after the blind PSF exchange. Across starts, the largest difference between two estimates of a matched peak area was 0.86%. The acid area in sample 009 was 99.76–99.81% of truth. The calibration, support proposals and GIC comparisons used only observed counts.
 
 ![False positive and missed calls across three PSF starts and three searches](../reference/figures/psf-start-recovery.png)
 
@@ -74,7 +84,7 @@ Their areas are not added to the selected match.
 
 [![Ordinary log–log peak-area fits and 95% prediction intervals](../reference/figures/simulated-16-area-predictions.png)](../reference/figures/simulated-16-area-predictions.png)
 
-All panels use **total-ion count equivalents**. Spectra are normalized to
+The method panels share the same estimated-area axis. All panels use **total-ion count equivalents**. Spectra are normalized to
 unit L1 norm, with their magnitude transferred to the corresponding profile
 or area. Native model-ion areas are corrected for their ion fraction and
 integration-time units. The conversions use each engine's exported factors

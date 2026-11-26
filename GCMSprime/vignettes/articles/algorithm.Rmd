@@ -119,7 +119,7 @@ specification give the same objective differences.
 For simulated data, pass `truth.profiles` to `gcmsDeco()` to compare the
 standard fit with the same solver initialized from known, matched elution
 profiles. Both fits estimate spectra and abundances from the measured counts.
-The estimated-profile start descended from 21,188,577 to **4,146,698** and the true-profile start from 10,875,547 to **4,142,623**. Both reached **estimated rank 100, equal to the true rank of 100**. The GIC held steady or decreased at every recorded checkpoint (158 for the estimated start and 126 for the true-profile start). Both fits used the observed counts and identical search settings. Their endpoints differ by **0.098%** of the absolute reference GIC. This empirical optimality gap measures agreement with an attainable reference. Its distance from the global minimum is unknown.
+In a separate convergence experiment with 100 extra sweeps and a second blind PSF, the estimated-profile start descended from 21,188,577 to **4,146,698** and the true-profile start from 10,875,547 to **4,142,623**. Both reached **estimated rank 100, equal to the true rank of 100**. The GIC held steady or decreased at every recorded checkpoint (158 for the estimated start and 126 for the true-profile start). Both fits used the observed counts and identical search settings. Their endpoints differ by **0.098%** of the absolute reference GIC. This empirical optimality gap measures agreement with an attainable reference. Its distance from the global minimum is unknown.
 
 The [multisample example](multisample.html#empirical-gic-gap) includes the
 code, timings and convergence figure link.

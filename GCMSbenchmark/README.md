@@ -60,7 +60,7 @@ GCMSprime used four two-thread workers for grouped PSF regressions and could use
 
 [![Estimated-versus-true total-ion peak areas](../GCMSprime/man/figures/simulated-16-area-predictions.png)](../GCMSprime/man/figures/simulated-16-area-predictions.png)
 
-All panels use **total-ion count equivalents**. Spectra are normalized to
+The method panels share the same estimated-area axis. All panels use **total-ion count equivalents**. Spectra are normalized to
 unit L1 norm, with their magnitude transferred to the corresponding profile
 or area. Native model-ion areas are corrected for their ion fraction and
 integration-time units. The conversions use each engine's exported factors
@@ -123,7 +123,7 @@ horizontal axis; profile amplitudes remain on their native total-ion scale.
 
 GCMSprime recovers all occurrences of both the regular EMG and the
 shark-fin-shaped acid. Mean profile cosine, counting missed occurrences as
-zero, is **0.999996 for the regular compound** and **0.999983 for the acid**;
+zero, is **0.999995 for the regular compound** and **0.999983 for the acid**;
 median cosine among matched occurrences is **0.999998** and **0.999990**,
 respectively. Other configurations often truncate profiles, split their
 contributions or miss the acid. MS-DIAL also resolves the regular compound (mean cosine 0.998). It recovers five of the seven acid

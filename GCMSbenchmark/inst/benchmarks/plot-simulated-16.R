@@ -10,7 +10,6 @@ plotBenchmark16 <- function(results, output_dir = results) {
 
   labels <- c(GCMSprime = "GCMSprime", "MS-DIAL" = "MS-DIAL", mzmine = "mzmine GC-EI",
     eRah = "eRah", AMDIS = "AMDIS", "xcms+CAMERA" = "xcms + CAMERA", MSHub = "MSHub")
-  units <- stats::setNames(rep("Total-ion counts",length(labels)),names(labels))
   colour <- stats::setNames(scales::hue_pal(l = 48, c = 82)(length(labels)), names(labels))
   fill <- stats::setNames(scales::hue_pal(l = 88, c = 42)(length(labels)), names(labels))
   area_band_colour <- "#d9d9d9"
@@ -27,28 +26,35 @@ plotBenchmark16 <- function(results, output_dir = results) {
   }), methods)
 
   draw("simulated-16-area-predictions.png", 2390, 1440, {
-    graphics::par(mfrow = c(ceiling((length(methods) + 1L) / 4L), 4L),
-      mar = c(3, 3.7, 3.8, 0.85), oma = c(2.3, 0.5, 0.7, 0.5),
-      mgp = c(2.15, 0.57, 0), las = 1, tcl = -0.25, cex.axis = 0.9)
-    xlim <- range(log10(truth$area_true)) + c(-0.06, 0.06)
-    for (m in methods) {
+    columns <- min(4L, length(methods) + 1L)
+    graphics::par(mfrow = c(ceiling((length(methods) + 1L) / columns), columns),
+      mar = c(2.9, 1.6, 3.8, 1.0), oma = c(2.7, 3.4, 0.7, 0.5),
+      mgp = c(2.15, 0.57, 0), las = 1, tcl = -0.25, cex.axis = 1.2)
+    xlim <- range(log10(truth$area_true[is.finite(truth$area_true) & truth$area_true > 0])) + c(-0.06, 0.06)
+    bands <- lapply(models, function(z) {
+      if (is.null(z$fit)) return(NULL)
+      grid <- data.frame(log_true = seq(min(z$data$log_true), max(z$data$log_true), length.out = 160L))
+      cbind(grid, stats::predict(z$fit, grid, interval = "prediction", level = 0.95))
+    })
+    ylim <- range(xlim, unlist(lapply(models, function(z) z$data$log_estimated)),
+      unlist(lapply(bands, function(b) c(b$lwr, b$upr))), finite = TRUE)
+    for (i in seq_along(methods)) {
+      m <- methods[i]
       z <- models[[m]]
       x <- z$data$log_true
       y <- z$data$log_estimated
-      interval <- if (!is.null(z$fit)) {
-        grid <- seq(min(x), max(x), length.out = 160L)
-        stats::predict(z$fit, newdata = data.frame(log_true = grid), interval = "prediction", level = 0.95)
-      } else NULL
-      ylim <- range(c(y, interval, xlim))
+      interval <- bands[[m]]
       graphics::plot(x, y, type = "n", xlim = xlim, ylim = ylim,
-        xlab = "", ylab = bquote(log[10]~.(unname(units[m]))))
+        xlab = "", ylab = "", axes = FALSE)
       graphics::grid(col = "#e5ebee", lty = 1)
+      graphics::axis(1)
+      graphics::axis(2, labels = (i - 1L) %% columns == 0L)
+      graphics::box()
       if (!is.null(interval)) {
-        graphics::polygon(c(grid, rev(grid)), c(interval[, "lwr"], rev(interval[, "upr"])),
-          col = area_band_colour, border = NA)
+        graphics::polygon(c(interval$log_true, rev(interval$log_true)),
+          c(interval$lwr, rev(interval$upr)), col = area_band_colour, border = NA)
+        graphics::lines(interval$log_true, interval$fit, col = "black", lwd = 2.3)
       }
-      if (!is.null(interval))
-        graphics::lines(grid, interval[, "fit"], col = "black", lwd = 2.3)
       graphics::points(x, y, pch = 16, cex = 0.78,
         col = grDevices::adjustcolor(colour[m], alpha.f = 0.5))
       graphics::abline(0, 1, col = reference_colour, lty = 2, lwd = 1.65)
@@ -72,8 +78,10 @@ plotBenchmark16 <- function(results, output_dir = results) {
         "black", area_band_colour, reference_colour),
       pch = c(16, NA, 15, NA), lty = c(NA, 1, NA, 2), lwd = c(NA, 2.3, NA, 1.65),
       pt.cex = c(1.30, 1, 1.45, 1))
-    graphics::mtext(expression(log[10]*"(True peak area, integrated counts)"),
-      1, outer = TRUE, line = 0.6, cex = 1.1)
+    graphics::mtext(expression(log[10]*"(true peak area, integrated counts)"),
+      1, outer = TRUE, line = 0.55, cex = 1.2)
+    graphics::mtext(expression(log[10]*"(estimated peak area, integrated counts)"),
+      2, outer = TRUE, line = 1.55, cex = 1.2, las = 0)
   })
 
 

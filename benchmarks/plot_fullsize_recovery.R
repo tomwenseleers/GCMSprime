@@ -31,7 +31,8 @@ plotFullsize16Recovery <- function(directory="benchmarks/results/fullsize16",
   graphics::legend("topleft",c("True positives","False positives","True count"),
     fill=c("#1876C2","#DF4747",NA),pch=c(NA,NA,1),border=NA,bty="n",cex=.85,ncol=3L)
   lim <- range(x,y,band)
-  graphics::plot(x,y,type="n",xlim=lim,ylim=lim,xlab=expression(log[10]~"true total-ion area"),
+  graphics::plot(x,y,type="n",xlim=lim,ylim=lim,las=1,cex.axis=1.08,cex.lab=1.15,
+    xlab=expression(log[10]~"true total-ion area"),
     ylab=expression(log[10]~"estimated total-ion area"),main="Peak-area accuracy")
   graphics::mtext(sprintf("Adjusted R² %.6f   |   Median absolute area error %.3f%%",
     fit$adjusted_R2,100*stats::median(abs(10^(y-x)-1))),3,line=.35,cex=.83)
