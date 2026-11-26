@@ -6,9 +6,8 @@ library(GCMSprime)
 args <- commandArgs(trailingOnly=TRUE)
 library_file <- if (length(args)) args[[1L]] else "codex_sandbox/library_import/MoNA/MoNA-export-GC-MS_Spectra.msp"
 out <- if (length(args)>1L) args[[2L]] else "codex_sandbox/library_search_weights"
-RhpcBLASctl::blas_set_num_threads(1L)
-RhpcBLASctl::omp_set_num_threads(ncores)
-stopifnot(RhpcBLASctl::omp_get_max_threads() >= ncores)
+L0glm::l0glmThreads(blas = 1L, openmp = ncores)
+stopifnot(L0glm::l0glmThreads()$openmp >= ncores)
 dir.create(out,recursive=TRUE,showWarnings=FALSE)
 lib <- if (tolower(tools::file_ext(library_file))=="rds")
   readRDS(library_file) else readMSP(library_file, backend="memory")

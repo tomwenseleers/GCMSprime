@@ -1,3 +1,8 @@
+# GCMSprime 0.1.0.9013
+
+- Batch analysis uses L0glm's native BLAS thread control while processing
+  samples in parallel. The caller's thread limits are restored on exit.
+
 # GCMSprime 0.1.0.9012
 
 The 16-sample benchmark figures and timing tables now use the same fast local-search fits. The PSF-width comparison reports rank and occurrence recovery separately for each initialization.

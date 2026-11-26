@@ -459,9 +459,8 @@ GCMS_initial_sample <- function(task) {
 
 
 GCMS_batch_apply <- function(tasks,workers,threads,fun=GCMS_initial_sample) {
-  blas<-RhpcBLASctl::blas_get_num_procs()
-  on.exit(RhpcBLASctl::blas_set_num_threads(blas),add=TRUE)
-  RhpcBLASctl::blas_set_num_threads(1L)
+  previous_threads<-L0glm::l0glmThreads(blas=1L)
+  on.exit(do.call(L0glm::l0glmThreads,previous_threads),add=TRUE)
   if(workers==1L)return(lapply(tasks,fun))
   keys<-c("OPENBLAS_NUM_THREADS","MKL_NUM_THREADS","OMP_NUM_THREADS","OMP_WAIT_POLICY","R_LIBS")
   old<-Sys.getenv(keys,unset=NA_character_)
@@ -470,7 +469,10 @@ GCMS_batch_apply <- function(tasks,workers,threads,fun=GCMS_initial_sample) {
     R_LIBS=paste(.libPaths(),collapse=.Platform$path.sep))
   cl<-parallel::makePSOCKcluster(workers,rscript_args="--vanilla",useXDR=FALSE)
   on.exit(parallel::stopCluster(cl),add=TRUE)
-  initialize<-function(paths){.libPaths(paths);loadNamespace("GCMSprime");NULL}
+  initialize<-function(paths){
+    .libPaths(paths);loadNamespace("GCMSprime")
+    L0glm::l0glmThreads(blas=1L);NULL
+  }
   environment(initialize)<-baseenv()
   parallel::clusterCall(cl,initialize,.libPaths())
   parallel::parLapplyLB(cl,tasks,fun,chunk.size=1L)

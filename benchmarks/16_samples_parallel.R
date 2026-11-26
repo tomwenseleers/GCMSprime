@@ -3,9 +3,8 @@ library(logconNMF)
 
 benchmark_samples16 <- function(output = tempfile("GCMSprime_samples16_"),
                                 cores = c(1L, 8L, 16L)) {
-  blas <- RhpcBLASctl::blas_get_num_procs()
-  on.exit(RhpcBLASctl::blas_set_num_threads(blas))
-  RhpcBLASctl::blas_set_num_threads(1L)
+  previous_threads <- L0glm::l0glmThreads(blas = 1L)
+  on.exit(do.call(L0glm::l0glmThreads, previous_threads))
   input <- file.path(output, "cdf")
   dir.create(input, recursive = TRUE)
   sim <- simulateGCMSSamples(samples = 16L, n = 1200L, k = 48L,
