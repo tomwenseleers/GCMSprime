@@ -167,8 +167,8 @@ disk. The local rank search recovered **all 7,917 occurrences** in
 **9.37 min** with **only 2 false positives** across 16 chromatograms of
 10,000 scans and 550 channels. Its **estimated rank of 1,000 exactly
 matched the true rank of 1,000**. The same control recovered **true rank
-100 exactly** in **104.48 s** on the smaller simulation. [Compare rank,
-recovery and
+100 exactly** on the smaller simulation in **96.51 s**, with an
+independent repeat of **100.82 s**. [Compare rank, recovery and
 timing](https://tomwenseleers.github.io/GCMSprime/articles/multisample.html#local-rank-search).
 The [two 16-sample
 experiments](https://tomwenseleers.github.io/GCMSprime/articles/multisample.html#benchmark-scales)
@@ -177,14 +177,14 @@ sizes.
 
 In the [small-scale 16-sample software
 comparison](https://tomwenseleers.github.io/GCMSprime/articles/benchmarks.md),
-GCMSprime recovers **769 of 769 true occurrences in 196.28 s**,
-including the acid compound in all seven samples where it occurs. Each
+GCMSprime recovers **769 of 769 true occurrences in 96.51 s**, including
+the acid compound in all seven samples where it occurs. Each
 chromatogram has 100 candidate compounds, 1,200 scans and 258 mass
 channels, with drift, concentration-dependent broadening and a smooth
 background derived from experimental GC/MS data. Initialization uses 32
 ion groups and the final fit uses every original ion. The grouped
-regressions used four two-thread workers. The joint fit reused the
-eight-thread budget on the original ion channels.
+regressions used eight two-thread workers. The joint fit reused the
+16-thread budget on the original ion channels.
 
 The extended search with 100 extra sweeps and a second blind PSF
 recovered **true rank 100 exactly (estimated rank 100)** and achieved an
@@ -196,19 +196,20 @@ traces](https://tomwenseleers.github.io/GCMSprime/articles/multisample.html#empi
 ## Benchmarks against other software
 
 On **16 chromatograms with 100 reference compounds**, GCMSprime recovers
-**769 of 769 true peak occurrences**, with **zero false positives**
-(peak F1 **1.000**). Its total-ion peak areas show **ordinary adjusted
-R² 0.999993** and **median absolute area error 0.079%**.
+**769 of 769 true peak occurrences**, with **only one false positive**
+(peak F1 **0.999**). Its total-ion peak areas show **ordinary adjusted
+R² 0.999993** and **median absolute area error 0.082%**.
 
 [![True and estimated total-ion peak areas with least-squares
 fits](reference/figures/simulated-16-area-predictions.png)](https://tomwenseleers.github.io/GCMSprime/reference/figures/simulated-16-area-predictions.png)
 
-All methods use total-ion count equivalents, accounting for native
-model-ion fractions and integration-time units. The least-squares line
-summarizes the log–log relationship. Its pointwise 95% prediction
-interval describes the scatter of individual matched peak areas. Points
-have opacity 0.5, so darker areas show denser overlap. The dashed 1:1
-reference is visible in every panel.
+The method panels share the same estimated-area axis. All methods use
+total-ion count equivalents, accounting for native model-ion fractions
+and integration-time units. The least-squares line summarizes the
+log–log relationship. Its pointwise 95% prediction interval describes
+the scatter of individual matched peak areas. Points have opacity 0.5,
+so darker areas show denser overlap. The dashed 1:1 reference is visible
+in every panel.
 
 [![Reciprocal spectral cosine similarities for seven
 workflows](reference/figures/simulated-16-spectral-violin.png)](https://tomwenseleers.github.io/GCMSprime/reference/figures/simulated-16-spectral-violin.png)
@@ -217,11 +218,33 @@ workflows](reference/figures/simulated-16-spectral-violin.png)](https://tomwense
 cutoff](reference/figures/simulated-16-spectral-support.png)](https://tomwenseleers.github.io/GCMSprime/reference/figures/simulated-16-spectral-support.png)
 
 The shared **0.1% base-peak cutoff** gives GCMSprime **mean ion-support
-F1 0.995**, compared with **0.860** for the strongest comparator. This
+F1 0.996**, compared with **0.860** for the strongest comparator. This
 is also the default cutoff for GCMSprime’s reported spectra and spectral
 exports. Matching requires reciprocal best spectral hits within **30 RI
 units**. The reference includes compounds absent from individual
 samples.
+
+### Elution profile recovery
+
+The regular compound with the largest total area was present in 11 of
+the 16 chromatograms. GCMSprime recovered all 11 profiles, with a mean
+cosine similarity of **0.999995** to the simulated elution curves. The
+shark-fin acid was present in seven chromatograms. GCMSprime recovered
+all seven profiles, with a mean cosine similarity of **0.999983**.
+
+Both figures show all 16 samples on the original total-ion intensity
+scale. Solid lines show estimated profiles and dashed lines show the
+simulated truth. Colours run from blue to red with increasing true peak
+area. Samples in which the compound was absent have a true profile of
+zero.
+
+[![Estimated and true elution profiles of the highest-abundance regular
+compound across 16 samples, by
+method](reference/figures/simulated-16-regular-profiles.png)](https://tomwenseleers.github.io/GCMSprime/reference/figures/simulated-16-regular-profiles.png)
+
+[![Estimated and true elution profiles of the shark-fin acid across 16
+samples, by
+method](reference/figures/simulated-16-acid-profiles.png)](https://tomwenseleers.github.io/GCMSprime/reference/figures/simulated-16-acid-profiles.png)
 
 See [benchmarks against other
 software](https://tomwenseleers.github.io/GCMSprime/articles/benchmarks.md)

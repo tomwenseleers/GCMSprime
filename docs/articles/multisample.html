@@ -31,7 +31,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">GCMSprime</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9011</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9012</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -177,7 +177,7 @@ compounds.</p>
 <tr class="even">
 <td align="left">Estimated rank</td>
 <td align="right"><strong>100 (exact)</strong></td>
-<td align="right">1,002</td>
+<td align="right"><strong>1,000 (exact)</strong></td>
 </tr>
 <tr class="odd">
 <td align="left">True occurrences</td>
@@ -196,22 +196,23 @@ compounds.</p>
 </tr>
 <tr class="even">
 <td align="left">Complete 16-sample analysis</td>
-<td align="right"><strong>196.28 s (3.27 min)</strong></td>
-<td align="right"><strong>533.88 s (8.90 min)</strong></td>
+<td align="right"><strong>96.51 s (1.61 min)</strong></td>
+<td align="right"><strong>562.05 s (9.37 min)</strong></td>
 </tr>
 </tbody>
 </table>
-<p>The small experiment used 100 extra selective sweeps, a temporary
-fourfold penalty and a second blind PSF. Preparation, PSF calibration
-and ion grouping took 14.59 s, grouped regression and joint fitting
-177.10 s, and export 4.33 s. The enclosing benchmark took <strong>196.28
-s</strong> from CDF input through results. The large resource benchmark
-used the default support settings.</p>
-<p>With the default stopping and support settings, the same CDF files
-took <strong>54.66 s</strong> and gave <strong>estimated rank
-115</strong> against <strong>true rank 100</strong>, with 769 true
-positives and only 26 false positives. The software-comparison figures
-use the 196.28 s extended fit.</p>
+<p>The small benchmark used the fast local search on the blind,
+time-varying PSF start. Data preparation, PSF calibration and ion
+grouping took 10.21 s, grouped regression and joint fitting 81.46 s, and
+export 4.59 s. Including the benchmark wrapper, the complete analysis
+took <strong>96.51 s</strong>. The original-ion GIC was
+<strong>4,142,023</strong>. A second run took <strong>100.82 s</strong>
+and returned the same rank, GIC, areas and spectra. <a href="https://github.com/tomwenseleers/GCMSprime/blob/master/benchmarks/results/calibrated-threads.csv" class="external-link">Recorded
+runs</a>.</p>
+<p>With the default stopping and support settings, an eight-thread run
+on the same CDF files took <strong>54.66 s</strong> and gave
+<strong>estimated rank 115</strong> against <strong>true rank
+100</strong>, with 769 true positives and only 26 false positives.</p>
 <div class="section level3">
 <h3 id="local-rank-search">Local search for the shared rank<a class="anchor" aria-label="anchor" href="#local-rank-search"></a>
 </h3>
@@ -247,7 +248,7 @@ and ranks were used only for evaluation.</p>
 <td align="right">54.66 s</td>
 </tr>
 <tr class="even">
-<td align="left">Small, local search</td>
+<td align="left">Small, local search (eight threads)</td>
 <td align="right"><strong>100 / 100 (exact)</strong></td>
 <td align="right">769</td>
 <td align="right">1</td>
@@ -272,6 +273,73 @@ and ranks were used only for evaluation.</p>
 </tr>
 </tbody>
 </table>
+<p>The local rank search was applied to each starting PSF on the same 16
+chromatograms. All runs used eight threads and scored matched peaks on
+the original ion channels.</p>
+<table style="width:100%;" class="table">
+<colgroup>
+<col width="11%">
+<col width="11%">
+<col width="11%">
+<col width="11%">
+<col width="11%">
+<col width="11%">
+<col width="11%">
+<col width="11%">
+<col width="11%">
+</colgroup>
+<thead><tr class="header">
+<th align="left">Starting PSF</th>
+<th align="right">Estimated / true rank</th>
+<th align="right">TP</th>
+<th align="right">FP</th>
+<th align="right">Missed</th>
+<th align="right">Acid recovered</th>
+<th align="right">Median area error</th>
+<th align="right">Original-ion GIC</th>
+<th align="right">CDF time</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left">Calibrated time-varying</td>
+<td align="right"><strong>100 / 100 (exact)</strong></td>
+<td align="right">769</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">7 / 7</td>
+<td align="right">0.082%</td>
+<td align="right">4,142,023</td>
+<td align="right">104.48 s</td>
+</tr>
+<tr class="even">
+<td align="left">Half-width Gaussian</td>
+<td align="right">108 / 100</td>
+<td align="right">764</td>
+<td align="right">13</td>
+<td align="right">5</td>
+<td align="right">7 / 7</td>
+<td align="right">0.089%</td>
+<td align="right">4,171,642</td>
+<td align="right">113.66 s</td>
+</tr>
+<tr class="odd">
+<td align="left">Double-width Gaussian</td>
+<td align="right">105 / 100</td>
+<td align="right">769</td>
+<td align="right">23</td>
+<td align="right">0</td>
+<td align="right">7 / 7</td>
+<td align="right">0.095%</td>
+<td align="right">4,324,923</td>
+<td align="right">297.27 s</td>
+</tr>
+</tbody>
+</table>
+<p>The calibrated start recovered the true rank exactly. The half-width
+Gaussian retained extra factors and missed five occurrences. The local
+search remains optional. <a href="https://github.com/tomwenseleers/GCMSprime/blob/master/benchmarks/benchmark_gaussian_starts.R" class="external-link">Reproduce
+the Gaussian starts</a> · <a href="https://github.com/tomwenseleers/GCMSprime/blob/master/benchmarks/results/fast-gaussian-starts.csv" class="external-link">Download
+the measurements</a>.</p>
 <div class="float">
 <img src="../reference/figures/rank-search-comparison.png" alt="Shared rank, occurrence recovery and complete CDF workflow time with and without local search"><div class="figcaption">Shared rank, occurrence recovery and complete
 CDF workflow time with and without local search</div>
@@ -301,9 +369,8 @@ separate standard.</p>
 <span><span class="va">fit</span><span class="op">$</span><span class="va">coupled</span><span class="op">$</span><span class="va">refinement</span></span></code></pre></div>
 <p>The timings include CDF processing, PSF initialization, joint fitting
 and export. Simulation, scoring and separate standard calibration are
-outside the timed fits. The area and profile figures below use the
-extended search for the small software comparison and the default fit
-for the large resource benchmark. <a href="https://github.com/tomwenseleers/GCMSprime/blob/master/benchmarks/results/rank-search.csv" class="external-link">Per-fit
+outside the timed fits. The area, spectral and profile figures use the
+corresponding fast local-search fit at each scale. <a href="https://github.com/tomwenseleers/GCMSprime/blob/master/benchmarks/results/rank-search.csv" class="external-link">Per-fit
 results and area errors</a>.</p>
 </div>
 </div>
@@ -312,10 +379,9 @@ results and area errors</a>.</p>
 </h2>
 <p>The small-scale fit (seed <code>9118</code>) uses two blind-PSF
 windows, three PSF iterations, 32 common ion groups and up to 12 initial
-conditional sweeps on the original channels. The published small fit
-also used 100 extra selective sweeps, a temporary fourfold penalty and a
-second blind PSF. All profile figures for this simulation on both
-websites use the same saved fit.</p>
+conditional sweeps on the original channels. The published fit used the
+fast local rank search on the initial dictionary. All profile figures
+for this simulation on both websites use the same saved fit.</p>
 <p>The <strong>16 chromatograms</strong> share a library of <strong>100
 reference compounds</strong>. Each spans a 20-minute retention window,
 with 1,200 scans and all 258 mass channels. Compounds are absent from
@@ -339,20 +405,20 @@ complete reference library:</p>
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">GCMSbenchmark</span><span class="op">)</span></span>
 <span><span class="va">bench</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"benchmarks"</span>, package<span class="op">=</span><span class="st">"GCMSbenchmark"</span>, mustWork<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/source.html" class="external-link">source</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">bench</span>, <span class="st">"simulated-16.R"</span><span class="op">)</span>, encoding<span class="op">=</span><span class="st">"UTF-8"</span><span class="op">)</span></span>
-<span><span class="va">small</span> <span class="op">&lt;-</span> <span class="fu">runBenchmark16</span><span class="op">(</span><span class="st">"benchmark-small"</span>, method<span class="op">=</span><span class="st">"GCMSprime"</span>, ncores<span class="op">=</span><span class="fl">8L</span>, support_search<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="va">small</span> <span class="op">&lt;-</span> <span class="fu">runBenchmark16</span><span class="op">(</span><span class="st">"benchmark-small"</span>, method<span class="op">=</span><span class="st">"GCMSprime"</span>, ncores<span class="op">=</span><span class="fl">16L</span>, support_search<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="va">small</span><span class="op">$</span><span class="va">summary</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"analysis_s"</span>, <span class="st">"true_rank"</span>, <span class="st">"estimated_rank"</span>, <span class="st">"rank_exact"</span>, <span class="st">"TP"</span>, <span class="st">"FP"</span>, <span class="st">"FN"</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="co"># Optional figures from the saved results:</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/source.html" class="external-link">source</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">bench</span>, <span class="st">"plot-simulated-16.R"</span><span class="op">)</span>, encoding<span class="op">=</span><span class="st">"UTF-8"</span><span class="op">)</span></span>
 <span><span class="fu">plotBenchmark16</span><span class="op">(</span><span class="st">"benchmark-small"</span><span class="op">)</span></span></code></pre></div>
 <p>The analysis recovered <strong>769 of 769 true occurrences</strong>,
-with <strong>zero false positives</strong> (peak F1
-<strong>1.000</strong>), including all seven acid occurrences. Ordinary
+with <strong>only one false positive</strong> (peak F1
+<strong>0.999</strong>), including all seven acid occurrences. Ordinary
 adjusted log-area R² was <strong>0.999993</strong>, the median absolute
-peak-area error was <strong>0.079%</strong>, and mean spectral
-ion-support F1 was <strong>0.995</strong> at the shared 0.1% base-peak
+peak-area error was <strong>0.082%</strong>, and mean spectral
+ion-support F1 was <strong>0.996</strong> at the shared 0.1% base-peak
 threshold.</p>
-<p>The benchmark wrapper measured <strong>196.28 s</strong> from CDF
-input through results with four two-thread PSF workers and eight threads
+<p>The benchmark wrapper measured <strong>96.51 s</strong> from CDF
+input through results with eight two-thread PSF workers and 16 threads
 available for joint refinement on an HP ZBook Fury G8, Intel Core
 i9-11950H, eight physical cores, 16 logical threads, Windows and R
 4.5.0. CDF generation is separate.</p>
@@ -364,9 +430,10 @@ plots and tables.</p>
 <div class="section level3">
 <h3 id="empirical-gic-gap">How close is the fit to a truth-initialized solution?<a class="anchor" aria-label="anchor" href="#empirical-gic-gap"></a>
 </h3>
-<p>The estimated-profile start descended from 21,188,577 to
-<strong>4,146,698</strong> and the true-profile start from 10,875,547 to
-<strong>4,142,623</strong>. Both reached <strong>estimated rank 100,
+<p>In a separate convergence experiment with 100 extra sweeps and a
+second blind PSF, the estimated-profile start descended from 21,188,577
+to <strong>4,146,698</strong> and the true-profile start from 10,875,547
+to <strong>4,142,623</strong>. Both reached <strong>estimated rank 100,
 equal to the true rank of 100</strong>. The GIC held steady or decreased
 at every recorded checkpoint (158 for the estimated start and 126 for
 the true-profile start). Both fits used the observed counts and
@@ -408,10 +475,10 @@ intervals, a background estimated from <code>gcmsData2</code> and
 quasi-Poisson dispersion 783.18. A separate narrow-peak standard
 supplies the time-varying PSF.</p>
 <p>With a <strong>true rank of 1,000</strong>, the conditional solver
-estimated <strong>1,002 shared factors</strong> from the original ion
-measurements. All <strong>7,917 true occurrences</strong> were
-recovered, including every occurrence of the shark-fin acid. The largest
-absolute area error among the eight acid occurrences was
+recovered <strong>exactly 1,000 shared factors</strong> from the
+original ion measurements. All <strong>7,917 true occurrences</strong>
+were recovered, including every occurrence of the shark-fin acid. The
+largest absolute area error among the eight acid occurrences was
 <strong>0.19%</strong>.</p>
 <table class="table">
 <thead><tr class="header">
@@ -421,7 +488,7 @@ absolute area error among the eight acid occurrences was
 <tbody>
 <tr class="odd">
 <td align="left">True rank / estimated rank</td>
-<td align="right">1,000 / 1,002</td>
+<td align="right"><strong>1,000 / 1,000 (exact)</strong></td>
 </tr>
 <tr class="even">
 <td align="left">True occurrences recovered</td>
@@ -429,15 +496,15 @@ absolute area error among the eight acid occurrences was
 </tr>
 <tr class="odd">
 <td align="left">False positives / false negatives</td>
-<td align="right">13 / 0</td>
+<td align="right">2 / 0</td>
 </tr>
 <tr class="even">
 <td align="left">Occurrence F1</td>
-<td align="right">0.99918</td>
+<td align="right">0.99987</td>
 </tr>
 <tr class="odd">
 <td align="left">Joint quasi-GIC</td>
-<td align="right">34,062,277</td>
+<td align="right">34,056,138</td>
 </tr>
 <tr class="even">
 <td align="left">Median spectral cosine</td>
@@ -445,7 +512,7 @@ absolute area error among the eight acid occurrences was
 </tr>
 <tr class="odd">
 <td align="left">Mean within-spectrum ion F1</td>
-<td align="right">0.99519</td>
+<td align="right">0.99517</td>
 </tr>
 <tr class="even">
 <td align="left">Mean profile cosine</td>
@@ -457,7 +524,7 @@ absolute area error among the eight acid occurrences was
 </tr>
 <tr class="even">
 <td align="left">Adjusted log-area R²</td>
-<td align="right">0.999976</td>
+<td align="right">0.999978</td>
 </tr>
 <tr class="odd">
 <td align="left">Acid occurrences recovered</td>
@@ -483,35 +550,34 @@ uses RI-constrained reciprocal hits.</p>
 <tr class="odd">
 <td align="left">Reading data, preparing sample PSFs and
 initialization</td>
-<td align="right">144.35</td>
+<td align="right">142.14</td>
 </tr>
 <tr class="even">
 <td align="left">Grouped PSF regression, alignment and joint
 original-channel refinement</td>
-<td align="right">357.67</td>
+<td align="right">388.96</td>
 </tr>
 <tr class="odd">
 <td align="left">Constructing and exporting results</td>
-<td align="right">31.86</td>
+<td align="right">30.95</td>
 </tr>
 <tr class="even">
 <td align="left"><strong>Complete fit and exports</strong></td>
-<td align="right"><strong>533.88</strong></td>
+<td align="right"><strong>562.05</strong></td>
 </tr>
 </tbody>
 </table>
-<p>Within the 357.67 s coupled stage, grouped PSF regression took 108.75
-s and alignment and joint refinement took 248.67 s. Simulation, separate
+<p>Within the 388.96 s coupled stage, grouped PSF regression took 134.67
+s and alignment and joint refinement took 254.05 s. Simulation, separate
 standard calibration and scoring against truth are outside the timed
 fit.</p>
 <p>On the HP ZBook Fury G8 (Core i9-11950H, eight physical cores, 16
 logical cores and 64 GB RAM), the memory-aware scheduler used <strong>6
 PSF workers with 2 threads each</strong>. The joint solver could use all
 16 threads. Across the measured workflow the process tree averaged
-<strong>4.59 logical-core equivalents</strong> and peaked at
-<strong>6.96 GiB working set</strong> and <strong>7.23 GiB private
-memory</strong>. At least 29.46 GiB of physical memory stayed
-available.</p>
+<strong>4.76 logical-core equivalents</strong> and peaked at
+<strong>7.01 GiB working set</strong> and <strong>11.11 GiB private
+memory</strong>.</p>
 <div class="float">
 <img src="../reference/figures/fullsize-16-resources.png" alt="Measured process-tree memory and CPU use for sixteen full-sized chromatograms"><div class="figcaption">Measured process-tree memory and CPU use for
 sixteen full-sized chromatograms</div>
@@ -548,7 +614,7 @@ repository root:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Run from a GCMSprime repository checkout; use a fresh output directory.</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/source.html" class="external-link">source</a></span><span class="op">(</span><span class="st">"benchmarks/benchmark_fullsize_16.R"</span><span class="op">)</span></span>
-<span><span class="fu">benchmarkFullsize16</span><span class="op">(</span><span class="st">"benchmark-large"</span>, stage<span class="op">=</span><span class="st">"all"</span>, ncores<span class="op">=</span><span class="fl">16L</span><span class="op">)</span></span>
+<span><span class="fu">benchmarkFullsize16</span><span class="op">(</span><span class="st">"benchmark-large"</span>, stage<span class="op">=</span><span class="st">"all"</span>, ncores<span class="op">=</span><span class="fl">16L</span>, workers<span class="op">=</span><span class="fl">6L</span>, coupling<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>penalty_search<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu">plotFullsize16Acid</span><span class="op">(</span><span class="st">"benchmark-large"</span><span class="op">)</span></span></code></pre></div>
 <p>This writes inputs, fitted results (including timings), scoring
 tables and the acid PNG to <code>benchmark-large</code>. Separate
@@ -701,11 +767,12 @@ identities and 1,076 occurrences</strong>.</p>
 </tbody>
 </table>
 <p>The joint quasi-GIC was <strong>28,467,211</strong>, with each shared
-spectrum charged once. The two beer CDFs took <strong>302.19 s</strong>
-from input through export. Preparation and calibration took 122.73 s,
-grouped regression and joint refinement 172.88 s, and result
-construction and export 6.10 s. Separate RI calibration took 2.52 s and
-RI annotation and export took 3.69 s. Plotting is excluded.</p>
+spectrum charged once. The two beer CDFs took <strong>339.26 s</strong>
+from input through export. Preparation and PSF calibration took 145.32
+s, grouped regression and joint refinement 186.38 s, and result
+construction and export 6.94 s. RI calibration added 3.11 s and RI
+annotation and export added 4.36 s, bringing the total to <strong>346.73
+s</strong> before plotting.</p>
 <p>Using the Agilent NIST records, a ±30 RI window and a minimum
 spectral cosine of 0.85, the two beers yielded <strong>212 and 203
 distinct reciprocal identifications</strong>. There were 88 and 73

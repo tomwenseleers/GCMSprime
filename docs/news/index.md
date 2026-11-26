@@ -1,5 +1,11 @@
 # Changelog
 
+## GCMSprime 0.1.0.9012
+
+The 16-sample benchmark figures and timing tables now use the same fast
+local-search fits. The PSF-width comparison reports rank and occurrence
+recovery separately for each initialization.
+
 ## GCMSprime 0.1.0.9011
 
 - `batch = list(coupling = list(penalty_search = TRUE))` enables local

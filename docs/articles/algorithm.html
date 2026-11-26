@@ -31,7 +31,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">GCMSprime</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9011</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9012</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -244,17 +244,18 @@ same objective differences.</p>
 <p>For simulated data, pass <code>truth.profiles</code> to
 <code><a href="../reference/gcmsDeco.html">gcmsDeco()</a></code> to compare the standard fit with the same solver
 initialized from known, matched elution profiles. Both fits estimate
-spectra and abundances from the measured counts. The estimated-profile
-start descended from 21,188,577 to <strong>4,146,698</strong> and the
-true-profile start from 10,875,547 to <strong>4,142,623</strong>. Both
-reached <strong>estimated rank 100, equal to the true rank of
-100</strong>. The GIC held steady or decreased at every recorded
-checkpoint (158 for the estimated start and 126 for the true-profile
-start). Both fits used the observed counts and identical search
-settings. Their endpoints differ by <strong>0.098%</strong> of the
-absolute reference GIC. This empirical optimality gap measures agreement
-with an attainable reference. Its distance from the global minimum is
-unknown.</p>
+spectra and abundances from the measured counts. In a separate
+convergence experiment with 100 extra sweeps and a second blind PSF, the
+estimated-profile start descended from 21,188,577 to
+<strong>4,146,698</strong> and the true-profile start from 10,875,547 to
+<strong>4,142,623</strong>. Both reached <strong>estimated rank 100,
+equal to the true rank of 100</strong>. The GIC held steady or decreased
+at every recorded checkpoint (158 for the estimated start and 126 for
+the true-profile start). Both fits used the observed counts and
+identical search settings. Their endpoints differ by
+<strong>0.098%</strong> of the absolute reference GIC. This empirical
+optimality gap measures agreement with an attainable reference. Its
+distance from the global minimum is unknown.</p>
 <p>The <a href="multisample.html#empirical-gic-gap">multisample
 example</a> includes the code, timings and convergence figure link.</p>
 <p>Solver selection is automatic. Sections 3 and 4 give the

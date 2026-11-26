@@ -127,16 +127,16 @@ experiment$areas
 ```
 
 Grouped PSF regressions divide the core budget between independent samples and native threads. The scheduler estimates how many regressions fit in available memory, including Windows commit headroom. After those workers exit, a single process shares the original ion counts and fitted means. OpenMP updates elution profiles across samples. It fits each ion’s shared spectrum and sample-specific background coefficients independently, keeping a fixed component order within each ion. The general identity-link solver can stream original-channel blocks from disk.
-The local rank search recovered **all 7,917 occurrences** in **9.37 min** with **only 2 false positives** across 16 chromatograms of 10,000 scans and 550 channels. Its **estimated rank of 1,000 exactly matched the true rank of 1,000**. The same control recovered **true rank 100 exactly** in **104.48 s** on the smaller simulation. [Compare rank, recovery and timing](https://tomwenseleers.github.io/GCMSprime/articles/multisample.html#local-rank-search).
+The local rank search recovered **all 7,917 occurrences** in **9.37 min** with **only 2 false positives** across 16 chromatograms of 10,000 scans and 550 channels. Its **estimated rank of 1,000 exactly matched the true rank of 1,000**. The same control recovered **true rank 100 exactly** on the smaller simulation in **96.51 s**, with an independent repeat of **100.82 s**. [Compare rank, recovery and timing](https://tomwenseleers.github.io/GCMSprime/articles/multisample.html#local-rank-search).
 The [two 16-sample experiments](https://tomwenseleers.github.io/GCMSprime/articles/multisample.html#benchmark-scales) give the measured resource use, timings and recovery at both acquisition sizes.
 
 In the [small-scale 16-sample software comparison](articles/benchmarks.html), GCMSprime recovers
-**769 of 769 true occurrences in 104.48 s**, including the acid compound in
+**769 of 769 true occurrences in 96.51 s**, including the acid compound in
 all seven samples where it occurs. Each chromatogram has 100 candidate
 compounds, 1,200 scans and 258 mass channels, with drift, concentration-dependent
 broadening and a smooth background derived from experimental GC/MS data.
 Initialization uses 32 ion groups and the final fit uses every original ion.
-The grouped regressions used four two-thread workers. The joint fit reused the eight-thread budget on the original ion channels.
+The grouped regressions used eight two-thread workers. The joint fit reused the 16-thread budget on the original ion channels.
 
 The extended search with 100 extra sweeps and a second blind PSF recovered **true rank 100 exactly (estimated rank 100)** and achieved an **empirical GIC gap of 0.098%** relative to a
 fit initialised with the true elution profiles and cross-sample compound identities.

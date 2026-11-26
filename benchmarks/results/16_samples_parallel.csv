@@ -1,4 +1,4 @@
-"algorithm","ncores","workers","clustering","initial","coupled","exports","total","GIC","shared","occurrences","TP","FP","FN","TN","F1","MCC","median_spectral_cosine","true_rank","estimated_rank","rank_exact"
-"conditional",1,1,0,19.43,32.89,4.23999999999999,56.56,9985082.22140188,48,380,380,0,0,388,1,1,0.999994981420683,48,48,TRUE
-"conditional",8,8,0,13.02,12.05,3.53999999999999,28.61,9985082.22140188,48,380,380,0,0,388,1,1,0.999994981420683,48,48,TRUE
-"conditional",16,16,0,12.68,11.64,3.56,27.88,9985082.22140188,48,380,380,0,0,388,1,1,0.999994981420683,48,48,TRUE
+"algorithm","ncores","workers","clustering","initial","coupled","exports","total","GIC","shared","true_rank","estimated_rank","rank_exact","occurrences","TP","FP","FN","TN","F1","MCC","median_spectral_cosine"
+"conditional",1,1,0,22.28,38.7,4.69,65.67,9985082.22140188,48,48,48,TRUE,380,380,0,0,388,1,1,0.999994981420683
+"conditional",8,8,0,15.49,12.25,3.84999999999999,31.59,9985082.22140188,48,48,48,TRUE,380,380,0,0,388,1,1,0.999994981420683
+"conditional",16,16,0,14.67,11.78,4.02,30.47,9985082.22140188,48,48,48,TRUE,380,380,0,0,388,1,1,0.999994981420683

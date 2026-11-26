@@ -31,12 +31,12 @@ used for scoring; the deconvolution receives neither the known areas nor
 the true profiles.
 
 The optional search recovered **true rank 100 exactly (estimated rank
-100)** and **769 of 769 occurrences with zero false positives**. The
+100)** and **769 of 769 occurrences with only one false positive**. The
 acid was recovered in all seven samples where it was present.
 
 | Method        | Seconds |  Estimated rank |  TP |   FP | Sensitivity | Peak F1 | Ion F1 |
 |:--------------|--------:|----------------:|----:|-----:|------------:|--------:|-------:|
-| GCMSprime     |  196.28 | **100 (exact)** | 769 |    0 |      100.0% |   1.000 |  0.995 |
+| GCMSprime     |   96.51 | **100 (exact)** | 769 |    1 |      100.0% |   0.999 |  0.996 |
 | MS-DIAL       |   17.61 |               — | 675 |  641 |       87.8% |   0.647 |  0.858 |
 | mzmine GC-EI  |   38.47 |               — | 622 |   70 |       80.9% |   0.851 |  0.860 |
 | eRah          |   17.07 |               — | 645 | 1912 |       83.9% |   0.388 |  0.771 |
@@ -55,40 +55,52 @@ and xcms + CAMERA uses four workers. Input conversion is timed
 separately. The six comparator rows use their saved outputs and timings
 from the identical simulated inputs.
 
-A shorter search recovered **true rank 100 exactly** in **104.48 s**,
-with all 769 true occurrences and only 1 extra occurrence. The same
-control recovered **true rank 1,000 exactly** on the independent large
-example. [Compare local search at both
-scales](https://tomwenseleers.github.io/GCMSprime/articles/multisample.html#local-rank-search).
+The small benchmark used the fast local search on the blind,
+time-varying PSF start. Data preparation, PSF calibration and ion
+grouping took 10.21 s, grouped regression and joint fitting 81.46 s, and
+export 4.59 s. Including the benchmark wrapper, the complete analysis
+took **96.51 s**. The original-ion GIC was **4,142,023**. A second run
+took **100.82 s** and returned the same rank, GIC, areas and spectra.
+[Recorded
+runs](https://github.com/tomwenseleers/GCMSprime/blob/master/benchmarks/results/calibrated-threads.csv).
 
-The small experiment used 100 extra selective sweeps, a temporary
-fourfold penalty and a second blind PSF. Preparation, PSF calibration
-and ion grouping took 14.59 s, grouped regression and joint fitting
-177.10 s, and export 4.33 s. The enclosing benchmark took **196.28 s**
-from CDF input through results. The large resource benchmark used the
-default support settings.
+With the default stopping and support settings, an eight-thread run on
+the same CDF files took **54.66 s** and gave **estimated rank 115**
+against **true rank 100**, with 769 true positives and only 26 false
+positives.
 
-With the default stopping and support settings, the same CDF files took
-**54.66 s** and gave **estimated rank 115** against **true rank 100**,
-with 769 true positives and only 26 false positives. The
-software-comparison figures use the 196.28 s extended fit. The
-original-channel GIC of the selected rank-100 fit was **4,146,698**.
-
-GCMSprime used four two-thread workers for grouped PSF regressions and
-could use eight threads for the joint fit. Profile and background
-updates run across samples. Shared spectra run across ions. Local merge
+GCMSprime used eight two-thread workers for grouped PSF regressions and
+could use 16 threads for the joint fit. Profile and background updates
+run across samples. Shared spectra run across ions. Local merge
 decisions and file exports also contribute to elapsed time.
 
 ## Sensitivity to the starting peak width
 
-The same 16 chromatograms were also fitted from Gaussian PSFs of 3.64
-and 14.56 scans at half height. The calibrated and both Gaussian starts
-recovered **estimated rank 100, equal to true rank 100**, all 769
-occurrences and zero false positives after the blind PSF exchange.
-Across starts, the largest difference between two estimates of a matched
-peak area was 0.86%. The acid area in sample 009 was 99.76–99.81% of
-truth. The calibration, support proposals and GIC comparisons used only
-observed counts.
+The local rank search was applied to each starting PSF on the same 16
+chromatograms. All runs used eight threads and scored matched peaks on
+the original ion channels.
+
+| Starting PSF | Estimated / true rank | TP | FP | Missed | Acid recovered | Median area error | Original-ion GIC | CDF time |
+|:---|---:|---:|---:|---:|---:|---:|---:|---:|
+| Calibrated time-varying | **100 / 100 (exact)** | 769 | 1 | 0 | 7 / 7 | 0.082% | 4,142,023 | 104.48 s |
+| Half-width Gaussian | 108 / 100 | 764 | 13 | 5 | 7 / 7 | 0.089% | 4,171,642 | 113.66 s |
+| Double-width Gaussian | 105 / 100 | 769 | 23 | 0 | 7 / 7 | 0.095% | 4,324,923 | 297.27 s |
+
+The calibrated start recovered the true rank exactly. The half-width
+Gaussian retained extra factors and missed five occurrences. The local
+search remains optional. [Reproduce the Gaussian
+starts](https://github.com/tomwenseleers/GCMSprime/blob/master/benchmarks/benchmark_gaussian_starts.R)
+· [Download the
+measurements](https://github.com/tomwenseleers/GCMSprime/blob/master/benchmarks/results/fast-gaussian-starts.csv).
+
+The extended search added a second blind PSF and 100 refinement sweeps.
+From the calibrated start and both Gaussian starts it recovered
+**estimated rank 100, equal to true rank 100**, all 769 occurrences and
+zero false positives after the blind PSF exchange. Across starts, the
+largest difference between two estimates of a matched peak area was
+0.86%. The acid area in sample 009 was 99.76–99.81% of truth. The
+calibration, support proposals and GIC comparisons used only observed
+counts.
 
 ![False positive and missed calls across three PSF starts and three
 searches](../reference/figures/psf-start-recovery.png)
@@ -114,13 +126,14 @@ match.
 [![Ordinary log–log peak-area fits and 95% prediction
 intervals](../reference/figures/simulated-16-area-predictions.png)](https://tomwenseleers.github.io/GCMSprime/reference/figures/simulated-16-area-predictions.png)
 
-All panels use **total-ion count equivalents**. Spectra are normalized
-to unit L1 norm, with their magnitude transferred to the corresponding
-profile or area. Native model-ion areas are corrected for their ion
-fraction and integration-time units. The conversions use each engine’s
-exported factors and acquisition metadata, without calibration against
-the known answers. The native values and conversion factors remain in
-the result objects.
+The method panels share the same estimated-area axis. All panels use
+**total-ion count equivalents**. Spectra are normalized to unit L1 norm,
+with their magnitude transferred to the corresponding profile or area.
+Native model-ion areas are corrected for their ion fraction and
+integration-time units. The conversions use each engine’s exported
+factors and acquisition metadata, without calibration against the known
+answers. The native values and conversion factors remain in the result
+objects.
 
 For a component with profile h and spectrum s, let c=\sum_j s_j, p=s/c
 and \widetilde h=ch. Then hs^\top=\widetilde h p^\top and \sum_j p_j=1.
@@ -135,8 +148,8 @@ dashed line shows exact agreement. Darker points indicate overlap
 (opacity 0.5).
 
 GCMSprime recovered **all 769 occurrences**, with **adjusted R²
-0.999993** and a **median absolute area error of 0.079%**. Even the
-lowest estimate was 98.3% of its true area. Area agreement is
+0.999993** and a **median absolute area error of 0.082%**. Even the
+lowest estimate was 98.1% of its true area. Area agreement is
 conditional on recovered true matches, so it is shown together with
 sensitivity and false-positive counts.
 
@@ -158,7 +171,7 @@ Ion support uses a shared **0.1% of base-peak intensity cutoff**,
 applied independently to reference and recovered spectra for every
 method: I_j\>0 and I_j\geq0.001\max_l I_l. Within-spectrum
 F_1=2TP/(2TP+FP+FN) is averaged over correctly matched true spectra.
-GCMSprime achieves **mean ion F1 0.995**, compared with **0.860** for
+GCMSprime achieves **mean ion F1 0.996**, compared with **0.860** for
 the strongest comparator. Individual points accompany the violins; the
 logit-spaced axis retains labels in the original F1 units.
 
@@ -212,7 +225,7 @@ remain on their native total-ion scale.
 
 GCMSprime recovers all occurrences of both the regular EMG and the
 shark-fin-shaped acid. Mean profile cosine, counting missed occurrences
-as zero, is **0.999996 for the regular compound** and **0.999983 for the
+as zero, is **0.999995 for the regular compound** and **0.999983 for the
 acid**; median cosine among matched occurrences is **0.999998** and
 **0.999990**, respectively. Other configurations often truncate
 profiles, split their contributions or miss the acid. MS-DIAL also

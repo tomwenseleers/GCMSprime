@@ -6,7 +6,7 @@
   on 16 samples with 48 reference compounds and 1,200 scans. The conditional
   solver recovered **true rank 48 exactly (estimated rank 48)** and all 380 occurrences with zero false positives. The
   shared spectra, areas and GIC agreed across 1, 8 and 16 requested threads.
-  Wall times were 56.56, 28.61 and 27.88 seconds, respectively.
+  Wall times were 65.67, 31.59 and 30.47 seconds, respectively.
   [Worker-count results](results/16_samples_parallel.csv)
 - `benchmark_fullsize_16.R` reproduces the 16-sample resource validation with
   10,000 scans, 550 recorded mass channels and about 500 compounds per sample.

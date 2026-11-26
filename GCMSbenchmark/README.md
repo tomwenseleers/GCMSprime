@@ -37,7 +37,7 @@ The optional search recovered **true rank 100 exactly (estimated rank 100)** and
 
 | Method | Seconds | Estimated rank | TP | FP | Sensitivity | Peak F1 | Ion F1 |
 |:--|--:|--:|--:|--:|--:|--:|--:|
-| GCMSprime | 104.48 | **100 (exact)** | 769 | 1 | 100.0% | 0.999 | 0.996 |
+| GCMSprime | 96.51 | **100 (exact)** | 769 | 1 | 100.0% | 0.999 | 0.996 |
 | MS-DIAL | 17.61 | — | 675 | 641 | 87.8% | 0.647 | 0.858 |
 | mzmine GC-EI | 38.47 | — | 622 | 70 | 80.9% | 0.851 | 0.860 |
 | eRah | 17.07 | — | 645 | 1912 | 83.9% | 0.388 | 0.771 |
@@ -52,11 +52,11 @@ Workstation with an Intel Core i9-11950H at 2.60 GHz, eight physical cores
 and 16 logical threads, Windows and R 4.5.0. AMDIS runs serially and xcms + CAMERA uses four workers. Input conversion is timed separately. The six comparator rows use
 their saved outputs and timings from the identical simulated inputs.
 
-The small benchmark used the fast local search on the blind, time-varying PSF start. Data preparation, PSF calibration and ion grouping took 10.85 s, grouped regression and joint fitting 89.05 s, and export 4.35 s. Including the benchmark wrapper, the complete analysis took **104.48 s**. The original-ion GIC was **4,142,023**.
+The small benchmark used the fast local search on the blind, time-varying PSF start. Data preparation, PSF calibration and ion grouping took 10.21 s, grouped regression and joint fitting 81.46 s, and export 4.59 s. Including the benchmark wrapper, the complete analysis took **96.51 s**. The original-ion GIC was **4,142,023**. A second run took **100.82 s** and returned the same rank, GIC, areas and spectra. [Recorded runs](https://github.com/tomwenseleers/GCMSprime/blob/master/benchmarks/results/calibrated-threads.csv).
 
-With the default stopping and support settings, the same CDF files took **54.66 s** and gave **estimated rank 115** against **true rank 100**, with 769 true positives and only 26 false positives. The figures use the optional search.
+With the default stopping and support settings, an eight-thread run on the same CDF files took **54.66 s** and gave **estimated rank 115** against **true rank 100**, with 769 true positives and only 26 false positives. The figures use the optional search.
 
-GCMSprime used four two-thread workers for grouped PSF regressions and could use eight threads for the joint fit. Profile and background updates run across samples. Shared spectra run across ions. Local merge decisions and file exports also contribute to elapsed time.
+GCMSprime used eight two-thread workers for grouped PSF regressions and could use 16 threads for the joint fit. Profile and background updates run across samples. Shared spectra run across ions. Local merge decisions and file exports also contribute to elapsed time.
 
 [![Estimated-versus-true total-ion peak areas](../GCMSprime/man/figures/simulated-16-area-predictions.png)](../GCMSprime/man/figures/simulated-16-area-predictions.png)
 

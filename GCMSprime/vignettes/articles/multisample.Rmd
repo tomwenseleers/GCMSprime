@@ -70,11 +70,11 @@ native scan grids and report recovery against the generating compounds.
 | True occurrences | 769 | 7,917 |
 | Samples containing the acid | 7 | 8 |
 | PSF calibration | Blind, two windows | Standard-assisted, ten windows |
-| Complete 16-sample analysis | **104.48 s (1.74 min)** | **562.05 s (9.37 min)** |
+| Complete 16-sample analysis | **96.51 s (1.61 min)** | **562.05 s (9.37 min)** |
 
-The small benchmark used the fast local search on the blind, time-varying PSF start. Data preparation, PSF calibration and ion grouping took 10.85 s, grouped regression and joint fitting 89.05 s, and export 4.35 s. Including the benchmark wrapper, the complete analysis took **104.48 s**. The original-ion GIC was **4,142,023**.
+The small benchmark used the fast local search on the blind, time-varying PSF start. Data preparation, PSF calibration and ion grouping took 10.21 s, grouped regression and joint fitting 81.46 s, and export 4.59 s. Including the benchmark wrapper, the complete analysis took **96.51 s**. The original-ion GIC was **4,142,023**. A second run took **100.82 s** and returned the same rank, GIC, areas and spectra. [Recorded runs](https://github.com/tomwenseleers/GCMSprime/blob/master/benchmarks/results/calibrated-threads.csv).
 
-With the default stopping and support settings, the same CDF files took **54.66 s** and gave **estimated rank 115** against **true rank 100**, with 769 true positives and only 26 false positives.
+With the default stopping and support settings, an eight-thread run on the same CDF files took **54.66 s** and gave **estimated rank 115** against **true rank 100**, with 769 true positives and only 26 false positives.
 
 
 ### Local search for the shared rank {#local-rank-search}
@@ -87,7 +87,7 @@ in a sample. The true spectra, profiles and ranks were used only for evaluation.
 | Dataset and control | True / estimated rank | TP | FP | Original-ion GIC | Complete time |
 |:--|--:|--:|--:|--:|--:|
 | Small, default | 100 / 115 | 769 | 26 | 4,173,728 | 54.66 s |
-| Small, local search | **100 / 100 (exact)** | 769 | 1 | 4,142,023 | 104.48 s |
+| Small, local search (eight threads) | **100 / 100 (exact)** | 769 | 1 | 4,142,023 | 104.48 s |
 | Large, default | 1,000 / 1,002 | 7,917 | 13 | 34,062,277 | 533.88 s |
 | Large, local search | **1,000 / 1,000 (exact)** | 7,917 | 2 | 34,056,138 | 562.05 s |
 
@@ -162,7 +162,7 @@ reference library:
 library(GCMSbenchmark)
 bench <- system.file("benchmarks", package="GCMSbenchmark", mustWork=TRUE)
 source(file.path(bench, "simulated-16.R"), encoding="UTF-8")
-small <- runBenchmark16("benchmark-small", method="GCMSprime", ncores=8L, support_search=TRUE)
+small <- runBenchmark16("benchmark-small", method="GCMSprime", ncores=16L, support_search=TRUE)
 small$summary[c("analysis_s", "true_rank", "estimated_rank", "rank_exact", "TP", "FP", "FN")]
 # Optional figures from the saved results:
 source(file.path(bench, "plot-simulated-16.R"), encoding="UTF-8")
@@ -174,7 +174,7 @@ Ordinary adjusted log-area R² was **0.999993**, the median absolute peak-area e
 was **0.082%**, and mean spectral ion-support F1 was **0.996** at the shared
 0.1% base-peak threshold.
 
-The benchmark wrapper measured **104.48 s** from CDF input through results with four two-thread PSF workers and eight threads available for joint refinement on an HP ZBook Fury G8, Intel Core i9-11950H, eight physical cores,
+The benchmark wrapper measured **96.51 s** from CDF input through results with eight two-thread PSF workers and 16 threads available for joint refinement on an HP ZBook Fury G8, Intel Core i9-11950H, eight physical cores,
 16 logical threads, Windows and R 4.5.0. CDF generation is separate.
 
 [![Total-ion area accuracy with ordinary log–log fits](../reference/figures/simulated-16-area-predictions.png)](../reference/figures/simulated-16-area-predictions.png)
@@ -379,7 +379,7 @@ four threads per worker and retained **643 shared identities and 1,076 occurrenc
 | 54040014_a | 527 | 617.21 | 15,068,092 | 0.98345 |
 
 The joint quasi-GIC was **28,467,211**, with each shared spectrum charged once.
-The two beer CDFs took **302.19 s** from input through export. Preparation and calibration took 122.73 s, grouped regression and joint refinement 172.88 s, and result construction and export 6.10 s. Separate RI calibration took 2.52 s and RI annotation and export took 3.69 s. Plotting is excluded.
+The two beer CDFs took **339.26 s** from input through export. Preparation and PSF calibration took 145.32 s, grouped regression and joint refinement 186.38 s, and result construction and export 6.94 s. RI calibration added 3.11 s and RI annotation and export added 4.36 s, bringing the total to **346.73 s** before plotting.
 
 Using the Agilent NIST records, a ±30 RI window and a minimum spectral cosine of 0.85, the two beers yielded **212 and 203 distinct reciprocal identifications**. There were 88 and 73 additional forward assignments to identities already called in the respective samples. These are tentative identifications in beers of unknown composition.
 
