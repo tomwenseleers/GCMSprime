@@ -98,9 +98,8 @@ plotBenchmark16 <- function(results, output_dir = results) {
     labels,colour,fill,draw,"simulated-16-spectral-support.png",
     "Within-spectrum F1 (logit scale)","Correctness of spectral ion support",
     mean,"Mean",c(0,.25,.5,.75,.9,.95,.99,1),nrow(truth))
-  benchmark16Heatmap(results,draw)
   benchmark16ProfilePlots(results,methods,labels,draw)
-  benchmark16AreaHeatmaps(results,output_dir,methods,labels,draw)
+  benchmark16Performance(summary,labels,colour,draw)
   invisible(list(area=models))
 }
 
@@ -117,7 +116,7 @@ benchmark16Similarity <- function(hits,metric,methods,labels,colour,fill,draw,
     data.frame(method=m,q25=q[1],q75=q[2],value=if(nrow(z))statistic(z$score)else NA_real_,
       compared=nrow(z),true=sum(z$presence=="Present"))
   }))
-  stats$label<-sprintf("%s %.6f · %d/%d true",stat_label,stats$value,stats$true,total)
+  stats$label<-sprintf("%s %.7f · %d/%d true",stat_label,stats$value,stats$true,total)
   display<-function(v)if(is.null(cap))v else pmin(v,cap)
   span<-range(stats::qlogis(display(c(x$score,ticks))),finite=TRUE)
   logit<-function(v) {
@@ -176,45 +175,13 @@ benchmark16Similarity <- function(hits,metric,methods,labels,colour,fill,draw,
   invisible(stats)
 }
 
-benchmark16Palette <- function(n=1000L)
-  grDevices::colorRampPalette(c("black","blue","green","yellow","orange","red"))(n)
-
-benchmark16Heatmap <- function(results,draw) {
-  file<-file.path(results,"sample-heatmap.rds")
-  if(!file.exists(file))return(invisible(NULL))
-  x<-readRDS(file)
-  grid<-seq(min(x$time),max(x$time),length.out=length(x$time))
-  matrices<-lapply(list(x$observed,x$mean),function(z)
-    apply(z,2L,function(v)stats::approx(x$time,v,grid)$y))
-  lim<-range(c(0,sqrt(unlist(matrices))))
-  draw("simulated-16-sample-heatmap.png",2200,1250,{
-    graphics::layout(matrix(c(1,3,2,3),2,2,byrow=TRUE),widths=c(12,1.6))
-    graphics::par(mar=c(3.3,4.2,2.5,1),mgp=c(2.3,.7,0),las=1)
-    titles<-c("Observed counts","True mean, including smooth background")
-    for(i in 1:2) {
-      graphics::image(grid,x$mass,sqrt(matrices[[i]]),col=benchmark16Palette(),zlim=lim,
-        useRaster=TRUE,xlab="Retention time (min)",ylab="Mass-to-charge ratio",
-        main=paste(x$sample,titles[i],sep=" · "))
-      graphics::abline(v=x$apex[x$present],col=grDevices::adjustcolor("red",.4),lwd=.65)
-      graphics::abline(v=x$apex[intersect(which(x$present),x$acid)],col="red",lwd=1.8)
-    }
-    graphics::par(mar=c(3.3,.2,2.5,4.7))
-    values<-seq(lim[1],lim[2],length.out=1000L)
-    graphics::image(c(0,1),values,matrix(rep(values,each=2),2),axes=FALSE,
-      col=benchmark16Palette(),xlab="",ylab="",useRaster=TRUE)
-    at<-pretty(lim,4);at<-at[at>=lim[1]&at<=lim[2]]
-    graphics::axis(4,at=at,labels=format(at^2,trim=TRUE,scientific=TRUE),cex.axis=.8)
-    graphics::mtext("Intensity (square-root colours)",4,line=3.6,cex=.8,las=0)
-  })
-}
-
 benchmark16ProfilePlots <- function(results,methods,labels,draw) {
   file<-file.path(results,"profiles.rds")
   if(!file.exists(file))return(invisible(NULL))
   x<-readRDS(file)
   quality<-utils::read.csv(file.path(results,"profile-quality.csv"))
   labels<-c("Ground truth"="Ground truth",labels)
-  available<-c("Ground truth",intersect(methods,unique(x$method)))
+  available<-c("Ground truth",methods)
   colours<-grDevices::colorRampPalette(c("#144bb8","#189ad5","#f5c343","#d82b28"))(16)
   for(kind in unique(x$kind)) {
     z<-x[x$kind==kind,,drop=FALSE]
@@ -226,7 +193,7 @@ benchmark16ProfilePlots <- function(results,methods,labels,draw) {
     ymax<-1.06*max(z$intensity)
     filename<-paste0("simulated-16-",tolower(kind),"-profiles.png")
     draw(filename,2400,1450,{
-      graphics::layout(matrix(seq_along(available),2L,3L,byrow=TRUE))
+      graphics::par(mfrow=c(ceiling(length(available)/4),4L))
       graphics::par(mar=c(3.6,4.3,3,.6),oma=c(2.8,0,2.6,0),mgp=c(2.5,.7,0),cex=.95)
       curves<-function(d,lty,lwd) {
         for(rank in seq_len(16)) {
@@ -242,69 +209,49 @@ benchmark16ProfilePlots <- function(results,methods,labels,draw) {
         graphics::plot(NA,xlim=window,ylim=c(0,ymax),xlab="Retention index",
           ylab="Total-ion intensity",main=labels[[method]])
         graphics::grid(col="#e5ebee",lty=1)
+        if(method!="Ground truth" && !nrow(d)) {
+          graphics::text(mean(window), ymax*.55, "No sample profile exported", col="#526579")
+          next
+        }
         if(method!="Ground truth")curves(d,1,1.5)
         curves(known,2,1.2)
         q<-quality[quality$kind==kind &quality$method==method,,drop=FALSE]
         if(nrow(q))graphics::mtext(sprintf("Profile cosine %.6f · %d/%d true calls",
           q$mean_profile_cosine,q$recovered,q$present),3,line=.2,cex=.75)
       }
-      graphics::mtext(paste("Small-scale 16-sample benchmark |",
+      graphics::mtext(paste("Full chromatograms |",
         if(kind=="Regular")"Highest-abundance regular compound"else
           "Shark-fin-shaped acid compound"),3,outer=TRUE,line=.9,font=2,cex=1.15)
       graphics::mtext("Solid: inferred profiles · Dashed: ground truth · All 16 samples, blue (smallest area) to red (largest area)",
         1,outer=TRUE,line=1.1,cex=.95)
       present<-length(unique(known$sample[known$true_area>0]))
-      graphics::mtext(sprintf("100 reference compounds; 1,200 scans. Present in %d/16 samples; absent true profiles lie at zero. Original amplitudes retained.",present),
+      graphics::mtext(sprintf("1,000 compounds, 10,000 scans per sample. Present in %d of 16 samples. Zero lines show absence. Heights retain total-ion units.",present),
         1,outer=TRUE,line=.05,cex=.9)
     })
   }
 }
 
-benchmark16AreaHeatmaps <- function(results,output_dir,methods,labels,draw) {
-  file<-file.path(results,"area-grid.csv")
-  if(!file.exists(file))return(invisible(NULL))
-  x<-utils::read.csv(file)
-  order<-rev(c("Ground truth",methods))
-  x<-x[x$method%in%order,,drop=FALSE]
-  labels<-c("Ground truth"="Ground truth",labels)
-  k<-max(x$truth_id)
-  lim<-range(log10(x$area_estimated[x$area_estimated>0]),finite=TRUE)
-  palette<-grDevices::colorRampPalette(c("blue2","red2"))(1000L)
-  panel<-function(z,title) {
-    graphics::layout(matrix(1:2,1,2),widths=c(15,1.7))
-    graphics::par(mar=c(4.5,8,3,1),mgp=c(2.7,.7,0),las=1)
-    values<-matrix(NA_real_,k,length(order));fn<-matrix(FALSE,k,length(order))
-    i<-cbind(z$truth_id,match(z$method,order))
-    values[i]<-ifelse(z$area_estimated>0,log10(z$area_estimated),NA_real_)
-    fn[i]<-z$false_negative
-    graphics::plot.new();graphics::plot.window(c(.5,k+.5),c(.5,length(order)+.5),xaxs="i",yaxs="i")
-    graphics::rect(.5,.5,k+.5,length(order)+.5,col="#edf0f2",border=NA)
-    graphics::image(seq_len(k),seq_along(order),values,add=TRUE,col=palette,
-      zlim=lim,useRaster=TRUE)
-    j<-which(fn,arr.ind=TRUE)
-    if(nrow(j))graphics::rect(j[,1]-.5,j[,2]-.5,j[,1]+.5,j[,2]+.5,col="yellow",border=NA)
-    graphics::axis(1,at=unique(c(1,seq(10,k,10))))
-    graphics::axis(2,at=seq_along(order),labels=unname(labels[order]),cex.axis=.9)
-    graphics::title(main=title,xlab="Compound (ordered by retention index)")
-    graphics::box()
-    graphics::mtext("Yellow: false negative · Grey: no signal/call · Positive cells show total-ion count equivalents",1,line=3.6,cex=.83)
-    graphics::par(mar=c(4.5,.5,3,4.5))
-    levels<-seq(lim[1],lim[2],length.out=1000)
-    graphics::image(c(0,1),levels,matrix(rep(levels,each=2),2),col=palette,
-      axes=FALSE,xlab="",ylab="",useRaster=TRUE)
-    graphics::axis(4,at=pretty(lim,4))
-    graphics::mtext(expression(log[10]*"(peak area)"),4,line=2.8,las=0)
-  }
-  selected<-readRDS(file.path(results,"sample-heatmap.rds"))$sample
-  draw("simulated-16-area-heatmap.png",2300,700,
-    panel(x[x$sample==selected,,drop=FALSE],paste(selected,"· true and inferred peak areas")))
-  pooled<-do.call(rbind,lapply(split(x,interaction(x$method,x$truth_id,drop=TRUE)),function(z)
-    data.frame(method=z$method[1],truth_id=z$truth_id[1],area_estimated=sum(z$area_estimated),
-      false_negative=any(z$present)&!any(z$called &z$present))))
-  draw("simulated-16-area-heatmap-pooled.png",2300,700,
-    panel(pooled,"True and inferred peak areas pooled across 16 samples"))
-  grDevices::pdf(file.path(output_dir,"simulated-16-area-heatmaps-all-samples.pdf"),width=15,height=4.6)
-  on.exit(grDevices::dev.off())
-  for(sample in unique(x$sample))panel(x[x$sample==sample,,drop=FALSE],
-    paste(sample,"· true and inferred peak areas"))
+
+benchmark16Performance <- function(summary, labels, colour, draw) {
+  z <- summary[rev(order(summary$analysis_and_conversion_s_per_sample)), , drop = FALSE]
+  draw("simulated-16-performance.png", 1850L, 820L, {
+    graphics::par(mfrow = c(1, 2), mar = c(4.2, 8, 3.2, 1.4), las = 1)
+    times <- z$analysis_and_conversion_s_per_sample
+    ticks <- graphics::barplot(times, horiz = TRUE, names.arg = labels[z$method],
+      col = colour[z$method], border = NA, xlim = c(0, max(times) * 1.22),
+      xlab = "Wall seconds per sample", main = "Computing time", cex.names = .9)
+    graphics::text(times, ticks, sprintf("%.2f", times), pos = 4, cex = .85)
+    recall <- 100 * z$TP / (z$TP + z$FN)
+    precision <- 100 * z$TP / (z$TP + z$FP)
+    y <- seq_len(nrow(z))
+    graphics::plot(NA, xlim = c(0, 102), ylim = range(y) + c(-.6, .6), yaxt = "n",
+      xlab = "Percent", ylab = "", main = "Occurrence recovery")
+    graphics::grid(nx = NULL, ny = NA, col = "#e5ebee", lty = 1)
+    graphics::axis(2, at = y, labels = labels[z$method], tick = FALSE, cex.axis = .9)
+    graphics::segments(recall, y, precision, y, col = colour[z$method], lwd = 2)
+    graphics::points(recall, y, pch = 16, col = colour[z$method], cex = 1.35)
+    graphics::points(precision, y, pch = 1, col = "#14273b", cex = 1.35)
+    graphics::legend("bottomleft", c("Sensitivity", "Precision"), pch = c(16, 1),
+      col = c("#526579", "#14273b"), bty = "n", cex = .85)
+  })
 }

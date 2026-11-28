@@ -1,4 +1,0 @@
-PSF,fwhm_scans,true_rank,estimated_rank,TP,FP,FN,acid_TP,median_absolute_area_error_pct,original_ion_GIC,cdf_seconds
-Calibrated time-varying,,100,100,769,1,0,7,0.0824560279447661,4142023.19379613,104.48
-Half-width Gaussian,3.68840764757693,100,108,764,13,5,7,0.0885046570259174,4171642.31118733,113.66
-Double-width Gaussian,14.754878693208,100,105,769,23,0,7,0.0947960964976957,4324922.79838597,297.27

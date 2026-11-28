@@ -213,19 +213,19 @@ as.data.frame(hit)
 #> 6            1000           query                     1     1005       -5    1
 #> 7            1000           query                     1     1005       -5    1
 #>         name  cas inchikey               source source_id  origin ri_phase
-#> 1 compound A <NA>     <NA> file77e02bc7414e.msp      <NA> unknown      DB5
-#> 2 compound A <NA>     <NA> file77e02bc7414e.msp      <NA> unknown      DB5
-#> 3 compound A <NA>     <NA> file77e02bc7414e.msp      <NA> unknown      DB5
-#> 4 compound A <NA>     <NA> file77e02bc7414e.msp      <NA> unknown      DB5
-#> 5 compound A <NA>     <NA> file77e02bc7414e.msp      <NA> unknown      DB5
-#> 6 compound A <NA>     <NA> file77e02bc7414e.msp      <NA> unknown      DB5
-#> 7 compound A <NA>     <NA> file77e02bc7414e.msp      <NA> unknown      DB5
+#> 1 compound A <NA>     <NA> filec3586da0539f.msp      <NA> unknown      DB5
+#> 2 compound A <NA>     <NA> filec3586da0539f.msp      <NA> unknown      DB5
+#> 3 compound A <NA>     <NA> filec3586da0539f.msp      <NA> unknown      DB5
+#> 4 compound A <NA>     <NA> filec3586da0539f.msp      <NA> unknown      DB5
+#> 5 compound A <NA>     <NA> filec3586da0539f.msp      <NA> unknown      DB5
+#> 6 compound A <NA>     <NA> filec3586da0539f.msp      <NA> unknown      DB5
+#> 7 compound A <NA>     <NA> filec3586da0539f.msp      <NA> unknown      DB5
 #>   ri_assumed ri_origin            ri_source query_total compound score
-#> 1      FALSE   unknown file77e02bc7414e.msp        1000        1  1000
-#> 2      FALSE   unknown file77e02bc7414e.msp        1000        1  1000
-#> 3      FALSE   unknown file77e02bc7414e.msp        1000        1  1000
-#> 4      FALSE   unknown file77e02bc7414e.msp        1000        1  1000
-#> 5      FALSE   unknown file77e02bc7414e.msp        1000        1  1000
-#> 6      FALSE   unknown file77e02bc7414e.msp        1000        1  1000
-#> 7      FALSE   unknown file77e02bc7414e.msp        1000        1  1000
+#> 1      FALSE   unknown filec3586da0539f.msp        1000        1  1000
+#> 2      FALSE   unknown filec3586da0539f.msp        1000        1  1000
+#> 3      FALSE   unknown filec3586da0539f.msp        1000        1  1000
+#> 4      FALSE   unknown filec3586da0539f.msp        1000        1  1000
+#> 5      FALSE   unknown filec3586da0539f.msp        1000        1  1000
+#> 6      FALSE   unknown filec3586da0539f.msp        1000        1  1000
+#> 7      FALSE   unknown filec3586da0539f.msp        1000        1  1000
 ```

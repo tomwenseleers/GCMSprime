@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">GCMSprime</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9012</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9014</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -46,17 +46,25 @@
     </div>
 
     <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.1.0.9014" id="gcmsprime-0109014">GCMSprime 0.1.0.9014<a class="anchor" aria-label="anchor" href="#gcmsprime-0109014"></a></h2>
+<ul><li>The shared benchmark compares seven workflows on 16 full chromatograms with 1,000 compounds, including ten shark-fin acids. Timings are reported in seconds per sample.</li>
+</ul></div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.1.0.9013" id="gcmsprime-0109013">GCMSprime 0.1.0.9013<a class="anchor" aria-label="anchor" href="#gcmsprime-0109013"></a></h2>
+<ul><li>Batch analysis uses L0glm’s native BLAS thread control while processing samples in parallel. The caller’s thread limits are restored on exit.</li>
+</ul></div>
+    <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.0.9012" id="gcmsprime-0109012">GCMSprime 0.1.0.9012<a class="anchor" aria-label="anchor" href="#gcmsprime-0109012"></a></h2>
-<p>The 16-sample benchmark figures and timing tables now use the same fast local-search fits. The PSF-width comparison reports rank and occurrence recovery separately for each initialization.</p>
+<p>The optional local rank search uses the original-ion criterion after the initial fit.</p>
 </div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.0.9011" id="gcmsprime-0109011">GCMSprime 0.1.0.9011<a class="anchor" aria-label="anchor" href="#gcmsprime-0109011"></a></h2>
 <ul><li>
-<code>batch = list(coupling = list(penalty_search = TRUE))</code> enables local rank refinement on the original ion data. The multisample tutorial compares complete analysis times and occurrence recovery on the two 16-sample simulations.</li>
+<code>batch = list(coupling = list(penalty_search = TRUE))</code> enables local rank refinement on the original ion data.</li>
 </ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.0.9010" id="gcmsprime-0109010">GCMSprime 0.1.0.9010<a class="anchor" aria-label="anchor" href="#gcmsprime-0109010"></a></h2>
-<ul><li>Joint CDF fits accept the optional logconNMF support search through <code>batch$coupling</code>. The 16-sample benchmark includes the measured CDF-to-export time and recovery from three PSF starts.</li>
+<ul><li>Joint CDF fits accept the optional logconNMF support search through <code>batch$coupling</code>.</li>
 </ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.0.9009" id="gcmsprime-0109009">GCMSprime 0.1.0.9009<a class="anchor" aria-label="anchor" href="#gcmsprime-0109009"></a></h2>

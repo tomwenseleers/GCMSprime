@@ -1,3 +1,7 @@
+# GCMSprime 0.1.0.9014
+
+- The shared benchmark compares seven workflows on 16 full chromatograms with 1,000 compounds, including ten shark-fin acids. Timings are reported in seconds per sample.
+
 # GCMSprime 0.1.0.9013
 
 - Batch analysis uses L0glm's native BLAS thread control while processing
@@ -5,15 +9,15 @@
 
 # GCMSprime 0.1.0.9012
 
-The 16-sample benchmark figures and timing tables now use the same fast local-search fits. The PSF-width comparison reports rank and occurrence recovery separately for each initialization.
+The optional local rank search uses the original-ion criterion after the initial fit.
 
 # GCMSprime 0.1.0.9011
 
-- `batch = list(coupling = list(penalty_search = TRUE))` enables local rank refinement on the original ion data. The multisample tutorial compares complete analysis times and occurrence recovery on the two 16-sample simulations.
+- `batch = list(coupling = list(penalty_search = TRUE))` enables local rank refinement on the original ion data.
 
 # GCMSprime 0.1.0.9010
 
-- Joint CDF fits accept the optional logconNMF support search through `batch$coupling`. The 16-sample benchmark includes the measured CDF-to-export time and recovery from three PSF starts.
+- Joint CDF fits accept the optional logconNMF support search through `batch$coupling`.
 
 # GCMSprime 0.1.0.9009
 

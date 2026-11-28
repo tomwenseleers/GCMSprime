@@ -61,7 +61,7 @@ for independent residuals. Backgrounds are estimated on a fixed basis and
 remain unpenalized. The fitted noise parameters add a constant charge to the
 reported information criterion for that dataset.
 
-For the local count search, pass `batch = list(coupling = list(penalty_search = TRUE))`. Weak occurrences can transfer their signal to overlapping log-concave profiles. Across samples, similar spectra with overlapping aligned half-height intervals can share one identity after a local joint refit with their neighbours. The original-channel GIC decides each support change. [Rank and timing on both simulations](multisample.html#local-rank-search).
+For the local count search, pass `batch = list(coupling = list(penalty_search = TRUE))`. Weak occurrences can transfer their signal to overlapping log-concave profiles. Across samples, similar spectra with overlapping aligned half-height intervals can share one identity after a local joint refit with their neighbours. The original-channel GIC decides each support change. [Shared rank and time per sample on full chromatograms](multisample.html#local-rank-search).
 
 The adaptive-ridge calibration in the initial PSF regression applies each time that regression uses the surrogate. Factor updates charge the full original GIC price per degree of freedom. A temporary fourfold price proposes a sparser support. After refitting, the original price decides whether to keep the candidate. For simultaneous count fits a second blind PSF also proposes groups of overlapping factors for exchange. Long refinements revisit all factors on the first, every tenth and the final sweep. Supply `refinement_sweeps=100L`, `penalty_search=TRUE` and `alternative_X=TRUE` in `batch$coupling` for this search.
 
@@ -119,11 +119,7 @@ specification give the same objective differences.
 For simulated data, pass `truth.profiles` to `gcmsDeco()` to compare the
 standard fit with the same solver initialized from known, matched elution
 profiles. Both fits estimate spectra and abundances from the measured counts.
-In a separate convergence experiment with 100 extra sweeps and a second blind PSF, the estimated-profile start descended from 21,188,577 to **4,146,698** and the true-profile start from 10,875,547 to **4,142,623**. Both reached **estimated rank 100, equal to the true rank of 100**. The GIC held steady or decreased at every recorded checkpoint (158 for the estimated start and 126 for the true-profile start). Both fits used the observed counts and identical search settings. Their endpoints differ by **0.098%** of the absolute reference GIC. This empirical optimality gap measures agreement with an attainable reference. Its distance from the global minimum is unknown.
-
-The [multisample example](multisample.html#empirical-gic-gap) includes the
-code, timings and convergence figure link.
-
+The signed empirical GIC gap compares the endpoints of the two fits at the same penalty. The attainable reference depends on the data and starting values. The full-chromatogram benchmark times the blind fit and checks its estimated rank against the generating compounds. [Simulation, measured rank and timing](multisample.html#local-rank-search).
 
 Solver selection is automatic. Sections 3 and 4 give the component-count
 penalty used for other noise families and for disk-backed joint refinement.

@@ -1,0 +1,2 @@
+"samples","scans_per_sample","recorded_channels","true_rank","compound_signal_channels","true_occurrences","acid_compounds","acid_occurrences","dispersion","simulation_seed","presence_seed","min_compounds_per_sample","max_compounds_per_sample"
+16,10000,550,1000,245,8000,10,80,783.180350395701,171117,171116,479,517

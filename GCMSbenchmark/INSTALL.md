@@ -39,6 +39,7 @@ The benchmark was verified with the Windows .NET Framework console build
 its export assemblies. PowerShell 7 was used for the benchmark.
 
 ```r
+control <- list()
 control[["MS-DIAL"]] <- list(
   exe = "C:/tools/MS-DIAL/MSDIALCUI.exe",
   powershell = "pwsh")

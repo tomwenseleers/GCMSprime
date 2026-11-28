@@ -1,7 +1,7 @@
 Package: GCMSprime
 Type: Package
 Title: Scalable and Automated GC–MS Deconvolution, Quantification, and Spectral Library Search in R
-Version: 0.1.0.9013
+Version: 0.1.0.9014
 Date: 2026-11-26
 Authors@R: c(
     person("Tom", "Wenseleers", role = c("aut", "cre"),

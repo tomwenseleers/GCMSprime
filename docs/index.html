@@ -31,7 +31,7 @@
 
     <a class="navbar-brand me-2" href="index.html">GCMSprime</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9012</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9014</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -162,27 +162,106 @@ R · Full mass spectra · CDF input · MSP &amp; Excel output
 <span>  precluster<span class="op">=</span><span class="fl">32L</span>, batch<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>plots<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">experiment</span><span class="op">$</span><span class="va">samples</span></span>
 <span><span class="va">experiment</span><span class="op">$</span><span class="va">areas</span></span></code></pre></div>
-<p>Grouped PSF regressions divide the core budget between independent samples and native threads. The scheduler estimates how many regressions fit in available memory, including Windows commit headroom. After those workers exit, a single process shares the original ion counts and fitted means. OpenMP updates elution profiles across samples. It fits each ion’s shared spectrum and sample-specific background coefficients independently, keeping a fixed component order within each ion. The general identity-link solver can stream original-channel blocks from disk. The local rank search recovered <strong>all 7,917 occurrences</strong> in <strong>9.37 min</strong> with <strong>only 2 false positives</strong> across 16 chromatograms of 10,000 scans and 550 channels. Its <strong>estimated rank of 1,000 exactly matched the true rank of 1,000</strong>. The same control recovered <strong>true rank 100 exactly</strong> on the smaller simulation in <strong>96.51 s</strong>, with an independent repeat of <strong>100.82 s</strong>. <a href="https://tomwenseleers.github.io/GCMSprime/articles/multisample.html#local-rank-search">Compare rank, recovery and timing</a>. The <a href="https://tomwenseleers.github.io/GCMSprime/articles/multisample.html#benchmark-scales">two 16-sample experiments</a> give the measured resource use, timings and recovery at both acquisition sizes.</p>
-<p>In the <a href="articles/benchmarks.html">small-scale 16-sample software comparison</a>, GCMSprime recovers <strong>769 of 769 true occurrences in 96.51 s</strong>, including the acid compound in all seven samples where it occurs. Each chromatogram has 100 candidate compounds, 1,200 scans and 258 mass channels, with drift, concentration-dependent broadening and a smooth background derived from experimental GC/MS data. Initialization uses 32 ion groups and the final fit uses every original ion. The grouped regressions used eight two-thread workers. The joint fit reused the 16-thread budget on the original ion channels.</p>
-<p>The extended search with 100 extra sweeps and a second blind PSF recovered <strong>true rank 100 exactly (estimated rank 100)</strong> and achieved an <strong>empirical GIC gap of 0.098%</strong> relative to a fit initialised with the true elution profiles and cross-sample compound identities. <a href="https://tomwenseleers.github.io/GCMSprime/articles/multisample.html#empirical-gic-gap">Compare the GIC traces</a>.</p>
-</div>
-<div class="section level2">
-<h2 id="benchmarks-against-other-software">Benchmarks against other software<a class="anchor" aria-label="anchor" href="#benchmarks-against-other-software"></a>
-</h2>
-<p>On <strong>16 chromatograms with 100 reference compounds</strong>, GCMSprime recovers <strong>769 of 769 true peak occurrences</strong>, with <strong>only one false positive</strong> (peak F1 <strong>0.999</strong>). Its total-ion peak areas show <strong>ordinary adjusted R² 0.999993</strong> and <strong>median absolute area error 0.082%</strong>.</p>
-<p><a href="reference/figures/simulated-16-area-predictions.png"><img src="reference/figures/simulated-16-area-predictions.png" alt="True and estimated total-ion peak areas with least-squares fits"></a></p>
-<p>The method panels share the same estimated-area axis. All methods use total-ion count equivalents, accounting for native model-ion fractions and integration-time units. The least-squares line summarizes the log–log relationship. Its pointwise 95% prediction interval describes the scatter of individual matched peak areas. Points have opacity 0.5, so darker areas show denser overlap. The dashed 1:1 reference is visible in every panel.</p>
-<p><a href="reference/figures/simulated-16-spectral-violin.png"><img src="reference/figures/simulated-16-spectral-violin.png" alt="Reciprocal spectral cosine similarities for seven workflows"></a></p>
-<p><a href="reference/figures/simulated-16-spectral-support.png"><img src="reference/figures/simulated-16-spectral-support.png" alt="Within-spectrum F1 using the shared 0.1% base-peak cutoff"></a></p>
-<p>The shared <strong>0.1% base-peak cutoff</strong> gives GCMSprime <strong>mean ion-support F1 0.996</strong>, compared with <strong>0.860</strong> for the strongest comparator. This is also the default cutoff for GCMSprime’s reported spectra and spectral exports. Matching requires reciprocal best spectral hits within <strong>30 RI units</strong>. The reference includes compounds absent from individual samples.</p>
+<p>Grouped PSF regressions divide the core budget between independent samples and native threads. The scheduler estimates how many regressions fit in available memory, including Windows commit headroom. After those workers exit, a single process shares the original ion counts and fitted means. OpenMP updates elution profiles across samples. It fits each ion’s shared spectrum and sample-specific background coefficients independently, keeping a fixed component order within each ion. The general identity-link solver can stream original-channel blocks from disk. ## Benchmarks against other software</p>
+<p>The same 16 simulated chromatograms were supplied to every program. Each contains <strong>10,000 scans × 550 nominal mass channels</strong> (m/z 30–579), covering approximately 50 minutes. Together they contain <strong>88 million simulated ion intensities</strong>. Each of the <strong>1,000 distinct compounds</strong> occurs in eight randomly chosen samples. The design therefore contains <strong>8,000 positive sample–compound pairs</strong>. Rank here counts the distinct generating compounds across the batch, each with a time-local elution profile in each positive sample. Of the compounds, 990 have exponentially modified Gaussian (EMG) peaks and ten have a rising shark-fin profile with an abrupt trailing edge. Higher concentrations broaden both types. The acquisition clock allows a smooth retention shift of up to 2.93 seconds between the first and last injections and approximately 2% variation in scan spacing.</p>
+<p>GCMSprime, using simultaneous logconNMF, <strong>recovered the true rank of 1,000 exactly</strong> in <strong>35.95 seconds per sample</strong>. It recovered <strong>8,000 of 8,000</strong> compound occurrences and made <strong>no false-positive calls</strong>. The recovered peaks included <strong>80 of the 80 acid occurrences</strong>. MSHub returned <strong>1,414 deconvolved components</strong>, 41.4% above the true rank. The other five workflows produce peak lists or aligned feature groups. Their outputs do not define a common factorisation rank.</p>
+<table class="table">
+<colgroup>
+<col width="11%">
+<col width="14%">
+<col width="14%">
+<col width="14%">
+<col width="14%">
+<col width="14%">
+<col width="14%">
+</colgroup>
+<thead><tr>
+<th>Workflow</th>
+<th align="right">Seconds/sample</th>
+<th align="right">Estimated rank (true 1,000)</th>
+<th align="right">TP</th>
+<th align="right">FP</th>
+<th align="right">FN</th>
+<th align="right">Acid TP / 80</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>GCMSprime</td>
+<td align="right">35.95</td>
+<td align="right"><strong>1,000 (exact)</strong></td>
+<td align="right">8,000</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">80 / 80</td>
+</tr>
+<tr>
+<td>MS-DIAL</td>
+<td align="right">16.02</td>
+<td align="right">—</td>
+<td align="right">7,728</td>
+<td align="right">11,685</td>
+<td align="right">272</td>
+<td align="right">73 / 80</td>
+</tr>
+<tr>
+<td>mzmine GC-EI</td>
+<td align="right">6.92</td>
+<td align="right">—</td>
+<td align="right">4,202</td>
+<td align="right">185</td>
+<td align="right">3,798</td>
+<td align="right">29 / 80</td>
+</tr>
+<tr>
+<td>eRah</td>
+<td align="right">25.94</td>
+<td align="right">—</td>
+<td align="right">7,172</td>
+<td align="right">5,615</td>
+<td align="right">828</td>
+<td align="right">70 / 80</td>
+</tr>
+<tr>
+<td>AMDIS</td>
+<td align="right">28.99</td>
+<td align="right">—</td>
+<td align="right">7,878</td>
+<td align="right">9,122</td>
+<td align="right">122</td>
+<td align="right">80 / 80</td>
+</tr>
+<tr>
+<td>xcms + CAMERA</td>
+<td align="right">4.22</td>
+<td align="right">—</td>
+<td align="right">7,261</td>
+<td align="right">890</td>
+<td align="right">739</td>
+<td align="right">31 / 80</td>
+</tr>
+<tr>
+<td>MSHub</td>
+<td align="right">15.05</td>
+<td align="right">1,414</td>
+<td align="right">7,179</td>
+<td align="right">12,184</td>
+<td align="right">821</td>
+<td align="right">50 / 80</td>
+</tr>
+</tbody>
+</table>
+<p>Among GCMSprime’s 8,000 matched occurrences, the median absolute relative area error was <strong>0.095%</strong> and ordinary adjusted R² on the log₁₀ scale was <strong>0.999982</strong>.</p>
+<p><a href="reference/figures/simulated-16-performance.png"><img src="reference/figures/simulated-16-performance.png" alt="Time per sample, sensitivity and precision for all seven workflows"></a></p>
+<p><a href="reference/figures/simulated-16-area-predictions.png"><img src="reference/figures/simulated-16-area-predictions.png" alt="Estimated versus true total-ion areas across all seven workflows"></a></p>
+<p><a href="reference/figures/simulated-16-spectral-violin.png"><img src="reference/figures/simulated-16-spectral-violin.png" alt="Reciprocal reference spectrum matches across the 16 chromatograms"></a></p>
+<p><a href="reference/figures/simulated-16-spectral-support.png"><img src="reference/figures/simulated-16-spectral-support.png" alt="Ion-support recovery across the seven workflows"></a></p>
 <div class="section level3">
 <h3 id="elution-profile-recovery">Elution profile recovery<a class="anchor" aria-label="anchor" href="#elution-profile-recovery"></a>
 </h3>
-<p>The regular compound with the largest total area was present in 11 of the 16 chromatograms. GCMSprime recovered all 11 profiles, with a mean cosine similarity of <strong>0.999995</strong> to the simulated elution curves. The shark-fin acid was present in seven chromatograms. GCMSprime recovered all seven profiles, with a mean cosine similarity of <strong>0.999983</strong>.</p>
-<p>Both figures show all 16 samples on the original total-ion intensity scale. Solid lines show estimated profiles and dashed lines show the simulated truth. Colours run from blue to red with increasing true peak area. Samples in which the compound was absent have a true profile of zero.</p>
-<p><a href="reference/figures/simulated-16-regular-profiles.png"><img src="reference/figures/simulated-16-regular-profiles.png" alt="Estimated and true elution profiles of the highest-abundance regular compound across 16 samples, by method"></a></p>
-<p><a href="reference/figures/simulated-16-acid-profiles.png"><img src="reference/figures/simulated-16-acid-profiles.png" alt="Estimated and true elution profiles of the shark-fin acid across 16 samples, by method"></a></p>
-<p>See <a href="articles/benchmarks.html">benchmarks against other software</a> for timings, TP/FP counts, square-root signal heatmaps, recovered compound areas and regular/acid elution profiles. The <a href="https://github.com/tomwenseleers/GCMSprime/tree/master/GCMSbenchmark" class="external-link">GCMSbenchmark package</a> provides the seeded simulation and reproducible comparison.</p>
+<p>The examples are the EMG compound and the acid with the greatest total true area in their respective classes. Both were selected from the simulation before comparing any fits. Each occurs in eight samples. Solid curves show inferred profiles, dashed curves show the true profiles, and the eight absent true profiles coincide at zero. Colours order the 16 samples by true area. Heights retain original total-ion intensity per scan. The mean cosine in each example uses all eight positive occurrences, with a missing recovered profile scoring zero. The all-acid tally covers all ten acids.</p>
+<p><a href="reference/figures/simulated-16-regular-profiles.png"><img src="reference/figures/simulated-16-regular-profiles.png" alt="Recovered and simulated profiles for the selected EMG compound"></a></p>
+<p><a href="reference/figures/simulated-16-acid-profiles.png"><img src="reference/figures/simulated-16-acid-profiles.png" alt="Recovered and simulated profiles for the selected shark-fin acid"></a></p>
+<p><a href="https://tomwenseleers.github.io/GCMSprime/articles/benchmarks.html">Benchmark methods, scoring, timings and reproduction code</a>.</p>
 </div>
 </div>
 <div class="section level2">

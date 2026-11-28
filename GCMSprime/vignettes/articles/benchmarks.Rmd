@@ -4,231 +4,121 @@ description: "Peak-area accuracy, spectral ion support and elution-profile recov
 output: rmarkdown::html_document
 ---
 
-## Small-scale 16-sample software comparison {#sixteen-simulated-chromatograms}
+## Sixteen full simulated chromatograms {#sixteen-simulated-chromatograms}
 
-This page reports the **small-scale** seven-workflow comparison. It is distinct
-from the [large-scale 16-sample resource benchmark](multisample.html#benchmark-scales)
-with 10,000 scans per sample and 1,000 reference compounds across the experiment. The linked overview
-reports both timings, settings and short reproduction recipes. Here GCMSprime uses 32 common ion groups, two blind-PSF windows, at most three PSF iterations, and up to 12 initial conditional sweeps on the original ions.
+The same 16 simulated chromatograms were supplied to every program. Each contains **10,000 scans × 550 nominal mass channels** (m/z 30–579), covering approximately 50 minutes. Together they contain **88 million simulated ion intensities**. Each of the **1,000 distinct compounds** occurs in eight randomly chosen samples. The design therefore contains **8,000 positive sample–compound pairs**. Rank here counts the distinct generating compounds across the batch, each with a time-local elution profile in each positive sample. Of the compounds, 990 have exponentially modified Gaussian (EMG) peaks and ten have a rising shark-fin profile with an abrupt trailing edge. Higher concentrations broaden both types. The acquisition clock allows a smooth retention shift of up to 2.93 seconds between the first and last injections and approximately 2% variation in scan spacing.
 
-The **16 chromatograms** share a library of **100 reference compounds**.
-Each spans a 20-minute retention window, with 1,200 scans and all 258 mass channels.
-Compounds are absent from about half the samples, giving **769 true occurrences**.
-Library retention indices determine their positions. One compound has a broad
-shark-fin-shaped acid profile; the remaining profiles are exponentially modified
-Gaussians. Higher concentrations extend peaks towards later times from
-approximately fixed leading edges, and a small positive drift shifts successive
-injections to the right.
+GCMSprime, using simultaneous logconNMF, **recovered the true rank of 1,000 exactly** in **35.95 seconds per sample**. It recovered **8,000 of 8,000** compound occurrences and made **no false-positive calls**. The recovered peaks included **80 of the 80 acid occurrences**. MSHub returned **1,414 deconvolved components**, 41.4% above the true rank. The other five workflows produce peak lists or aligned feature groups. Their outputs do not define a common factorisation rank.
 
-The smooth B-spline background is derived from the experimental `gcmsData2`
-window and contributes 3.03% of the integrated compound signal. The simulation
-retains its native abundance scale and uses quasi-Poisson noise with
-**dispersion 783.18**, estimated from that window. GCMSprime estimates dispersion
-separately in each sample, with a **median estimate of 829.55**. The generating
-retention-index maps are used for scoring;
-the deconvolution receives neither the known areas nor the true profiles.
+| Workflow | Seconds/sample | Estimated rank (true 1,000) | TP | FP | FN | Acid TP / 80 |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| GCMSprime | 35.95 | **1,000 (exact)** | 8,000 | 0 | 0 | 80 / 80 |
+| MS-DIAL | 16.02 | — | 7,728 | 11,685 | 272 | 73 / 80 |
+| mzmine GC-EI | 6.92 | — | 4,202 | 185 | 3,798 | 29 / 80 |
+| eRah | 25.94 | — | 7,172 | 5,615 | 828 | 70 / 80 |
+| AMDIS | 28.99 | — | 7,878 | 9,122 | 122 | 80 / 80 |
+| xcms + CAMERA | 4.22 | — | 7,261 | 890 | 739 | 31 / 80 |
+| MSHub | 15.05 | 1,414 | 7,179 | 12,184 | 821 | 50 / 80 |
 
-The optional search recovered **true rank 100 exactly (estimated rank 100)** and **769 of 769 occurrences with only one false positive**. The acid was recovered in all seven samples where it was present.
+The native GCMSprime factor IDs mapped one-to-one to the 1,000 generating compounds across all eight positive samples per compound. For MSHub, the correctly matched sample occurrences belonged to 1,072 of its 1,414 native components. [Occurrence-to-factor assignments](https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst/benchmarks/results/factor-matches.csv).
 
-| Method | Seconds | Estimated rank | TP | FP | Sensitivity | Peak F1 | Ion F1 |
-|:--|--:|--:|--:|--:|--:|--:|--:|
-| GCMSprime | 96.51 | **100 (exact)** | 769 | 1 | 100.0% | 0.999 | 0.996 |
-| MS-DIAL | 17.61 | — | 675 | 641 | 87.8% | 0.647 | 0.858 |
-| mzmine GC-EI | 38.47 | — | 622 | 70 | 80.9% | 0.851 | 0.860 |
-| eRah | 17.07 | — | 645 | 1912 | 83.9% | 0.388 | 0.771 |
-| AMDIS | 92.58 | — | 671 | 1153 | 87.3% | 0.518 | 0.854 |
-| xcms + CAMERA | 24.06 | — | 635 | 146 | 82.6% | 0.819 | 0.617 |
-| MSHub | 20.58 | 281 | 635 | 2797 | 82.6% | 0.302 | 0.844 |
+Each program ran once, in sequence, on the same 64 GB Windows laptop with eight physical cores and 16 logical processors. Seconds per sample means wall time divided by 16 for the whole batch. The comparison includes any required input conversion or staging and the program’s native analysis. GCMSprime’s time includes reading and fitting an independent PSF standard, the coupled fit and native results export. Simulation, common-format result extraction and accuracy scoring are outside the timed comparison. One run per program gives a descriptive timing for these files and this machine.
 
-The true rank is 100 distinct compounds present in at least one sample. The rank column counts shared fitted factors. A dash identifies workflows without a comparable cross-sample factorisation rank.
+[![Time per sample, sensitivity and precision for all seven workflows](../reference/figures/simulated-16-performance.png)](../reference/figures/simulated-16-performance.png)
 
-Times are wall-clock analysis times on an HP ZBook Fury G8 Mobile
-Workstation with an Intel Core i9-11950H at 2.60 GHz, eight physical cores
-and 16 logical threads, Windows and R 4.5.0. AMDIS runs serially and xcms + CAMERA uses four workers. Input conversion is timed separately. The six comparator rows use
-their saved outputs and timings from the identical simulated inputs.
+### Timing boundaries
 
-The small benchmark used the fast local search on the blind, time-varying PSF start. Data preparation, PSF calibration and ion grouping took 10.21 s, grouped regression and joint fitting 81.46 s, and export 4.59 s. Including the benchmark wrapper, the complete analysis took **96.51 s**. The original-ion GIC was **4,142,023**. A second run took **100.82 s** and returned the same rank, GIC, areas and spectra. [Recorded runs](https://github.com/tomwenseleers/GCMSprime/blob/master/benchmarks/results/calibrated-threads.csv).
+| Workflow | Native analysis (s/sample) | Input conversion or staging (s/sample) | Through result extraction (s/sample) |
+| --- | ---: | ---: | ---: |
+| GCMSprime | 35.95 | — | 36.40 |
+| MS-DIAL | 12.26 | 3.76 | 17.40 |
+| mzmine GC-EI | 3.51 | 3.41 | 6.93 |
+| eRah | 25.94 | — | 26.46 |
+| AMDIS | 25.75 | 3.24 | 29.57 |
+| xcms + CAMERA | 4.22 | — | 4.99 |
+| MSHub | 14.99 | 0.06 | 15.38 |
 
-With the default stopping and support settings, an eight-thread run on the same CDF files took **54.66 s** and gave **estimated rank 115** against **true rank 100**, with 769 true positives and only 26 false positives.
+The headline time adds native analysis and separately timed input conversion or staging. A dash means the workflow read its inputs directly. The last column also includes extracting peak tables and spectra into the common in-memory representation, before saving that record or comparing it with truth.
 
-GCMSprime used eight two-thread workers for grouped PSF regressions and could use 16 threads for the joint fit. Profile and background updates run across samples. Shared spectra run across ions. Local merge decisions and file exports also contribute to elapsed time.
+### Simulation and scoring
 
-## Sensitivity to the starting peak width
+Individual chromatograms contain 479–517 true peaks. The L0glm library supplies spectra on m/z 41–298. The selected spectra have compound signal in 245 of the 550 recorded channels. A smoothly varying background fitted to the measured gcmsData2 window supplies the background on m/z 41–298. The additional channels carry low background. Counts have quasi-Poisson variance proportional to the mean, with dispersion 783.18 estimated from gcmsData2. Measured on the recorded scan grids, the median within-compound Spearman correlation between area and half-height width was 0.86 for EMGs and 0.94 for acids. The nominal compound centres follow a regular grid with one deliberately close pair. Concentration-dependent broadening and the subset present in each injection determine the actual overlap. The retention-index (RI) scale is synthetic and time-calibrated for each injection. Reference spectra, occurrence labels and true rank are used in scoring.
 
-The local rank search was applied to each starting PSF on the same 16 chromatograms. All runs used eight threads and scored matched peaks on the original ion channels.
+GCMSprime calibrated the time-varying PSF on a separately generated 20-peak standard. It used a 16-thread budget with up to eight simultaneous sample initialisations, 32 pooled mass-channel groups and the final local rank search (`batch = list(workers = 8L, coupling = list(penalty_search = TRUE))`). The search compares changes to the original-ion GIC. It receives neither the expected number of compounds nor their spectra. The other programs used their local GC–EI workflows. The settings and software versions accompany the results.
 
-| Starting PSF | Estimated / true rank | TP | FP | Missed | Acid recovered | Median area error | Original-ion GIC | CDF time |
-|:--|--:|--:|--:|--:|--:|--:|--:|--:|
-| Calibrated time-varying | **100 / 100 (exact)** | 769 | 1 | 0 | 7 / 7 | 0.082% | 4,142,023 | 104.48 s |
-| Half-width Gaussian | 108 / 100 | 764 | 13 | 5 | 7 / 7 | 0.089% | 4,171,642 | 113.66 s |
-| Double-width Gaussian | 105 / 100 | 769 | 23 | 0 | 7 / 7 | 0.095% | 4,324,923 | 297.27 s |
+eRah used a minimum peak width of 2 seconds. The xcms matched filter used a 2.6-second FWHM and a signal-to-noise threshold of 1.5. CAMERA grouped peaks by FWHM with `perfwhm = 0.8` and required four ions. AMDIS used `PEAKWIDTH = 16`, `SENSIT = 60`, `RESOLUTION = 0` and `PEAKSHAPE = 0`. MSHub used its standalone deconvolution workflow. The simulation and CDF writer ran with logconNMF and GCMSprime 0.1.0.9012. Their generating functions, reference spectra and empirical background were checked against the versions used for fitting (0.1.0.9013).
 
-The calibrated start recovered the true rank exactly. The half-width Gaussian retained extra factors and missed five occurrences. The local search remains optional. [Reproduce the Gaussian starts](https://github.com/tomwenseleers/GCMSprime/blob/master/benchmarks/benchmark_gaussian_starts.R) · [Download the measurements](https://github.com/tomwenseleers/GCMSprime/blob/master/benchmarks/results/fast-gaussian-starts.csv).
+Each recovered spectrum competes against all 1,000 references, including compounds absent from that sample. A true positive requires a reciprocal best match with spectral cosine ≥0.70, within ±30 simulated RI units, to a compound present in that sample. The score allows one credit per sample and reference. Extra calls, including duplicates, count as false positives. Sensitivity uses all 8,000 occurrences as its denominator. Acid recovery uses all 80.
 
-The extended search added a second blind PSF and 100 refinement sweeps. From the calibrated start and both Gaussian starts it recovered **estimated rank 100, equal to true rank 100**, all 769 occurrences and zero false positives after the blind PSF exchange. Across starts, the largest difference between two estimates of a matched peak area was 0.86%. The acid area in sample 009 was 99.76–99.81% of truth. The calibration, support proposals and GIC comparisons used only observed counts.
+## Quantification and spectral recovery
 
-![False positive and missed calls across three PSF starts and three searches](../reference/figures/psf-start-recovery.png)
+| Workflow | Area adjusted R² | Median spectral cosine | Mean ion-support F1 | Median profile cosine |
+| --- | ---: | ---: | ---: | ---: |
+| GCMSprime | 0.999982 | 0.9999995 | 0.995 | 0.999994 |
+| MS-DIAL | 0.700129 | 0.9925397 | 0.901 | 0.996864 |
+| mzmine GC-EI | 0.966560 | 0.9975148 | 0.874 | — |
+| eRah | 0.853212 | 0.9957392 | 0.794 | 0.001678 |
+| AMDIS | 0.499773 | 0.9972175 | 0.894 | 0.970942 |
+| xcms + CAMERA | 0.951953 | 0.9807221 | 0.604 | 0.971638 |
+| MSHub | 0.305059 | 0.9857457 | 0.913 | — |
 
-[Rank, original-price GIC, recovery and area measurements for all nine fits](https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst/benchmarks/results/psf-starts.csv).
+Among GCMSprime’s 8,000 matched occurrences, the median absolute relative area error was **0.095%** and ordinary adjusted R² on the log₁₀ scale was **0.999982**. The area panels use ordinary least-squares regression with pointwise 95% prediction intervals. Square axes span 7.5 to 10.5 on both log₁₀ scales. The fits include every positive matched pair, including observations outside the displayed limits. The dashed diagonal marks exact area recovery.
 
-## Reciprocal spectral matches and integrated areas
+[![Estimated versus true total-ion areas across all seven workflows](../reference/figures/simulated-16-area-predictions.png)](../reference/figures/simulated-16-area-predictions.png)
 
-The reference library contains all 100 compounds, including those absent
-from an individual sample. Candidate spectra must fall within **30 RI units**
-and have cosine similarity of at least **0.70**. A reciprocal pair selects
-each other as the best eligible spectral hit. Ties are resolved by RI
-difference and then ID. A reciprocal hit to a compound actually present is
-a true positive; every other returned component is a false positive.
-Additional calls to the same reference compound are included in those counts.
-Their areas are not added to the selected match.
+Areas use each program’s exported ion intensities and its acquisition clock to convert to integrated total-ion equivalents. Accuracy is conditional on a correct match. The first table gives the missed and extra calls alongside it.
 
-[![Ordinary log–log peak-area fits and 95% prediction intervals](../reference/figures/simulated-16-area-predictions.png)](../reference/figures/simulated-16-area-predictions.png)
+[![Reciprocal reference spectrum matches across the 16 chromatograms](../reference/figures/simulated-16-spectral-violin.png)](../reference/figures/simulated-16-spectral-violin.png)
 
-The method panels share the same estimated-area axis. All panels use **total-ion count equivalents**. Spectra are normalized to
-unit L1 norm, with their magnitude transferred to the corresponding profile
-or area. Native model-ion areas are corrected for their ion fraction and
-integration-time units. The conversions use each engine's exported factors
-and acquisition metadata, without calibration against the known answers.
-The native values and conversion factors remain in the result objects.
+[![Ion-support recovery across the seven workflows](../reference/figures/simulated-16-spectral-support.png)](../reference/figures/simulated-16-spectral-support.png)
 
-For a component with profile \(h\) and spectrum \(s\), let
-\(c=\sum_j s_j\), \(p=s/c\) and \(\widetilde h=ch\).
-Then \(hs^\top=\widetilde h p^\top\) and \(\sum_j p_j=1\).
-An area measured for a particular ion \(q\) becomes
-\(A_{\mathrm{TIC}}=A_q/p_q\), after converting its integration-time units.
-
-The solid line fits an ordinary least-squares regression of log₁₀ estimated area on log₁₀ true area to all positive matched pairs, including the outliers. The shaded region is the pointwise 95% prediction interval for an individual peak at a given true area. The dashed line shows exact agreement. Darker points indicate overlap (opacity 0.5).
-
-GCMSprime recovered **all 769 occurrences**, with **adjusted R² 0.999993** and a **median absolute area error of 0.082%**. Even the lowest estimate was 98.1% of its true area.
-Area agreement is conditional on recovered true matches, so it is shown
-together with sensitivity and false-positive counts.
-
-[![Reciprocal spectral cosine similarity with individual points](../reference/figures/simulated-16-spectral-violin.png)](../reference/figures/simulated-16-spectral-violin.png)
-
-Each point is a reciprocal spectral hit. Crosses identify hits to compounds
-absent from that sample; the cosine axis uses logit spacing. Display values
-at or above 0.999999 are shown at 1, while the statistics retain their
-original values. Compact horizontal tick labels keep the scale readable.
-
-## Correctness of spectral ion support
-
-[![Within-spectrum ion-support F1 with the shared 0.1% cutoff](../reference/figures/simulated-16-spectral-support.png)](../reference/figures/simulated-16-spectral-support.png)
-
-Ion support uses a shared **0.1% of base-peak intensity cutoff**, applied
-independently to reference and recovered spectra for every method:
-\(I_j>0\) and \(I_j\geq0.001\max_l I_l\).
-Within-spectrum \(F_1=2TP/(2TP+FP+FN)\) is averaged over correctly matched
-true spectra. GCMSprime achieves **mean ion F1 0.996**, compared with
-**0.860** for the strongest comparator. Individual points accompany the
-violins; the logit-spaced axis retains labels in the original F1 units.
-
-This is also GCMSprime's default spectral reporting cutoff for coefficient
-summaries, library queries and MSP/Excel output. `ion_threshold=0` retains
-all positive ions. Reporting preserves fitted total ion counts, peak areas,
-profiles and information criteria.
-
-## Observed signal and recovered peak areas
-
-[![Observed and true signal with square-root intensity colours](../reference/figures/simulated-16-sample-heatmap.png)](../reference/figures/simulated-16-sample-heatmap.png)
-
-The observed counts and true mean, including background, use the plotMat
-palette with **square-root intensity colours**. Red lines mark true apices.
-
-[![Method-by-compound peak areas with yellow false negatives](../reference/figures/simulated-16-area-heatmap.png)](../reference/figures/simulated-16-area-heatmap.png)
-
-The ground-truth row and method rows show one sample's true or inferred
-total-ion areas. **Bright yellow marks false negatives**; grey marks no signal or
-call. Compounds follow increasing RI. A
-[pooled view](../reference/figures/simulated-16-area-heatmap-pooled.png)
-summarizes all 16 samples; the
-[sample-by-sample PDF](../reference/figures/simulated-16-area-heatmaps-all-samples.pdf)
-shows every acquisition.
+The first distribution includes all reciprocal library hits. Crosses identify hits to references absent from the sample. Ion-support F1 compares the nonzero ions at or above 0.1% of each spectrum’s own base peak and is averaged over correct matches.
 
 ## Correctness of inferred elution profiles
 
-[![Solid inferred and dashed true regular-compound profiles, blue to red by true area](../reference/figures/simulated-16-regular-profiles.png)](../reference/figures/simulated-16-regular-profiles.png)
+The examples are the EMG compound and the acid with the greatest total true area in their respective classes. Both were selected from the simulation before comparing any fits. Each occurs in eight samples. Solid curves show inferred profiles, dashed curves show the true profiles, and the eight absent true profiles coincide at zero. Colours order the 16 samples by true area. Heights retain original total-ion intensity per scan. The mean cosine in each example uses all eight positive occurrences, with a missing recovered profile scoring zero. The all-acid tally covers all ten acids.
 
-[![Solid inferred and dashed true acid-compound profiles, blue to red by true area](../reference/figures/simulated-16-acid-profiles.png)](../reference/figures/simulated-16-acid-profiles.png)
+[![Recovered and simulated profiles for the selected EMG compound](../reference/figures/simulated-16-regular-profiles.png)](../reference/figures/simulated-16-regular-profiles.png)
 
-The first panel set shows the regular compound with the largest total
-true area across samples (present in **11 of 16 samples**); the second shows
-the acid compound (present in **7 of 16**). These are the same saved profiles
-shown on the logconNMF homepage. All 16 samples
-are included and ordered by true abundance, from **blue for the smallest
-area to red for the largest**. **Dashed curves are ground truth; solid curves
-are returned profiles.** Intensities retain their original total-ion scale,
-without unit-area or peak-height normalization. Absent compounds have zero
-true signal. Compatible fragments remain separate curves so splitting stays
-visible. The generating retention-index calibration supplies the common
-horizontal axis; profile amplitudes remain on their native total-ion scale.
+[![Recovered and simulated profiles for the selected shark-fin acid](../reference/figures/simulated-16-acid-profiles.png)](../reference/figures/simulated-16-acid-profiles.png)
 
-GCMSprime recovers all occurrences of both the regular EMG and the
-shark-fin-shaped acid. Mean profile cosine, counting missed occurrences as
-zero, is **0.999995 for the regular compound** and **0.999983 for the acid**;
-median cosine among matched occurrences is **0.999998** and **0.999990**,
-respectively. Other configurations often truncate profiles, split their
-contributions or miss the acid. MS-DIAL also resolves the regular compound (mean cosine 0.998). It recovers five of the seven acid
-occurrences and has acid mean cosine 0.449. CAMERA supplies a
-representative-ion trace scaled to the grouped total-ion area. The mzmine
-export here contains spectra and areas without component scan profiles.
-MSHub factorizes aligned ion-peak integrals across samples. Its model has
-no common compound elution profile constrained to be shared across mass
-channels, so component scan profiles are absent from the model itself.
-See [Aksenov et al. (2021)](https://pmc.ncbi.nlm.nih.gov/articles/PMC7971188/).
+CAMERA supplies a representative-ion trace scaled to the grouped area. The mzmine and MSHub exports provide spectra and areas without a sample-specific profile in this workflow.
 
-## Detection settings and reproducibility
+### Recovery of all ten shark-fin acids
 
-The xcms + CAMERA configuration uses an **8.6-second filter FWHM**,
-signal-to-noise threshold **1.5**, a minimum of **four ions**, and CAMERA
-FWHM grouping with `perfwhm=0.8`. Settings were selected on odd-numbered samples and checked on even-numbered samples. This configuration recovered 635 of 769 occurrences across all samples (82.6% sensitivity).
+Each entry counts correctly identified occurrences out of eight for one acid. The downloadable per-compound table also gives the median estimated-to-true area ratio and mean matched profile cosine where a profile is available.
 
-### Recovery across true peak sizes
+| Acid ID | GCMSprime | MS-DIAL | mzmine | eRah | AMDIS | xcms+CAMERA | MSHub |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 250 | 8 | 7 | 5 | 5 | 8 | 3 | 8 |
+| 311 | 8 | 7 | 3 | 7 | 8 | 6 | 4 |
+| 372 | 8 | 8 | 6 | 6 | 8 | 1 | 8 |
+| 433 | 8 | 7 | 4 | 8 | 8 | 2 | 8 |
+| 494 | 8 | 7 | 4 | 7 | 8 | 3 | 0 |
+| 556 | 8 | 7 | 7 | 8 | 8 | 5 | 8 |
+| 617 | 8 | 8 | 0 | 8 | 8 | 2 | 6 |
+| 678 | 8 | 8 | 0 | 8 | 8 | 7 | 0 |
+| 739 | 8 | 7 | 0 | 7 | 8 | 2 | 8 |
+| 800 | 8 | 7 | 0 | 6 | 8 | 0 | 0 |
 
-Sensitivity is also calculated separately in quartiles of true integrated
-peak area, including every true occurrence. This makes the preferential
-recovery of large peaks visible alongside the conditional area regressions. GCMSprime recovered **all 193 peaks in the smallest quarter**.
+## Reproduce the benchmark
 
-| Method | Smallest quarter | Lower-middle | Upper-middle | Largest quarter |
-|:--|--:|--:|--:|--:|
-| GCMSprime | 100.0% | 100.0% | 100.0% | 100.0% |
-| MS-DIAL | 79.3% | 84.4% | 91.1% | 96.4% |
-| mzmine GC-EI | 70.5% | 79.2% | 82.3% | 91.7% |
-| eRah | 72.0% | 78.6% | 89.1% | 95.8% |
-| AMDIS | 78.2% | 83.3% | 89.6% | 97.9% |
-| xcms + CAMERA | 66.3% | 81.8% | 84.9% | 97.4% |
-| MSHub | 73.6% | 82.8% | 86.5% | 87.5% |
+Install the programs and set their local executable paths in the named list `control`. The included R recipe generates the common CDFs and their scoring key, fits the programs sequentially, then scores the saved fits. [Engine setup and control list](https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/INSTALL.md).
 
-GCMSbenchmark includes the seeded simulation, empirical-background template,
-engine settings, scoring tables and plotting code. Its
-[installation guide](https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/INSTALL.md)
-covers the R packages and external engines.
+```r
+bench <- system.file("benchmarks", package = "GCMSbenchmark", mustWork = TRUE)
+source(file.path(bench, "simulated-16.R"))
+directory <- "full-chromatograms"
+prepareFullBenchmark(directory)
+methods <- c("GCMSprime", "MS-DIAL", "mzmine", "MSHub", "AMDIS", "xcms+CAMERA", "eRah")
+for (m in methods) fitFullBenchmark(directory, m, control[[m]], ncores = 16L)
+for (m in methods) scoreFullBenchmark(directory, m)
+collectFullBenchmark(directory, methods, file.path(directory, "results"))
+source(file.path(bench, "plot-simulated-16.R"))
+plotBenchmark16(file.path(directory, "results"), file.path(directory, "figures"))
+```
 
-~~~r
-library(GCMSbenchmark)
-bench <- system.file("benchmarks", package="GCMSbenchmark", mustWork=TRUE)
-source(file.path(bench, "simulated-16.R"), encoding="UTF-8")
-source(file.path(bench, "plot-simulated-16.R"), encoding="UTF-8")
-
-# Recreate the plots from the included results.
-plotBenchmark16(file.path(bench, "results"), "benchmark-figures")
-
-# Generate the same samples and rerun selected installed workflows.
-fit <- runBenchmark16("benchmark-run",
-  method=c("GCMSprime", "xcms+CAMERA"), ncores=16L, support_search=TRUE)
-~~~
-
-The simulation uses seed 9118. The tested versions are MS-DIAL 5.5.261105,
-mzmine 4.11.0, eRah 2.2.0, AMDIS 2.71, xcms 4.6.4, CAMERA 1.64.0 and
-standalone MSHub revision `59fe5d5d7ad5`. Native engine exports are retained.
-The MS-DIAL method and mzmine batch are included. AMDIS uses component
-width 16 scans, sensitivity 60, resolution 0 and peak-shape setting 0.
-
-Download the
-[summary table](https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst/benchmarks/results/benchmark.csv),
-[matched pairs](https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst/benchmarks/results/matches.csv),
-[all component identifications](https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst/benchmarks/results/identifications.csv),
-[stage timings and coupled GIC](https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst/benchmarks/results/native-timings.csv),
-and [xcms tuning results](https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst/benchmarks/results/xcms-training-results.csv).
+[CDF checksums](https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst/benchmarks/results/inputs.csv) · [Reference spectra](https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst/benchmarks/results/reference-library.rds) · [Occurrence and area matrices](https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst/benchmarks/results/settings.rds) · [Summary and timing components](https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst/benchmarks/results/benchmark.csv) · [Matched peaks](https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst/benchmarks/results/matches.csv) · [Per-acid recovery](https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst/benchmarks/results/acid-by-compound.csv) · [Recovery by abundance quartile](https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst/benchmarks/results/sensitivity-by-area.csv) · [Software versions](https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst/benchmarks/results/versions.csv) · [Serial run log](https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst/benchmarks/results/run-order.csv). The numerical input hashes cover scan times, masses and intensities. The whole-file hashes also include the CDF export timestamp.
 
 ## Comparison with other software
 
@@ -244,7 +134,7 @@ and their occurrences. Grouped L0 selection uses the mass channels jointly,
 and hard log-concavity constrains each component profile. This combination
 distinguishes GCMSprime from every evaluated configuration. The other
 workflows use peak detection, representative ion traces, correlations,
-local covariance, factorization of peak integrals or PARAFAC2 least squares.
+local covariance or factorisation of peak integrals.
 Their preprocessing noise estimates and selection rules are summarized below.
 [Mathematical basis](algorithm.html)
 
@@ -257,4 +147,3 @@ Their preprocessing noise estimates and selection rules are summarized below.
 | eRah | Uses local covariance and orthogonal signal deconvolution after filtering and baseline removal. Recovery depends on width and signal thresholds. Cross-sample alignment follows per-sample deconvolution. [eRah manual](https://cran.r-project.org/web/packages/erah/vignettes/erah-manual.html) | Free, GPL open source. [CRAN](https://cran.r-project.org/package=erah) |
 | AMDIS | Uses representative ion traces as model peak shapes within each chromatogram. Component width, sensitivity and shape settings govern the calls and extracted spectra. [NIST guide](https://chemdata.nist.gov/mass-spc/amdis/docs/amdis.pdf) | Free standalone binary. [NIST distribution](https://chemdata.nist.gov/dokuwiki/doku.php?id=chemdata%3Aamdis) |
 | GNPS/MSHub | Requires a sample series for its NMF workflow. It factorizes aligned peak integrals, so the model resolves spectra and abundances from variation across samples and drops the scan-level profile information. [Aksenov et al. (2021)](https://doi.org/10.1038/s41587-020-0700-3) · [Workflow guide](https://ccms-ucsd.github.io/GNPSDocumentation/gc-ms-deconvolution/) | Free hosted workflow with a GNPS account. Public source under the repository’s nonprofit-use licence. [Source](https://github.com/CCMS-UCSD/GNPS_Workflows/tree/master/mshub-gc) · [Licence](https://github.com/CCMS-UCSD/GNPS_Workflows/blob/733ed89372c3754a4c4d132319da5b4313c47288/LICENSE) |
-| PARADISe | Fits PARAFAC2 within retention intervals. Intervals and ranks can require review, and the constant cross-product constraint restricts how peak overlap can change across samples. [Johnsen et al. (2017)](https://doi.org/10.1016/j.chroma.2017.04.052) · [Protocol](https://doi.org/10.21203/rs.3.pex-2143/v1) | Free Community and paid Professional editions. [Kromath](https://www.kromath.com/) |

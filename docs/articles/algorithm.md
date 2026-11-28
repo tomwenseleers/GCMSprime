@@ -58,9 +58,9 @@ For the local count search, pass
 can transfer their signal to overlapping log-concave profiles. Across
 samples, similar spectra with overlapping aligned half-height intervals
 can share one identity after a local joint refit with their neighbours.
-The original-channel GIC decides each support change. [Rank and timing
-on both
-simulations](https://tomwenseleers.github.io/GCMSprime/articles/multisample.html#local-rank-search).
+The original-channel GIC decides each support change. [Shared rank and
+time per sample on full
+chromatograms](https://tomwenseleers.github.io/GCMSprime/articles/multisample.html#local-rank-search).
 
 The adaptive-ridge calibration in the initial PSF regression applies
 each time that regression uses the surrogate. Factor updates charge the
@@ -155,20 +155,12 @@ For simulated data, pass `truth.profiles` to
 [`gcmsDeco()`](https://tomwenseleers.github.io/GCMSprime/reference/gcmsDeco.md)
 to compare the standard fit with the same solver initialized from known,
 matched elution profiles. Both fits estimate spectra and abundances from
-the measured counts. In a separate convergence experiment with 100 extra
-sweeps and a second blind PSF, the estimated-profile start descended
-from 21,188,577 to **4,146,698** and the true-profile start from
-10,875,547 to **4,142,623**. Both reached **estimated rank 100, equal to
-the true rank of 100**. The GIC held steady or decreased at every
-recorded checkpoint (158 for the estimated start and 126 for the
-true-profile start). Both fits used the observed counts and identical
-search settings. Their endpoints differ by **0.098%** of the absolute
-reference GIC. This empirical optimality gap measures agreement with an
-attainable reference. Its distance from the global minimum is unknown.
-
-The [multisample
-example](https://tomwenseleers.github.io/GCMSprime/articles/multisample.html#empirical-gic-gap)
-includes the code, timings and convergence figure link.
+the measured counts. The signed empirical GIC gap compares the endpoints
+of the two fits at the same penalty. The attainable reference depends on
+the data and starting values. The full-chromatogram benchmark times the
+blind fit and checks its estimated rank against the generating
+compounds. [Simulation, measured rank and
+timing](https://tomwenseleers.github.io/GCMSprime/articles/multisample.html#local-rank-search).
 
 Solver selection is automatic. Sections 3 and 4 give the component-count
 penalty used for other noise families and for disk-backed joint

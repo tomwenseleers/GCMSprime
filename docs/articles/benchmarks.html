@@ -31,7 +31,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">GCMSprime</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9012</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9014</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -88,466 +88,512 @@
     
     
 <div class="section level2">
-<h2 id="sixteen-simulated-chromatograms">Small-scale 16-sample software comparison<a class="anchor" aria-label="anchor" href="#sixteen-simulated-chromatograms"></a>
+<h2 id="sixteen-simulated-chromatograms">Sixteen full simulated chromatograms<a class="anchor" aria-label="anchor" href="#sixteen-simulated-chromatograms"></a>
 </h2>
-<p>This page reports the <strong>small-scale</strong> seven-workflow
-comparison. It is distinct from the <a href="multisample.html#benchmark-scales">large-scale 16-sample resource
-benchmark</a> with 10,000 scans per sample and 1,000 reference compounds
-across the experiment. The linked overview reports both timings,
-settings and short reproduction recipes. Here GCMSprime uses 32 common
-ion groups, two blind-PSF windows, at most three PSF iterations, and up
-to 12 initial conditional sweeps on the original ions.</p>
-<p>The <strong>16 chromatograms</strong> share a library of <strong>100
-reference compounds</strong>. Each spans a 20-minute retention window,
-with 1,200 scans and all 258 mass channels. Compounds are absent from
-about half the samples, giving <strong>769 true occurrences</strong>.
-Library retention indices determine their positions. One compound has a
-broad shark-fin-shaped acid profile; the remaining profiles are
-exponentially modified Gaussians. Higher concentrations extend peaks
-towards later times from approximately fixed leading edges, and a small
-positive drift shifts successive injections to the right.</p>
-<p>The smooth B-spline background is derived from the experimental
-<code>gcmsData2</code> window and contributes 3.03% of the integrated
-compound signal. The simulation retains its native abundance scale and
-uses quasi-Poisson noise with <strong>dispersion 783.18</strong>,
-estimated from that window. GCMSprime estimates dispersion separately in
-each sample, with a <strong>median estimate of 829.55</strong>. The
-generating retention-index maps are used for scoring; the deconvolution
-receives neither the known areas nor the true profiles.</p>
-<p>The optional search recovered <strong>true rank 100 exactly
-(estimated rank 100)</strong> and <strong>769 of 769 occurrences with
-only one false positive</strong>. The acid was recovered in all seven
-samples where it was present.</p>
+<p>The same 16 simulated chromatograms were supplied to every program.
+Each contains <strong>10,000 scans × 550 nominal mass channels</strong>
+(m/z 30–579), covering approximately 50 minutes. Together they contain
+<strong>88 million simulated ion intensities</strong>. Each of the
+<strong>1,000 distinct compounds</strong> occurs in eight randomly
+chosen samples. The design therefore contains <strong>8,000 positive
+sample–compound pairs</strong>. Rank here counts the distinct generating
+compounds across the batch, each with a time-local elution profile in
+each positive sample. Of the compounds, 990 have exponentially modified
+Gaussian (EMG) peaks and ten have a rising shark-fin profile with an
+abrupt trailing edge. Higher concentrations broaden both types. The
+acquisition clock allows a smooth retention shift of up to 2.93 seconds
+between the first and last injections and approximately 2% variation in
+scan spacing.</p>
+<p>GCMSprime, using simultaneous logconNMF, <strong>recovered the true
+rank of 1,000 exactly</strong> in <strong>35.95 seconds per
+sample</strong>. It recovered <strong>8,000 of 8,000</strong> compound
+occurrences and made <strong>no false-positive calls</strong>. The
+recovered peaks included <strong>80 of the 80 acid occurrences</strong>.
+MSHub returned <strong>1,414 deconvolved components</strong>, 41.4%
+above the true rank. The other five workflows produce peak lists or
+aligned feature groups. Their outputs do not define a common
+factorisation rank.</p>
 <table class="table">
 <colgroup>
-<col width="12%">
-<col width="12%">
-<col width="12%">
-<col width="12%">
-<col width="12%">
-<col width="12%">
-<col width="12%">
-<col width="12%">
+<col width="11%">
+<col width="14%">
+<col width="14%">
+<col width="14%">
+<col width="14%">
+<col width="14%">
+<col width="14%">
 </colgroup>
 <thead><tr class="header">
-<th align="left">Method</th>
-<th align="right">Seconds</th>
-<th align="right">Estimated rank</th>
+<th>Workflow</th>
+<th align="right">Seconds/sample</th>
+<th align="right">Estimated rank (true 1,000)</th>
 <th align="right">TP</th>
 <th align="right">FP</th>
-<th align="right">Sensitivity</th>
-<th align="right">Peak F1</th>
-<th align="right">Ion F1</th>
+<th align="right">FN</th>
+<th align="right">Acid TP / 80</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td align="left">GCMSprime</td>
-<td align="right">96.51</td>
-<td align="right"><strong>100 (exact)</strong></td>
-<td align="right">769</td>
-<td align="right">1</td>
-<td align="right">100.0%</td>
-<td align="right">0.999</td>
-<td align="right">0.996</td>
+<td>GCMSprime</td>
+<td align="right">35.95</td>
+<td align="right"><strong>1,000 (exact)</strong></td>
+<td align="right">8,000</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">80 / 80</td>
 </tr>
 <tr class="even">
-<td align="left">MS-DIAL</td>
-<td align="right">17.61</td>
+<td>MS-DIAL</td>
+<td align="right">16.02</td>
 <td align="right">—</td>
-<td align="right">675</td>
-<td align="right">641</td>
-<td align="right">87.8%</td>
-<td align="right">0.647</td>
-<td align="right">0.858</td>
+<td align="right">7,728</td>
+<td align="right">11,685</td>
+<td align="right">272</td>
+<td align="right">73 / 80</td>
 </tr>
 <tr class="odd">
-<td align="left">mzmine GC-EI</td>
-<td align="right">38.47</td>
+<td>mzmine GC-EI</td>
+<td align="right">6.92</td>
 <td align="right">—</td>
-<td align="right">622</td>
-<td align="right">70</td>
-<td align="right">80.9%</td>
-<td align="right">0.851</td>
-<td align="right">0.860</td>
+<td align="right">4,202</td>
+<td align="right">185</td>
+<td align="right">3,798</td>
+<td align="right">29 / 80</td>
 </tr>
 <tr class="even">
-<td align="left">eRah</td>
-<td align="right">17.07</td>
+<td>eRah</td>
+<td align="right">25.94</td>
 <td align="right">—</td>
-<td align="right">645</td>
-<td align="right">1912</td>
-<td align="right">83.9%</td>
-<td align="right">0.388</td>
-<td align="right">0.771</td>
+<td align="right">7,172</td>
+<td align="right">5,615</td>
+<td align="right">828</td>
+<td align="right">70 / 80</td>
 </tr>
 <tr class="odd">
-<td align="left">AMDIS</td>
-<td align="right">92.58</td>
+<td>AMDIS</td>
+<td align="right">28.99</td>
 <td align="right">—</td>
-<td align="right">671</td>
-<td align="right">1153</td>
-<td align="right">87.3%</td>
-<td align="right">0.518</td>
-<td align="right">0.854</td>
+<td align="right">7,878</td>
+<td align="right">9,122</td>
+<td align="right">122</td>
+<td align="right">80 / 80</td>
 </tr>
 <tr class="even">
-<td align="left">xcms + CAMERA</td>
-<td align="right">24.06</td>
+<td>xcms + CAMERA</td>
+<td align="right">4.22</td>
 <td align="right">—</td>
-<td align="right">635</td>
-<td align="right">146</td>
-<td align="right">82.6%</td>
-<td align="right">0.819</td>
-<td align="right">0.617</td>
+<td align="right">7,261</td>
+<td align="right">890</td>
+<td align="right">739</td>
+<td align="right">31 / 80</td>
 </tr>
 <tr class="odd">
-<td align="left">MSHub</td>
-<td align="right">20.58</td>
-<td align="right">281</td>
-<td align="right">635</td>
-<td align="right">2797</td>
-<td align="right">82.6%</td>
-<td align="right">0.302</td>
-<td align="right">0.844</td>
+<td>MSHub</td>
+<td align="right">15.05</td>
+<td align="right">1,414</td>
+<td align="right">7,179</td>
+<td align="right">12,184</td>
+<td align="right">821</td>
+<td align="right">50 / 80</td>
 </tr>
 </tbody>
 </table>
-<p>The true rank is 100 distinct compounds present in at least one
-sample. The rank column counts shared fitted factors. A dash identifies
-workflows without a comparable cross-sample factorisation rank.</p>
-<p>Times are wall-clock analysis times on an HP ZBook Fury G8 Mobile
-Workstation with an Intel Core i9-11950H at 2.60 GHz, eight physical
-cores and 16 logical threads, Windows and R 4.5.0. AMDIS runs serially
-and xcms + CAMERA uses four workers. Input conversion is timed
-separately. The six comparator rows use their saved outputs and timings
-from the identical simulated inputs.</p>
-<p>The small benchmark used the fast local search on the blind,
-time-varying PSF start. Data preparation, PSF calibration and ion
-grouping took 10.21 s, grouped regression and joint fitting 81.46 s, and
-export 4.59 s. Including the benchmark wrapper, the complete analysis
-took <strong>96.51 s</strong>. The original-ion GIC was
-<strong>4,142,023</strong>. A second run took <strong>100.82 s</strong>
-and returned the same rank, GIC, areas and spectra. <a href="https://github.com/tomwenseleers/GCMSprime/blob/master/benchmarks/results/calibrated-threads.csv" class="external-link">Recorded
-runs</a>.</p>
-<p>With the default stopping and support settings, an eight-thread run
-on the same CDF files took <strong>54.66 s</strong> and gave
-<strong>estimated rank 115</strong> against <strong>true rank
-100</strong>, with 769 true positives and only 26 false positives.</p>
-<p>GCMSprime used eight two-thread workers for grouped PSF regressions
-and could use 16 threads for the joint fit. Profile and background
-updates run across samples. Shared spectra run across ions. Local merge
-decisions and file exports also contribute to elapsed time.</p>
-</div>
-<div class="section level2">
-<h2 id="sensitivity-to-the-starting-peak-width">Sensitivity to the starting peak width<a class="anchor" aria-label="anchor" href="#sensitivity-to-the-starting-peak-width"></a>
-</h2>
-<p>The local rank search was applied to each starting PSF on the same 16
-chromatograms. All runs used eight threads and scored matched peaks on
-the original ion channels.</p>
-<table style="width:100%;" class="table">
+<p>The native GCMSprime factor IDs mapped one-to-one to the 1,000
+generating compounds across all eight positive samples per compound. For
+MSHub, the correctly matched sample occurrences belonged to 1,072 of its
+1,414 native components. <a href="https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst/benchmarks/results/factor-matches.csv" class="external-link">Occurrence-to-factor
+assignments</a>.</p>
+<p>Each program ran once, in sequence, on the same 64 GB Windows laptop
+with eight physical cores and 16 logical processors. Seconds per sample
+means wall time divided by 16 for the whole batch. The comparison
+includes any required input conversion or staging and the program’s
+native analysis. GCMSprime’s time includes reading and fitting an
+independent PSF standard, the coupled fit and native results export.
+Simulation, common-format result extraction and accuracy scoring are
+outside the timed comparison. One run per program gives a descriptive
+timing for these files and this machine.</p>
+<p><a href="../reference/figures/simulated-16-performance.png"><img src="../reference/figures/simulated-16-performance.png" alt="Time per sample, sensitivity and precision for all seven workflows"></a></p>
+<div class="section level3">
+<h3 id="timing-boundaries">Timing boundaries<a class="anchor" aria-label="anchor" href="#timing-boundaries"></a>
+</h3>
+<table class="table">
 <colgroup>
-<col width="11%">
-<col width="11%">
-<col width="11%">
-<col width="11%">
-<col width="11%">
-<col width="11%">
-<col width="11%">
-<col width="11%">
-<col width="11%">
+<col width="20%">
+<col width="26%">
+<col width="26%">
+<col width="26%">
 </colgroup>
 <thead><tr class="header">
-<th align="left">Starting PSF</th>
-<th align="right">Estimated / true rank</th>
-<th align="right">TP</th>
-<th align="right">FP</th>
-<th align="right">Missed</th>
-<th align="right">Acid recovered</th>
-<th align="right">Median area error</th>
-<th align="right">Original-ion GIC</th>
-<th align="right">CDF time</th>
+<th>Workflow</th>
+<th align="right">Native analysis (s/sample)</th>
+<th align="right">Input conversion or staging (s/sample)</th>
+<th align="right">Through result extraction (s/sample)</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td align="left">Calibrated time-varying</td>
-<td align="right"><strong>100 / 100 (exact)</strong></td>
-<td align="right">769</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">7 / 7</td>
-<td align="right">0.082%</td>
-<td align="right">4,142,023</td>
-<td align="right">104.48 s</td>
+<td>GCMSprime</td>
+<td align="right">35.95</td>
+<td align="right">—</td>
+<td align="right">36.40</td>
 </tr>
 <tr class="even">
-<td align="left">Half-width Gaussian</td>
-<td align="right">108 / 100</td>
-<td align="right">764</td>
-<td align="right">13</td>
-<td align="right">5</td>
-<td align="right">7 / 7</td>
-<td align="right">0.089%</td>
-<td align="right">4,171,642</td>
-<td align="right">113.66 s</td>
+<td>MS-DIAL</td>
+<td align="right">12.26</td>
+<td align="right">3.76</td>
+<td align="right">17.40</td>
 </tr>
 <tr class="odd">
-<td align="left">Double-width Gaussian</td>
-<td align="right">105 / 100</td>
-<td align="right">769</td>
-<td align="right">23</td>
-<td align="right">0</td>
-<td align="right">7 / 7</td>
-<td align="right">0.095%</td>
-<td align="right">4,324,923</td>
-<td align="right">297.27 s</td>
+<td>mzmine GC-EI</td>
+<td align="right">3.51</td>
+<td align="right">3.41</td>
+<td align="right">6.93</td>
+</tr>
+<tr class="even">
+<td>eRah</td>
+<td align="right">25.94</td>
+<td align="right">—</td>
+<td align="right">26.46</td>
+</tr>
+<tr class="odd">
+<td>AMDIS</td>
+<td align="right">25.75</td>
+<td align="right">3.24</td>
+<td align="right">29.57</td>
+</tr>
+<tr class="even">
+<td>xcms + CAMERA</td>
+<td align="right">4.22</td>
+<td align="right">—</td>
+<td align="right">4.99</td>
+</tr>
+<tr class="odd">
+<td>MSHub</td>
+<td align="right">14.99</td>
+<td align="right">0.06</td>
+<td align="right">15.38</td>
 </tr>
 </tbody>
 </table>
-<p>The calibrated start recovered the true rank exactly. The half-width
-Gaussian retained extra factors and missed five occurrences. The local
-search remains optional. <a href="https://github.com/tomwenseleers/GCMSprime/blob/master/benchmarks/benchmark_gaussian_starts.R" class="external-link">Reproduce
-the Gaussian starts</a> · <a href="https://github.com/tomwenseleers/GCMSprime/blob/master/benchmarks/results/fast-gaussian-starts.csv" class="external-link">Download
-the measurements</a>.</p>
-<p>The extended search added a second blind PSF and 100 refinement
-sweeps. From the calibrated start and both Gaussian starts it recovered
-<strong>estimated rank 100, equal to true rank 100</strong>, all 769
-occurrences and zero false positives after the blind PSF exchange.
-Across starts, the largest difference between two estimates of a matched
-peak area was 0.86%. The acid area in sample 009 was 99.76–99.81% of
-truth. The calibration, support proposals and GIC comparisons used only
-observed counts.</p>
-<div class="float">
-<img src="../reference/figures/psf-start-recovery.png" alt="False positive and missed calls across three PSF starts and three searches"><div class="figcaption">False positive and missed calls across three PSF
-starts and three searches</div>
+<p>The headline time adds native analysis and separately timed input
+conversion or staging. A dash means the workflow read its inputs
+directly. The last column also includes extracting peak tables and
+spectra into the common in-memory representation, before saving that
+record or comparing it with truth.</p>
 </div>
-<p><a href="https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst/benchmarks/results/psf-starts.csv" class="external-link">Rank,
-original-price GIC, recovery and area measurements for all nine
-fits</a>.</p>
+<div class="section level3">
+<h3 id="simulation-and-scoring">Simulation and scoring<a class="anchor" aria-label="anchor" href="#simulation-and-scoring"></a>
+</h3>
+<p>Individual chromatograms contain 479–517 true peaks. The L0glm
+library supplies spectra on m/z 41–298. The selected spectra have
+compound signal in 245 of the 550 recorded channels. A smoothly varying
+background fitted to the measured gcmsData2 window supplies the
+background on m/z 41–298. The additional channels carry low background.
+Counts have quasi-Poisson variance proportional to the mean, with
+dispersion 783.18 estimated from gcmsData2. Measured on the recorded
+scan grids, the median within-compound Spearman correlation between area
+and half-height width was 0.86 for EMGs and 0.94 for acids. The nominal
+compound centres follow a regular grid with one deliberately close pair.
+Concentration-dependent broadening and the subset present in each
+injection determine the actual overlap. The retention-index (RI) scale
+is synthetic and time-calibrated for each injection. Reference spectra,
+occurrence labels and true rank are used in scoring.</p>
+<p>GCMSprime calibrated the time-varying PSF on a separately generated
+20-peak standard. It used a 16-thread budget with up to eight
+simultaneous sample initialisations, 32 pooled mass-channel groups and
+the final local rank search
+(<code>batch = list(workers = 8L, coupling = list(penalty_search = TRUE))</code>).
+The search compares changes to the original-ion GIC. It receives neither
+the expected number of compounds nor their spectra. The other programs
+used their local GC–EI workflows. The settings and software versions
+accompany the results.</p>
+<p>eRah used a minimum peak width of 2 seconds. The xcms matched filter
+used a 2.6-second FWHM and a signal-to-noise threshold of 1.5. CAMERA
+grouped peaks by FWHM with <code>perfwhm = 0.8</code> and required four
+ions. AMDIS used <code>PEAKWIDTH = 16</code>, <code>SENSIT = 60</code>,
+<code>RESOLUTION = 0</code> and <code>PEAKSHAPE = 0</code>. MSHub used
+its standalone deconvolution workflow. The simulation and CDF writer ran
+with logconNMF and GCMSprime 0.1.0.9012. Their generating functions,
+reference spectra and empirical background were checked against the
+versions used for fitting (0.1.0.9013).</p>
+<p>Each recovered spectrum competes against all 1,000 references,
+including compounds absent from that sample. A true positive requires a
+reciprocal best match with spectral cosine ≥0.70, within ±30 simulated
+RI units, to a compound present in that sample. The score allows one
+credit per sample and reference. Extra calls, including duplicates,
+count as false positives. Sensitivity uses all 8,000 occurrences as its
+denominator. Acid recovery uses all 80.</p>
 </div>
-<div class="section level2">
-<h2 id="reciprocal-spectral-matches-and-integrated-areas">Reciprocal spectral matches and integrated areas<a class="anchor" aria-label="anchor" href="#reciprocal-spectral-matches-and-integrated-areas"></a>
-</h2>
-<p>The reference library contains all 100 compounds, including those
-absent from an individual sample. Candidate spectra must fall within
-<strong>30 RI units</strong> and have cosine similarity of at least
-<strong>0.70</strong>. A reciprocal pair selects each other as the best
-eligible spectral hit. Ties are resolved by RI difference and then ID. A
-reciprocal hit to a compound actually present is a true positive; every
-other returned component is a false positive. Additional calls to the
-same reference compound are included in those counts. Their areas are
-not added to the selected match.</p>
-<p><a href="../reference/figures/simulated-16-area-predictions.png"><img src="../reference/figures/simulated-16-area-predictions.png" alt="Ordinary log–log peak-area fits and 95% prediction intervals"></a></p>
-<p>The method panels share the same estimated-area axis. All panels use
-<strong>total-ion count equivalents</strong>. Spectra are normalized to
-unit L1 norm, with their magnitude transferred to the corresponding
-profile or area. Native model-ion areas are corrected for their ion
-fraction and integration-time units. The conversions use each engine’s
-exported factors and acquisition metadata, without calibration against
-the known answers. The native values and conversion factors remain in
-the result objects.</p>
-<p>For a component with profile <span class="math inline">h</span> and
-spectrum <span class="math inline">s</span>, let <span class="math inline">c=\sum_j s_j</span>, <span class="math inline">p=s/c</span> and <span class="math inline">\widetilde h=ch</span>. Then <span class="math inline">hs^\top=\widetilde h p^\top</span> and <span class="math inline">\sum_j p_j=1</span>. An area measured for a
-particular ion <span class="math inline">q</span> becomes <span class="math inline">A_{\mathrm{TIC}}=A_q/p_q</span>, after converting
-its integration-time units.</p>
-<p>The solid line fits an ordinary least-squares regression of log₁₀
-estimated area on log₁₀ true area to all positive matched pairs,
-including the outliers. The shaded region is the pointwise 95%
-prediction interval for an individual peak at a given true area. The
-dashed line shows exact agreement. Darker points indicate overlap
-(opacity 0.5).</p>
-<p>GCMSprime recovered <strong>all 769 occurrences</strong>, with
-<strong>adjusted R² 0.999993</strong> and a <strong>median absolute area
-error of 0.082%</strong>. Even the lowest estimate was 98.1% of its true
-area. Area agreement is conditional on recovered true matches, so it is
-shown together with sensitivity and false-positive counts.</p>
-<p><a href="../reference/figures/simulated-16-spectral-violin.png"><img src="../reference/figures/simulated-16-spectral-violin.png" alt="Reciprocal spectral cosine similarity with individual points"></a></p>
-<p>Each point is a reciprocal spectral hit. Crosses identify hits to
-compounds absent from that sample; the cosine axis uses logit spacing.
-Display values at or above 0.999999 are shown at 1, while the statistics
-retain their original values. Compact horizontal tick labels keep the
-scale readable.</p>
 </div>
 <div class="section level2">
-<h2 id="correctness-of-spectral-ion-support">Correctness of spectral ion support<a class="anchor" aria-label="anchor" href="#correctness-of-spectral-ion-support"></a>
+<h2 id="quantification-and-spectral-recovery">Quantification and spectral recovery<a class="anchor" aria-label="anchor" href="#quantification-and-spectral-recovery"></a>
 </h2>
-<p><a href="../reference/figures/simulated-16-spectral-support.png"><img src="../reference/figures/simulated-16-spectral-support.png" alt="Within-spectrum ion-support F1 with the shared 0.1% cutoff"></a></p>
-<p>Ion support uses a shared <strong>0.1% of base-peak intensity
-cutoff</strong>, applied independently to reference and recovered
-spectra for every method: <span class="math inline">I_j&gt;0</span> and
-<span class="math inline">I_j\geq0.001\max_l I_l</span>. Within-spectrum
-<span class="math inline">F_1=2TP/(2TP+FP+FN)</span> is averaged over
-correctly matched true spectra. GCMSprime achieves <strong>mean ion F1
-0.996</strong>, compared with <strong>0.860</strong> for the strongest
-comparator. Individual points accompany the violins; the logit-spaced
-axis retains labels in the original F1 units.</p>
-<p>This is also GCMSprime’s default spectral reporting cutoff for
-coefficient summaries, library queries and MSP/Excel output.
-<code>ion_threshold=0</code> retains all positive ions. Reporting
-preserves fitted total ion counts, peak areas, profiles and information
-criteria.</p>
-</div>
-<div class="section level2">
-<h2 id="observed-signal-and-recovered-peak-areas">Observed signal and recovered peak areas<a class="anchor" aria-label="anchor" href="#observed-signal-and-recovered-peak-areas"></a>
-</h2>
-<p><a href="../reference/figures/simulated-16-sample-heatmap.png"><img src="../reference/figures/simulated-16-sample-heatmap.png" alt="Observed and true signal with square-root intensity colours"></a></p>
-<p>The observed counts and true mean, including background, use the
-plotMat palette with <strong>square-root intensity colours</strong>. Red
-lines mark true apices.</p>
-<p><a href="../reference/figures/simulated-16-area-heatmap.png"><img src="../reference/figures/simulated-16-area-heatmap.png" alt="Method-by-compound peak areas with yellow false negatives"></a></p>
-<p>The ground-truth row and method rows show one sample’s true or
-inferred total-ion areas. <strong>Bright yellow marks false
-negatives</strong>; grey marks no signal or call. Compounds follow
-increasing RI. A <a href="../reference/figures/simulated-16-area-heatmap-pooled.png">pooled
-view</a> summarizes all 16 samples; the <a href="../reference/figures/simulated-16-area-heatmaps-all-samples.pdf">sample-by-sample
-PDF</a> shows every acquisition.</p>
+<table class="table">
+<colgroup>
+<col width="15%">
+<col width="21%">
+<col width="21%">
+<col width="21%">
+<col width="21%">
+</colgroup>
+<thead><tr class="header">
+<th>Workflow</th>
+<th align="right">Area adjusted R²</th>
+<th align="right">Median spectral cosine</th>
+<th align="right">Mean ion-support F1</th>
+<th align="right">Median profile cosine</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>GCMSprime</td>
+<td align="right">0.999982</td>
+<td align="right">0.9999995</td>
+<td align="right">0.995</td>
+<td align="right">0.999994</td>
+</tr>
+<tr class="even">
+<td>MS-DIAL</td>
+<td align="right">0.700129</td>
+<td align="right">0.9925397</td>
+<td align="right">0.901</td>
+<td align="right">0.996864</td>
+</tr>
+<tr class="odd">
+<td>mzmine GC-EI</td>
+<td align="right">0.966560</td>
+<td align="right">0.9975148</td>
+<td align="right">0.874</td>
+<td align="right">—</td>
+</tr>
+<tr class="even">
+<td>eRah</td>
+<td align="right">0.853212</td>
+<td align="right">0.9957392</td>
+<td align="right">0.794</td>
+<td align="right">0.001678</td>
+</tr>
+<tr class="odd">
+<td>AMDIS</td>
+<td align="right">0.499773</td>
+<td align="right">0.9972175</td>
+<td align="right">0.894</td>
+<td align="right">0.970942</td>
+</tr>
+<tr class="even">
+<td>xcms + CAMERA</td>
+<td align="right">0.951953</td>
+<td align="right">0.9807221</td>
+<td align="right">0.604</td>
+<td align="right">0.971638</td>
+</tr>
+<tr class="odd">
+<td>MSHub</td>
+<td align="right">0.305059</td>
+<td align="right">0.9857457</td>
+<td align="right">0.913</td>
+<td align="right">—</td>
+</tr>
+</tbody>
+</table>
+<p>Among GCMSprime’s 8,000 matched occurrences, the median absolute
+relative area error was <strong>0.095%</strong> and ordinary adjusted R²
+on the log₁₀ scale was <strong>0.999982</strong>. The area panels use
+ordinary least-squares regression with pointwise 95% prediction
+intervals. Square axes span 7.5 to 10.5 on both log₁₀ scales. The fits
+include every positive matched pair, including observations outside the
+displayed limits. The dashed diagonal marks exact area recovery.</p>
+<p><a href="../reference/figures/simulated-16-area-predictions.png"><img src="../reference/figures/simulated-16-area-predictions.png" alt="Estimated versus true total-ion areas across all seven workflows"></a></p>
+<p>Areas use each program’s exported ion intensities and its acquisition
+clock to convert to integrated total-ion equivalents. Accuracy is
+conditional on a correct match. The first table gives the missed and
+extra calls alongside it.</p>
+<p><a href="../reference/figures/simulated-16-spectral-violin.png"><img src="../reference/figures/simulated-16-spectral-violin.png" alt="Reciprocal reference spectrum matches across the 16 chromatograms"></a></p>
+<p><a href="../reference/figures/simulated-16-spectral-support.png"><img src="../reference/figures/simulated-16-spectral-support.png" alt="Ion-support recovery across the seven workflows"></a></p>
+<p>The first distribution includes all reciprocal library hits. Crosses
+identify hits to references absent from the sample. Ion-support F1
+compares the nonzero ions at or above 0.1% of each spectrum’s own base
+peak and is averaged over correct matches.</p>
 </div>
 <div class="section level2">
 <h2 id="correctness-of-inferred-elution-profiles">Correctness of inferred elution profiles<a class="anchor" aria-label="anchor" href="#correctness-of-inferred-elution-profiles"></a>
 </h2>
-<p><a href="../reference/figures/simulated-16-regular-profiles.png"><img src="../reference/figures/simulated-16-regular-profiles.png" alt="Solid inferred and dashed true regular-compound profiles, blue to red by true area"></a></p>
-<p><a href="../reference/figures/simulated-16-acid-profiles.png"><img src="../reference/figures/simulated-16-acid-profiles.png" alt="Solid inferred and dashed true acid-compound profiles, blue to red by true area"></a></p>
-<p>The first panel set shows the regular compound with the largest total
-true area across samples (present in <strong>11 of 16 samples</strong>);
-the second shows the acid compound (present in <strong>7 of
-16</strong>). These are the same saved profiles shown on the logconNMF
-homepage. All 16 samples are included and ordered by true abundance,
-from <strong>blue for the smallest area to red for the largest</strong>.
-<strong>Dashed curves are ground truth; solid curves are returned
-profiles.</strong> Intensities retain their original total-ion scale,
-without unit-area or peak-height normalization. Absent compounds have
-zero true signal. Compatible fragments remain separate curves so
-splitting stays visible. The generating retention-index calibration
-supplies the common horizontal axis; profile amplitudes remain on their
-native total-ion scale.</p>
-<p>GCMSprime recovers all occurrences of both the regular EMG and the
-shark-fin-shaped acid. Mean profile cosine, counting missed occurrences
-as zero, is <strong>0.999995 for the regular compound</strong> and
-<strong>0.999983 for the acid</strong>; median cosine among matched
-occurrences is <strong>0.999998</strong> and <strong>0.999990</strong>,
-respectively. Other configurations often truncate profiles, split their
-contributions or miss the acid. MS-DIAL also resolves the regular
-compound (mean cosine 0.998). It recovers five of the seven acid
-occurrences and has acid mean cosine 0.449. CAMERA supplies a
-representative-ion trace scaled to the grouped total-ion area. The
-mzmine export here contains spectra and areas without component scan
-profiles. MSHub factorizes aligned ion-peak integrals across samples.
-Its model has no common compound elution profile constrained to be
-shared across mass channels, so component scan profiles are absent from
-the model itself. See <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC7971188/" class="external-link">Aksenov et
-al. (2021)</a>.</p>
-</div>
-<div class="section level2">
-<h2 id="detection-settings-and-reproducibility">Detection settings and reproducibility<a class="anchor" aria-label="anchor" href="#detection-settings-and-reproducibility"></a>
-</h2>
-<p>The xcms + CAMERA configuration uses an <strong>8.6-second filter
-FWHM</strong>, signal-to-noise threshold <strong>1.5</strong>, a minimum
-of <strong>four ions</strong>, and CAMERA FWHM grouping with
-<code>perfwhm=0.8</code>. Settings were selected on odd-numbered samples
-and checked on even-numbered samples. This configuration recovered 635
-of 769 occurrences across all samples (82.6% sensitivity).</p>
+<p>The examples are the EMG compound and the acid with the greatest
+total true area in their respective classes. Both were selected from the
+simulation before comparing any fits. Each occurs in eight samples.
+Solid curves show inferred profiles, dashed curves show the true
+profiles, and the eight absent true profiles coincide at zero. Colours
+order the 16 samples by true area. Heights retain original total-ion
+intensity per scan. The mean cosine in each example uses all eight
+positive occurrences, with a missing recovered profile scoring zero. The
+all-acid tally covers all ten acids.</p>
+<p><a href="../reference/figures/simulated-16-regular-profiles.png"><img src="../reference/figures/simulated-16-regular-profiles.png" alt="Recovered and simulated profiles for the selected EMG compound"></a></p>
+<p><a href="../reference/figures/simulated-16-acid-profiles.png"><img src="../reference/figures/simulated-16-acid-profiles.png" alt="Recovered and simulated profiles for the selected shark-fin acid"></a></p>
+<p>CAMERA supplies a representative-ion trace scaled to the grouped
+area. The mzmine and MSHub exports provide spectra and areas without a
+sample-specific profile in this workflow.</p>
 <div class="section level3">
-<h3 id="recovery-across-true-peak-sizes">Recovery across true peak sizes<a class="anchor" aria-label="anchor" href="#recovery-across-true-peak-sizes"></a>
+<h3 id="recovery-of-all-ten-shark-fin-acids">Recovery of all ten shark-fin acids<a class="anchor" aria-label="anchor" href="#recovery-of-all-ten-shark-fin-acids"></a>
 </h3>
-<p>Sensitivity is also calculated separately in quartiles of true
-integrated peak area, including every true occurrence. This makes the
-preferential recovery of large peaks visible alongside the conditional
-area regressions. GCMSprime recovered <strong>all 193 peaks in the
-smallest quarter</strong>.</p>
+<p>Each entry counts correctly identified occurrences out of eight for
+one acid. The downloadable per-compound table also gives the median
+estimated-to-true area ratio and mean matched profile cosine where a
+profile is available.</p>
 <table class="table">
 <colgroup>
-<col width="20%">
-<col width="20%">
-<col width="20%">
-<col width="20%">
-<col width="20%">
+<col width="9%">
+<col width="12%">
+<col width="12%">
+<col width="12%">
+<col width="12%">
+<col width="12%">
+<col width="12%">
+<col width="12%">
 </colgroup>
 <thead><tr class="header">
-<th align="left">Method</th>
-<th align="right">Smallest quarter</th>
-<th align="right">Lower-middle</th>
-<th align="right">Upper-middle</th>
-<th align="right">Largest quarter</th>
+<th>Acid ID</th>
+<th align="right">GCMSprime</th>
+<th align="right">MS-DIAL</th>
+<th align="right">mzmine</th>
+<th align="right">eRah</th>
+<th align="right">AMDIS</th>
+<th align="right">xcms+CAMERA</th>
+<th align="right">MSHub</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td align="left">GCMSprime</td>
-<td align="right">100.0%</td>
-<td align="right">100.0%</td>
-<td align="right">100.0%</td>
-<td align="right">100.0%</td>
+<td>250</td>
+<td align="right">8</td>
+<td align="right">7</td>
+<td align="right">5</td>
+<td align="right">5</td>
+<td align="right">8</td>
+<td align="right">3</td>
+<td align="right">8</td>
 </tr>
 <tr class="even">
-<td align="left">MS-DIAL</td>
-<td align="right">79.3%</td>
-<td align="right">84.4%</td>
-<td align="right">91.1%</td>
-<td align="right">96.4%</td>
+<td>311</td>
+<td align="right">8</td>
+<td align="right">7</td>
+<td align="right">3</td>
+<td align="right">7</td>
+<td align="right">8</td>
+<td align="right">6</td>
+<td align="right">4</td>
 </tr>
 <tr class="odd">
-<td align="left">mzmine GC-EI</td>
-<td align="right">70.5%</td>
-<td align="right">79.2%</td>
-<td align="right">82.3%</td>
-<td align="right">91.7%</td>
+<td>372</td>
+<td align="right">8</td>
+<td align="right">8</td>
+<td align="right">6</td>
+<td align="right">6</td>
+<td align="right">8</td>
+<td align="right">1</td>
+<td align="right">8</td>
 </tr>
 <tr class="even">
-<td align="left">eRah</td>
-<td align="right">72.0%</td>
-<td align="right">78.6%</td>
-<td align="right">89.1%</td>
-<td align="right">95.8%</td>
+<td>433</td>
+<td align="right">8</td>
+<td align="right">7</td>
+<td align="right">4</td>
+<td align="right">8</td>
+<td align="right">8</td>
+<td align="right">2</td>
+<td align="right">8</td>
 </tr>
 <tr class="odd">
-<td align="left">AMDIS</td>
-<td align="right">78.2%</td>
-<td align="right">83.3%</td>
-<td align="right">89.6%</td>
-<td align="right">97.9%</td>
+<td>494</td>
+<td align="right">8</td>
+<td align="right">7</td>
+<td align="right">4</td>
+<td align="right">7</td>
+<td align="right">8</td>
+<td align="right">3</td>
+<td align="right">0</td>
 </tr>
 <tr class="even">
-<td align="left">xcms + CAMERA</td>
-<td align="right">66.3%</td>
-<td align="right">81.8%</td>
-<td align="right">84.9%</td>
-<td align="right">97.4%</td>
+<td>556</td>
+<td align="right">8</td>
+<td align="right">7</td>
+<td align="right">7</td>
+<td align="right">8</td>
+<td align="right">8</td>
+<td align="right">5</td>
+<td align="right">8</td>
 </tr>
 <tr class="odd">
-<td align="left">MSHub</td>
-<td align="right">73.6%</td>
-<td align="right">82.8%</td>
-<td align="right">86.5%</td>
-<td align="right">87.5%</td>
+<td>617</td>
+<td align="right">8</td>
+<td align="right">8</td>
+<td align="right">0</td>
+<td align="right">8</td>
+<td align="right">8</td>
+<td align="right">2</td>
+<td align="right">6</td>
+</tr>
+<tr class="even">
+<td>678</td>
+<td align="right">8</td>
+<td align="right">8</td>
+<td align="right">0</td>
+<td align="right">8</td>
+<td align="right">8</td>
+<td align="right">7</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td>739</td>
+<td align="right">8</td>
+<td align="right">7</td>
+<td align="right">0</td>
+<td align="right">7</td>
+<td align="right">8</td>
+<td align="right">2</td>
+<td align="right">8</td>
+</tr>
+<tr class="even">
+<td>800</td>
+<td align="right">8</td>
+<td align="right">7</td>
+<td align="right">0</td>
+<td align="right">6</td>
+<td align="right">8</td>
+<td align="right">0</td>
+<td align="right">0</td>
 </tr>
 </tbody>
 </table>
-<p>GCMSbenchmark includes the seeded simulation, empirical-background
-template, engine settings, scoring tables and plotting code. Its <a href="https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/INSTALL.md" class="external-link">installation
-guide</a> covers the R packages and external engines.</p>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">GCMSbenchmark</span><span class="op">)</span></span>
-<span><span class="va">bench</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"benchmarks"</span>, package<span class="op">=</span><span class="st">"GCMSbenchmark"</span>, mustWork<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/source.html" class="external-link">source</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">bench</span>, <span class="st">"simulated-16.R"</span><span class="op">)</span>, encoding<span class="op">=</span><span class="st">"UTF-8"</span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/source.html" class="external-link">source</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">bench</span>, <span class="st">"plot-simulated-16.R"</span><span class="op">)</span>, encoding<span class="op">=</span><span class="st">"UTF-8"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Recreate the plots from the included results.</span></span>
-<span><span class="fu">plotBenchmark16</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">bench</span>, <span class="st">"results"</span><span class="op">)</span>, <span class="st">"benchmark-figures"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Generate the same samples and rerun selected installed workflows.</span></span>
-<span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu">runBenchmark16</span><span class="op">(</span><span class="st">"benchmark-run"</span>,</span>
-<span>  method<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"GCMSprime"</span>, <span class="st">"xcms+CAMERA"</span><span class="op">)</span>, ncores<span class="op">=</span><span class="fl">16L</span>, support_search<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<p>The simulation uses seed 9118. The tested versions are MS-DIAL
-5.5.261105, mzmine 4.11.0, eRah 2.2.0, AMDIS 2.71, xcms 4.6.4, CAMERA
-1.64.0 and standalone MSHub revision <code>59fe5d5d7ad5</code>. Native
-engine exports are retained. The MS-DIAL method and mzmine batch are
-included. AMDIS uses component width 16 scans, sensitivity 60,
-resolution 0 and peak-shape setting 0.</p>
-<p>Download the <a href="https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst/benchmarks/results/benchmark.csv" class="external-link">summary
-table</a>, <a href="https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst/benchmarks/results/matches.csv" class="external-link">matched
-pairs</a>, <a href="https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst/benchmarks/results/identifications.csv" class="external-link">all
-component identifications</a>, <a href="https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst/benchmarks/results/native-timings.csv" class="external-link">stage
-timings and coupled GIC</a>, and <a href="https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst/benchmarks/results/xcms-training-results.csv" class="external-link">xcms
-tuning results</a>.</p>
 </div>
+</div>
+<div class="section level2">
+<h2 id="reproduce-the-benchmark">Reproduce the benchmark<a class="anchor" aria-label="anchor" href="#reproduce-the-benchmark"></a>
+</h2>
+<p>Install the programs and set their local executable paths in the
+named list <code>control</code>. The included R recipe generates the
+common CDFs and their scoring key, fits the programs sequentially, then
+scores the saved fits. <a href="https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/INSTALL.md" class="external-link">Engine
+setup and control list</a>.</p>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">bench</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"benchmarks"</span>, package <span class="op">=</span> <span class="st">"GCMSbenchmark"</span>, mustWork <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/source.html" class="external-link">source</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">bench</span>, <span class="st">"simulated-16.R"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">directory</span> <span class="op">&lt;-</span> <span class="st">"full-chromatograms"</span></span>
+<span><span class="fu">prepareFullBenchmark</span><span class="op">(</span><span class="va">directory</span><span class="op">)</span></span>
+<span><span class="va">methods</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"GCMSprime"</span>, <span class="st">"MS-DIAL"</span>, <span class="st">"mzmine"</span>, <span class="st">"MSHub"</span>, <span class="st">"AMDIS"</span>, <span class="st">"xcms+CAMERA"</span>, <span class="st">"eRah"</span><span class="op">)</span></span>
+<span><span class="kw">for</span> <span class="op">(</span><span class="va">m</span> <span class="kw">in</span> <span class="va">methods</span><span class="op">)</span> <span class="fu">fitFullBenchmark</span><span class="op">(</span><span class="va">directory</span>, <span class="va">m</span>, <span class="va">control</span><span class="op">[[</span><span class="va">m</span><span class="op">]</span><span class="op">]</span>, ncores <span class="op">=</span> <span class="fl">16L</span><span class="op">)</span></span>
+<span><span class="kw">for</span> <span class="op">(</span><span class="va">m</span> <span class="kw">in</span> <span class="va">methods</span><span class="op">)</span> <span class="fu">scoreFullBenchmark</span><span class="op">(</span><span class="va">directory</span>, <span class="va">m</span><span class="op">)</span></span>
+<span><span class="fu">collectFullBenchmark</span><span class="op">(</span><span class="va">directory</span>, <span class="va">methods</span>, <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">directory</span>, <span class="st">"results"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/source.html" class="external-link">source</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">bench</span>, <span class="st">"plot-simulated-16.R"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu">plotBenchmark16</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">directory</span>, <span class="st">"results"</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">directory</span>, <span class="st">"figures"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p><a href="https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst/benchmarks/results/inputs.csv" class="external-link">CDF
+checksums</a> · <a href="https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst/benchmarks/results/reference-library.rds" class="external-link">Reference
+spectra</a> · <a href="https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst/benchmarks/results/settings.rds" class="external-link">Occurrence
+and area matrices</a> · <a href="https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst/benchmarks/results/benchmark.csv" class="external-link">Summary
+and timing components</a> · <a href="https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst/benchmarks/results/matches.csv" class="external-link">Matched
+peaks</a> · <a href="https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst/benchmarks/results/acid-by-compound.csv" class="external-link">Per-acid
+recovery</a> · <a href="https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst/benchmarks/results/sensitivity-by-area.csv" class="external-link">Recovery
+by abundance quartile</a> · <a href="https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst/benchmarks/results/versions.csv" class="external-link">Software
+versions</a> · <a href="https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst/benchmarks/results/run-order.csv" class="external-link">Serial
+run log</a>. The numerical input hashes cover scan times, masses and
+intensities. The whole-file hashes also include the CDF export
+timestamp.</p>
 </div>
 <div class="section level2">
 <h2 id="comparison-with-other-software">Comparison with other software<a class="anchor" aria-label="anchor" href="#comparison-with-other-software"></a>
@@ -564,9 +610,9 @@ for the number of compounds and their occurrences. Grouped L0 selection
 uses the mass channels jointly, and hard log-concavity constrains each
 component profile. This combination distinguishes GCMSprime from every
 evaluated configuration. The other workflows use peak detection,
-representative ion traces, correlations, local covariance, factorization
-of peak integrals or PARAFAC2 least squares. Their preprocessing noise
-estimates and selection rules are summarized below. <a href="algorithm.html">Mathematical basis</a></p>
+representative ion traces, correlations, local covariance or
+factorisation of peak integrals. Their preprocessing noise estimates and
+selection rules are summarized below. <a href="algorithm.html">Mathematical basis</a></p>
 <table class="table">
 <colgroup>
 <col width="15%">
@@ -658,16 +704,6 @@ guide</a>
 <td align="left">Free hosted workflow with a GNPS account. Public source
 under the repository’s nonprofit-use licence. <a href="https://github.com/CCMS-UCSD/GNPS_Workflows/tree/master/mshub-gc" class="external-link">Source</a>
 · <a href="https://github.com/CCMS-UCSD/GNPS_Workflows/blob/733ed89372c3754a4c4d132319da5b4313c47288/LICENSE" class="external-link">Licence</a>
-</td>
-</tr>
-<tr class="even">
-<td align="left">PARADISe</td>
-<td align="left">Fits PARAFAC2 within retention intervals. Intervals and
-ranks can require review, and the constant cross-product constraint
-restricts how peak overlap can change across samples. <a href="https://doi.org/10.1016/j.chroma.2017.04.052" class="external-link">Johnsen et
-al. (2017)</a> · <a href="https://doi.org/10.21203/rs.3.pex-2143/v1" class="external-link">Protocol</a>
-</td>
-<td align="left">Free Community and paid Professional editions. <a href="https://www.kromath.com/" class="external-link">Kromath</a>
 </td>
 </tr>
 </tbody>
