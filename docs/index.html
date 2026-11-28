@@ -260,8 +260,8 @@ R · Full mass spectra · CDF input · MSP &amp; Excel output
 <div class="section level3">
 <h3 id="optimality-gap-to-ground-truth-initialised-solution">Optimality gap to ground truth-initialised solution<a class="anchor" aria-label="anchor" href="#optimality-gap-to-ground-truth-initialised-solution"></a>
 </h3>
-<p>The blind fit descended from an original-ion GIC of <strong>46,273,866</strong> to <strong>32,610,830</strong>. The fit initialised from the true elution profiles finished at <strong>32,682,079</strong>, giving a signed empirical optimality gap of <strong>-0.2180%</strong> (the blind fit scored below the reference). Both trajectories showed smooth empirical descent. GIC never increased across the 29 blind or 16 reference checkpoints.</p>
-<p>Both fits used the same noisy counts, penalty and stopping rules. Only the reference received the true unit-area elution shapes and their cross-sample identities. Both fits then updated the elution profiles, their amplitudes, the shared spectra and the background. The red line gives the best GIC reached from the ground truth initialisation under these stopping rules. The global minimum is unknown.</p>
+<p>The blind fit descended from <strong>46,273,866</strong> to <strong>32,610,830</strong>. The fit initialised with the true elution profiles reached <strong>32,672,206</strong> after the same eight sweeps. The blind fit finished <strong>0.1879% below</strong> that reference. GIC never increased across the 29 blind or 25 reference checkpoints. Both fits ended at rank <strong>1,000</strong> with <strong>8,000 occurrences</strong>.</p>
+<p>Only the reference received the true unit-area profiles and compound identities. Both fits estimated spectra, areas, profiles and background from the same noisy counts. The open circle marks the fourth sweep, when the reference met the ordinary stopping rule. The red line marks its final GIC after four further full sweeps. These trajectories give an empirical comparison. The global minimum is unknown.</p>
 <p><a href="reference/figures/full-benchmark-gic-gap.png"><img src="reference/figures/full-benchmark-gic-gap.png" alt="Blind and ground truth-initialised GIC trajectories on the full 16-sample benchmark"></a></p>
 <p><a href="https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst/benchmarks/results/gic-trace.csv" class="external-link">Block-level GIC trace</a> · <a href="https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst/benchmarks/results/gic-gap.csv" class="external-link">Final GIC values</a>.</p>
 </div>
@@ -336,6 +336,11 @@ R · Full mass spectra · CDF input · MSP &amp; Excel output
 </tr>
 </tbody>
 </table>
+<div class="section level3">
+<h3 id="commercial-gcms-software">Commercial GC–MS software<a class="anchor" aria-label="anchor" href="#commercial-gcms-software"></a>
+</h3>
+<p>AnalyzerPro exposes peak-width and detection thresholds. MassHunter Unknowns Analysis can search multiple widths, with a trade-off between resolving close peaks and runtime. LECO ChromaTOF Sync co-processes Pegasus sample sets to improve spectra and align peaks. GCMSprime fits one shared spectrum and a separate log-concave profile per occurrence, and scores candidate splits against the original ion counts. The commercial workflows have yet to be scored on these 16 chromatograms. <a href="https://spectralworks.com/2016/07/08/using-analyzerpro-in-the-metabolomics-workflow/" class="external-link">AnalyzerPro</a> · <a href="https://www.agilent.com/cs/library/usermanuals/public/G3335-90243_Unknowns_Analysis_Familiarization-en.pdf#page=27" class="external-link">MassHunter</a> · <a href="https://www.leco.com/instrument/chromatof-sync-data-alignment/" class="external-link">ChromaTOF Sync</a> <a href="articles/benchmarks.html#commercial-gcms-deconvolution-software">Nine commercial workflows compared</a>.</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="spectral-library-search">Spectral library search<a class="anchor" aria-label="anchor" href="#spectral-library-search"></a>
@@ -354,6 +359,8 @@ R · Full mass spectra · CDF input · MSP &amp; Excel output
 <h2 id="selected-references">Selected references<a class="anchor" aria-label="anchor" href="#selected-references"></a>
 </h2>
 <ul>
+<li>Lu et al. (2008) tested how concentration and component-width settings affected GC–TOF-MS deconvolution with AnalyzerPro, ChromaTOF and AMDIS. <a href="https://doi.org/10.1016/j.trac.2007.11.004" class="external-link">Comparative evaluation</a>
+</li>
 <li>Camp (2019) describes how alternating regression lets analysts choose constraints separately for concentrations and spectra. <a href="https://doi.org/10.6028/jres.124.018" class="external-link">pyMCR</a>
 </li>
 <li>Lee et al. (2012) fit a common factor across multiple datasets. <a href="https://doi.org/10.1371/journal.pone.0048238" class="external-link">Simultaneous NMF</a>

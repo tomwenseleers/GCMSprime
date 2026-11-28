@@ -1,5 +1,7 @@
 # Re-run the calibrated full benchmark with both objective traces.
 runFullBenchmarkGIC <- function(directory, output_dir, ncores = 16L) {
+  if (utils::packageVersion("logconNMF") < "0.1.0.9015")
+    stop("The matched-sweep diagnostic requires logconNMF 0.1.0.9015 or later.")
   directory <- normalizePath(directory, winslash = "/")
   truth <- readRDS(file.path(directory, "truth.rds"))
   profiles <- lapply(truth, function(x) x[c("id", "time", "H")])
@@ -39,6 +41,7 @@ plotFullBenchmarkGIC <- function(trace, file) {
   delta <- function(gic) 100 * (gic - reference) / abs(reference)
   colours <- c("#17649a", "#a8521b")
   baseline <- "#c32d35"
+  early <- arms[[2]][arms[[2]]$stage == "matched reference continuation" & arms[[2]]$block == "start", , drop = FALSE]
   initial <- range(trace$GIC / 1e6)
   grDevices::png(file, width = 1700, height = 790, res = 160)
   on.exit(grDevices::dev.off())
@@ -64,9 +67,23 @@ plotFullBenchmarkGIC <- function(trace, file) {
       graphics::lines(x[[i]], y[[i]], col = colours[i], lty = i, lwd = 2.2)
       graphics::points(tail(x[[i]], 1L), tail(y[[i]], 1L), col = colours[i], pch = 16, cex = .72)
     }
-    if (!zoom) graphics::legend("topright", bty = "n", cex = .8,
-      legend = c("Blind start", "Ground truth-initialised", "Reference endpoint"),
-      lty = c(1,2,3), lwd = 2, col = c(colours, baseline))
+    if (nrow(early)) graphics::points(early$sweep[1L],
+      if (zoom) delta(early$GIC[1L]) else early$GIC[1L] / 1e6,
+      pch = 21, col = colours[2L], bg = "white", lwd = 1.5, cex = .85)
+    if (!zoom) {
+      labels <- c("Blind start", "Ground truth-initialised", "Reference endpoint")
+      symbols <- rep(NA_integer_, 3L)
+      types <- 1:3
+      inks <- c(colours, baseline)
+      if (nrow(early)) {
+        labels <- c(labels, "Reference met stopping rule")
+        symbols <- c(symbols, 21L)
+        types <- c(types, NA_integer_)
+        inks <- c(inks, colours[2L])
+      }
+      graphics::legend("topright", bty = "n", cex = .8, legend = labels,
+        pch = symbols, pt.bg = "white", lty = types, lwd = 2, col = inks)
+    }
   }
   graphics::mtext("GIC convergence on 16 full chromatograms", side = 3, outer = TRUE,
     font = 2, cex = 1.32, col = "#14273b", line = .6)

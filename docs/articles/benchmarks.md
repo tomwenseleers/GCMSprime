@@ -202,38 +202,47 @@ profile is available.
 
 ## Optimality gap to ground truth-initialised solution
 
-The blind fit descended from an original-ion GIC of **46,273,866** to
-**32,610,830**. The fit initialised from the true elution profiles
-finished at **32,682,079**, giving a signed empirical optimality gap of
-**-0.2180%** (the blind fit scored below the reference). Both
-trajectories showed smooth empirical descent. GIC never increased across
-the 29 blind or 16 reference checkpoints.
+The blind fit descended from **46,273,866** to **32,610,830**. The fit
+initialised with the true elution profiles reached **32,672,206** after
+the same eight sweeps. The blind fit finished **0.1879% below** that
+reference. GIC never increased across the 29 blind or 25 reference
+checkpoints. Both fits ended at rank **1,000** with **8,000
+occurrences**.
 
-Both fits used the same noisy counts, penalty and stopping rules. Only
-the reference received the true unit-area elution shapes and their
-cross-sample identities. Both fits then updated the elution profiles,
-their amplitudes, the shared spectra and the background. The red line
-gives the best GIC reached from the ground truth initialisation under
-these stopping rules. The global minimum is unknown.
+Only the reference received the true unit-area profiles and compound
+identities. Both fits estimated spectra, areas, profiles and background
+from the same noisy counts. The open circle marks the fourth sweep, when
+the reference met the ordinary stopping rule. The red line marks its
+final GIC after four further full sweeps. These trajectories give an
+empirical comparison. The global minimum is unknown.
 
 [![Blind and ground truth-initialised GIC trajectories on the full
 16-sample
 benchmark](../reference/figures/full-benchmark-gic-gap.png)](https://tomwenseleers.github.io/GCMSprime/reference/figures/full-benchmark-gic-gap.png)
 
-The blind fit started with 1,088 candidate factors. It crossed below the
-reference after the support exchange at sweep 6 and finished after 8
-sweeps. The reference stopped after 4. Both ended at rank 1,000 with
-8,000 occurrences. The reference had 143,787 less scaled deviance. The
-blind fit used 3,961 fewer profile degrees of freedom and 20 fewer
-spectral degrees of freedom, which lowered its final penalised criterion
-by 71,249.
+The curves cross twice. At the start, the reference already fitted the
+ion counts better, with scaled deviance 19.56 million versus 30.90
+million. Its initial spectral regression nevertheless used 542,801 free
+ion coefficients, compared with 77,974 for the blind start. The larger
+penalty put the reference above the blind fit. Its first spectral update
+reduced that count to 73,871. By the end of sweep one the reference GIC
+was 32,976,439 and the blind GIC was 36,473,383.
 
-The signed gap is 100 × (blind GIC − reference GIC) / \|reference GIC\|.
-The left panel shows every recorded original-ion GIC. The right panel
-enlarges the final half of each trajectory on the percentage scale. The
-red dotted line marks the reference endpoint. The published 35.95
-seconds per sample measures the ordinary blind run. Collecting both
-traces was a separate diagnostic run.
+The reference met the 0.1% relative objective-change threshold at sweep
+four. The blind fit needed six initial sweeps, accepted support changes
+and made two further refits. Extending the reference to eight full
+sweeps reduced its GIC from 32,682,079 to 32,672,206. The last sweep
+still gained 819 GIC units. The blind fit overtook it again during the
+profile update of sweep seven. At the endpoint the reference had 150,960
+less scaled deviance. The blind fit used 3,915 fewer profile degrees of
+freedom and 16 fewer spectral degrees of freedom, which gave it the
+lower penalised GIC by 61,376.
+
+The signed gap is 100 × (blind GIC − reference GIC) / \|reference GIC\|,
+giving **-0.1879%**. The right panel enlarges the last four sweeps.
+Individual support changes can lower GIC at the same sweep number. The
+ordinary blind benchmark took 35.95 seconds per sample. The two-start
+diagnostic was timed separately.
 
 [Block-level GIC
 trace](https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst/benchmarks/results/gic-trace.csv)
@@ -312,6 +321,47 @@ basis](https://tomwenseleers.github.io/GCMSprime/articles/algorithm.md)
 | eRah | Uses local covariance and orthogonal signal deconvolution after filtering and baseline removal. Recovery depends on width and signal thresholds. Cross-sample alignment follows per-sample deconvolution. [eRah manual](https://cran.r-project.org/web/packages/erah/vignettes/erah-manual.html) | Free, GPL open source. [CRAN](https://cran.r-project.org/package=erah) |
 | AMDIS | Uses representative ion traces as model peak shapes within each chromatogram. Component width, sensitivity and shape settings govern the calls and extracted spectra. [NIST guide](https://chemdata.nist.gov/mass-spc/amdis/docs/amdis.pdf) | Free standalone binary. [NIST distribution](https://chemdata.nist.gov/dokuwiki/doku.php?id=chemdata%3Aamdis) |
 | GNPS/MSHub | Requires a sample series for its NMF workflow. It factorizes aligned peak integrals, so the model resolves spectra and abundances from variation across samples and drops the scan-level profile information. [Aksenov et al. (2021)](https://doi.org/10.1038/s41587-020-0700-3) · [Workflow guide](https://ccms-ucsd.github.io/GNPSDocumentation/gc-ms-deconvolution/) | Free hosted workflow with a GNPS account. Public source under the repository’s nonprofit-use licence. [Source](https://github.com/CCMS-UCSD/GNPS_Workflows/tree/master/mshub-gc) · [Licence](https://github.com/CCMS-UCSD/GNPS_Workflows/blob/733ed89372c3754a4c4d132319da5b4313c47288/LICENSE) |
+
+### Commercial GC–MS deconvolution software
+
+Two decisions matter when an ion trace contains a shoulder. The software
+must decide which ions belong to the same elution profile and whether a
+second compound explains enough signal to justify another peak. The
+commercial workflows below make some of these decisions visible through
+peak-width, correlation or detection settings. Several also use
+information from multiple samples.
+
+| Software | Documented workflow and practical implications |
+|:---|:---|
+| **SpectralWorks AnalyzerPro** | Users set detection thresholds for peak area, height, width and signal-to-noise, along with scan windows and chromatographic resolution. Detected components can populate a target library across a sequence. A component missed during extraction contributes no spectrum from that file to the library. [AnalyzerPro metabolomics workflow](https://spectralworks.com/2016/07/08/using-analyzerpro-in-the-metabolomics-workflow/) |
+| **Agilent MassHunter Unknowns Analysis** | This module supports untargeted deconvolution and retention-index library searches. Its retention-time window factor controls how extracted ion peaks are grouped. Agilent documents a resolution–runtime trade-off. Smaller settings separate closer peaks, return more components and take longer. Larger settings suit broader peaks, and several widths can be searched together. [Unknowns Analysis guide, p. 27](https://www.agilent.com/cs/library/usermanuals/public/G3335-90243_Unknowns_Analysis_Familiarization-en.pdf#page=27) |
+| **Thermo Scientific TraceFinder** | In the documented unit-resolution plug-in (v1.3 for TraceFinder 4.1), a user-set minimum ion overlap determines which extracted peaks form a component. A threshold on the summed ion peak controls entry in the output list before optional library searching. Both settings therefore affect which candidates reach identification. [Thermo technical note 10624, pp. 4–5](https://documents.thermofisher.com/TFS-Assets/CMD/Technical-Notes/tn-10624-gc-ms-deconvolution-plugin-tracefinder-tn10624-en.pdf#page=4) |
+| **Shimadzu LabSolutions Insight Explore GCMS** | Peak detection, deconvolution and library searching can run across a batch. The software extracts component spectra even for co-elutions represented by a single integrated peak. Shimadzu describes the batch workflow and its outputs. How it chooses a shared compound count across injections is unspecified. [Shimadzu features](https://www.shimadzu.com/an/products/software-informatics/software-option/labsolutions-insight-explore-gcms/features.html) |
+| **Markes / SepSolve ChromSpace 1D** | Supports multiple input formats, automated background subtraction, deconvolution and library searching. Markes lists automatic alignment and between-sample comparison under the ChromCompare+ upgrade. ChromSpace extends processing to GC×GC. [ChromSpace 1D specifications](https://markes.com/separationanalysisdata/data-analysis/chromspace-1d) |
+| **LECO ChromaTOF / ChromaTOF Sync** | Sync explicitly uses evidence across the entire sample set for peak discovery, spectral improvement and a single aligned peak table. This makes it a particularly relevant multisample comparator. LECO specifies Pegasus BT-series data for Sync and a separate Sync 2D workflow for GC×GC. The published description leaves its component-count criterion unspecified. [LECO ChromaTOF Sync](https://www.leco.com/instrument/chromatof-sync-data-alignment/) |
+| **Wiley KnowItAll GC Expert / MS Expert** | Wiley’s worked examples deconvolve a chromatogram, search each extracted spectrum and review the proposed identities. A library hit supports the identity of an extracted component. Peak splitting and the allocation of total area require separate checks against known profiles. [GC Expert tutorial](https://sciencesolutions.wiley.com/wp-content/uploads/2025/09/07_Training-GC-MS_Process_And_Analysis.pdf) · [MS Expert tutorial](https://sciencesolutions.wiley.com/wp-content/uploads/2024/12/07_Training-GC-MS_Process_And_Analysis.pdf) |
+| **MsMetrix GC-Analyzer / GCxGC-Analyzer** | GC-Analyzer groups ions by retention time and shape, with differential analysis for sample–control comparisons. GCxGC-Analyzer offers total-ion or individual-ion processing for two-dimensional separations. The choice of separation and detection mode matters when comparing the resulting peak counts. [GC-Analyzer](https://www.msmetrix.com/our-products/gc-analyzer/) · [GCxGC-Analyzer](https://www.msmetrix.com/our-products/gcxgc-analyzer/) |
+| **ACD/Labs Spectrus (MS Structure ID Suite)** | IntelliXtract follows ion traces to separate co-eluting components. Spectrus also offers targeted screening, library and structure tools, and adjustable peak detection. The extraction and structure-assignment steps answer different questions, and the documented outputs can be assessed separately for peak recovery and identification. [ACD/Labs MS Structure ID Suite](https://www.acdlabs.com/products/spectrus-platform/ms-structure-id-suite/) |
+
+An independent experiment illustrates why component width deserves
+attention. In GC–TOF-MS metabolite mixtures, Lu et al. found that
+AnalyzerPro returned 28 spectra with library match factors above 850 at
+500 µM and five at 50 µM. They identified component width as the most
+influential processing setting across the three programs they tested.
+Those results describe the versions and mixtures studied in 2008. [Lu et
+al. (2008)](https://doi.org/10.1016/j.trac.2007.11.004)
+
+GCMSprime addresses peak grouping by fitting all original ion channels
+with one spectrum per compound across samples. Each occurrence has its
+own log-concave profile, so a resolved occurrence in one injection can
+inform a co-eluting occurrence in another. The calibrated point spread
+function supplies starting widths. The subsequent fit can change widths
+and asymmetry, and its GIC charges for both spectral coefficients and
+profile complexity. That makes the evidence for retaining a split
+inspectable. The full benchmark recovered all 1,000 compounds and all
+8,000 occurrences with zero false calls. Recovery, area error and
+runtime for the commercial products on these same files remain
+unmeasured.
 
 ### Matrix and tensor factorisation approaches
 

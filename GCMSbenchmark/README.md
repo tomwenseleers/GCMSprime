@@ -67,7 +67,7 @@ plotBenchmark16(file.path(directory, "results"), file.path(directory, "figures")
 
 ## Full-benchmark GIC diagnostic
 
-After generating the 16 files with `prepareFullBenchmark(directory)`, use a separate output directory to record the ordinary fit and the fit initialised from the generating profiles.
+After generating the 16 files with `prepareFullBenchmark(directory)`, use a separate output directory to record the ordinary fit and the fit initialised from the generating profiles. With logconNMF 0.1.0.9015 or later, the reference fit continues for at least as many profile and spectral sweeps as the blind fit, even if it reaches the usual stopping tolerance sooner.
 
 ```r
 source(file.path(bench, "full-gic.R"))

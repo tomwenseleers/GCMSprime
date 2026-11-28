@@ -138,38 +138,47 @@ code](https://tomwenseleers.github.io/GCMSprime/articles/benchmarks.html).
 
 ### Optimality gap to ground truth-initialised solution
 
-The blind fit descended from an original-ion GIC of **46,273,866** to
-**32,610,830**. The fit initialised from the true elution profiles
-finished at **32,682,079**, giving a signed empirical optimality gap of
-**-0.2180%** (the blind fit scored below the reference). Both
-trajectories showed smooth empirical descent. GIC never increased across
-the 29 blind or 16 reference checkpoints.
+The blind fit descended from **46,273,866** to **32,610,830**. The fit
+initialised with the true elution profiles reached **32,672,206** after
+the same eight sweeps. The blind fit finished **0.1879% below** that
+reference. GIC never increased across the 29 blind or 25 reference
+checkpoints. Both fits ended at rank **1,000** with **8,000
+occurrences**.
 
-Both fits used the same noisy counts, penalty and stopping rules. Only
-the reference received the true unit-area elution shapes and their
-cross-sample identities. Both fits then updated the elution profiles,
-their amplitudes, the shared spectra and the background. The red line
-gives the best GIC reached from the ground truth initialisation under
-these stopping rules. The global minimum is unknown.
+Only the reference received the true unit-area profiles and compound
+identities. Both fits estimated spectra, areas, profiles and background
+from the same noisy counts. The open circle marks the fourth sweep, when
+the reference met the ordinary stopping rule. The red line marks its
+final GIC after four further full sweeps. These trajectories give an
+empirical comparison. The global minimum is unknown.
 
 [![Blind and ground truth-initialised GIC trajectories on the full
 16-sample
 benchmark](../reference/figures/full-benchmark-gic-gap.png)](https://tomwenseleers.github.io/GCMSprime/reference/figures/full-benchmark-gic-gap.png)
 
-The blind fit started with 1,088 candidate factors. It crossed below the
-reference after the support exchange at sweep 6 and finished after 8
-sweeps. The reference stopped after 4. Both ended at rank 1,000 with
-8,000 occurrences. The reference had 143,787 less scaled deviance. The
-blind fit used 3,961 fewer profile degrees of freedom and 20 fewer
-spectral degrees of freedom, which lowered its final penalised criterion
-by 71,249.
+The curves cross twice. At the start, the reference already fitted the
+ion counts better, with scaled deviance 19.56 million versus 30.90
+million. Its initial spectral regression nevertheless used 542,801 free
+ion coefficients, compared with 77,974 for the blind start. The larger
+penalty put the reference above the blind fit. Its first spectral update
+reduced that count to 73,871. By the end of sweep one the reference GIC
+was 32,976,439 and the blind GIC was 36,473,383.
 
-The signed gap is 100 × (blind GIC − reference GIC) / \|reference GIC\|.
-The left panel shows every recorded original-ion GIC. The right panel
-enlarges the final half of each trajectory on the percentage scale. The
-red dotted line marks the reference endpoint. The published 35.95
-seconds per sample measures the ordinary blind run. Collecting both
-traces was a separate diagnostic run.
+The reference met the 0.1% relative objective-change threshold at sweep
+four. The blind fit needed six initial sweeps, accepted support changes
+and made two further refits. Extending the reference to eight full
+sweeps reduced its GIC from 32,682,079 to 32,672,206. The last sweep
+still gained 819 GIC units. The blind fit overtook it again during the
+profile update of sweep seven. At the endpoint the reference had 150,960
+less scaled deviance. The blind fit used 3,915 fewer profile degrees of
+freedom and 16 fewer spectral degrees of freedom, which gave it the
+lower penalised GIC by 61,376.
+
+The signed gap is 100 × (blind GIC − reference GIC) / \|reference GIC\|,
+giving **-0.1879%**. The right panel enlarges the last four sweeps.
+Individual support changes can lower GIC at the same sweep number. The
+ordinary blind benchmark took 35.95 seconds per sample. The two-start
+diagnostic was timed separately.
 
 [Block-level GIC
 trace](https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst/benchmarks/results/gic-trace.csv)

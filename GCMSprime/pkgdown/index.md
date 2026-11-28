@@ -159,9 +159,9 @@ Among GCMSprime’s 8,000 matched occurrences, the median absolute relative area
 
 ### Optimality gap to ground truth-initialised solution
 
-The blind fit descended from an original-ion GIC of **46,273,866** to **32,610,830**. The fit initialised from the true elution profiles finished at **32,682,079**, giving a signed empirical optimality gap of **-0.2180%** (the blind fit scored below the reference). Both trajectories showed smooth empirical descent. GIC never increased across the 29 blind or 16 reference checkpoints.
+The blind fit descended from **46,273,866** to **32,610,830**. The fit initialised with the true elution profiles reached **32,672,206** after the same eight sweeps. The blind fit finished **0.1879% below** that reference. GIC never increased across the 29 blind or 25 reference checkpoints. Both fits ended at rank **1,000** with **8,000 occurrences**.
 
-Both fits used the same noisy counts, penalty and stopping rules. Only the reference received the true unit-area elution shapes and their cross-sample identities. Both fits then updated the elution profiles, their amplitudes, the shared spectra and the background. The red line gives the best GIC reached from the ground truth initialisation under these stopping rules. The global minimum is unknown.
+Only the reference received the true unit-area profiles and compound identities. Both fits estimated spectra, areas, profiles and background from the same noisy counts. The open circle marks the fourth sweep, when the reference met the ordinary stopping rule. The red line marks its final GIC after four further full sweeps. These trajectories give an empirical comparison. The global minimum is unknown.
 
 [![Blind and ground truth-initialised GIC trajectories on the full 16-sample benchmark](reference/figures/full-benchmark-gic-gap.png)](reference/figures/full-benchmark-gic-gap.png)
 
@@ -192,6 +192,10 @@ The following matrix and tensor models offer other ways to resolve co-elution. T
 | **Classical PARAFAC2 and PARADISe** | Elution profiles can vary across samples subject to a common matrix of cross-products. PARADISe applies PARAFAC2 to chromatographic intervals. [PARAFAC2 for retention shifts](https://research.rug.nl/en/publications/parafac2-part-ii-modeling-chromatographic-data-with-retention-tim/) · [PARADISe](https://doi.org/10.1016/j.chroma.2017.04.052) | Candidate ranks are fitted per interval. Automated model assessment is also available. [Johnsen et al.](https://doi.org/10.1002/cem.2575) |
 | **Flexible and fully constrained PARAFAC2** | Flexible coupling relaxes the cross-product condition. AO-ADMM can retain the condition while imposing constraints on all modes, including the varying elution profiles. [Cohen and Bro](https://doi.org/10.1007/978-3-319-93764-9_9) · [Roald et al.](https://doi.org/10.1137/21M1450033) | Both formulations fit a specified number of components. |
 | **Shift-invariant trilinearity and PARAFAC2×N** | Shift-invariant trilinearity uses Fourier-domain information to accommodate elution shifts. PARAFAC2×N extends drift modelling to multiple separation modes in multidimensional chromatography. [Shift-invariant trilinearity](https://doi.org/10.1002/cem.3501) · [PARAFAC2×N](https://doi.org/10.1016/j.aca.2023.340909) | Each model is fitted at a chosen component count. |
+
+### Commercial GC–MS software
+
+AnalyzerPro exposes peak-width and detection thresholds. MassHunter Unknowns Analysis can search multiple widths, with a trade-off between resolving close peaks and runtime. LECO ChromaTOF Sync co-processes Pegasus sample sets to improve spectra and align peaks. GCMSprime fits one shared spectrum and a separate log-concave profile per occurrence, and scores candidate splits against the original ion counts. The commercial workflows have yet to be scored on these 16 chromatograms. [AnalyzerPro](https://spectralworks.com/2016/07/08/using-analyzerpro-in-the-metabolomics-workflow/) · [MassHunter](https://www.agilent.com/cs/library/usermanuals/public/G3335-90243_Unknowns_Analysis_Familiarization-en.pdf#page=27) · [ChromaTOF Sync](https://www.leco.com/instrument/chromatof-sync-data-alignment/) [Nine commercial workflows compared](articles/benchmarks.html#commercial-gcms-deconvolution-software).
 
 ## Spectral library search
 
@@ -226,6 +230,7 @@ calibration and comparison benchmarks.
 
 ## Selected references
 
+- Lu et al. (2008) tested how concentration and component-width settings affected GC–TOF-MS deconvolution with AnalyzerPro, ChromaTOF and AMDIS. [Comparative evaluation](https://doi.org/10.1016/j.trac.2007.11.004)
 - Camp (2019) describes how alternating regression lets analysts choose constraints separately for concentrations and spectra. [pyMCR](https://doi.org/10.6028/jres.124.018)
 - Lee et al. (2012) fit a common factor across multiple datasets. [Simultaneous NMF](https://doi.org/10.1371/journal.pone.0048238)
 - Johnsen et al. (2017) describe the PARADISe workflow for GC–MS. Roald et al. (2022) show how to constrain all modes of PARAFAC2. [PARADISe](https://doi.org/10.1016/j.chroma.2017.04.052) · [Constrained PARAFAC2](https://doi.org/10.1137/21M1450033)
