@@ -150,9 +150,13 @@ chromatograms](../reference/figures/simulated-16-spectral-violin.png)](https://t
 workflows](../reference/figures/simulated-16-spectral-support.png)](https://tomwenseleers.github.io/GCMSprime/reference/figures/simulated-16-spectral-support.png)
 
 The first distribution includes all reciprocal library hits. Crosses
-identify hits to references absent from the sample. Ion-support F1
-compares the nonzero ions at or above 0.1% of each spectrum’s own base
-peak and is averaged over correct matches.
+identify hits to references absent from the sample. All cosines use
+their measured values on the logit scale. Of the 8,000 GCMSprime
+spectra, 5,656 scored above 0.999999 and the maximum was 0.9999999913.
+Exact ion-support matches occupy a separate position at 1, with the
+violin showing the remaining observations. Ion-support F1 compares the
+nonzero ions at or above 0.1% of each spectrum’s own base peak and is
+averaged over correct matches.
 
 ## Correctness of inferred elution profiles
 
@@ -195,6 +199,46 @@ profile is available.
 | 678     |         8 |       8 |      0 |    8 |     8 |           7 |     0 |
 | 739     |         8 |       7 |      0 |    7 |     8 |           2 |     8 |
 | 800     |         8 |       7 |      0 |    6 |     8 |           0 |     0 |
+
+## Optimality gap to ground truth-initialised solution
+
+The blind fit descended from an original-ion GIC of **46,273,866** to
+**32,610,830**. The fit initialised from the true elution profiles
+finished at **32,682,079**, giving a signed empirical optimality gap of
+**-0.2180%** (the blind fit scored below the reference). Both
+trajectories showed smooth empirical descent. GIC never increased across
+the 29 blind or 16 reference checkpoints.
+
+Both fits used the same noisy counts, penalty and stopping rules. Only
+the reference received the true unit-area elution shapes and their
+cross-sample identities. Both fits then updated the elution profiles,
+their amplitudes, the shared spectra and the background. The red line
+gives the best GIC reached from the ground truth initialisation under
+these stopping rules. The global minimum is unknown.
+
+[![Blind and ground truth-initialised GIC trajectories on the full
+16-sample
+benchmark](../reference/figures/full-benchmark-gic-gap.png)](https://tomwenseleers.github.io/GCMSprime/reference/figures/full-benchmark-gic-gap.png)
+
+The blind fit started with 1,088 candidate factors. It crossed below the
+reference after the support exchange at sweep 6 and finished after 8
+sweeps. The reference stopped after 4. Both ended at rank 1,000 with
+8,000 occurrences. The reference had 143,787 less scaled deviance. The
+blind fit used 3,961 fewer profile degrees of freedom and 20 fewer
+spectral degrees of freedom, which lowered its final penalised criterion
+by 71,249.
+
+The signed gap is 100 × (blind GIC − reference GIC) / \|reference GIC\|.
+The left panel shows every recorded original-ion GIC. The right panel
+enlarges the final half of each trajectory on the percentage scale. The
+red dotted line marks the reference endpoint. The published 35.95
+seconds per sample measures the ordinary blind run. Collecting both
+traces was a separate diagnostic run.
+
+[Block-level GIC
+trace](https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst/benchmarks/results/gic-trace.csv)
+· [Final GIC
+values](https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst/benchmarks/results/gic-gap.csv).
 
 ## Reproduce the benchmark
 
@@ -248,14 +292,15 @@ information criterion** for automatic compound-count selection.
 
 For its default quasi-Poisson model, the fitted mean and variance
 satisfy \operatorname{Var}(Y\_{it})=\phi\mu\_{it}. The final quasi-GIC
-combines the corresponding fit criterion with a penalty for the number
-of compounds and their occurrences. Grouped L0 selection uses the mass
-channels jointly, and hard log-concavity constrains each component
-profile. This combination distinguishes GCMSprime from every evaluated
-configuration. The other workflows use peak detection, representative
-ion traces, correlations, local covariance or factorisation of peak
-integrals. Their preprocessing noise estimates and selection rules are
-summarized below. [Mathematical
+combines the dispersion-scaled fit criterion with charges for the free
+nonzero ion proportions in each shared spectrum and the fitted dimension
+of each log-concave profile. Grouped L0 selection uses the mass channels
+jointly, and hard log-concavity constrains each component profile. This
+combination distinguishes GCMSprime from every evaluated configuration.
+The other workflows use peak detection, representative ion traces,
+correlations, local covariance or factorisation of peak integrals. Their
+preprocessing noise estimates and selection rules are summarized below.
+[Mathematical
 basis](https://tomwenseleers.github.io/GCMSprime/articles/algorithm.md)
 
 | Workflow | How it deconvolves and where that can limit recovery | Access |
@@ -267,3 +312,44 @@ basis](https://tomwenseleers.github.io/GCMSprime/articles/algorithm.md)
 | eRah | Uses local covariance and orthogonal signal deconvolution after filtering and baseline removal. Recovery depends on width and signal thresholds. Cross-sample alignment follows per-sample deconvolution. [eRah manual](https://cran.r-project.org/web/packages/erah/vignettes/erah-manual.html) | Free, GPL open source. [CRAN](https://cran.r-project.org/package=erah) |
 | AMDIS | Uses representative ion traces as model peak shapes within each chromatogram. Component width, sensitivity and shape settings govern the calls and extracted spectra. [NIST guide](https://chemdata.nist.gov/mass-spc/amdis/docs/amdis.pdf) | Free standalone binary. [NIST distribution](https://chemdata.nist.gov/dokuwiki/doku.php?id=chemdata%3Aamdis) |
 | GNPS/MSHub | Requires a sample series for its NMF workflow. It factorizes aligned peak integrals, so the model resolves spectra and abundances from variation across samples and drops the scan-level profile information. [Aksenov et al. (2021)](https://doi.org/10.1038/s41587-020-0700-3) · [Workflow guide](https://ccms-ucsd.github.io/GNPSDocumentation/gc-ms-deconvolution/) | Free hosted workflow with a GNPS account. Public source under the repository’s nonprofit-use licence. [Source](https://github.com/CCMS-UCSD/GNPS_Workflows/tree/master/mshub-gc) · [Licence](https://github.com/CCMS-UCSD/GNPS_Workflows/blob/733ed89372c3754a4c4d132319da5b4313c47288/LICENSE) |
+
+### Matrix and tensor factorisation approaches
+
+The models below describe the methodological alternatives to the seven
+timed workflows.
+
+| Approach | What is shared and how peaks are represented | How the component count enters |
+|:---|:---|:---|
+| **GCMSprime / logconNMF** | A common spectrum across samples and one log-concave elution profile per occurrence. Width, asymmetry, area and retention time can vary by sample. | Grouped PSF regression proposes peaks. Original-ion GIC scores changes to the shared factors and their support. |
+| **MCR-ALS, conventional GC–MS NMF and unimodal NMF** | Alternating regressions estimate elution profiles and spectra. Nonnegativity and unimodality can be imposed. Poisson MCR also models signal-dependent noise. [pyMCR](https://doi.org/10.6028/jres.124.018) · [GC–MS NMF](https://doi.org/10.1016/j.talanta.2004.09.017) · [Unimodal NMF](https://doi.org/10.1109/ICASSP39728.2021.9414631) · [Poisson MCR](https://doi.org/10.1016/j.chemolab.2016.02.006) | The cited fits use a chosen component count. Diagnostics can guide that choice. |
+| **Simultaneous NMF and global parametric GC–MS analysis** | Simultaneous NMF shares a factor across data matrices. Parametric GC–MS analysis fits shared spectra with an explicit elution model such as an exponentially modified Gaussian. [Shared-factor NMF](https://doi.org/10.1371/journal.pone.0048238) · [Global GC–MS analysis](https://doi.org/10.1016/j.chemolab.2008.10.004) | The analyst specifies a candidate model order. |
+| **PARAFAC and shifted PARAFAC** | Trilinear components share their spectrum and elution shape up to amplitude. Shifted PARAFAC also allows translations of that shape. [Shifted factor models](https://three-mode.leidenuniv.nl/pdf/h/harshmanhonglundy2003i.pdf) | Candidate ranks can be compared using diagnostics such as core consistency. [Bro and Kiers](https://doi.org/10.1002/cem.801) |
+| **Classical PARAFAC2 and PARADISe** | Elution profiles can vary across samples subject to a common matrix of cross-products. PARADISe applies PARAFAC2 to chromatographic intervals. [PARAFAC2 for retention shifts](https://research.rug.nl/en/publications/parafac2-part-ii-modeling-chromatographic-data-with-retention-tim/) · [PARADISe](https://doi.org/10.1016/j.chroma.2017.04.052) | Candidate ranks are fitted per interval. Automated model assessment is also available. [Johnsen et al.](https://doi.org/10.1002/cem.2575) |
+| **Flexible and fully constrained PARAFAC2** | Flexible coupling relaxes the cross-product condition. AO-ADMM can retain the condition while imposing constraints on all modes, including the varying elution profiles. [Cohen and Bro](https://doi.org/10.1007/978-3-319-93764-9_9) · [Roald et al.](https://doi.org/10.1137/21M1450033) | Both formulations fit a specified number of components. |
+| **Shift-invariant trilinearity and PARAFAC2×N** | Shift-invariant trilinearity uses Fourier-domain information to accommodate elution shifts. PARAFAC2×N extends drift modelling to multiple separation modes in multidimensional chromatography. [Shift-invariant trilinearity](https://doi.org/10.1002/cem.3501) · [PARAFAC2×N](https://doi.org/10.1016/j.aca.2023.340909) | Each model is fitted at a chosen component count. |
+
+The 1,000 shared factors matched the 1,000 generating compounds
+one-to-one across all eight occurrences of each compound. This is exact
+automatic recovery of the chemical component count from 550 measured ion
+channels. Scan order distinguishes compounds that elute at different
+times, and each compound contributes a shared spectrum wherever it
+occurs.
+
+Across the 160,000 scans, the median number of simultaneously eluting
+true peaks was one, the 95th percentile was three and the maximum was
+five, counting a peak wherever it reached 1% of its own apex. Thus 1,000
+measures the number of distinct compounds across the chromatograms. An
+unrestricted nonnegative factorisation of the stacked scan-by-ion matrix
+has nonnegative rank at most 550, since the 550 ion columns themselves
+provide a nonnegative basis.
+
+Published rank-selection experiments put the scale in perspective.
+Distributed NMF (DnMFk) recovered seven planted factors in a
+one-terabyte matrix. Eswar et al. compared NMF rank selectors at true
+rank 10. Fu et al. tested nonnegative tensor rank selection at true
+ranks 15–40. The 1,000 compounds here are **25 times the largest
+generating rank in that tensor experiment**. These studies use different
+data models and assess different kinds of rank. [Chennupati et
+al.](https://doi.org/10.1007/s11227-020-03181-6) · [Eswar et
+al.](https://www.osti.gov/servlets/purl/3002147) · [Fu et
+al.](https://doi.org/10.3390/e21070632)

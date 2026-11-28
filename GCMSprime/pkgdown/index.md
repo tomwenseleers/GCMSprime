@@ -133,6 +133,10 @@ The same 16 simulated chromatograms were supplied to every program. Each contain
 
 GCMSprime, using simultaneous logconNMF, **recovered the true rank of 1,000 exactly** in **35.95 seconds per sample**. It recovered **8,000 of 8,000** compound occurrences and made **no false-positive calls**. The recovered peaks included **80 of the 80 acid occurrences**. MSHub returned **1,414 deconvolved components**, 41.4% above the true rank. The other five workflows produce peak lists or aligned feature groups. Their outputs do not define a common factorisation rank.
 
+The 1,000 shared factors matched the 1,000 generating compounds one-to-one across all eight occurrences of each compound. This is exact automatic recovery of the chemical component count from 550 measured ion channels. Scan order distinguishes compounds that elute at different times, and each compound contributes a shared spectrum wherever it occurs.
+
+Published rank-selection experiments put the scale in perspective. Distributed NMF (DnMFk) recovered seven planted factors in a one-terabyte matrix. Eswar et al. compared NMF rank selectors at true rank 10. Fu et al. tested nonnegative tensor rank selection at true ranks 15–40. The 1,000 compounds here are **25 times the largest generating rank in that tensor experiment**. These studies use different data models and assess different kinds of rank. [Chennupati et al.](https://doi.org/10.1007/s11227-020-03181-6) · [Eswar et al.](https://www.osti.gov/servlets/purl/3002147) · [Fu et al.](https://doi.org/10.3390/e21070632)
+
 | Workflow | Seconds/sample | Estimated rank (true 1,000) | TP | FP | FN | Acid TP / 80 |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
 | GCMSprime | 35.95 | **1,000 (exact)** | 8,000 | 0 | 0 | 80 / 80 |
@@ -153,6 +157,16 @@ Among GCMSprime’s 8,000 matched occurrences, the median absolute relative area
 
 [![Ion-support recovery across the seven workflows](reference/figures/simulated-16-spectral-support.png)](reference/figures/simulated-16-spectral-support.png)
 
+### Optimality gap to ground truth-initialised solution
+
+The blind fit descended from an original-ion GIC of **46,273,866** to **32,610,830**. The fit initialised from the true elution profiles finished at **32,682,079**, giving a signed empirical optimality gap of **-0.2180%** (the blind fit scored below the reference). Both trajectories showed smooth empirical descent. GIC never increased across the 29 blind or 16 reference checkpoints.
+
+Both fits used the same noisy counts, penalty and stopping rules. Only the reference received the true unit-area elution shapes and their cross-sample identities. Both fits then updated the elution profiles, their amplitudes, the shared spectra and the background. The red line gives the best GIC reached from the ground truth initialisation under these stopping rules. The global minimum is unknown.
+
+[![Blind and ground truth-initialised GIC trajectories on the full 16-sample benchmark](reference/figures/full-benchmark-gic-gap.png)](reference/figures/full-benchmark-gic-gap.png)
+
+[Block-level GIC trace](https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst/benchmarks/results/gic-trace.csv) · [Final GIC values](https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst/benchmarks/results/gic-gap.csv).
+
 ### Elution profile recovery
 
 The examples are the EMG compound and the acid with the greatest total true area in their respective classes. Both were selected from the simulation before comparing any fits. Each occurs in eight samples. Solid curves show inferred profiles, dashed curves show the true profiles, and the eight absent true profiles coincide at zero. Colours order the 16 samples by true area. Heights retain original total-ion intensity per scan. The mean cosine in each example uses all eight positive occurrences, with a missing recovered profile scoring zero. The all-acid tally covers all ten acids.
@@ -162,6 +176,22 @@ The examples are the EMG compound and the acid with the greatest total true area
 [![Recovered and simulated profiles for the selected shark-fin acid](reference/figures/simulated-16-acid-profiles.png)](reference/figures/simulated-16-acid-profiles.png)
 
 [Benchmark methods, scoring, timings and reproduction code](https://tomwenseleers.github.io/GCMSprime/articles/benchmarks.html).
+
+## Comparison with other software
+
+On the same 16 files, GCMSprime recovered 8,000 true occurrences with zero false calls. GNPS/MSHub estimated 1,414 batch components. MS-DIAL, mzmine GC-EI, eRah, AMDIS and xcms + CAMERA returned peak lists or aligned features. The seven-workflow benchmark gives their measured recovery and timings. [Benchmark results and settings](https://tomwenseleers.github.io/GCMSprime/articles/benchmarks.html).
+
+The following matrix and tensor models offer other ways to resolve co-elution. The comparison describes their published formulations.
+
+| Approach | What is shared and how peaks are represented | How the component count enters |
+|:--|:--|:--|
+| **GCMSprime / logconNMF** | A common spectrum across samples and one log-concave elution profile per occurrence. Width, asymmetry, area and retention time can vary by sample. | Grouped PSF regression proposes peaks. Original-ion GIC scores changes to the shared factors and their support. |
+| **MCR-ALS, conventional GC–MS NMF and unimodal NMF** | Alternating regressions estimate elution profiles and spectra. Nonnegativity and unimodality can be imposed. Poisson MCR also models signal-dependent noise. [pyMCR](https://doi.org/10.6028/jres.124.018) · [GC–MS NMF](https://doi.org/10.1016/j.talanta.2004.09.017) · [Unimodal NMF](https://doi.org/10.1109/ICASSP39728.2021.9414631) · [Poisson MCR](https://doi.org/10.1016/j.chemolab.2016.02.006) | The cited fits use a chosen component count. Diagnostics can guide that choice. |
+| **Simultaneous NMF and global parametric GC–MS analysis** | Simultaneous NMF shares a factor across data matrices. Parametric GC–MS analysis fits shared spectra with an explicit elution model such as an exponentially modified Gaussian. [Shared-factor NMF](https://doi.org/10.1371/journal.pone.0048238) · [Global GC–MS analysis](https://doi.org/10.1016/j.chemolab.2008.10.004) | The analyst specifies a candidate model order. |
+| **PARAFAC and shifted PARAFAC** | Trilinear components share their spectrum and elution shape up to amplitude. Shifted PARAFAC also allows translations of that shape. [Shifted factor models](https://three-mode.leidenuniv.nl/pdf/h/harshmanhonglundy2003i.pdf) | Candidate ranks can be compared using diagnostics such as core consistency. [Bro and Kiers](https://doi.org/10.1002/cem.801) |
+| **Classical PARAFAC2 and PARADISe** | Elution profiles can vary across samples subject to a common matrix of cross-products. PARADISe applies PARAFAC2 to chromatographic intervals. [PARAFAC2 for retention shifts](https://research.rug.nl/en/publications/parafac2-part-ii-modeling-chromatographic-data-with-retention-tim/) · [PARADISe](https://doi.org/10.1016/j.chroma.2017.04.052) | Candidate ranks are fitted per interval. Automated model assessment is also available. [Johnsen et al.](https://doi.org/10.1002/cem.2575) |
+| **Flexible and fully constrained PARAFAC2** | Flexible coupling relaxes the cross-product condition. AO-ADMM can retain the condition while imposing constraints on all modes, including the varying elution profiles. [Cohen and Bro](https://doi.org/10.1007/978-3-319-93764-9_9) · [Roald et al.](https://doi.org/10.1137/21M1450033) | Both formulations fit a specified number of components. |
+| **Shift-invariant trilinearity and PARAFAC2×N** | Shift-invariant trilinearity uses Fourier-domain information to accommodate elution shifts. PARAFAC2×N extends drift modelling to multiple separation modes in multidimensional chromatography. [Shift-invariant trilinearity](https://doi.org/10.1002/cem.3501) · [PARAFAC2×N](https://doi.org/10.1016/j.aca.2023.340909) | Each model is fitted at a chosen component count. |
 
 ## Spectral library search
 
@@ -193,6 +223,14 @@ shows single- and multisample identification. The
 [identification theory](articles/identification-theory.html) gives the formulas,
 calibration and comparison benchmarks.
 
+
+## Selected references
+
+- Camp (2019) describes how alternating regression lets analysts choose constraints separately for concentrations and spectra. [pyMCR](https://doi.org/10.6028/jres.124.018)
+- Lee et al. (2012) fit a common factor across multiple datasets. [Simultaneous NMF](https://doi.org/10.1371/journal.pone.0048238)
+- Johnsen et al. (2017) describe the PARADISe workflow for GC–MS. Roald et al. (2022) show how to constrain all modes of PARAFAC2. [PARADISe](https://doi.org/10.1016/j.chroma.2017.04.052) · [Constrained PARAFAC2](https://doi.org/10.1137/21M1450033)
+- Aksenov et al. (2021) describe the GNPS/MSHub workflow evaluated on these 16 chromatograms. [MSHub](https://doi.org/10.1038/s41587-020-0700-3)
+- Chennupati et al. (2020) infer the number of factors in large matrices. Fu, Matsushima and Yamanishi (2019) compare rank-selection criteria for nonnegative tensors. [Distributed NMF](https://doi.org/10.1007/s11227-020-03181-6) · [Tensor rank selection](https://doi.org/10.3390/e21070632)
 
 ## Citation
 

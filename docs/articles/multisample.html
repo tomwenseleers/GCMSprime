@@ -282,14 +282,41 @@ all-acid tally covers all ten acids.</p>
 <p><a href="../reference/figures/simulated-16-acid-profiles.png"><img src="../reference/figures/simulated-16-acid-profiles.png" alt="Recovered and simulated profiles for the selected shark-fin acid"></a></p>
 <p><a href="https://tomwenseleers.github.io/GCMSprime/articles/benchmarks.html">Seven-workflow
 comparison and reproduction code</a>.</p>
+<p><span id="empirical-gic-gap"></span></p>
 </div>
 <div class="section level3">
-<h3 id="empirical-gic-gap">Empirical GIC gap<a class="anchor" aria-label="anchor" href="#empirical-gic-gap"></a>
+<h3 id="optimality-gap-to-ground-truth-initialised-solution">Optimality gap to ground truth-initialised solution<a class="anchor" aria-label="anchor" href="#optimality-gap-to-ground-truth-initialised-solution"></a>
 </h3>
-<p>Passing <code>truth.profiles</code> requests a second,
-truth-initialised fit for comparison. The timing above measures one
-blind fit. <a href="https://tomwenseleers.github.io/logconNMF/reference/gicGap.html" class="external-link">Empirical
-GIC diagnostic</a>.</p>
+<p>The blind fit descended from an original-ion GIC of
+<strong>46,273,866</strong> to <strong>32,610,830</strong>. The fit
+initialised from the true elution profiles finished at
+<strong>32,682,079</strong>, giving a signed empirical optimality gap of
+<strong>-0.2180%</strong> (the blind fit scored below the reference).
+Both trajectories showed smooth empirical descent. GIC never increased
+across the 29 blind or 16 reference checkpoints.</p>
+<p>Both fits used the same noisy counts, penalty and stopping rules.
+Only the reference received the true unit-area elution shapes and their
+cross-sample identities. Both fits then updated the elution profiles,
+their amplitudes, the shared spectra and the background. The red line
+gives the best GIC reached from the ground truth initialisation under
+these stopping rules. The global minimum is unknown.</p>
+<p><a href="../reference/figures/full-benchmark-gic-gap.png"><img src="../reference/figures/full-benchmark-gic-gap.png" alt="Blind and ground truth-initialised GIC trajectories on the full 16-sample benchmark"></a></p>
+<p>The blind fit started with 1,088 candidate factors. It crossed below
+the reference after the support exchange at sweep 6 and finished after 8
+sweeps. The reference stopped after 4. Both ended at rank 1,000 with
+8,000 occurrences. The reference had 143,787 less scaled deviance. The
+blind fit used 3,961 fewer profile degrees of freedom and 20 fewer
+spectral degrees of freedom, which lowered its final penalised criterion
+by 71,249.</p>
+<p>The signed gap is 100 × (blind GIC − reference GIC) / |reference
+GIC|. The left panel shows every recorded original-ion GIC. The right
+panel enlarges the final half of each trajectory on the percentage
+scale. The red dotted line marks the reference endpoint. The published
+35.95 seconds per sample measures the ordinary blind run. Collecting
+both traces was a separate diagnostic run.</p>
+<p><a href="https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst/benchmarks/results/gic-trace.csv" class="external-link">Block-level
+GIC trace</a> · <a href="https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst/benchmarks/results/gic-gap.csv" class="external-link">Final
+GIC values</a>.</p>
 </div>
 </div>
 <div class="section level2">
@@ -344,10 +371,8 @@ and scan grid remain separate.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/stats/fitted.values.html" class="external-link">fitted</a></span><span class="op">(</span><span class="va">experiment</span>, sample<span class="op">=</span><span class="fl">1L</span><span class="op">)</span></span></code></pre></div>
 <p>The <a href="https://tomwenseleers.github.io/logconNMF/articles/simultaneous-nmf.html" class="external-link">simultaneous
 NMF tutorial</a> gives the mathematical model, alignment, spectral
-grouping, local updates and simulation results. Its validation includes
-three samples with all 258 mass channels, differing scan grids,
-concentration-dependent tails and compounds absent from half the
-samples. All seven signal noise families are supported.</p>
+grouping, local updates and the full 16-sample example, including the
+two-start GIC diagnostic and reproduction code.</p>
 </div>
 <div class="section level2">
 <h2 id="scan-spacing-and-exposure">Scan spacing and exposure<a class="anchor" aria-label="anchor" href="#scan-spacing-and-exposure"></a>

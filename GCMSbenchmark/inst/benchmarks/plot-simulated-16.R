@@ -93,18 +93,18 @@ plotBenchmark16 <- function(results, output_dir = results) {
   benchmark16Similarity(hits,"spectral_cosine",methods,labels,colour,fill,draw,
     "simulated-16-spectral-violin.png","Cosine similarity (logit scale)",
     "Reciprocal spectral hits across 16 samples",stats::median,"Median",
-    c(.5,.7,.9,.99,.999,.9999,.99999,.999999),nrow(truth),.7,cap=.999999)
+    c(.5,.7,.9,.99,1-10^c(-4,-6,-7,-8)),nrow(truth),.7)
   benchmark16Similarity(hits[hits$present,,drop=FALSE],"spectral_F1",methods,
     labels,colour,fill,draw,"simulated-16-spectral-support.png",
     "Within-spectrum F1 (logit scale)","Correctness of spectral ion support",
-    mean,"Mean",c(0,.25,.5,.75,.9,.95,.99,1),nrow(truth))
+    mean,"Mean",c(0,.25,.5,.75,.9,.99,.995,.999,1),nrow(truth))
   benchmark16ProfilePlots(results,methods,labels,draw)
   benchmark16Performance(summary,labels,colour,draw)
   invisible(list(area=models))
 }
 
 benchmark16Similarity <- function(hits,metric,methods,labels,colour,fill,draw,
-    filename,axis,title,statistic,stat_label,ticks,total,cutoff=NULL,cap=NULL) {
+    filename,axis,title,statistic,stat_label,ticks,total,cutoff=NULL) {
   x<-data.frame(method=hits$method,score=hits[[metric]],
     presence=factor(ifelse(hits$present,"Present","Absent"),levels=c("Present","Absent")))
   x<-x[is.finite(x$score),,drop=FALSE]
@@ -114,13 +114,15 @@ benchmark16Similarity <- function(hits,metric,methods,labels,colour,fill,draw,
     z<-x[x$method==m,,drop=FALSE]
     q<-stats::quantile(z$score,c(.25,.75),na.rm=TRUE,names=FALSE)
     data.frame(method=m,q25=q[1],q75=q[2],value=if(nrow(z))statistic(z$score)else NA_real_,
-      compared=nrow(z),true=sum(z$presence=="Present"))
+      compared=nrow(z),true=sum(z$presence=="Present"),exact=sum(z$score==1))
   }))
   stats$label<-sprintf("%s %.7f · %d/%d true",stat_label,stats$value,stats$true,total)
-  display<-function(v)if(is.null(cap))v else pmin(v,cap)
-  span<-range(stats::qlogis(display(c(x$score,ticks))),finite=TRUE)
+  if(metric=="spectral_F1")
+    stats$label<-paste0(stats$label,"\n",format(stats$exact,big.mark=",",trim=TRUE)," exact")
+  if(any(x$score==1)) ticks<-sort(unique(c(ticks,1)))
+  stopifnot(all(x$score>=0 & x$score<=1))
+  span<-range(stats::qlogis(c(x$score,ticks)),finite=TRUE)
   logit<-function(v) {
-    v<-display(v)
     z<-stats::qlogis(v)
     z[which(v==0)]<-span[1]-1.4
     z[which(v==1)]<-span[2]+1.4
@@ -129,15 +131,19 @@ benchmark16Similarity <- function(hits,metric,methods,labels,colour,fill,draw,
   x$position<-logit(x$score)
   limits<-range(c(x$position,logit(ticks)),finite=TRUE)
   plot_limits<-limits+c(-.4,.4)
-  tick_labels<-vapply(ticks,function(v)if(!is.null(cap)&&v>=cap)"1"else
-    format(v,trim=TRUE,scientific=FALSE),"")
+  tick_labels<-parse(text=vapply(ticks,function(v) {
+    if(v==1) return("'1 (exact)'")
+    if(v>=.9999) return(sprintf("1-10^-%d",round(-log10(1-v))))
+    format(v,trim=TRUE,scientific=FALSE)
+  },""))
   stats$label_position<-limits[2]+.7
-  varying<-methods[vapply(methods,function(m)length(unique(x$score[x$method==m]))>1L,TRUE)]
+  interior<-x[x$score>0 & x$score<1,,drop=FALSE]
+  varying<-methods[vapply(methods,function(m)length(unique(interior$score[interior$method==m]))>1L,TRUE)]
   plot<-ggplot2::ggplot(x,ggplot2::aes(x=method,y=position))+
     ggplot2::geom_point(ggplot2::aes(colour=method,shape=presence),
       size=.70,stroke=.20,alpha=.08,
       position=ggplot2::position_jitter(width=.23,height=0,seed=23))+
-    ggplot2::geom_violin(data=x[x$method%in%varying,,drop=FALSE],
+    ggplot2::geom_violin(data=interior[interior$method%in%varying,,drop=FALSE],
       ggplot2::aes(fill=method,colour=method),scale="width",width=.78,adjust=.75,linewidth=.45)+
     ggplot2::geom_linerange(data=stats[stats$compared>0L,],
       ggplot2::aes(x=method,ymin=logit(q25),ymax=logit(q75),colour=method),
@@ -160,8 +166,8 @@ benchmark16Similarity <- function(hits,metric,methods,labels,colour,fill,draw,
     ggplot2::labs(x=NULL,y=axis,title=title,
       subtitle=paste("RI window ±30 · open dot:",tolower(stat_label),"· bar: interquartile range"),
       caption=if(metric=="spectral_F1")
-        "Correctly matched true spectra · shared cutoff: 0.1% of base-peak intensity in reference and estimated spectra."
-      else "Each point is a reciprocal library hit. Crosses: absent compounds. Display values ≥0.999999 are shown at 1; statistics use original values.")+
+        "Ion support uses 0.1% of base-peak intensity. Violins show imperfect matches. Exact matches appear at the separate right-hand tick."
+      else "Each point is a reciprocal library hit. Crosses indicate absent compounds. All cosines below 1 use their measured values.")+
     ggplot2::theme_minimal(base_size=13)+
     ggplot2::theme(panel.grid.minor=ggplot2::element_blank(),
       panel.grid.major.y=ggplot2::element_blank(),legend.position="bottom",

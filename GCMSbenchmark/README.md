@@ -65,6 +65,17 @@ plotBenchmark16(file.path(directory, "results"), file.path(directory, "figures")
 | `xcms+CAMERA` | Install both Bioconductor packages. xcms detects ion peaks with a matched filter and CAMERA groups them within each sample by coelution and EIC correlation. It returns summed ion integrals, pseudospectra, and representative-ion traces. Use `control[["xcms+CAMERA"]]` to set `detection` (for example `fwhm` in seconds or `snthresh`), `fwhm_grouping` (arguments to `CAMERA::groupFWHM()`), `grouping` (arguments to `CAMERA::groupCorr()`, or `FALSE` for FWHM grouping alone), or `min_ions` (default 3). |
 | `MSHub` | For a batch of at least 10 samples, set `control$MSHub$exe` to Python and `source` to the standalone [MSHub repository](https://bitbucket.org/iAnalytica/mshub_process/src/master/). The runtime needs NumPy, SciPy, h5py, scikit-learn and netCDF4. An optional `pythonpath` selects an isolated dependency directory. |
 
+## Full-benchmark GIC diagnostic
+
+After generating the 16 files with `prepareFullBenchmark(directory)`, use a separate output directory to record the ordinary fit and the fit initialised from the generating profiles.
+
+```r
+source(file.path(bench, "full-gic.R"))
+gap <- runFullBenchmarkGIC(directory, file.path(directory, "diagnostic"), ncores = 16L)
+plot(gap)
+plotFullBenchmarkGIC(gap$trace, file.path(directory, "diagnostic", "full-benchmark-gic-gap.png"))
+```
+
 ## Supply simulation truth
 
 Each truth record contains `id`, `apex` in minutes, `area` in integrated
