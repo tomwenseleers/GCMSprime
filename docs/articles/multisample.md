@@ -77,15 +77,15 @@ returned **1,414 deconvolved components**, 41.4% above the true rank.
 The other five workflows produce peak lists or aligned feature groups.
 Their outputs do not define a common factorisation rank.
 
-| Workflow | Seconds/sample | Estimated rank (true 1,000) | TP | FP | FN | Acid TP / 80 |
+| Workflow | Seconds/sample | Estimated rank (true 1,000) | TP (sensitivity) | FP | FN | Acid TP / 80 |
 |----|---:|---:|---:|---:|---:|---:|
-| GCMSprime | 35.95 | **1,000 (exact)** | 8,000 | 0 | 0 | 80 / 80 |
-| MS-DIAL | 16.02 | — | 7,728 | 11,685 | 272 | 73 / 80 |
-| mzmine GC-EI | 6.92 | — | 4,202 | 185 | 3,798 | 29 / 80 |
-| eRah | 25.94 | — | 7,172 | 5,615 | 828 | 70 / 80 |
-| AMDIS | 28.99 | — | 7,878 | 9,122 | 122 | 80 / 80 |
-| xcms + CAMERA | 4.22 | — | 7,261 | 890 | 739 | 31 / 80 |
-| MSHub | 15.05 | 1,414 | 7,179 | 12,184 | 821 | 50 / 80 |
+| GCMSprime | 35.95 | **1,000 (exact)** | 8,000 (100%) | 0 | 0 | 80 / 80 |
+| MS-DIAL | 16.02 | — | 7,728 (96.6%) | 11,685 | 272 | 73 / 80 |
+| mzmine GC-EI | 6.92 | — | 4,202 (52.5%) | 185 | 3,798 | 29 / 80 |
+| eRah | 25.94 | — | 7,172 (89.7%) | 5,615 | 828 | 70 / 80 |
+| AMDIS | 28.99 | — | 7,878 (98.5%) | 9,122 | 122 | 80 / 80 |
+| xcms + CAMERA | 4.22 | — | 7,261 (90.8%) | 890 | 739 | 31 / 80 |
+| MSHub | 15.05 | 1,414 | 7,179 (89.7%) | 12,184 | 821 | 50 / 80 |
 
 ### Local search for the shared rank
 
@@ -136,13 +136,15 @@ acid](../reference/figures/simulated-16-acid-profiles.png)](https://tomwenseleer
 [Seven-workflow comparison and reproduction
 code](https://tomwenseleers.github.io/GCMSprime/articles/benchmarks.html).
 
-### Optimality gap to ground truth-initialised solution
+### Convergence behaviour
 
-The blind fit showed smooth, monotonic descent in GIC across eight
-sweeps. Its final GIC differed by only **0.19%** from that of a fit
-initialised with the true elution profiles and run for the same eight
-sweeps. Both fits ended at the true rank of **1,000** with **8,000**
-sample-level occurrences.
+The blind fit converged to a solution very close to the simulated ground
+truth. It recovered **all 1,000 compounds and all 8,000 peak
+occurrences**, with a median elution-profile cosine of **0.999994** and
+a median absolute relative area error of **0.095%**. GIC showed smooth,
+monotonic descent over eight sweeps. Its final value differed by only
+**0.19%** from that of a fit initialised with the true elution profiles
+and run for the same eight sweeps.
 
 [![Original-ion GIC over eight sweeps of the blind fit on 16 full
 chromatograms](../reference/figures/full-benchmark-gic-gap.png)](https://tomwenseleers.github.io/GCMSprime/reference/figures/full-benchmark-gic-gap.png)

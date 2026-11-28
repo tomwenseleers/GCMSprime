@@ -127,7 +127,7 @@ factorisation rank.</p>
 <th>Workflow</th>
 <th align="right">Seconds/sample</th>
 <th align="right">Estimated rank (true 1,000)</th>
-<th align="right">TP</th>
+<th align="right">TP (sensitivity)</th>
 <th align="right">FP</th>
 <th align="right">FN</th>
 <th align="right">Acid TP / 80</th>
@@ -137,7 +137,7 @@ factorisation rank.</p>
 <td>GCMSprime</td>
 <td align="right">35.95</td>
 <td align="right"><strong>1,000 (exact)</strong></td>
-<td align="right">8,000</td>
+<td align="right">8,000 (100%)</td>
 <td align="right">0</td>
 <td align="right">0</td>
 <td align="right">80 / 80</td>
@@ -146,7 +146,7 @@ factorisation rank.</p>
 <td>MS-DIAL</td>
 <td align="right">16.02</td>
 <td align="right">—</td>
-<td align="right">7,728</td>
+<td align="right">7,728 (96.6%)</td>
 <td align="right">11,685</td>
 <td align="right">272</td>
 <td align="right">73 / 80</td>
@@ -155,7 +155,7 @@ factorisation rank.</p>
 <td>mzmine GC-EI</td>
 <td align="right">6.92</td>
 <td align="right">—</td>
-<td align="right">4,202</td>
+<td align="right">4,202 (52.5%)</td>
 <td align="right">185</td>
 <td align="right">3,798</td>
 <td align="right">29 / 80</td>
@@ -164,7 +164,7 @@ factorisation rank.</p>
 <td>eRah</td>
 <td align="right">25.94</td>
 <td align="right">—</td>
-<td align="right">7,172</td>
+<td align="right">7,172 (89.7%)</td>
 <td align="right">5,615</td>
 <td align="right">828</td>
 <td align="right">70 / 80</td>
@@ -173,7 +173,7 @@ factorisation rank.</p>
 <td>AMDIS</td>
 <td align="right">28.99</td>
 <td align="right">—</td>
-<td align="right">7,878</td>
+<td align="right">7,878 (98.5%)</td>
 <td align="right">9,122</td>
 <td align="right">122</td>
 <td align="right">80 / 80</td>
@@ -182,7 +182,7 @@ factorisation rank.</p>
 <td>xcms + CAMERA</td>
 <td align="right">4.22</td>
 <td align="right">—</td>
-<td align="right">7,261</td>
+<td align="right">7,261 (90.8%)</td>
 <td align="right">890</td>
 <td align="right">739</td>
 <td align="right">31 / 80</td>
@@ -191,7 +191,7 @@ factorisation rank.</p>
 <td>MSHub</td>
 <td align="right">15.05</td>
 <td align="right">1,414</td>
-<td align="right">7,179</td>
+<td align="right">7,179 (89.7%)</td>
 <td align="right">12,184</td>
 <td align="right">821</td>
 <td align="right">50 / 80</td>
@@ -565,16 +565,20 @@ profile is available.</p>
 </tr>
 </tbody>
 </table>
+<p><span id="optimality-gap-to-ground-truth-initialised-solution"></span></p>
 </div>
 </div>
 <div class="section level2">
-<h2 id="optimality-gap-to-ground-truth-initialised-solution">Optimality gap to ground truth-initialised solution<a class="anchor" aria-label="anchor" href="#optimality-gap-to-ground-truth-initialised-solution"></a>
+<h2 id="convergence-behaviour">Convergence behaviour<a class="anchor" aria-label="anchor" href="#convergence-behaviour"></a>
 </h2>
-<p>The blind fit showed smooth, monotonic descent in GIC across eight
-sweeps. Its final GIC differed by only <strong>0.19%</strong> from that
-of a fit initialised with the true elution profiles and run for the same
-eight sweeps. Both fits ended at the true rank of <strong>1,000</strong>
-with <strong>8,000</strong> sample-level occurrences.</p>
+<p>The blind fit converged to a solution very close to the simulated
+ground truth. It recovered <strong>all 1,000 compounds and all 8,000
+peak occurrences</strong>, with a median elution-profile cosine of
+<strong>0.999994</strong> and a median absolute relative area error of
+<strong>0.095%</strong>. GIC showed smooth, monotonic descent over eight
+sweeps. Its final value differed by only <strong>0.19%</strong> from
+that of a fit initialised with the true elution profiles and run for the
+same eight sweeps.</p>
 <p><a href="../reference/figures/full-benchmark-gic-gap.png"><img src="../reference/figures/full-benchmark-gic-gap.png" alt="Original-ion GIC over eight sweeps of the blind fit on 16 full chromatograms"></a></p>
 <p>The figure connects all 29 recorded checkpoints of the blind fit.
 Multiple updates can occur at the same sweep number when the set of
@@ -623,260 +627,115 @@ timestamp.</p>
 <div class="section level2">
 <h2 id="comparison-with-other-software">Comparison with other software<a class="anchor" aria-label="anchor" href="#comparison-with-other-software"></a>
 </h2>
-<p>GCMSprime combines a formally <strong>estimated time-varying
-point-spread function (PSF)</strong> with <strong>compound-specific peak
-shapes</strong>, <strong>grouped peak selection across mass
-channels</strong> and a <strong>mathematically specified information
-criterion</strong> for automatic compound-count selection.</p>
-<p>For its default quasi-Poisson model, the fitted mean and variance
-satisfy <span class="math inline">\operatorname{Var}(Y_{it})=\phi\mu_{it}</span>. The
-final quasi-GIC combines the dispersion-scaled fit criterion with
-charges for the free nonzero ion proportions in each shared spectrum and
-the fitted dimension of each log-concave profile. Grouped L0 selection
-uses the mass channels jointly, and hard log-concavity constrains each
-component profile. This combination distinguishes GCMSprime from every
-evaluated configuration. The other workflows use peak detection,
-representative ion traces, correlations, local covariance or
-factorisation of peak integrals. Their preprocessing noise estimates and
-selection rules are summarized below. <a href="algorithm.html">Mathematical basis</a></p>
+<p>Of the seven workflows tested, <strong>only GCMSprime recovered the
+true rank of 1,000 and all 8,000 peaks with 100% sensitivity and zero
+false positives</strong>. Rank counts distinct compounds present
+anywhere in the batch. Sensitivity is the fraction of the 8,000
+sample–compound occurrences recovered. Every one of GCMSprime’s 1,000
+shared factors matched its generating compound in all eight positive
+samples. Its peak integration was also the most accurate, with
+<strong>adjusted R² = 0.999982</strong> for estimated versus true log₁₀
+areas and <strong>0.095% median absolute relative area error</strong>.
+The next-highest adjusted R² was 0.966560 for mzmine GC-EI, among its
+4,202 matched peaks. <a href="#quantification-and-spectral-recovery">Quantification
+results</a></p>
+<p>GNPS/MSHub was the only other tested workflow to return a batch
+component count. It estimated <strong>1,414 components</strong>, a
+<strong>41.4% overestimate</strong>. Of those, 342 had no correctly
+matched occurrence. At the level of individual samples it made
+<strong>12,184 false-positive calls</strong> and missed 821 true
+occurrences. The five per-sample workflows produced peak lists or
+aligned features without estimating a common factorisation rank. Their
+sensitivity ranged from <strong>52.5% to 98.5%</strong>, and each made
+between <strong>185 and 11,685 false-positive calls</strong>. The
+published settings and reciprocal-match rule apply to all counts below.
+<a href="#simulation-and-scoring">Benchmark design and scoring</a> · <a href="https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst/benchmarks/results/factor-matches.csv" class="external-link">Factor
+assignments</a></p>
 <table class="table">
 <colgroup>
-<col width="15%">
-<col width="60%">
-<col width="24%">
+<col width="33%">
+<col width="33%">
+<col width="33%">
 </colgroup>
 <thead><tr class="header">
 <th align="left">Workflow</th>
-<th align="left">How it deconvolves and where that can limit
-recovery</th>
-<th align="left">Access</th>
+<th align="left">Which choices affect peak recovery?</th>
+<th align="left">Result on the 16 chromatograms</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td align="left">GCMSprime</td>
-<td align="left">Estimates a time-varying PSF and uses grouped L0
-selection across ions to call peaks. A log-concave factor model fits
-compound-specific profiles, full spectra and smooth background, with GIC
-or quasi-GIC selecting the compound count. Samples can share spectra
-while retaining their own profiles.</td>
-<td align="left">Free, GPL open source. <a href="https://github.com/tomwenseleers/GCMSprime" class="external-link">Repository</a>
+<td align="left"><strong>MS-DIAL</strong></td>
+<td align="left">Model peaks are detected within each chromatogram
+before alignment. Smoothing, peak-detection thresholds and the
+deconvolution window affect which weak or overlapping components yield
+spectra. <a href="https://github.com/systemsomicslab/mtbinfo.github.io/blob/master/MS-DIAL/tutorial.md" class="external-link">MS-DIAL
+GC–MS tutorial</a>
 </td>
+<td align="left">96.6% sensitivity and 11,685 false-positive calls.</td>
 </tr>
 <tr class="even">
-<td align="left">MS-DIAL</td>
-<td align="left">Extracts spectra from detected model peaks within each
-run, then aligns the features. Smoothing, detection thresholds and the
-deconvolution window affect which components are recovered. <a href="https://github.com/systemsomicslab/mtbinfo.github.io/blob/master/MS-DIAL/tutorial.md" class="external-link">GC–MS
-tutorial</a>
+<td align="left"><strong>mzmine GC-EI</strong></td>
+<td align="left">Groups previously detected ion peaks by retention time
+and shape. The grouping tolerances and minimum ion count affect which
+components reach the peak list. <a href="https://mzmine.github.io/mzmine_documentation/latest/module_docs/featdet_spectraldeconvolutiongc/spectraldeconvolutiongc.html" class="external-link">GC-EI
+module</a>
 </td>
-<td align="left">Free, LGPL-3 source. Some vendor readers have separate
-terms. <a href="https://github.com/systemsomicslab/MsdialWorkbench#source-code-license" class="external-link">MsdialWorkbench</a>
-</td>
+<td align="left">The fewest false-positive calls among the alternatives
+(185) and the most missed peaks (3,798).</td>
 </tr>
 <tr class="odd">
-<td align="left">mzmine / ADAP-GC</td>
-<td align="left">The benchmark’s GC-EI module groups resolved ions by
-retention time and shape similarity. Pseudospectra depend on upstream
-detection, the grouping thresholds and the minimum number of ions. Batch
-alignment follows extraction. <a href="https://mzmine.github.io/mzmine_documentation/latest/module_docs/featdet_spectraldeconvolutiongc/spectraldeconvolutiongc.html" class="external-link">GC-EI
-guide</a>
-</td>
-<td align="left">Free Community licence for eligible academic users.
-Commercial use requires a paid plan. <a href="https://github.com/mzmine/mzmine#license" class="external-link">Public source</a> · <a href="https://mzio.io/plans/" class="external-link">Plans</a>
-</td>
-</tr>
-<tr class="even">
-<td align="left">xcms + CAMERA</td>
-<td align="left">Detects ion peaks first and then groups them into
-pseudospectra. Filter widths and grouping rules affect the coverage of
-weak and coeluting peaks. CAMERA was developed for LC–MS feature
-annotation. <a href="https://doi.org/10.1021/ac202450g" class="external-link">Kuhl et
-al. (2012)</a>
-</td>
-<td align="left">Free, GPL open source. <a href="https://bioconductor.org/packages/xcms" class="external-link">xcms</a> · <a href="https://bioconductor.org/packages/CAMERA" class="external-link">CAMERA</a>
-</td>
-</tr>
-<tr class="odd">
-<td align="left">eRah</td>
-<td align="left">Uses local covariance and orthogonal signal
-deconvolution after filtering and baseline removal. Recovery depends on
-width and signal thresholds. Cross-sample alignment follows per-sample
-deconvolution. <a href="https://cran.r-project.org/web/packages/erah/vignettes/erah-manual.html" class="external-link">eRah
+<td align="left"><strong>eRah</strong></td>
+<td align="left">Filters and resolves each sample before aligning
+compounds. Minimum peak width and detection thresholds influence which
+local spectra survive deconvolution. <a href="https://cran.r-project.org/web/packages/erah/vignettes/erah-manual.html" class="external-link">eRah
 manual</a>
 </td>
-<td align="left">Free, GPL open source. <a href="https://cran.r-project.org/package=erah" class="external-link">CRAN</a>
-</td>
+<td align="left">Missed 828 true occurrences and made 5,615
+false-positive calls.</td>
 </tr>
 <tr class="even">
-<td align="left">AMDIS</td>
-<td align="left">Uses representative ion traces as model peak shapes
-within each chromatogram. Component width, sensitivity and shape
-settings govern the calls and extracted spectra. <a href="https://chemdata.nist.gov/mass-spc/amdis/docs/amdis.pdf" class="external-link">NIST
+<td align="left"><strong>AMDIS</strong></td>
+<td align="left">Representative ion traces supply the model peak shapes.
+Component width, resolution, sensitivity and shape settings affect
+splitting in crowded intervals. <a href="https://chemdata.nist.gov/mass-spc/amdis/docs/amdis.pdf" class="external-link">NIST user
 guide</a>
 </td>
-<td align="left">Free standalone binary. <a href="https://chemdata.nist.gov/dokuwiki/doku.php?id=chemdata%3Aamdis" class="external-link">NIST
-distribution</a>
-</td>
+<td align="left">Closest to GCMSprime on sensitivity (98.5%), with 122
+missed occurrences and 9,122 false-positive calls.</td>
 </tr>
 <tr class="odd">
-<td align="left">GNPS/MSHub</td>
-<td align="left">Requires a sample series for its NMF workflow. It
-factorizes aligned peak integrals, so the model resolves spectra and
-abundances from variation across samples and drops the scan-level
-profile information. <a href="https://doi.org/10.1038/s41587-020-0700-3" class="external-link">Aksenov et
-al. (2021)</a> · <a href="https://ccms-ucsd.github.io/GNPSDocumentation/gc-ms-deconvolution/" class="external-link">Workflow
-guide</a>
+<td align="left"><strong>xcms + CAMERA</strong></td>
+<td align="left">The matched filter detects individual ion peaks with a
+specified width and signal-to-noise cutoff. CAMERA then groups detected
+ions into pseudospectra. Peak detection errors can therefore propagate
+into spectral grouping. <a href="https://doi.org/10.1021/ac202450g" class="external-link">CAMERA</a>
 </td>
-<td align="left">Free hosted workflow with a GNPS account. Public source
-under the repository’s nonprofit-use licence. <a href="https://github.com/CCMS-UCSD/GNPS_Workflows/tree/master/mshub-gc" class="external-link">Source</a>
-· <a href="https://github.com/CCMS-UCSD/GNPS_Workflows/blob/733ed89372c3754a4c4d132319da5b4313c47288/LICENSE" class="external-link">Licence</a>
+<td align="left">Missed 739 occurrences and made 890 false-positive
+calls.</td>
+</tr>
+<tr class="even">
+<td align="left"><strong>GNPS/MSHub</strong></td>
+<td align="left">NMF separates compounds using aligned peak integrals
+across samples. Integration discards the scan-by-scan shapes that can
+help distinguish co-eluting compounds. <a href="https://doi.org/10.1038/s41587-020-0700-3" class="external-link">Aksenov et al.</a> · <a href="https://ccms-ucsd.github.io/GNPSDocumentation/gc-ms-deconvolution/" class="external-link">GNPS
+workflow</a>
 </td>
+<td align="left">Estimated 414 more batch components than the true
+1,000. Sample-level sensitivity was 89.7%.</td>
 </tr>
 </tbody>
 </table>
-<div class="section level3">
-<h3 id="commercial-gcms-deconvolution-software">Commercial GC–MS deconvolution software<a class="anchor" aria-label="anchor" href="#commercial-gcms-deconvolution-software"></a>
-</h3>
-<p>Two decisions matter when an ion trace contains a shoulder. The
-software must decide which ions belong to the same elution profile and
-whether a second compound explains enough signal to justify another
-peak. The commercial workflows below make some of these decisions
-visible through peak-width, correlation or detection settings. Several
-also use information from multiple samples.</p>
-<table class="table">
-<colgroup>
-<col width="50%">
-<col width="50%">
-</colgroup>
-<thead><tr class="header">
-<th align="left">Software</th>
-<th align="left">Documented workflow and practical implications</th>
-</tr></thead>
-<tbody>
-<tr class="odd">
-<td align="left"><strong>SpectralWorks AnalyzerPro</strong></td>
-<td align="left">Users set detection thresholds for peak area, height,
-width and signal-to-noise, along with scan windows and chromatographic
-resolution. Detected components can populate a target library across a
-sequence. A component missed during extraction contributes no spectrum
-from that file to the library. <a href="https://spectralworks.com/2016/07/08/using-analyzerpro-in-the-metabolomics-workflow/" class="external-link">AnalyzerPro
-metabolomics workflow</a>
-</td>
-</tr>
-<tr class="even">
-<td align="left"><strong>Agilent MassHunter Unknowns
-Analysis</strong></td>
-<td align="left">This module supports untargeted deconvolution and
-retention-index library searches. Its retention-time window factor
-controls how extracted ion peaks are grouped. Agilent documents a
-resolution–runtime trade-off. Smaller settings separate closer peaks,
-return more components and take longer. Larger settings suit broader
-peaks, and several widths can be searched together. <a href="https://www.agilent.com/cs/library/usermanuals/public/G3335-90243_Unknowns_Analysis_Familiarization-en.pdf#page=27" class="external-link">Unknowns
-Analysis guide, p. 27</a>
-</td>
-</tr>
-<tr class="odd">
-<td align="left"><strong>Thermo Scientific TraceFinder</strong></td>
-<td align="left">In the documented unit-resolution plug-in (v1.3 for
-TraceFinder 4.1), a user-set minimum ion overlap determines which
-extracted peaks form a component. A threshold on the summed ion peak
-controls entry in the output list before optional library searching.
-Both settings therefore affect which candidates reach identification. <a href="https://documents.thermofisher.com/TFS-Assets/CMD/Technical-Notes/tn-10624-gc-ms-deconvolution-plugin-tracefinder-tn10624-en.pdf#page=4" class="external-link">Thermo
-technical note 10624, pp. 4–5</a>
-</td>
-</tr>
-<tr class="even">
-<td align="left"><strong>Shimadzu LabSolutions Insight Explore
-GCMS</strong></td>
-<td align="left">Peak detection, deconvolution and library searching can
-run across a batch. The software extracts component spectra even for
-co-elutions represented by a single integrated peak. Shimadzu describes
-the batch workflow and its outputs. How it chooses a shared compound
-count across injections is unspecified. <a href="https://www.shimadzu.com/an/products/software-informatics/software-option/labsolutions-insight-explore-gcms/features.html" class="external-link">Shimadzu
-features</a>
-</td>
-</tr>
-<tr class="odd">
-<td align="left"><strong>Markes / SepSolve ChromSpace 1D</strong></td>
-<td align="left">Supports multiple input formats, automated background
-subtraction, deconvolution and library searching. Markes lists automatic
-alignment and between-sample comparison under the ChromCompare+ upgrade.
-ChromSpace extends processing to GC×GC. <a href="https://markes.com/separationanalysisdata/data-analysis/chromspace-1d" class="external-link">ChromSpace
-1D specifications</a>
-</td>
-</tr>
-<tr class="even">
-<td align="left"><strong>LECO ChromaTOF / ChromaTOF Sync</strong></td>
-<td align="left">Sync explicitly uses evidence across the entire sample
-set for peak discovery, spectral improvement and a single aligned peak
-table. This makes it a particularly relevant multisample comparator.
-LECO specifies Pegasus BT-series data for Sync and a separate Sync 2D
-workflow for GC×GC. The published description leaves its component-count
-criterion unspecified. <a href="https://www.leco.com/instrument/chromatof-sync-data-alignment/" class="external-link">LECO
-ChromaTOF Sync</a>
-</td>
-</tr>
-<tr class="odd">
-<td align="left"><strong>Wiley KnowItAll GC Expert / MS
-Expert</strong></td>
-<td align="left">Wiley’s worked examples deconvolve a chromatogram,
-search each extracted spectrum and review the proposed identities. A
-library hit supports the identity of an extracted component. Peak
-splitting and the allocation of total area require separate checks
-against known profiles. <a href="https://sciencesolutions.wiley.com/wp-content/uploads/2025/09/07_Training-GC-MS_Process_And_Analysis.pdf" class="external-link">GC
-Expert tutorial</a> · <a href="https://sciencesolutions.wiley.com/wp-content/uploads/2024/12/07_Training-GC-MS_Process_And_Analysis.pdf" class="external-link">MS
-Expert tutorial</a>
-</td>
-</tr>
-<tr class="even">
-<td align="left"><strong>MsMetrix GC-Analyzer /
-GCxGC-Analyzer</strong></td>
-<td align="left">GC-Analyzer groups ions by retention time and shape,
-with differential analysis for sample–control comparisons.
-GCxGC-Analyzer offers total-ion or individual-ion processing for
-two-dimensional separations. The choice of separation and detection mode
-matters when comparing the resulting peak counts. <a href="https://www.msmetrix.com/our-products/gc-analyzer/" class="external-link">GC-Analyzer</a>
-· <a href="https://www.msmetrix.com/our-products/gcxgc-analyzer/" class="external-link">GCxGC-Analyzer</a>
-</td>
-</tr>
-<tr class="odd">
-<td align="left"><strong>ACD/Labs Spectrus (MS Structure ID
-Suite)</strong></td>
-<td align="left">IntelliXtract follows ion traces to separate co-eluting
-components. Spectrus also offers targeted screening, library and
-structure tools, and adjustable peak detection. The extraction and
-structure-assignment steps answer different questions, and the
-documented outputs can be assessed separately for peak recovery and
-identification. <a href="https://www.acdlabs.com/products/spectrus-platform/ms-structure-id-suite/" class="external-link">ACD/Labs
-MS Structure ID Suite</a>
-</td>
-</tr>
-</tbody>
-</table>
-<p>An independent experiment illustrates why component width deserves
-attention. In GC–TOF-MS metabolite mixtures, Lu et al. found that
-AnalyzerPro returned 28 spectra with library match factors above 850 at
-500 µM and five at 50 µM. They identified component width as the most
-influential processing setting across the three programs they tested.
-Those results describe the versions and mixtures studied in 2008. <a href="https://doi.org/10.1016/j.trac.2007.11.004" class="external-link">Lu et
-al. (2008)</a></p>
-<p>GCMSprime addresses peak grouping by fitting all original ion
-channels with one spectrum per compound across samples. Each occurrence
-has its own log-concave profile, so a resolved occurrence in one
-injection can inform a co-eluting occurrence in another. The calibrated
-point spread function supplies starting widths. The subsequent fit can
-change widths and asymmetry, and its GIC charges for both spectral
-coefficients and profile complexity. That makes the evidence for
-retaining a split inspectable. The full benchmark recovered all 1,000
-compounds and all 8,000 occurrences with zero false calls. Recovery,
-area error and runtime for the commercial products on these same files
-remain unmeasured.</p>
-</div>
 <div class="section level3">
 <h3 id="matrix-and-tensor-factorisation-approaches">Matrix and tensor factorisation approaches<a class="anchor" aria-label="anchor" href="#matrix-and-tensor-factorisation-approaches"></a>
 </h3>
-<p>The models below describe the methodological alternatives to the
-seven timed workflows.</p>
+<p>GCMSprime uses grouped L₀ regression to select candidate peaks
+jointly across mass channels. It then scores changes to the shared
+compound count on the original ion data. Its quasi-Poisson GIC charges
+for the complexity of each log-concave elution profile and the number of
+free positive ion proportions in each spectrum. An additional compound
+or fragment ion must improve the fit enough to justify its cost. This
+gives an explicit selection rule for spectral sparsity. <a href="https://tomwenseleers.github.io/logconNMF/articles/algorithm.html#conditional-count-objective" class="external-link">Mathematical
+description</a></p>
 <table class="table">
 <colgroup>
 <col width="33%">
@@ -884,95 +743,104 @@ seven timed workflows.</p>
 <col width="33%">
 </colgroup>
 <thead><tr class="header">
-<th align="left">Approach</th>
-<th align="left">What is shared and how peaks are represented</th>
-<th align="left">How the component count enters</th>
+<th align="left">Matrix or tensor method</th>
+<th align="left">How rank enters the fit</th>
+<th align="left">Limitation for these chromatograms</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td align="left"><strong>GCMSprime / logconNMF</strong></td>
-<td align="left">A common spectrum across samples and one log-concave
-elution profile per occurrence. Width, asymmetry, area and retention
-time can vary by sample.</td>
-<td align="left">Grouped PSF regression proposes peaks. Original-ion GIC
-scores changes to the shared factors and their support.</td>
-</tr>
-<tr class="even">
 <td align="left"><strong>MCR-ALS, conventional GC–MS NMF and unimodal
 NMF</strong></td>
-<td align="left">Alternating regressions estimate elution profiles and
-spectra. Nonnegativity and unimodality can be imposed. Poisson MCR also
-models signal-dependent noise. <a href="https://doi.org/10.6028/jres.124.018" class="external-link">pyMCR</a> · <a href="https://doi.org/10.1016/j.talanta.2004.09.017" class="external-link">GC–MS NMF</a> · <a href="https://doi.org/10.1109/ICASSP39728.2021.9414631" class="external-link">Unimodal NMF</a>
-· <a href="https://doi.org/10.1016/j.chemolab.2016.02.006" class="external-link">Poisson
-MCR</a>
+<td align="left">The analyst supplies the component count, often after
+an exploratory analysis.</td>
+<td align="left">Nonnegativity allows multiple maxima within a profile.
+Unimodality rules those out but still allows irregular shoulders and
+tails. <a href="https://doi.org/10.6028/jres.124.018" class="external-link">MCR-ALS</a> · <a href="https://doi.org/10.1016/j.talanta.2004.09.017" class="external-link">GC–MS NMF</a> · <a href="https://doi.org/10.1109/ICASSP39728.2021.9414631" class="external-link">Unimodal
+NMF</a>
 </td>
-<td align="left">The cited fits use a chosen component count.
-Diagnostics can guide that choice.</td>
+</tr>
+<tr class="even">
+<td align="left"><strong>Simultaneous NMF</strong></td>
+<td align="left">A common factor links datasets at a specified
+rank.</td>
+<td align="left">Sharing spectra helps across samples. The basic
+factorisation leaves each compound’s elution shape unrestricted and
+supplies no chromatographic rule to choose between one broad peak and
+two neighbouring factors. <a href="https://doi.org/10.1371/journal.pone.0048238" class="external-link">Lee et al.</a>
+</td>
 </tr>
 <tr class="odd">
-<td align="left"><strong>Simultaneous NMF and global parametric GC–MS
-analysis</strong></td>
-<td align="left">Simultaneous NMF shares a factor across data matrices.
-Parametric GC–MS analysis fits shared spectra with an explicit elution
-model such as an exponentially modified Gaussian. <a href="https://doi.org/10.1371/journal.pone.0048238" class="external-link">Shared-factor
-NMF</a> · <a href="https://doi.org/10.1016/j.chemolab.2008.10.004" class="external-link">Global GC–MS
-analysis</a>
+<td align="left"><strong>Global parametric GC–MS analysis</strong></td>
+<td align="left">Candidate compound models are specified and fitted
+jointly.</td>
+<td align="left">The chosen peak family must describe the peaks in every
+sample. A good exponentially modified Gaussian model for a regular peak
+can leave a systematic residual at the sharp trailing edge of a
+shark-fin acid. <a href="https://doi.org/10.1016/j.chemolab.2008.10.004" class="external-link">Van Stokkum et
+al.</a>
 </td>
-<td align="left">The analyst specifies a candidate model order.</td>
 </tr>
 <tr class="even">
 <td align="left"><strong>PARAFAC and shifted PARAFAC</strong></td>
-<td align="left">Trilinear components share their spectrum and elution
-shape up to amplitude. Shifted PARAFAC also allows translations of that
-shape. <a href="https://three-mode.leidenuniv.nl/pdf/h/harshmanhonglundy2003i.pdf" class="external-link">Shifted
-factor models</a>
-</td>
-<td align="left">Candidate ranks can be compared using diagnostics such
-as core consistency. <a href="https://doi.org/10.1002/cem.801" class="external-link">Bro and
-Kiers</a>
+<td align="left">Diagnostics such as core consistency compare specified
+ranks.</td>
+<td align="left">Standard trilinearity fixes each compound’s elution
+shape across samples up to amplitude. Allowing a retention shift moves
+the peak, while its width and asymmetry remain fixed. The simulated
+peaks broaden with concentration. <a href="https://three-mode.leidenuniv.nl/pdf/h/harshmanhonglundy2003i.pdf" class="external-link">Shifted
+factor models</a> · <a href="https://doi.org/10.1002/cem.801" class="external-link">Core
+consistency</a>
 </td>
 </tr>
 <tr class="odd">
 <td align="left"><strong>Classical PARAFAC2 and PARADISe</strong></td>
-<td align="left">Elution profiles can vary across samples subject to a
-common matrix of cross-products. PARADISe applies PARAFAC2 to
-chromatographic intervals. <a href="https://research.rug.nl/en/publications/parafac2-part-ii-modeling-chromatographic-data-with-retention-tim/" class="external-link">PARAFAC2
-for retention shifts</a> · <a href="https://doi.org/10.1016/j.chroma.2017.04.052" class="external-link">PARADISe</a>
-</td>
-<td align="left">Candidate ranks are fitted per interval. Automated
-model assessment is also available. <a href="https://doi.org/10.1002/cem.2575" class="external-link">Johnsen et al.</a>
+<td align="left">PARADISe compares candidate ranks within retention
+intervals. A later automated workflow also selects and evaluates
+models.</td>
+<td align="left">PARAFAC2 lets profiles move, but their cross-products
+after scaling must agree across samples. Differential broadening changes
+how much neighbouring peaks overlap and can violate that condition.
+Choosing an interval model also leaves the task of assigning unique
+compounds across the chromatogram. <a href="https://doi.org/10.1016/j.chroma.2017.04.052" class="external-link">PARADISe</a> · <a href="https://doi.org/10.1016/j.trac.2021.116451" class="external-link">Automated
+PARADISe</a>
 </td>
 </tr>
 <tr class="even">
 <td align="left"><strong>Flexible and fully constrained
 PARAFAC2</strong></td>
+<td align="left">Both cited formulations fit a specified number of
+components.</td>
 <td align="left">Flexible coupling relaxes the cross-product condition.
-AO-ADMM can retain the condition while imposing constraints on all
-modes, including the varying elution profiles. <a href="https://doi.org/10.1007/978-3-319-93764-9_9" class="external-link">Cohen and Bro</a> ·
+AO-ADMM can impose sparsity, smoothness or nonnegativity on all modes.
+The analyst still specifies the rank and relevant regularisation
+settings in these least-squares fits. <a href="https://doi.org/10.1007/978-3-319-93764-9_9" class="external-link">Cohen and Bro</a> ·
 <a href="https://doi.org/10.1137/21M1450033" class="external-link">Roald et al.</a>
 </td>
-<td align="left">Both formulations fit a specified number of
-components.</td>
 </tr>
 <tr class="odd">
 <td align="left"><strong>Shift-invariant trilinearity and
 PARAFAC2×N</strong></td>
-<td align="left">Shift-invariant trilinearity uses Fourier-domain
-information to accommodate elution shifts. PARAFAC2×N extends drift
-modelling to multiple separation modes in multidimensional
-chromatography. <a href="https://doi.org/10.1002/cem.3501" class="external-link">Shift-invariant trilinearity</a>
+<td align="left">Both fit a chosen model order.</td>
+<td align="left">A shifted copy of a common peak cannot reproduce
+concentration-dependent broadening. PARAFAC2×N accommodates drift in
+multiple separation dimensions. Its coupling constraints still leave the
+number of compounds to be selected. <a href="https://doi.org/10.1002/cem.3501" class="external-link">Shift-invariant trilinearity</a>
 · <a href="https://doi.org/10.1016/j.aca.2023.340909" class="external-link">PARAFAC2×N</a>
 </td>
-<td align="left">Each model is fitted at a chosen component count.</td>
 </tr>
 </tbody>
 </table>
-<p>The 1,000 shared factors matched the 1,000 generating compounds
-one-to-one across all eight occurrences of each compound. This is exact
-automatic recovery of the chemical component count from 550 measured ion
-channels. Scan order distinguishes compounds that elute at different
-times, and each compound contributes a shared spectrum wherever it
-occurs.</p>
+<p>The distinction matters for the simulated ion counts, whose variance
+rises with their mean. Unweighted least squares treats a residual of a
+given size equally at all intensities. Poisson MCR and KL-based NMF
+accommodate signal-dependent noise. GCMSprime also estimates
+overdispersion, which sets the scale of a deviance improvement relative
+to the cost of extra ions or compounds. The methods above have useful
+extensions for noise, sparsity and rank selection. Their cited
+formulations do not combine grouped peak selection across ions,
+penalisation of spectral support and per-occurrence log-concavity in a
+whole-chromatogram rank criterion. <a href="https://doi.org/10.1016/j.chemolab.2016.02.006" class="external-link">Poisson MCR</a> ·
+<a href="https://doi.org/10.1002/9780470747278" class="external-link">NMF objectives</a></p>
 <p>Across the 160,000 scans, the median number of simultaneously eluting
 true peaks was one, the 95th percentile was three and the maximum was
 five, counting a peak wherever it reached 1% of its own apex. Thus 1,000
@@ -980,15 +848,209 @@ measures the number of distinct compounds across the chromatograms. An
 unrestricted nonnegative factorisation of the stacked scan-by-ion matrix
 has nonnegative rank at most 550, since the 550 ion columns themselves
 provide a nonnegative basis.</p>
-<p>Published rank-selection experiments put the scale in perspective.
-Distributed NMF (DnMFk) recovered seven planted factors in a
-one-terabyte matrix. Eswar et al. compared NMF rank selectors at true
-rank 10. Fu et al. tested nonnegative tensor rank selection at true
-ranks 15–40. The 1,000 compounds here are <strong>25 times the largest
-generating rank in that tensor experiment</strong>. These studies use
-different data models and assess different kinds of rank. <a href="https://doi.org/10.1007/s11227-020-03181-6" class="external-link">Chennupati et al.</a>
-· <a href="https://www.osti.gov/servlets/purl/3002147" class="external-link">Eswar et al.</a>
+<p>The largest exact rank recovery we found in a published benchmark of
+conventional NMF with added noise was <strong>150 factors</strong>.
+Squires, Prügel-Bennett and Niranjan selected that rank on a 1,000 ×
+2,000 matrix using minimum description length. They also recovered 50,
+80 and 120 factors exactly. The 16 full chromatograms here contain
+<strong>88 million ion measurements</strong>, compared with <strong>2
+million matrix entries</strong> in their rank-150 example. The
+simultaneous fit recovered <strong>6.7 times</strong> as many generating
+components from <strong>44 times</strong> as many observations. <a href="https://doi.org/10.1162/NECO_a_00980" class="external-link">Squires et al., Figs.
+1–2</a></p>
+<p>Eswar et al. compared rank selectors on simulated matrices with true
+rank 10, testing candidate ranks from 1 to 20. Under Gaussian noise only
+cross-validation and singular-value hard thresholding ever recovered the
+planted rank in their experiment. Cai et al.’s Poisson NMF benchmark
+rarely extended beyond rank 10, with just one higher rank (30) among the
+six they tested. <a href="https://doi.org/10.1109/BigData62323.2024.10825324" class="external-link">Eswar et
+al.</a> · <a href="https://doi.org/10.1002/sim.9934" class="external-link">Cai et al.</a></p>
+<p>Chennupati et al. recovered seven planted factors in a one-terabyte
+matrix using distributed NMF. Fu et al. tested nonnegative tensor rank
+selection at true ranks 15–40. <a href="https://doi.org/10.1007/s11227-020-03181-6" class="external-link">Chennupati et al.</a>
 · <a href="https://doi.org/10.3390/e21070632" class="external-link">Fu et al.</a></p>
+</div>
+<div class="section level3">
+<h3 id="evidence-for-automatic-rank-recovery">Evidence for automatic rank recovery<a class="anchor" aria-label="anchor" href="#evidence-for-automatic-rank-recovery"></a>
+</h3>
+<p>An experiment tests exact rank recovery when the generating component
+count is known to the evaluator, the method selects the count from the
+observations, and the reported estimate equals the generating count.
+Verifying the identities of the recovered components is a further test.
+The distinction matters when several components can explain a similar
+signal.</p>
+<table class="table">
+<colgroup>
+<col width="50%">
+<col width="50%">
+</colgroup>
+<thead><tr class="header">
+<th align="left">Method</th>
+<th align="left">What the experiment established</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left">Minimum description length for NMF</td>
+<td align="left">On a noisy 1,000 × 2,000 synthetic matrix, the minimum
+description length selected exactly 150 factors. Across five planted
+ranks, the method recovered 50, 80, 120 and 150 exactly and slightly
+missed 25. <a href="https://doi.org/10.1162/NECO_a_00980" class="external-link">Squires et
+al., Figs. 1–2</a>
+</td>
+</tr>
+<tr class="even">
+<td align="left">Automatic relevance determination (ARD-NMF)</td>
+<td align="left">Starting with 32 candidate components, the method
+recovered the 16 limb positions in the <em>swimmer</em> images under
+Poisson noise. Recovery depended on the prior hyperparameter. <a href="https://doi.org/10.1109/TPAMI.2012.240" class="external-link">Tan and Févotte,
+§VI-B</a>
+</td>
+</tr>
+<tr class="odd">
+<td align="left">Separable multinomial factorisation</td>
+<td align="left">With 30 planted topics and words specific to each
+topic, TOP recovered the topic count in 100% of trials in Table 1. A
+separate experiment used 120 topics and reported factor estimation error
+and runtime. <a href="https://doi.org/10.3150/19-BEJ1166" class="external-link">Bing, Bunea
+and Wegkamp, Tables 1–2</a>
+</td>
+</tr>
+<tr class="even">
+<td align="left">Bayesian nonnegative tensor factorisation</td>
+<td align="left">On simulated count tensors the estimated rank was close
+to the planted value of 20. The authors also inferred about 120 active
+components in real event data, where the true count is unknown. <a href="https://arxiv.org/abs/1508.04211" class="external-link">Hu et al., §6</a>
+</td>
+</tr>
+<tr class="odd">
+<td align="left">Minimum description length for nonnegative tensors</td>
+<td align="left">Simulations covered true ranks 15–40. The authors
+scored how close each estimate was to the truth. Their reported score
+gives partial credit for a near miss. <a href="https://doi.org/10.3390/e21070632" class="external-link">Fu et al., §5.2</a>
+</td>
+</tr>
+<tr class="even">
+<td align="left">Spectral estimation of tensor rank (FastRank)</td>
+<td align="left">The rank estimates were exact on all 300 noiseless
+three-way tensors with planted ranks up to 50. On 300 noisy tensors, the
+mean absolute error was 7.08 components. The larger simulations in Table
+5 report runtime. <a href="https://proceedings.mlr.press/v300/bougiatiotis26a.html" class="external-link">Bougiatiotis
+and Paliouras, Tables 1, 2 and 5</a>
+</td>
+</tr>
+</tbody>
+</table>
+<p>We found no earlier published demonstration of a simultaneous
+chromatographic factorisation that selected 1,000 distinct compounds and
+verified their identities across all 8,000 occurrences.</p>
+</div>
+<div class="section level3">
+<h3 id="scaling-to-larger-batches">Scaling to larger batches<a class="anchor" aria-label="anchor" href="#scaling-to-larger-batches"></a>
+</h3>
+<p>The 16 full chromatograms each contained 10,000 scans and 550 ion
+channels. The joint analysis took <strong>35.95 seconds per
+sample</strong> on a 64 GB laptop with eight physical cores and 16
+logical processors. Its sampled peak working set was <strong>6.8
+GiB</strong>. Initial PSF regressions ran in parallel across samples.
+The joint fit restricted profile updates to local retention windows,
+shared each compound’s spectrum across samples and used OpenMP across
+samples or ions. <a href="https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst/benchmarks/results/benchmark.csv" class="external-link">Timing
+components and benchmark results</a></p>
+<p>The current joint count solver stores three dense scan-by-ion arrays
+per sample for the observations, background and fitted means. It also
+holds one dense scan-by-compound profile matrix per sample, even when
+many compounds are absent. For <span class="math inline">S</span>
+samples with <span class="math inline">T</span> scans, <span class="math inline">M</span> ion channels and <span class="math inline">K</span> shared components, these four arrays alone
+occupy <span class="math inline">8ST(3M+K)</span> bytes at double
+precision. Temporary arrays, initial dictionaries and other working
+storage add to that figure. <a href="https://github.com/tomwenseleers/logconNMF/blob/035d775f45081f6925086361127527f2eae43841/logconNMF/R/conditional_dictionary.R#L219" class="external-link">Profile
+and ion storage</a> · <a href="https://github.com/tomwenseleers/logconNMF/blob/035d775f45081f6925086361127527f2eae43841/logconNMF/R/conditional_native.R#L17" class="external-link">Joint
+count updates</a></p>
+<table class="table">
+<colgroup>
+<col width="25%">
+<col width="25%">
+<col width="25%">
+<col width="25%">
+</colgroup>
+<thead><tr class="header">
+<th align="right">Full chromatograms</th>
+<th align="right">Shared compounds</th>
+<th align="right">Ion measurements</th>
+<th align="right">Four arrays alone</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="right">16 (measured run)</td>
+<td align="right">1,000</td>
+<td align="right">88 million</td>
+<td align="right">3.2 GiB</td>
+</tr>
+<tr class="even">
+<td align="right">100 (projection)</td>
+<td align="right">10,000</td>
+<td align="right">550 million</td>
+<td align="right">86.8 GiB</td>
+</tr>
+<tr class="odd">
+<td align="right">1,000 (projection)</td>
+<td align="right">1,000</td>
+<td align="right">5.5 billion</td>
+<td align="right">197.4 GiB</td>
+</tr>
+<tr class="even">
+<td align="right">1,000 (projection)</td>
+<td align="right">10,000</td>
+<td align="right">5.5 billion</td>
+<td align="right">868.0 GiB</td>
+</tr>
+</tbody>
+</table>
+<p>At the measured throughput, 1,000 samples would take about ten hours
+<strong>if the time per sample held constant</strong>. The larger
+batches have yet to be timed or scored for rank recovery. On this
+laptop, an overnight run at that scale would require a more
+memory-efficient joint solver, for example one that stores only active
+profile windows and streams blocks of ion data. The number of compounds
+present per sample and how often their peaks overlap also affect the
+work per sweep.</p>
+</div>
+<div class="section level3">
+<h3 id="commercial-gcms-deconvolution-software">Commercial GC–MS software<a class="anchor" aria-label="anchor" href="#commercial-gcms-deconvolution-software"></a>
+</h3>
+<p>The vendor guides reviewed here do not specify a preset objective for
+deciding whether a better fit to the original ion counts justifies
+another compound, a more complex profile or additional fragment ions.
+Users can set peak width, height, area and signal-to-noise thresholds in
+AnalyzerPro. In MassHunter, the correlation window affects how many
+neighbouring peaks are resolved. These choices can change the peak list.
+The nine commercial workflows reviewed have no published result on these
+16 chromatograms against which to compare rank recovery, false calls or
+area accuracy. <a href="https://spectralworks.com/2016/07/08/using-analyzerpro-in-the-metabolomics-workflow/" class="external-link">AnalyzerPro</a>
+· <a href="https://www.agilent.com/cs/library/usermanuals/public/G3335-90243_Unknowns_Analysis_Familiarization-en.pdf#page=27" class="external-link">MassHunter,
+p. 27</a></p>
+<p>In an independent GC–TOF-MS experiment, Lu et al. found that
+component width was the most influential setting for the versions of
+AnalyzerPro, ChromaTOF and AMDIS they tested. Some modern products use
+information across injections. LECO ChromaTOF Sync, for example,
+co-processes sample sets, although its public description leaves the
+criterion for selecting the batch compound count unspecified. <a href="https://doi.org/10.1016/j.trac.2007.11.004" class="external-link">Lu et al.</a> · <a href="https://www.leco.com/instrument/chromatof-sync-data-alignment/" class="external-link">ChromaTOF
+Sync</a></p>
+<details><summary>
+Vendor documentation for the nine workflows reviewed
+</summary><p><a href="https://spectralworks.com/2016/07/08/using-analyzerpro-in-the-metabolomics-workflow/" class="external-link">SpectralWorks
+AnalyzerPro</a> · <a href="https://www.agilent.com/cs/library/usermanuals/public/G3335-90243_Unknowns_Analysis_Familiarization-en.pdf#page=27" class="external-link">Agilent
+MassHunter Unknowns Analysis</a> · <a href="https://documents.thermofisher.com/TFS-Assets/CMD/Technical-Notes/tn-10624-gc-ms-deconvolution-plugin-tracefinder-tn10624-en.pdf#page=4" class="external-link">Thermo
+Scientific TraceFinder</a></p>
+<p><a href="https://www.shimadzu.com/an/products/software-informatics/software-option/labsolutions-insight-explore-gcms/features.html" class="external-link">Shimadzu
+LabSolutions Insight Explore GCMS</a> · <a href="https://markes.com/separationanalysisdata/data-analysis/chromspace-1d" class="external-link">Markes
+/ SepSolve ChromSpace 1D</a> · <a href="https://www.leco.com/instrument/chromatof-sync-data-alignment/" class="external-link">LECO
+ChromaTOF / ChromaTOF Sync</a></p>
+<p><a href="https://sciencesolutions.wiley.com/wp-content/uploads/2025/09/07_Training-GC-MS_Process_And_Analysis.pdf" class="external-link">Wiley
+KnowItAll GC Expert / MS Expert</a> · <a href="https://www.msmetrix.com/our-products/gc-analyzer/" class="external-link">MsMetrix
+GC-Analyzer / GCxGC-Analyzer</a> · <a href="https://www.acdlabs.com/products/spectrus-platform/ms-structure-id-suite/" class="external-link">ACD/Labs
+Spectrus (MS Structure ID Suite)</a></p>
+</details>
 </div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
