@@ -18,8 +18,8 @@
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><link href="../extra.css" rel="stylesheet">
 <meta property="og:title" content="Spectral library import">
-<meta name="description" content="Stream MSP libraries into sparse matrices or indexed SQLite storage.">
-<meta property="og:description" content="Stream MSP libraries into sparse matrices or indexed SQLite storage.">
+<meta name="description" content="Convert Agilent and Shimadzu mass spectral libraries to MSP with OpenChrom and import them into GCMSprime.">
+<meta property="og:description" content="Convert Agilent and Shimadzu mass spectral libraries to MSP with OpenChrom and import them into GCMSprime.">
 <meta property="og:image" content="https://tomwenseleers.github.io/GCMSprime/reference/figures/logo.png">
 <meta property="og:image:alt" content="GCMSprime hex logo showing resolved chromatographic peaks and their mass spectra">
 </head>
@@ -87,29 +87,86 @@
 
     
     
-<p>GCMSprime keeps raw peaks, chemical identifiers and retention-index
-provenance together. Small libraries can be used in memory. Large
-libraries are imported in batches into SQLite and queried without
-loading every spectrum.</p>
+<p>GCMSprime can use <strong>Agilent ChemStation (<code>.L</code>) and
+Shimadzu MS Database (<code>.spc</code>)</strong> libraries, including
+vendor-formatted editions of NIST. First export the library from
+OpenChrom as a NIST text file (<code>.msp</code>), then import that file
+with <code><a href="../reference/readMSP.html">readMSP()</a></code>. If you already have an <code>.msp</code>
+file, go straight to <a href="#import-the-msp-file-in-r">Import the MSP
+file in R</a>.</p>
+<div class="section level2">
+<h2 id="convert-an-agilent-or-shimadzu-library-with-openchrom">Convert an Agilent or Shimadzu library with OpenChrom<a class="anchor" aria-label="anchor" href="#convert-an-agilent-or-shimadzu-library-with-openchrom"></a>
+</h2>
+<p>Install OpenChrom from the <a href="https://www.openchrom.net/download" class="external-link">OpenChrom download page</a> or
+use the command for your operating system.</p>
+<table class="table">
+<thead><tr class="header">
+<th>Operating system</th>
+<th>Install command</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>Windows (WinGet)</td>
+<td><code>winget install --id Lablicate.OpenChrom --exact</code></td>
+</tr>
+<tr class="even">
+<td>Linux with Snap</td>
+<td><code>sudo snap install openchrom</code></td>
+</tr>
+<tr class="odd">
+<td>macOS with Homebrew</td>
+<td><code>brew install --cask openchrom</code></td>
+</tr>
+</tbody>
+</table>
+<ol style="list-style-type: decimal">
+<li>Start OpenChrom. When the <strong>Vendor plugins missing</strong>
+prompt asks whether to install converter plug-ins, choose
+<strong>Yes</strong>.</li>
+<li>Select <strong>Agilent ChemStation GC-MS</strong> for an Agilent
+library or <strong>Shimadzu MS Database</strong> for a Shimadzu library.
+You can select both. Install the selected converters and restart
+OpenChrom.</li>
+<li>Open <strong>Data Analysis</strong>. In its file browser, navigate
+to the library and double-click the Agilent <code>.L</code> library
+(which may appear as a folder) or the Shimadzu <code>.spc</code>
+database file.</li>
+<li>With the library open, choose <strong>File → Save As…</strong>.
+Select the NIST text (<code>*.msp</code>) output format and save the
+file, for example as <code>library.msp</code>.</li>
+</ol>
+</div>
+<div class="section level2">
+<h2 id="import-the-msp-file-in-r">Import the MSP file in R<a class="anchor" aria-label="anchor" href="#import-the-msp-file-in-r"></a>
+</h2>
+<p>For a full NIST library, run <code><a href="../reference/readMSP.html">readMSP()</a></code> once to create a
+SQLite database. GCMSprime imports spectra in batches and keeps their
+raw peaks, chemical identifiers and retention-index annotations
+together.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tomwenseleers.github.io/GCMSprime/">GCMSprime</a></span><span class="op">)</span></span>
-<span><span class="va">lib</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/readMSP.html">readMSP</a></span><span class="op">(</span><span class="st">"library.msp"</span>, backend<span class="op">=</span><span class="st">"sqlite"</span>, db_file<span class="op">=</span><span class="st">"library.sqlite"</span><span class="op">)</span></span>
-<span><span class="va">lib</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/readMSP.html">openLibrary</a></span><span class="op">(</span><span class="st">"library.sqlite"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/libraryMetadata.html">libraryMetadata</a></span><span class="op">(</span><span class="va">lib</span>, which<span class="op">=</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/spectra.html">spectra</a></span><span class="op">(</span><span class="va">lib</span>, which<span class="op">=</span><span class="fl">1</span><span class="op">:</span><span class="fl">1000</span>, nominal<span class="op">=</span><span class="cn">TRUE</span>, normalize<span class="op">=</span><span class="st">"l2"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/retentionIndices.html">retentionIndices</a></span><span class="op">(</span><span class="va">lib</span>, which<span class="op">=</span><span class="fl">1</span><span class="op">:</span><span class="fl">1000</span>, phase<span class="op">=</span><span class="st">"DB5"</span><span class="op">)</span></span></code></pre></div>
-<p>Matrix rows identify mass values and columns identify library
-spectra. Raw extraction with <code>format="list"</code> preserves the
-input mass/intensity arrays, including duplicate masses. Sparse
-extraction sums duplicate masses. Nominal binning and normalization are
-explicit choices.</p>
+<span><span class="va">lib</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/readMSP.html">readMSP</a></span><span class="op">(</span><span class="st">"library.msp"</span>, backend <span class="op">=</span> <span class="st">"sqlite"</span>, db_file <span class="op">=</span> <span class="st">"library.sqlite"</span><span class="op">)</span></span></code></pre></div>
+<p>In later sessions, reopen the database and inspect a spectrum and its
+available retention indices.</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">lib</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/readMSP.html">openLibrary</a></span><span class="op">(</span><span class="st">"library.sqlite"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/libraryMetadata.html">libraryMetadata</a></span><span class="op">(</span><span class="va">lib</span>, which <span class="op">=</span> <span class="fl">1L</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/spectra.html">spectra</a></span><span class="op">(</span><span class="va">lib</span>, which <span class="op">=</span> <span class="fl">1L</span>, nominal <span class="op">=</span> <span class="cn">TRUE</span>, normalize <span class="op">=</span> <span class="st">"l2"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/retentionIndices.html">retentionIndices</a></span><span class="op">(</span><span class="va">lib</span>, which <span class="op">=</span> <span class="fl">1L</span><span class="op">)</span></span></code></pre></div>
+<p>For a small MSP file,
+<code>readMSP("library.msp", backend = "memory")</code> keeps the
+library in memory. Matrix rows identify mass values and columns identify
+library spectra. Raw extraction with <code>format="list"</code>
+preserves the input mass/intensity arrays, including duplicate masses.
+Sparse extraction sums duplicate masses. Nominal binning and
+normalization are explicit choices.</p>
+</div>
 <div class="section level2">
 <h2 id="source-formats">Source formats<a class="anchor" aria-label="anchor" href="#source-formats"></a>
 </h2>
 <ul>
-<li>OpenChrom Agilent and Shimadzu MSP exports use the streaming native
-reader. Repeated <code>Synon</code> and <code>Comments</code> tags and
-unknown fields remain available with
+<li>For MSP files exported by OpenChrom, repeated <code>Synon</code> and
+<code>Comments</code> tags and unknown fields remain available with
 <code>libraryMetadata(lib, raw=TRUE)</code>.</li>
 <li>
 <a href="https://mona.fiehnlab.ucdavis.edu/downloads" class="external-link">MoNA</a>
@@ -131,6 +188,11 @@ Their predicted origin is recorded explicitly.</li>
 <div class="section level2">
 <h2 id="retention-indices-and-chemical-information">Retention indices and chemical information<a class="anchor" aria-label="anchor" href="#retention-indices-and-chemical-information"></a>
 </h2>
+<p>Agilent and Shimadzu editions of the same NIST release can carry
+different retention indices for the same reference spectrum. Inspect the
+exported phase annotations before an RI-constrained search. For example,
+<code>retentionIndices(lib, which = 1L, phase = "DBWAX")</code> returns
+the polar-column indices recorded for the first spectrum.</p>
 <p>Retention indices form a long table. Multiple index values can belong
 to the same spectrum, with a phase class, raw column annotation, index
 convention and provenance. DB1, DB5 and DBWAX identify nonpolar,

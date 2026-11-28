@@ -17,7 +17,8 @@
 - [Spectral library
   import](https://tomwenseleers.github.io/GCMSprime/articles/spectral-libraries.md):
 
-  Stream MSP libraries into sparse matrices or indexed SQLite storage.
+  Convert Agilent and Shimadzu mass spectral libraries to MSP with
+  OpenChrom and import them into GCMSprime.
 
 - [Retention indices and library
   search](https://tomwenseleers.github.io/GCMSprime/articles/library-search.md):
