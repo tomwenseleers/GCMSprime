@@ -31,64 +31,32 @@ runFullBenchmarkGIC <- function(directory, output_dir, ncores = 16L) {
   invisible(gap)
 }
 
-# Draw both measured trajectories from the block-level CSV returned by the diagnostic.
+# Plot the blind fit at its recorded checkpoints in their original order.
 plotFullBenchmarkGIC <- function(trace, file) {
-  arms <- lapply(c("standard", "true profiles"), function(s) trace[trace$start == s, , drop = FALSE])
-  stopifnot(all(vapply(arms, nrow, 0L) > 0L), all(is.finite(trace$GIC)))
-  reference <- tail(arms[[2]]$GIC, 1L)
-  blind <- tail(arms[[1]]$GIC, 1L)
-  stopifnot(reference != 0)
-  delta <- function(gic) 100 * (gic - reference) / abs(reference)
-  colours <- c("#17649a", "#a8521b")
-  baseline <- "#c32d35"
-  early <- arms[[2]][arms[[2]]$stage == "matched reference continuation" & arms[[2]]$block == "start", , drop = FALSE]
-  initial <- range(trace$GIC / 1e6)
-  grDevices::png(file, width = 1700, height = 790, res = 160)
+  blind <- trace[trace$start == "standard", c("sweep", "GIC"), drop = FALSE]
+  stopifnot(nrow(blind) > 0L, all(is.finite(blind$GIC)),
+            all(is.finite(blind$sweep)), !is.unsorted(blind$sweep))
+  gic <- blind$GIC / 1e6
+  ink <- "#19354a"
+  blue <- "#17649a"
+
+  grDevices::png(file, width = 1460, height = 760, res = 155)
   on.exit(grDevices::dev.off())
-  graphics::par(mfrow = c(1, 2), mar = c(3.8, 4.7, 2.0, 1.0),
-    oma = c(2.2, 0.2, 2.5, 0.3), mgp = c(2.9, .75, 0), las = 1,
-    family = "sans", fg = "#34485a", col.lab = "#23384a", col.axis = "#34485a")
-  for (zoom in c(FALSE, TRUE)) {
-    lines <- if (zoom) lapply(arms, function(z) z[z$sweep >= max(z$sweep)/2, , drop = FALSE]) else arms
-    y <- lapply(lines, function(z) if (zoom) delta(z$GIC) else z$GIC / 1e6)
-    x <- lapply(lines, "[[", "sweep")
-    levels <- if (zoom) range(c(0, unlist(y))) else initial
-    if (diff(levels) == 0) levels <- levels + c(-1, 1) * 0.01
-    graphics::plot(range(unlist(x)), levels, type = "n", axes = FALSE,
-      xlab = "Profile and spectrum sweeps",
-      ylab = if (zoom) "GIC difference from reference (%)" else "Original-ion GIC (millions)",
-      main = if (zoom) "Final half of each fit" else "All recorded updates")
-    graphics::grid(col = "#e1e9ed", lty = 1)
-    graphics::axis(1)
-    graphics::axis(2)
-    graphics::box(col = "#9cabb6")
-    graphics::abline(h = if (zoom) 0 else reference / 1e6, col = baseline, lty = 3, lwd = 2)
-    for (i in seq_along(lines)) {
-      graphics::lines(x[[i]], y[[i]], col = colours[i], lty = i, lwd = 2.2)
-      graphics::points(tail(x[[i]], 1L), tail(y[[i]], 1L), col = colours[i], pch = 16, cex = .72)
-    }
-    if (nrow(early)) graphics::points(early$sweep[1L],
-      if (zoom) delta(early$GIC[1L]) else early$GIC[1L] / 1e6,
-      pch = 21, col = colours[2L], bg = "white", lwd = 1.5, cex = .85)
-    if (!zoom) {
-      labels <- c("Blind start", "Ground truth-initialised", "Reference endpoint")
-      symbols <- rep(NA_integer_, 3L)
-      types <- 1:3
-      inks <- c(colours, baseline)
-      if (nrow(early)) {
-        labels <- c(labels, "Reference met stopping rule")
-        symbols <- c(symbols, 21L)
-        types <- c(types, NA_integer_)
-        inks <- c(inks, colours[2L])
-      }
-      graphics::legend("topright", bty = "n", cex = .8, legend = labels,
-        pch = symbols, pt.bg = "white", lty = types, lwd = 2, col = inks)
-    }
-  }
-  graphics::mtext("GIC convergence on 16 full chromatograms", side = 3, outer = TRUE,
-    font = 2, cex = 1.32, col = "#14273b", line = .6)
-  graphics::mtext(sprintf("Blind GIC %s    |    Reference GIC %s    |    Final signed gap %+.4f%%",
-    format(round(blind), big.mark = ","), format(round(reference), big.mark = ","), delta(blind)),
-    side = 1, outer = TRUE, line = .55, cex = .92, col = "#354e63")
+  graphics::par(mar = c(4.0, 4.6, 4.2, 1.1), mgp = c(2.6, 0.7, 0),
+                las = 1, family = "sans", col.lab = ink, col.axis = ink)
+  graphics::plot(blind$sweep, gic, type = "n", axes = FALSE,
+                 xlab = "Profile and spectrum sweeps", ylab = "Original-ion GIC (millions)")
+  xticks <- pretty(blind$sweep, n = 8)
+  yticks <- pretty(gic)
+  graphics::abline(v = xticks, h = yticks, col = "#e5ebef", lwd = 0.8)
+  graphics::axis(1, at = xticks, tck = -0.012, col = "#a9b7bf")
+  graphics::axis(2, at = yticks, tck = -0.012, col = "#a9b7bf")
+  graphics::box(col = "#afbbc3")
+  graphics::lines(blind$sweep, gic, col = blue, lwd = 2.4)
+  graphics::points(blind$sweep, gic, pch = 16, cex = 0.62, col = blue)
+  graphics::title(main = "GIC convergence of the blind fit", line = 2.25,
+                  adj = 0, cex.main = 1.45, col.main = ink)
+  graphics::mtext(sprintf("16 full chromatograms  |  %d recorded checkpoints", nrow(blind)),
+                  side = 3, line = 0.7, adj = 0, col = "#475e70", cex = 0.96)
   invisible(file)
 }

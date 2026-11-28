@@ -180,11 +180,9 @@ Among GCMSprime’s 8,000 matched occurrences, the median absolute relative area
 
 ### Optimality gap to ground truth-initialised solution
 
-The blind fit descended from **46,273,866** to **32,610,830**. The fit initialised with the true elution profiles reached **32,672,206** after the same eight sweeps. The blind fit finished **0.1879% below** that reference. GIC never increased across the 29 blind or 25 reference checkpoints. Both fits ended at rank **1,000** with **8,000 occurrences**.
+The blind fit showed smooth, monotonic descent in GIC across eight sweeps. Its final GIC differed by only **0.19%** from that of a fit initialised with the true elution profiles and run for the same eight sweeps. Both fits ended at the true rank of **1,000** with **8,000** sample-level occurrences.
 
-Only the reference received the true unit-area profiles and compound identities. Both fits estimated spectra, areas, profiles and background from the same noisy counts. The open circle marks the fourth sweep, when the reference met the ordinary stopping rule. The red line marks its final GIC after four further full sweeps. These trajectories give an empirical comparison. The global minimum is unknown.
-
-[![Blind and ground truth-initialised GIC trajectories on the full 16-sample benchmark](GCMSprime/man/figures/full-benchmark-gic-gap.png)](GCMSprime/man/figures/full-benchmark-gic-gap.png)
+[![Original-ion GIC over eight sweeps of the blind fit on 16 full chromatograms](GCMSprime/man/figures/full-benchmark-gic-gap.png)](GCMSprime/man/figures/full-benchmark-gic-gap.png)
 
 [Block-level GIC trace](https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst/benchmarks/results/gic-trace.csv) · [Final GIC values](https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst/benchmarks/results/gic-gap.csv).
 

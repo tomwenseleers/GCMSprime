@@ -72,7 +72,6 @@ After generating the 16 files with `prepareFullBenchmark(directory)`, use a sepa
 ```r
 source(file.path(bench, "full-gic.R"))
 gap <- runFullBenchmarkGIC(directory, file.path(directory, "diagnostic"), ncores = 16L)
-plot(gap)
 plotFullBenchmarkGIC(gap$trace, file.path(directory, "diagnostic", "full-benchmark-gic-gap.png"))
 ```
 
