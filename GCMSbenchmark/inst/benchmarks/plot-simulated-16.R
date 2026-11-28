@@ -134,10 +134,11 @@ benchmark16Similarity <- function(hits,metric,methods,labels,colour,fill,draw,
   stats$label_position<-limits[2]+.7
   varying<-methods[vapply(methods,function(m)length(unique(x$score[x$method==m]))>1L,TRUE)]
   plot<-ggplot2::ggplot(x,ggplot2::aes(x=method,y=position))+
+    ggplot2::geom_point(ggplot2::aes(colour=method,shape=presence),
+      size=.70,stroke=.20,alpha=.08,
+      position=ggplot2::position_jitter(width=.23,height=0,seed=23))+
     ggplot2::geom_violin(data=x[x$method%in%varying,,drop=FALSE],
       ggplot2::aes(fill=method,colour=method),scale="width",width=.78,adjust=.75,linewidth=.45)+
-    ggplot2::geom_point(ggplot2::aes(colour=method,shape=presence),size=1.05,alpha=.5,
-      position=ggplot2::position_jitter(width=.23,height=0,seed=23))+
     ggplot2::geom_linerange(data=stats[stats$compared>0L,],
       ggplot2::aes(x=method,ymin=logit(q25),ymax=logit(q75),colour=method),
       inherit.aes=FALSE,linewidth=.85)+
@@ -147,8 +148,9 @@ benchmark16Similarity <- function(hits,metric,methods,labels,colour,fill,draw,
     ggplot2::geom_text(data=stats,ggplot2::aes(x=method,y=label_position,label=label),
       inherit.aes=FALSE,colour="#526579",hjust=0,size=3.2)+
     ggplot2::scale_shape_manual(values=c(Present=16,Absent=4),
-      name="Reference compound in the sample",guide=if(any(x$presence=="Absent"))"legend"else"none")+
-    ggplot2::scale_fill_manual(values=fill,guide="none")+
+      name="Reference compound in the sample",guide=if(any(x$presence=="Absent"))
+        ggplot2::guide_legend(override.aes=list(alpha=1,size=1.7,stroke=.5)) else "none")+
+    ggplot2::scale_fill_manual(values=stats::setNames(scales::alpha(fill,.60),names(fill)),guide="none")+
     ggplot2::scale_colour_manual(values=colour,guide="none")+
     ggplot2::scale_x_discrete(labels=labels)+
     ggplot2::scale_y_continuous(breaks=logit(ticks),
