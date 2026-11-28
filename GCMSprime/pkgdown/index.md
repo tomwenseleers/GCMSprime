@@ -142,7 +142,7 @@ Eswar et al. compared rank selectors on simulated matrices with true rank 10, te
 
 Chennupati et al. recovered seven planted factors in a one-terabyte matrix using distributed NMF. Fu et al. tested nonnegative tensor rank selection at true ranks 15–40. [Chennupati et al.](https://doi.org/10.1007/s11227-020-03181-6) · [Fu et al.](https://doi.org/10.3390/e21070632) · [Evidence for automatic rank recovery](https://tomwenseleers.github.io/GCMSprime/articles/benchmarks.html#evidence-for-automatic-rank-recovery)
 
-Fitting the 88 million observations took **35.95 seconds per sample** on a 64 GB laptop with 16 logical processors. The sampled peak working set was **6.8 GiB**. At the same throughput, 1,000 equally sized samples would take about ten hours. The current joint count solver would need more memory than this laptop has at that scale. [Measurements and memory requirements for larger batches](https://tomwenseleers.github.io/GCMSprime/articles/benchmarks.html#scaling-to-larger-batches)
+Fitting the 88 million observations took **35.95 seconds per sample** on a 64 GB laptop with 16 logical processors. The sampled peak working set was **6.8 GiB**. [Measured scalability](https://tomwenseleers.github.io/GCMSprime/articles/benchmarks.html#measured-scalability)
 
 | Workflow | Seconds/sample | Estimated rank (true 1,000) | TP (sensitivity) | FP | FN | Acid TP / 80 |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |

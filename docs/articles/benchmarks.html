@@ -945,7 +945,7 @@ chromatographic factorisation that selected 1,000 distinct compounds and
 verified their identities across all 8,000 occurrences.</p>
 </div>
 <div class="section level3">
-<h3 id="scaling-to-larger-batches">Scaling to larger batches<a class="anchor" aria-label="anchor" href="#scaling-to-larger-batches"></a>
+<h3 id="measured-scalability">Measured scalability<a class="anchor" aria-label="anchor" href="#measured-scalability"></a>
 </h3>
 <p>The 16 full chromatograms each contained 10,000 scans and 550 ion
 channels. The joint analysis took <strong>35.95 seconds per
@@ -954,66 +954,9 @@ logical processors. Its sampled peak working set was <strong>6.8
 GiB</strong>. Initial PSF regressions ran in parallel across samples.
 The joint fit restricted profile updates to local retention windows,
 shared each compound’s spectrum across samples and used OpenMP across
-samples or ions. <a href="https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst/benchmarks/results/benchmark.csv" class="external-link">Timing
-components and benchmark results</a></p>
-<p>The current joint count solver stores three dense scan-by-ion arrays
-per sample for the observations, background and fitted means. It also
-holds one dense scan-by-compound profile matrix per sample, even when
-many compounds are absent. For <span class="math inline">S</span>
-samples with <span class="math inline">T</span> scans, <span class="math inline">M</span> ion channels and <span class="math inline">K</span> shared components, these four arrays alone
-occupy <span class="math inline">8ST(3M+K)</span> bytes at double
-precision. Temporary arrays, initial dictionaries and other working
-storage add to that figure. <a href="https://github.com/tomwenseleers/logconNMF/blob/035d775f45081f6925086361127527f2eae43841/logconNMF/R/conditional_dictionary.R#L219" class="external-link">Profile
-and ion storage</a> · <a href="https://github.com/tomwenseleers/logconNMF/blob/035d775f45081f6925086361127527f2eae43841/logconNMF/R/conditional_native.R#L17" class="external-link">Joint
-count updates</a></p>
-<table class="table">
-<colgroup>
-<col width="25%">
-<col width="25%">
-<col width="25%">
-<col width="25%">
-</colgroup>
-<thead><tr class="header">
-<th align="right">Full chromatograms</th>
-<th align="right">Shared compounds</th>
-<th align="right">Ion measurements</th>
-<th align="right">Four arrays alone</th>
-</tr></thead>
-<tbody>
-<tr class="odd">
-<td align="right">16 (measured run)</td>
-<td align="right">1,000</td>
-<td align="right">88 million</td>
-<td align="right">3.2 GiB</td>
-</tr>
-<tr class="even">
-<td align="right">100 (projection)</td>
-<td align="right">10,000</td>
-<td align="right">550 million</td>
-<td align="right">86.8 GiB</td>
-</tr>
-<tr class="odd">
-<td align="right">1,000 (projection)</td>
-<td align="right">1,000</td>
-<td align="right">5.5 billion</td>
-<td align="right">197.4 GiB</td>
-</tr>
-<tr class="even">
-<td align="right">1,000 (projection)</td>
-<td align="right">10,000</td>
-<td align="right">5.5 billion</td>
-<td align="right">868.0 GiB</td>
-</tr>
-</tbody>
-</table>
-<p>At the measured throughput, 1,000 samples would take about ten hours
-<strong>if the time per sample held constant</strong>. The larger
-batches have yet to be timed or scored for rank recovery. On this
-laptop, an overnight run at that scale would require a more
-memory-efficient joint solver, for example one that stores only active
-profile windows and streams blocks of ion data. The number of compounds
-present per sample and how often their peaks overlap also affect the
-work per sweep.</p>
+samples or ions. <a href="https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst/benchmarks/results/benchmark.csv" class="external-link">Benchmark
+timings</a> · <a href="https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst/benchmarks/results/run-order.csv" class="external-link">Measured
+peak memory</a></p>
 </div>
 <div class="section level3">
 <h3 id="commercial-gcms-deconvolution-software">Commercial GC–MS software<a class="anchor" aria-label="anchor" href="#commercial-gcms-deconvolution-software"></a>

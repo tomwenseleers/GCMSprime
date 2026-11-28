@@ -186,20 +186,9 @@ An experiment tests exact rank recovery when the generating component count is k
 
 We found no earlier published demonstration of a simultaneous chromatographic factorisation that selected 1,000 distinct compounds and verified their identities across all 8,000 occurrences.
 
-### Scaling to larger batches
+### Measured scalability
 
-The 16 full chromatograms each contained 10,000 scans and 550 ion channels. The joint analysis took **35.95 seconds per sample** on a 64 GB laptop with eight physical cores and 16 logical processors. Its sampled peak working set was **6.8 GiB**. Initial PSF regressions ran in parallel across samples. The joint fit restricted profile updates to local retention windows, shared each compound’s spectrum across samples and used OpenMP across samples or ions. [Timing components and benchmark results](https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst/benchmarks/results/benchmark.csv)
-
-The current joint count solver stores three dense scan-by-ion arrays per sample for the observations, background and fitted means. It also holds one dense scan-by-compound profile matrix per sample, even when many compounds are absent. For $S$ samples with $T$ scans, $M$ ion channels and $K$ shared components, these four arrays alone occupy $8ST(3M+K)$ bytes at double precision. Temporary arrays, initial dictionaries and other working storage add to that figure. [Profile and ion storage](https://github.com/tomwenseleers/logconNMF/blob/035d775f45081f6925086361127527f2eae43841/logconNMF/R/conditional_dictionary.R#L219) · [Joint count updates](https://github.com/tomwenseleers/logconNMF/blob/035d775f45081f6925086361127527f2eae43841/logconNMF/R/conditional_native.R#L17)
-
-| Full chromatograms | Shared compounds | Ion measurements | Four arrays alone |
-|--:|--:|--:|--:|
-| 16 (measured run) | 1,000 | 88 million | 3.2 GiB |
-| 100 (projection) | 10,000 | 550 million | 86.8 GiB |
-| 1,000 (projection) | 1,000 | 5.5 billion | 197.4 GiB |
-| 1,000 (projection) | 10,000 | 5.5 billion | 868.0 GiB |
-
-At the measured throughput, 1,000 samples would take about ten hours **if the time per sample held constant**. The larger batches have yet to be timed or scored for rank recovery. On this laptop, an overnight run at that scale would require a more memory-efficient joint solver, for example one that stores only active profile windows and streams blocks of ion data. The number of compounds present per sample and how often their peaks overlap also affect the work per sweep.
+The 16 full chromatograms each contained 10,000 scans and 550 ion channels. The joint analysis took **35.95 seconds per sample** on a 64 GB laptop with eight physical cores and 16 logical processors. Its sampled peak working set was **6.8 GiB**. Initial PSF regressions ran in parallel across samples. The joint fit restricted profile updates to local retention windows, shared each compound’s spectrum across samples and used OpenMP across samples or ions. [Benchmark timings](https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst/benchmarks/results/benchmark.csv) · [Measured peak memory](https://github.com/tomwenseleers/GCMSprime/blob/master/GCMSbenchmark/inst/benchmarks/results/run-order.csv)
 
 ### Commercial GC–MS software {#commercial-gcms-deconvolution-software}
 

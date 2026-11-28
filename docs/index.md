@@ -224,11 +224,8 @@ recovery](https://tomwenseleers.github.io/GCMSprime/articles/benchmarks.html#evi
 
 Fitting the 88 million observations took **35.95 seconds per sample** on
 a 64 GB laptop with 16 logical processors. The sampled peak working set
-was **6.8 GiB**. At the same throughput, 1,000 equally sized samples
-would take about ten hours. The current joint count solver would need
-more memory than this laptop has at that scale. [Measurements and memory
-requirements for larger
-batches](https://tomwenseleers.github.io/GCMSprime/articles/benchmarks.html#scaling-to-larger-batches)
+was **6.8 GiB**. [Measured
+scalability](https://tomwenseleers.github.io/GCMSprime/articles/benchmarks.html#measured-scalability)
 
 | Workflow | Seconds/sample | Estimated rank (true 1,000) | TP (sensitivity) | FP | FN | Acid TP / 80 |
 |----|---:|---:|---:|---:|---:|---:|
